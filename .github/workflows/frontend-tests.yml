@@ -17,10 +17,12 @@ jobs:
 
       - name: Install dependencies
         run: npm install
-        working-directory: ./MapHub/client
+        working-directory: ./client
 
       - name: Install Cypress
         run: npm install cypress
+        working-directory: ./client
 
       - name: Run Cypress tests
         run: npx cypress run --headed #headed for GUI
+        working-directory: ./client
