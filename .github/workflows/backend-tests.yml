@@ -23,6 +23,6 @@ jobs:
         run: echo $GITHUB_WORKSPACE
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
-
+        working-directory: $GITHUB_WORKSPACE/client
       - name: Run backend tests
         run: npm test # Replace with the actual test command
