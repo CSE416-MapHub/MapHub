@@ -15,10 +15,13 @@ jobs:
         with:
           node-version: 14 # Adjust to your Node.js version
 
-      - name: Set working directory to the project directory
-        working-directory: $GITHUB_WORKSPACE/client
-
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
+        working-directory: ./client
+
       - name: Run backend tests
         run: npm test # Replace with the actual test command
+        working-directory: ./client
+
+
+
