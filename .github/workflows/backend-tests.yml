@@ -16,8 +16,7 @@ jobs:
           node-version: 14 # Adjust to your Node.js version
 
       - name: Set working directory to the project directory
-        run: cd client
-        working-directory: client
+        working-directory: $GITHUB_WORKSPACE/client
 
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
