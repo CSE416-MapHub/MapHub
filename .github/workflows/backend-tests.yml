@@ -14,16 +14,9 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: 14 # Adjust to your Node.js version
-
-      - name: Display GitHub Workspace
-        run: echo $GITHUB_WORKSPACE
-      - name: Set working directory to project directory
-        run: cd $GITHUB_WORKSPACE/client
-      - name: Display GitHub Workspace
-        run: echo $GITHUB_WORKSPACE
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
         working-directory: ./client
       - name: Run backend tests
         run: npm test # Replace with the actual test command
-        working-directory: ./client
+        working-directory: ./client #replace directory with server
