@@ -27,7 +27,7 @@ jobs:
           echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > lightsail-key
           chmod 600 lightsail-key
           # SSH into your Lightsail instance using the private key
-          ssh -i lightsail-key -o StrictHostKeyChecking=no ubuntu@<3.82.200.173> << 'ENDSSH'
+          ssh -i lightsail-key -o StrictHostKeyChecking=no ubuntu@3.82.200.173 << 'ENDSSH'
 
           ENDSSH
           # You may also restart the Node.js server.
