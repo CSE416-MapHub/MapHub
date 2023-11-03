@@ -19,7 +19,8 @@ jobs:
         run: echo $GITHUB_WORKSPACE
       - name: Set working directory to project directory
         run: cd $GITHUB_WORKSPACE/client
-
+      - name: Display GitHub Workspace
+        run: echo $GITHUB_WORKSPACE
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
 
