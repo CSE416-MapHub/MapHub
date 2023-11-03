@@ -23,6 +23,13 @@ jobs:
         run: |
           # Add commands to deploy your Node.js application to Lightsail here
           # For example, you may SSH into the Lightsail instance and pull the latest code from your repository
+          # Install SSH key
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > lightsail-key
+          chmod 600 lightsail-key
+          # SSH into your Lightsail instance using the private key
+          ssh -i lightsail-key -o StrictHostKeyChecking=no ubuntu@<3.82.200.173> << 'ENDSSH'
+
+          ENDSSH
           # You may also restart the Node.js server.
 
       - name: Cleanup
