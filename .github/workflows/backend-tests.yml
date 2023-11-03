@@ -17,6 +17,7 @@ jobs:
 
       - name: Set working directory to the project directory
         run: cd client
+        working-directory: $GITHUB_WORKSPACE
 
       - name: Install dependencies
         run: npm install # Replace with your package manager (e.g., yarn)
