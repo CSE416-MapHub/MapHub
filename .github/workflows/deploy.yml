@@ -26,7 +26,7 @@ jobs:
           chmod 600 lightsail-key
           
           # SSH into your Lightsail instance using the private key
-          ssh -i lightsail-key -o StrictHostKeyChecking=no ubuntu@3.82.200.173 << 'ENDSSH'
+          ssh -i lightsail-key -o StrictHostKeyChecking=no bitnami@3.82.200.173 << 'ENDSSH'
 
             # Add commands to deploy your Node.js application to Lightsail here
             # Pull from repo
