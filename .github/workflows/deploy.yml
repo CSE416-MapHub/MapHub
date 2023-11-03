@@ -1,0 +1,32 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Lightsail
+        run: |
+          # Add commands to deploy your Node.js application to Lightsail here
+          # For example, you may SSH into the Lightsail instance and pull the latest code from your repository
+          # You may also restart the Node.js server.
+
+      - name: Cleanup
+        run: |
+          # Clean up or perform any post-deployment tasks as needed
