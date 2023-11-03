@@ -26,3 +26,4 @@ jobs:
         working-directory: ./client
       - name: Run backend tests
         run: npm test # Replace with the actual test command
+        working-directory: ./client
