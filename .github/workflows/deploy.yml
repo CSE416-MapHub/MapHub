@@ -1,6 +1,9 @@
 name: Deploy to Lightsail
 
-on: [push]
+on:
+  push:
+    branches:
+      - dev
 
 jobs:
   deploy:
@@ -35,7 +38,7 @@ jobs:
             npm install
             # Restart node.js
             pm2 restart MapHub
-            
+
             exit          
           ENDSSH
 
