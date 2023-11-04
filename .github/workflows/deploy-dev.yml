@@ -1,0 +1,47 @@
+name: Deploy to Lightsail
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Deploy to Lightsail
+        run: |
+
+          # Install SSH key
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > lightsail-key
+          chmod 600 lightsail-key
+          
+          # SSH into your Lightsail instance using the private key
+          ssh -i lightsail-key -o StrictHostKeyChecking=no bitnami@maphub.pro << 'ENDSSH'
+
+            # Add commands to deploy your Node.js application to Lightsail here
+            # Pull from repo
+            git pull origin main
+            # Install node.js dependencies
+            npm install
+            # Restart node.js
+            pm2 restart MapHub
+
+            exit          
+          ENDSSH
+
+      - name: Cleanup
+        run: |
+          # Clean up or perform any post-deployment tasks as needed
