@@ -9,6 +9,5 @@ describe('User Registration API', () => {
     });
 
     expect(response.status).toBe(201);
-    // Add more assertions as needed
   });
 });
