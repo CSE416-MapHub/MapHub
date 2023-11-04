@@ -13,6 +13,11 @@ export default defineConfig({
     viewportWidth: 1920,
     video: false,
     screenshotOnRunFailure: false,
+    supportFile: 'cypress/support/e2e.ts',
+    specPattern: 'cypress/e2e/**/*.cy.{js,jsx,ts,tsx}',
+    setupNodeEvents(on, config) {
+      // implement node event listeners here
+    },
   },
   component: {
     devServer: {
