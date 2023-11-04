@@ -15,6 +15,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": "./src",
     // "types": ["jest", "node", "cypress", "@types/testing-library__jest-dom"],
     "types": ["node"],
     "plugins": [
@@ -22,6 +23,7 @@
         "name": "next"
       }
     ],
+
     "paths": {
       "@/*": ["./src/*"]
     }
