@@ -32,13 +32,10 @@ jobs:
           ssh -i lightsail-key -o StrictHostKeyChecking=no bitnami@maphub.pro << 'ENDSSH'
 
             # Add commands to deploy your Node.js application to Lightsail here
-            # Pull from repo
-            git pull origin main
-            # Install node.js dependencies
-            npm install
-            # Restart node.js
-            pm2 restart MapHub
-
+            # Move directory into dev
+            cd dev
+            # Run update script
+            ./update.sh
             exit          
           ENDSSH
 
