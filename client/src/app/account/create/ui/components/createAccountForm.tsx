@@ -72,7 +72,7 @@ function createAccountReducer(
       // characters.
       // TODO: Implement unique username checking.
       const { username } = state;
-      if (!/^[\w\.]{2,15}[\w]$/.test(state.username.value)) {
+      if (!/^[\w\.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
         username.errorText = 'Please enter a valid username between 3-16 ' + 
           'alphanumeric, underscore, or dot characters.';
@@ -84,6 +84,33 @@ function createAccountReducer(
         ...state,
         username,
       };
+    case CreateAccountActionType.updateEmail:
+      return {
+        ...state,
+        email: {
+          ...state.email,
+          value: action.value,
+        },
+      };
+    case CreateAccountActionType.validateEmail:
+      // Checks if the email address is well-formed. An email address is
+      // well-formed if it starts with a set of alphanumeric characters,
+      // underscores, and dots, followed by an @ symbol, followed by a domain
+      // name (set of alphanumeric characters, underscores, and dots such that
+      // it ends with a dot), and followed by a top-level domain name (a set of
+      // alphanumeric characters and underscores of length 2-4). 
+      const { email } = state;
+      if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
+        email.error = true;
+        email.errorText = 'Please enter a valid email address.'
+      } else {
+        email.error = false;
+        email.errorText = '';
+      }
+      return {
+        ...state,
+        email,
+      }
     default:
       return state;
   }
@@ -130,6 +157,19 @@ function CreateAccountForm() {
     });
   };
 
+  const setEmail = (value: string) => {
+    createAccountDispatch({
+      type: CreateAccountActionType.updateEmail,
+      value,
+    });
+  };
+
+  const validateEmail = () => {
+    createAccountDispatch({
+      type: CreateAccountActionType.validateEmail,
+    });
+  };
+
   return (
     <div className={styles.container}>
       <ValidatedTextField
@@ -143,8 +183,18 @@ function CreateAccountForm() {
         validate={validateUsername}
         helperText={createAccountState.username.errorText}
       />
+      <ValidatedTextField
+        id="email"
+        type="email"
+        label="Email Address"
+        value={createAccountState.email.value}
+        setValue={setEmail}
+        error={createAccountState.email.error}
+        validate={validateEmail}
+        helperText={createAccountState.email.errorText}
+      />
     </div>
-  )
+  );
 }
 
 export default CreateAccountForm;

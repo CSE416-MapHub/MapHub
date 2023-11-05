@@ -45,7 +45,7 @@ function ValidatedTextField({
   // changes over the limit.
   const handleChange: ChangeEventHandler = (event) => {
     const inputValue = (event.target as HTMLInputElement).value;
-    if (maxLength && inputValue.length <= maxLength) {
+    if ((maxLength && inputValue.length <= maxLength) || !maxLength) {
       setValue(inputValue);
       if (isValidating) {
         validate();
