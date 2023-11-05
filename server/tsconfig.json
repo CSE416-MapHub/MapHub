@@ -1,13 +1,13 @@
 {
   "compilerOptions": {
     "target": "es5",
-    "module": "NodeNext",
+    "module": "ES2015",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
-    "moduleResolution": "NodeNext",
+    "moduleResolution": "Node",
   },
   "include": ["index.ts", "tests/"],
   "exclude": ["node_modules"]

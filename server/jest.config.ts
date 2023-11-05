@@ -1,10 +1,6 @@
-module.exports = {
-  transform: {
-    '^.+\\.ts$': 'ts-jest' // Use 'ts-jest' for TypeScript files
-  },
+/** @type {import('ts-jest').JestConfigWithTsJest} */
+export default {
   preset: 'ts-jest',
   testEnvironment: 'node',
-  modulePathIgnorePatterns: ['<rootDir>/build/','/node_modules/'],
-  testPathIgnorePatterns: ['/node_modules/']
+  modulePathIgnorePatterns: ['<rootDir>/build/'],
 };
-
