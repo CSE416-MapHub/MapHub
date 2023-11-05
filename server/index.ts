@@ -26,7 +26,7 @@ app.use('/map', mapRouter)
 app.use('/posts', postRouter)
 
 // Setup DB
-mongoose.connect(process.env.MONGODB_URI!, {
+mongoose.connect(process.env.MONGODB_URI ?? "mongodb://localhost:27018", {
   // useNewUrlParser: true,
   // useUnifiedTopology: true,
 }).catch(e => {
