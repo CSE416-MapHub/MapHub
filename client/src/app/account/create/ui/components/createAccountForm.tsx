@@ -110,7 +110,32 @@ function createAccountReducer(
       return {
         ...state,
         email,
+      };
+    case CreateAccountActionType.updatePassword:
+      return {
+        ...state,
+        password: {
+          ...state.password,
+          value: action.value,
+        },
+      };
+    case CreateAccountActionType.validatePassword:
+      // Checks if the password is well-formed. A password is well-formed if it
+      // is a set of characters such that it is longer than 8 characters and 
+      // contains one uppercase letter, one lowercase letter, and one digit.
+      const { password } = state;
+      if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password.value)) {
+        password.error = true;
+        password.errorText = 'Please enter a password with at least eight ' +
+          'characters with one uppercase, one lowercase, and one digit';
+      } else {
+        password.error = false;
+        password.errorText = '';
       }
+      return {
+        ...state,
+        password,
+      };
     default:
       return state;
   }
@@ -170,6 +195,19 @@ function CreateAccountForm() {
     });
   };
 
+  const setPassword = (value: string) => {
+    createAccountDispatch({
+      type: CreateAccountActionType.updatePassword,
+      value,
+    });
+  };
+
+  const validatePassword = () => {
+    createAccountDispatch({
+      type: CreateAccountActionType.validatePassword,
+    });
+  }
+
   return (
     <div className={styles.container}>
       <ValidatedTextField
@@ -192,6 +230,16 @@ function CreateAccountForm() {
         error={createAccountState.email.error}
         validate={validateEmail}
         helperText={createAccountState.email.errorText}
+      />
+      <ValidatedTextField
+        id="password"
+        type="password"
+        label="Password"
+        value={createAccountState.password.value}
+        setValue={setPassword}
+        error={createAccountState.password.error}
+        validate={validatePassword}
+        helperText={createAccountState.password.errorText}
       />
     </div>
   );
