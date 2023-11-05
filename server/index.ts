@@ -8,7 +8,7 @@ import mongoose from 'mongoose';
 const app = express();
 // NOTE: you must pass in the port via
 // npm run start -- 8080 
-const port = process.argv[2]
+const port = process.argv[2] ?? 3031
 
 // Define your routes and middleware here
 
