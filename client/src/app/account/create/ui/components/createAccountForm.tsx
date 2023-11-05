@@ -57,7 +57,7 @@ function createAccountReducer(
   action: CreateAccountAction
 ): CreateAccountState {
   switch (action.type) {
-    case CreateAccountActionType.updateUsername:
+    case CreateAccountActionType.updateUsername: {
       return {
         ...state,
         username: {
@@ -65,7 +65,8 @@ function createAccountReducer(
           value: action.value,
         },
       };
-    case CreateAccountActionType.validateUsername:
+    }
+    case CreateAccountActionType.validateUsername: {
       // Checks if the username is well-formed. A well-formed username must
       // include alphanumeric characters, underscores, or dots such that the 
       // last character is not a dot. The username must also be between 3 to 16
@@ -84,7 +85,8 @@ function createAccountReducer(
         ...state,
         username,
       };
-    case CreateAccountActionType.updateEmail:
+    }
+    case CreateAccountActionType.updateEmail: {
       return {
         ...state,
         email: {
@@ -92,7 +94,8 @@ function createAccountReducer(
           value: action.value,
         },
       };
-    case CreateAccountActionType.validateEmail:
+    }
+    case CreateAccountActionType.validateEmail: {
       // Checks if the email address is well-formed. An email address is
       // well-formed if it starts with a set of alphanumeric characters,
       // underscores, and dots, followed by an @ symbol, followed by a domain
@@ -111,7 +114,8 @@ function createAccountReducer(
         ...state,
         email,
       };
-    case CreateAccountActionType.updatePassword:
+    }
+    case CreateAccountActionType.updatePassword: {
       return {
         ...state,
         password: {
@@ -119,7 +123,8 @@ function createAccountReducer(
           value: action.value,
         },
       };
-    case CreateAccountActionType.validatePassword:
+    }
+    case CreateAccountActionType.validatePassword: {
       // Checks if the password is well-formed. A password is well-formed if it
       // is a set of characters such that it is longer than 8 characters and 
       // contains one uppercase letter, one lowercase letter, and one digit.
@@ -136,8 +141,33 @@ function createAccountReducer(
         ...state,
         password,
       };
-    default:
+    }
+    case CreateAccountActionType.updatePasswordConfirm: {
+      return {
+        ...state,
+        passwordConfirm: {
+          ...state.passwordConfirm,
+          value: action.value,
+        },
+      };
+    }
+    case CreateAccountActionType.validatePasswordConfirm: {
+      const { password, passwordConfirm } = state;
+      if (password.value !== passwordConfirm.value) {
+        passwordConfirm.error = true;
+        passwordConfirm.errorText = 'Please reconfirm the password.'
+      } else {
+        passwordConfirm.error = false;
+        passwordConfirm.errorText = '';
+      }
+      return {
+        ...state,
+        passwordConfirm,
+      }
+    }
+    default: {
       return state;
+    }
   }
 }
 
@@ -208,6 +238,20 @@ function CreateAccountForm() {
     });
   }
 
+  const setPasswordConfirm = (value: string) => {
+    createAccountDispatch({
+      type: CreateAccountActionType.updatePasswordConfirm,
+      value,
+    });
+  }
+
+  const validatePasswordConfirm = () => {
+    createAccountDispatch({
+      type: CreateAccountActionType.validatePasswordConfirm,
+    });
+  };
+
+
   return (
     <div className={styles.container}>
       <ValidatedTextField
@@ -240,6 +284,16 @@ function CreateAccountForm() {
         error={createAccountState.password.error}
         validate={validatePassword}
         helperText={createAccountState.password.errorText}
+      />
+      <ValidatedTextField
+        id="password-confirm"
+        type="password"
+        label="Confirm Password"
+        value={createAccountState.passwordConfirm.value}
+        setValue={setPasswordConfirm}
+        error={createAccountState.passwordConfirm.error}
+        validate={validatePasswordConfirm}
+        helperText={createAccountState.passwordConfirm.errorText}
       />
     </div>
   );
