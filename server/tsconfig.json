@@ -7,8 +7,9 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
-    "moduleResolution": "NodeNext"
+    "moduleResolution": "NodeNext",
+    // "types": ["jest", "node"]
   },
-  "include": ["index.ts"],
-  "exclude": ["node_modules"]
+  "include": ["index.ts", "tests/"],
+  // "exclude": ["node_modules"]
 }

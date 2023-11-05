@@ -12,7 +12,7 @@ const port = process.argv[2] ?? 3031
 
 // Define your routes and middleware here
 
-mongoose.connect(process.env.MONGODB_URI!, {
+mongoose.connect(process.env.MONGODB_URI ?? "mongodb://localhost:27018", {
   // useNewUrlParser: true,
   // useUnifiedTopology: true,
 });
