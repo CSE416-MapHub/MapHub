@@ -8,8 +8,7 @@
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
     "moduleResolution": "NodeNext",
-    // "types": ["jest", "node"]
   },
   "include": ["index.ts", "tests/"],
-  // "exclude": ["node_modules"]
+  "exclude": ["node_modules"]
 }
