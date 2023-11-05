@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Typography } from '@mui/material';
 
 import styles from './ui/createAccountPage.module.css';
+import CreateAccountForm from './ui/components/createAccountForm';
 
 function Page() {
   return (
@@ -16,6 +17,7 @@ function Page() {
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
+      <CreateAccountForm />
     </div>
   );
 }

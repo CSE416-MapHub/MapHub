@@ -11,13 +11,11 @@ export default function Home() {
       <Typography style={{ fontSize: '3rem' }}>
         MAPHUB - the Porn Hub Alternative for Maps
       </Typography>
-
-      
-        <Button className={styles.navButton} variant="contained">
-          <Link href="/about">
-            About
-          </Link>
-        </Button>
+      <Button className={styles.navButton} variant="contained">
+        <Link href="/about">
+          About
+        </Link>
+      </Button>
       <Button className={styles.navButton} variant="contained">
         <Link href="/account/create">
           Join Now
