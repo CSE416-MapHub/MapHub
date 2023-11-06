@@ -215,7 +215,12 @@ function createAccountReducer(
   }
 }
 
-
+/**
+ * The CreateAccountForm renders a frontend form with the following text fields:
+ * username, email address, password, and confirm password. The form also 
+ * includes a button for submission. The state of the form and its verification
+ * is handled by the createAccountReducer.
+ */
 function CreateAccountForm() {
   const [ createAccountState, createAccountDispatch ] = useReducer(
     createAccountReducer,
@@ -300,7 +305,6 @@ function CreateAccountForm() {
       type: CreateAccountActionType.validate,
     });
   }
-
 
   return (
     <div className={styles.container}>

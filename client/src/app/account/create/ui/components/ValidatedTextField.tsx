@@ -3,6 +3,9 @@ import { useState, ChangeEventHandler, FocusEventHandler } from "react";
 
 import styles from './validatedTextField.module.css';
 
+/**
+ * The ValidatedTextFieldProps are the elements that go into a text field.
+ */
 interface ValidatedTextFieldProps {
   id: string,
   type: string,
