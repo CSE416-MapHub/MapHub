@@ -4,7 +4,7 @@ import auth from '../auth'
 import User from '../models/user-model';
 import bcrypt from 'bcryptjs';
 
-const registerUser = async (req : Request, res : Response) => {
+export const registerUser = async (req : Request, res : Response) => {
     try {        
         const { username, email, password, passwordVerify } = req.body;
         console.log("create user: " + username + " " + email + " " + password + " " + passwordVerify);
