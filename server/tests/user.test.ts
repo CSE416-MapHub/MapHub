@@ -1,6 +1,6 @@
 import request from 'supertest';
 import app from '../index';
-// import "@types/jest"
+import "@types/jest"
 
 describe('User Registration API', () => {
   it('should register a new user', async () => {
