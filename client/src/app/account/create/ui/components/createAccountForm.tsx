@@ -1,8 +1,11 @@
 'use client'
 
-import { useReducer } from 'react';
+import { useReducer, MouseEventHandler } from 'react';
+import { Button } from '@mui/material';
 
 import ValidatedTextField from './ValidatedTextField';
+
+import AccountAPI from 'api/AccountAPI';
 
 import styles from './createAccountForm.module.css';
 
@@ -39,6 +42,8 @@ enum CreateAccountActionType {
   validatePassword = 'validatePassword',
   updatePasswordConfirm = 'updatePasswordConfirm',
   validatePasswordConfirm = 'validatePasswordConfirm',
+  validate = 'validate',
+  createAccount = 'createAccount',
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
@@ -152,8 +157,11 @@ function createAccountReducer(
       };
     }
     case CreateAccountActionType.validatePasswordConfirm: {
+      // Checks if the password confirmation is well-formed and matches the 
+      // first password input value. Only checks whether or not the passwords
+      // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
-      if (password.value !== passwordConfirm.value) {
+      if (password.value !== passwordConfirm.value || passwordConfirm.value.length === 0) {
         passwordConfirm.error = true;
         passwordConfirm.errorText = 'Please reconfirm the password.'
       } else {
@@ -163,7 +171,43 @@ function createAccountReducer(
       return {
         ...state,
         passwordConfirm,
+      };
+    }
+    case CreateAccountActionType.validate: {
+      let newState = createAccountReducer(state, {
+        type: CreateAccountActionType.validateUsername,
+      });
+      newState = createAccountReducer(newState, {
+        type: CreateAccountActionType.validateEmail,
+      });
+      newState = createAccountReducer(newState, {
+        type: CreateAccountActionType.validatePassword,
+      });
+      newState = createAccountReducer(newState, {
+        type: CreateAccountActionType.validatePasswordConfirm,
+      });
+      return newState;
+    }
+    case CreateAccountActionType.createAccount: {
+      // Creates a new account by validating all input text fields and sending
+      // the registration request to the backend.
+      const validatedState = createAccountReducer(state, {
+        type: CreateAccountActionType.validate,
+      });
+      if (!validatedState.username.error &&
+        !validatedState.email.error &&
+        !validatedState.password.error &&
+        !validatedState.password.error) {
+        AccountAPI.registerUser(
+          validatedState.username.value,
+          validatedState.email.value,
+          validatedState.password.value,
+          validatedState.passwordConfirm.value,
+        );
       }
+      // TODO: Navigate to another page upon successfully creating an account
+      // or modify the form state.
+      return validatedState;
     }
     default: {
       return state;
@@ -251,6 +295,12 @@ function CreateAccountForm() {
     });
   };
 
+  const handleCreateAccountClick : MouseEventHandler = (event) => {
+    createAccountDispatch({
+      type: CreateAccountActionType.validate,
+    });
+  }
+
 
   return (
     <div className={styles.container}>
@@ -295,6 +345,13 @@ function CreateAccountForm() {
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
+      <Button 
+        className={styles.confirmButton}
+        variant="contained"
+        onClick={handleCreateAccountClick}
+      >
+        Create Account
+      </Button>
     </div>
   );
 }
