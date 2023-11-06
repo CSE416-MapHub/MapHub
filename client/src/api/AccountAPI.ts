@@ -1,8 +1,26 @@
 import axios from 'axios';
 
+const SERVER_PORT = 3031
+
 function getBaseUrl(): string {
-  // TODO: Implement the function that returns the base URL for the account API.
-  return '';
+  if (typeof window === "undefined") {
+    return ""
+  }
+  
+
+  // if hostname is localhost, change the port, else prepend with api
+  let baseURL = ""
+  if (window.location.hostname === "localhost") {
+    baseURL = `http://localhost:${SERVER_PORT}`
+  } else {
+    baseURL = `https://api.${window.location.hostname}`
+  }
+  // if pathname has /dev, the url we return also has /dev
+  if (window.location.pathname.startsWith("/dev")) {
+    baseURL += "/dev"
+  }
+  console.log("base url is " + baseURL)
+  return baseURL
 }
 
 /**
