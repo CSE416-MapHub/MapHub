@@ -76,4 +76,17 @@ export const registerUser = async (req : Request, res : Response) => {
     }
 }
 
+export const getAllUsers = async (req : Request, res : Response) => {
+    try {
+      // Retrieve all users from the database (adjust the query as needed)
+      const users = await User.find();
+  
+      // Send the user data as a JSON response
+      res.json(users);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Server error' });
+    }
+};
+
 export default registerUser;
