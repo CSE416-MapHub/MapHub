@@ -1,6 +1,6 @@
 
 import {Request, Response} from 'express';
-import auth from '../auth'
+import auth from '../auth/index'
 import User from '../models/user-model';
 import bcrypt from 'bcryptjs';
 
