@@ -2,13 +2,18 @@ import { Request, Response } from 'express';
 import auth from '../auth/index';
 import User from '../models/user-model';
 import bcrypt from 'bcrypt';
+import mongoose from 'mongoose';
+
+
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
+
+
     const { username, email, password, passwordVerify } = req.body;
 
-    const defaultProfilePic = Buffer.from([]);
-    const emptyMapList = [];
+    const defaultProfilePic = Buffer.alloc(0);
+    const emptyMapList: mongoose.Types.ObjectId[] = [];
 
     console.log(
       'create user: ' +
@@ -45,12 +50,12 @@ export const registerUser = async (req: Request, res: Response) => {
     console.log('passwordHash: ' + passwordHash);
 
     try {
-      const newUser = new User({ 
-        username, 
-        email, 
-        password: passwordHash, 
-        profilePic: defaultProfilePic, 
-        maps: emptyMapList });
+      const newUser = new User({
+        username,
+        email,
+        password: passwordHash,
+        maps: emptyMapList
+      });
       const savedUser = await newUser.save();
       console.log('New user saved: ' + savedUser._id);
 
@@ -76,6 +81,7 @@ export const registerUser = async (req: Request, res: Response) => {
       console.log('Token sent');
     } catch (err: any) {
       if (err.code === 11000) {
+        console.log(err)
         // Duplicate key error - usualyl in the form of "dupKey": dupValue
         const duplicateField = Object.keys(err.keyValue)[0];
         // To make it look pretty :#

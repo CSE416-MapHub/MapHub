@@ -6,7 +6,7 @@ function getBaseUrl(): string {
   if (typeof window === "undefined") {
     return ""
   }
-  
+
 
   // if hostname is localhost, change the port, else prepend with api
   let baseURL = ""
@@ -25,7 +25,7 @@ function getBaseUrl(): string {
 
 /**
  * The AccountAPI is responsible for sending and receiving requests from the
- * server for account login, creation, deletion, and modifications. 
+ * server for account login, creation, deletion, and modifications.
  */
 class AccountAPI {
   static api = axios.create({
@@ -37,7 +37,7 @@ class AccountAPI {
    * Sends a POST request to the server to create a new account with a username,
    * email address, password, and password confirmation. Returns a response from
    * the server.
-   * 
+   *
    * @param username - the new account username
    * @param email - the new account email address
    * @param password - the new account password
@@ -59,13 +59,13 @@ class AccountAPI {
   }
 
     /**
-   * Sends a GET request to the server to fetch all registered users. 
+   * Sends a GET request to the server to fetch all registered users.
    * Returns a list of usernames from the server.
-   * 
+   *
    * @returns the server response
    */
     static async getAllUsers() {
-      return this.api.post('/auth/users', {});
+      return this.api.get('/auth/users');
     }
 }
 
