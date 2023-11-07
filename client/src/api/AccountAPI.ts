@@ -57,6 +57,16 @@ class AccountAPI {
       passwordVerify: passwordConfirm,
     });
   }
+
+    /**
+   * Sends a GET request to the server to fetch all registered users. 
+   * Returns a list of usernames from the server.
+   * 
+   * @returns the server response
+   */
+    static async getAllUsers() {
+      return this.api.post('/auth/users', {});
+    }
 }
 
 export default AccountAPI;
