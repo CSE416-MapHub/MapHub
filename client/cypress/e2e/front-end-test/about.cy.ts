@@ -7,5 +7,6 @@ describe('About Page Navigation', () => {
     cy.url().should('include', '/about');
 
     cy.contains('MapHub'); // Assumes "About Us" is present on the about page
+
   });
 });
