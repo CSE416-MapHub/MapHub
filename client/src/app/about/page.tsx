@@ -1,4 +1,6 @@
-import React, { Suspense } from 'react';
+'use client'
+
+import React, { Suspense, useState, useEffect } from 'react';
 import Typography from '@mui/material/Typography';
 import { Container, Box } from '@mui/material';
 import AccountAPI from 'api/AccountAPI'; // Adjust the import path as needed
@@ -11,39 +13,28 @@ interface User {
   maps: string[];
 }
 
-// A resource to fetch and store the users
-const usersResource = (() => {
-  let promise: Promise<User[] | null> | null = null;
-  let result: User[] | null = null;
-
-  return {
-    read(): User[] {
-      if (result) {
-        console.log(result)
-        return result;
-      } else if (!promise) {
-        promise = AccountAPI.getAllUsers().then(
-          (response) => {
-            result = response.data;
-            console.log(result)
-            return result;
-          },
-          (error) => {
-            result = null;
-            throw error;
-          }
-        );
-        throw promise;
-      } else {
-        throw promise;
-      }
-    },
-  };
-})();
 
 const UsersList: React.FC = () => {
-  // Read the users data, which might throw a promise
-  const usersList = usersResource.read();
+  const [usersList, setUsersList] = useState<User[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Fetch user data from the server using AccountAPI.getAllUsers()
+    AccountAPI.getAllUsers()
+      .then((response) => {
+        setUsersList(response.data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        console.error('Error fetching user data:', error);
+        setIsLoading(false);
+      });
+  }, []);
+
+  if (isLoading) {
+    return <Typography>Loading...</Typography>;
+  }
+
   return (
     <Box>
       {usersList.map((user, index) => (
