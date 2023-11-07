@@ -6,6 +6,10 @@ import bcrypt from 'bcryptjs';
 export const registerUser = async (req: Request, res: Response) => {
   try {
     const { username, email, password, passwordVerify } = req.body;
+
+    const defaultProfilePic = Buffer.from([]);
+    const emptyMapList = [];
+
     console.log(
       'create user: ' +
         username +
@@ -41,7 +45,12 @@ export const registerUser = async (req: Request, res: Response) => {
     console.log('passwordHash: ' + passwordHash);
 
     try {
-      const newUser = new User({ username, email, passwordHash });
+      const newUser = new User({ 
+        username, 
+        email, 
+        password: passwordHash, 
+        profilePic: defaultProfilePic, 
+        maps: emptyMapList });
       const savedUser = await newUser.save();
       console.log('New user saved: ' + savedUser._id);
 
