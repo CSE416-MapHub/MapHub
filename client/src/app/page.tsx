@@ -9,7 +9,7 @@ export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <Typography style={{ fontSize: '3rem' }}>
-        MAPHUB - the Porn Hub Alternative for Maps
+        MAPHUB - The Social Media Map Editor
       </Typography>
       <Button className={styles.navButton} variant="contained">
         <Link href="/about">
