@@ -7,7 +7,7 @@ const userSchema = new Schema(
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    profilePic: { type: Buffer, required: true },
+    profilePic: { type: Buffer, default: Buffer.alloc(0) },
     maps: [{ type: Schema.Types.ObjectId, required: true, ref: 'Map' }],
   },
   { timestamps: true }
