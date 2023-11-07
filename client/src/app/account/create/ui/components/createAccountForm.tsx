@@ -194,6 +194,7 @@ function createAccountReducer(
       const validatedState = createAccountReducer(state, {
         type: CreateAccountActionType.validate,
       });
+      console.log("IN CREATE ACCOUNT")
       if (!validatedState.username.error &&
         !validatedState.email.error &&
         !validatedState.password.error &&
@@ -302,7 +303,7 @@ function CreateAccountForm() {
 
   const handleCreateAccountClick : MouseEventHandler = (event) => {
     createAccountDispatch({
-      type: CreateAccountActionType.validate,
+      type: CreateAccountActionType.createAccount,
     });
   }
 
