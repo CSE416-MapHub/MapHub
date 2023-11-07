@@ -4,21 +4,29 @@ import mongoose from 'mongoose';
 import authRouter from './routes/auth-router'; 
 import mapRouter from './routes/map-router';
 import postRouter from './routes/post-router';
+import cookieParser from 'cookie-parser';
+import cors from "cors"
 
 // const dotenv = require('dotenv');
 
 // dotenv.config();
 
 const app = express();
-const cookieParser = require('cookie-parser')
+
 // NOTE: you must pass in the port via
 // npm run start -- 8080 
 const port = process.argv[2] ?? 3031
 
 // Define your routes and middleware here
 // SETUP THE MIDDLEWARE
+app.use(cors({
+  origin: process.env.DEPLOYED ? "https://maphub.pro" : "http://localhost:3000",
+  optionsSuccessStatus: 200,
+  credentials: true
+}))
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
+
 
 // SETUP OUR OWN ROUTERS AS MIDDLEWARE
 app.use('/auth', authRouter)
