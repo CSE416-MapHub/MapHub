@@ -2,7 +2,7 @@
 import {Request, Response} from 'express';
 import auth from '../auth/index'
 import User from '../models/user-model';
-import bcrypt from 'bcryptjs';
+import bcrypt from 'bcrypt';
 
 export const registerUser = async (req : Request, res : Response) => {
     try {        
