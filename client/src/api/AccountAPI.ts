@@ -50,7 +50,7 @@ class AccountAPI {
     password: string,
     passwordConfirm: string
   ) {
-    return this.api.post('/register', {
+    return this.api.post('/auth/register', {
       username,
       email,
       password,
