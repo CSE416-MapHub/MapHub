@@ -87,7 +87,11 @@ export const registerUser = async (req: Request, res: Response) => {
         // To make it look pretty :#
         const capitalizedField =
           duplicateField.charAt(0).toUpperCase() + duplicateField.slice(1);
-        console.error(`${capitalizedField} already in use.`);
+        console.log(`${capitalizedField} already in use.`);
+        return res.status(400).json({
+          success: false,
+          errorMessage: `${capitalizedField} already in use.`,
+        })
       } else {
         // Handle other errors - idk for now, we can expand on this
         console.error('Error while saving the user:', err.message);
@@ -109,7 +113,7 @@ export const getAllUsers = async (req: Request, res: Response) => {
     const users = await User.find();
 
     // Send the user data as a JSON response
-    res.json(users);
+    res.status(200).json(users);
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
