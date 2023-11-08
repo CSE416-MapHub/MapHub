@@ -1,0 +1,41 @@
+name: Deploy to Lightsail (prod)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 20
+
+      - name: Deploy to Lightsail
+        run: |
+
+          # Install SSH key
+          echo "${{ secrets.LIGHTSAIL_SSH_KEY }}" > lightsail-key
+          chmod 600 lightsail-key
+          
+          # SSH into your Lightsail instance using the private key
+          ssh -i lightsail-key -o StrictHostKeyChecking=no bitnami@maphub.pro << 'ENDSSH'
+
+            # Add commands to deploy your Node.js application to Lightsail here
+            # Move directory into dev
+            cd prod
+            # Run update script
+            ./update.sh
+            exit          
+          ENDSSH
+
+      - name: Cleanup
+        run: |
+          # Clean up or perform any post-deployment tasks as needed
