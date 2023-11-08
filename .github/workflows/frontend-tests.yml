@@ -36,6 +36,7 @@ jobs:
 
       - name: Change directory
         run: cd client
+        working-directory: ./MapHub
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
