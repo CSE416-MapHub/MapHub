@@ -25,7 +25,6 @@ describe('User Registration API', () => {
       passwordVerify:'test!P1assword'
     });
     expect(response.status).toBe(200);
-
   });
 });
 
