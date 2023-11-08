@@ -45,9 +45,8 @@ if(mongoose.connections.length === 0){
 }
 
 
-app.listen(port, () => {
+export const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
 
 export default app;

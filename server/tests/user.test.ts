@@ -2,6 +2,7 @@ import request from 'supertest';
 import app from '../index';
 import * as db from './db'
 import mongoose from 'mongoose';
+import {server} from '../index'
 
 beforeAll(async () => {
 
@@ -10,8 +11,9 @@ beforeAll(async () => {
 afterEach(async () => {
   await db.clearDatabase()
 });
-afterAll(async () => {
+afterAll(async ()=> {
   await db.closeDatabase()
+  server.close()
 });
 
 //we test using the same email all the time so we want t osee if the duplcation works
