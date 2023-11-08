@@ -43,4 +43,5 @@ jobs:
         uses: cypress-io/github-action@v6.6.0     
         with:
           build: npm run build
+          working-directory: ./client
           start: npm start
