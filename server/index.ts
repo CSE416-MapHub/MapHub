@@ -33,15 +33,15 @@ app.use('/auth', authRouter)
 app.use('/map', mapRouter)
 app.use('/posts', postRouter)
 
-if(mongoose.connections.length === 0){
+
+// if it is running because of a test, do not connect
+if(require.main?.filename.indexOf(".test.") === -1){
   mongoose.connect(process.env.MONGODB_URI ?? "mongodb://localhost:27017/MapHub", {
     // useNewUrlParser: true,
     // useUnifiedTopology: true,
   }).catch(e => {
     console.error('Connection error', e.message)
   });
-}else{
-  console.log("THERES ALREADY AN CONNECTION work")
 }
 
 
