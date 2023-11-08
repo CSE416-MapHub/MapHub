@@ -45,3 +45,4 @@ jobs:
           build: npm run build
           working-directory: ./client
           start: npm start
+          working-directory: ./client
