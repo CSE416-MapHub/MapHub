@@ -18,6 +18,7 @@ function authManager() {
             }
 
             const secretOrPrivateKey: Secret | undefined = process.env.JWT_SECRET;
+
             if (!secretOrPrivateKey) {
                 return res.status(500).json({
                     loggedIn: false,
