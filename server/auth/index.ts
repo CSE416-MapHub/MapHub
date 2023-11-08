@@ -1,6 +1,7 @@
 // const jwt = require("jsonwebtoken")
 import { Request, Response, NextFunction } from 'express';
 import jwt, {Secret} from 'jsonwebtoken';
+const jwtSecret =  process.env.JWT_SECRET ?? "AOIHFAOUHFSHUSDFWEIUFHEIOWJ"
 
 function authManager() {
     const verify = (req : Request, res : Response, next : NextFunction) => {
@@ -17,7 +18,8 @@ function authManager() {
                 })
             }
 
-            const secretOrPrivateKey: Secret | undefined = process.env.JWT_SECRET;
+            const secretOrPrivateKey: Secret | undefined = jwtSecret;
+
             if (!secretOrPrivateKey) {
                 return res.status(500).json({
                     loggedIn: false,
@@ -47,7 +49,7 @@ function authManager() {
                 return null;
             }
 
-            const secretOrPublicKey: Secret | undefined = process.env.JWT_SECRET
+            const secretOrPublicKey: Secret | undefined = jwtSecret
             if (!secretOrPublicKey) {
                 return null;
             }
@@ -63,7 +65,7 @@ function authManager() {
     const signToken = (userId : string) => {
         return jwt.sign({
             userId: userId
-        }, process.env.JWT_SECRET as Secret);
+        },jwtSecret as Secret);
     }
 
     return {

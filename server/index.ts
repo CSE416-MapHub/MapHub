@@ -1,7 +1,7 @@
 
 import express from 'express';
 import mongoose from 'mongoose';
-import authRouter from './routes/auth-router'; 
+import authRouter from './routes/auth-router';
 import mapRouter from './routes/map-router';
 import postRouter from './routes/post-router';
 import cookieParser from 'cookie-parser';
@@ -14,7 +14,7 @@ import cors from "cors"
 const app = express();
 
 // NOTE: you must pass in the port via
-// npm run start -- 8080 
+// npm run start -- 8080
 const port = process.argv[2] ?? 3031
 
 // Define your routes and middleware here
@@ -33,16 +33,20 @@ app.use('/auth', authRouter)
 app.use('/map', mapRouter)
 app.use('/posts', postRouter)
 
-mongoose.connect(process.env.MONGODB_URI ?? "mongodb://localhost:27017", {
-  // useNewUrlParser: true,
-  // useUnifiedTopology: true,
-}).catch(e => {
-  console.error('Connection error', e.message)
-});
+if(mongoose.connections.length === 0){
+  mongoose.connect(process.env.MONGODB_URI ?? "mongodb://localhost:27017/MapHub", {
+    // useNewUrlParser: true,
+    // useUnifiedTopology: true,
+  }).catch(e => {
+    console.error('Connection error', e.message)
+  });
+}else{
+  console.log("THERES ALREADY AN CONNECTION work")
+}
 
-app.listen(port, () => {
+
+export const server = app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
-
 
 export default app;
