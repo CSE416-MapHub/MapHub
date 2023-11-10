@@ -52,7 +52,7 @@ const AboutPage: React.FC = () => {
       <Typography variant="h3" gutterBottom>
         MapHub
       </Typography>
-      <Typography variant="subtitle1" gutterBottom>
+      <Typography variant="body1" gutterBottom>
         List of all registered users
       </Typography>
       <Suspense fallback={<Typography>Loading...</Typography>}>
