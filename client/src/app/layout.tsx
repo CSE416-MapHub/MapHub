@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
-import ColorProvider from 'context/ColorProvider';
+import ThemeProvider from 'context/themeProvider';
 import './globals.css';
 
 const firaSans = Fira_Sans({
@@ -29,9 +29,9 @@ export default function RootLayout({
       className={`${firaSans.variable} ${sofiaSansCondensed.variable}`}
     >
       <body>
-        <ColorProvider>
+        <ThemeProvider>
           {children}
-        </ColorProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

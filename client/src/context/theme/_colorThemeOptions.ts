@@ -1,6 +1,47 @@
-import { createTheme } from '@mui/material';
+import { ThemeOptions, createTheme } from '@mui/material';
 
-const colorTheme = createTheme({
+declare module '@mui/material/styles' {
+  interface Palette {
+    tertiary?: PaletteColor,
+    surface?: PaletteColor,
+  }
+
+  interface PaletteOptions {
+    tertiary?: SimplePaletteColorOptions,
+    surface?: PaletteNeutralColorOptions,
+  }
+
+  interface PaletteColor {
+    on?: string,
+    container?: string,
+    onContainer?: string,
+  }
+
+  interface SimplePaletteColorOptions {
+    on?: string,
+    container?: string,
+    onContainer?: string,
+  }
+
+  interface PaletteNeutralColorOptions extends SimplePaletteColorOptions {
+    dim?: string,
+    dark?: string,
+    bright?: string,
+    light?: string,
+    containerLowest?: string,
+    containerLow?: string,
+    container?: string,
+    containerHigh?: string,
+    containerHighest?: string,
+    onSurface?: string,
+    onSurfaceVariant?: string,
+    outline?: string,
+    outlineVariant?: string,
+    shadow?: string,
+  }
+}
+
+const colorThemeOptions: ThemeOptions = {
   // On Primary, Secondary, Tertiary, Error, and Other Palette Colors can be
   // referred to as color.contrastText.
   palette: {
@@ -57,6 +98,6 @@ const colorTheme = createTheme({
       shadow: '#000000',
     }
   },
-})
+};
 
-export default colorTheme;
+export default colorThemeOptions;
