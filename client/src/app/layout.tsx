@@ -1,13 +1,16 @@
 import type { Metadata } from 'next';
 import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
+import ColorProvider from 'context/ColorProvider';
 import './globals.css';
 
 const firaSans = Fira_Sans({
   weight: ['400', '500', '700'],
   subsets: ['latin'],
+  variable: '--fira',
 });
 const sofiaSansCondensed = Sofia_Sans_Condensed({
   subsets: ['latin'],
+  variable: '--sofia',
 });
 
 export const metadata: Metadata = {
@@ -21,11 +24,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body 
-        className={`${firaSans.className} ${sofiaSansCondensed.className}`}
-      >
-        {children}
+    <html 
+      lang="en"
+      className={`${firaSans.variable} ${sofiaSansCondensed.variable}`}
+    >
+      <body>
+        <ColorProvider>
+          {children}
+        </ColorProvider>
       </body>
     </html>
   );
