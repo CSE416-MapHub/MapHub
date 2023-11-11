@@ -1,6 +1,6 @@
 import React from 'react';
 import Link from 'next/link';
-import Button from '@mui/material/Button';
+import Button from '../components/button';
 import Typography from '@mui/material/Typography';
 
 export default function Home() {
@@ -10,13 +10,13 @@ export default function Home() {
         MAPHUB - The BEST Social Media Map Editor
       </Typography>
       <Link href="/about">
-        <Button variant="contained">
+        <Button variant="filled">
             About
           </Button>
         </Link>
   
       <Link href="/account/create">
-        <Button variant="contained">
+        <Button variant="filled" disabled>
           Join Now
         </Button>
       </Link>
