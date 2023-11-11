@@ -1,8 +1,17 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
+import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
+import ThemeProvider from '../context/themeProvider';
+import './globals.scss';
 
-const inter = Inter({ subsets: ['latin'] });
+const firaSans = Fira_Sans({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--fira',
+});
+const sofiaSansCondensed = Sofia_Sans_Condensed({
+  subsets: ['latin'],
+  variable: '--sofia',
+});
 
 export const metadata: Metadata = {
   title: 'MapHub',
@@ -15,8 +24,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html 
+      lang="en"
+      className={`${firaSans.variable} ${sofiaSansCondensed.variable}`}
+    >
+      <body>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

@@ -1,26 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
-import Button from '@mui/material/Button';
+import Button from '../components/button';
 import Typography from '@mui/material/Typography';
-
-import styles from './ui/homePage.module.css';
 
 export default function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <Typography style={{ fontSize: '3rem' }}>
+      <Typography variant="h1">
         MAPHUB - The BEST Social Media Map Editor
       </Typography>
-      <Button className={styles.navButton} variant="contained">
-        <Link href="/about">
-          About
+      <Link href="/about">
+        <Button variant="filled">
+            About
+          </Button>
         </Link>
-      </Button>
-      <Button className={styles.navButton} variant="contained">
-        <Link href="/account/create">
+  
+      <Link href="/account/create">
+        <Button variant="filled">
           Join Now
-        </Link>
-      </Button>
+        </Button>
+      </Link>
     </main>
   );
 }

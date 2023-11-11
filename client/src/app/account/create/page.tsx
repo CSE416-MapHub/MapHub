@@ -10,7 +10,7 @@ function Page() {
       <Link className={styles.navLink} href="/">
         Home
       </Link>
-      <Typography className={styles.title} variant="h3" align="center">
+      <Typography className={styles.title} variant="h2" align="center">
         Create an account
       </Typography>
       <Typography className={styles.body} variant="body1" align="left">
