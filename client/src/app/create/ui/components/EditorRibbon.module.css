@@ -12,6 +12,9 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    width: 25%;
-    padding: 0px 20%;
+    padding: 0px 2%;
+}
+
+.dropdowns > * {
+    padding-right: 12px;
 }

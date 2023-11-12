@@ -2,7 +2,7 @@
 
 
 import { Divider, ListItemIcon, ListItemText, MenuItem, MenuList, Paper, Typography } from "@mui/material"
-import { ContentCut, ContentCopy, ContentPaste } from "@mui/icons-material"
+import { Undo, Redo } from '@mui/icons-material';
 import styles from "./EditorRibbon.module.css"
 import { useState } from "react"
 import EditorMenu, {MenuProps} from "./EditorMenu"
@@ -53,10 +53,14 @@ export default function() {
             }}> Map </Typography>
         </div>
         <div className={styles["map-title"]}>
-
+            <Typography>
+                Anglicans Down Under
+            </Typography>
+            
         </div>
         <div className={styles["undo-redo"]}>
-
+            <Undo fontSize="large" />
+            <Redo fontSize="large" />
         </div>
         {openMenu ? <EditorMenu {...openMenu} /> : <></>}
     </div>)

@@ -1,5 +1,5 @@
 import { ListItemIcon, ListItemText, MenuItem, MenuList, Paper, Popover } from "@mui/material";
-import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { ArrowRight } from '@mui/icons-material';
 import { useState } from "react"
 
 export interface MenuProps {
@@ -66,7 +66,7 @@ export default function EditorMenu({items, anchorEl, onClose} : MenuProps) {
                         <ListItemText>{item}</ListItemText>
                         {Object.keys(items[item]).length > 1? 
                             <ListItemIcon>
-                                <ArrowRightIcon fontSize="small" />
+                                <ArrowRight fontSize="small" />
                             </ListItemIcon> 
                             : <></>
                         }
