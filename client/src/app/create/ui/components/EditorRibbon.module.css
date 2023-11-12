@@ -1,0 +1,17 @@
+
+
+.ribbon-container {
+    height: 64px;
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+.dropdowns {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    width: 25%;
+    padding: 0px 20%;
+}
