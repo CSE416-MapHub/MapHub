@@ -14,12 +14,6 @@ export default function Home() {
             About
           </Button>
         </Link>
-  
-      <Link href="/account/create">
-        <Button variant="filled">
-          Join Now
-        </Button>
-      </Link>
     </main>
   );
 }
