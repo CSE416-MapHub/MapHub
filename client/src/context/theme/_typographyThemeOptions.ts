@@ -51,8 +51,10 @@ declare module '@mui/material/Typography' {
   }
 }
 
+const fallbackFontFamilies = 'Helvetica, Arial, sans-serif';
+
 const display: TypographyStyleOptions = {
-  fontFamily: 'var(--sofia)',
+  fontFamily: `var(--sofia), ${fallbackFontFamilies}`,
   fontWeight: 400,
   fontSize: '57px',
   letterSpacing: '-0.25px',
@@ -60,7 +62,7 @@ const display: TypographyStyleOptions = {
 };
 
 const headline: TypographyStyleOptions = {
-  fontFamily: 'var(--fira)',
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 400,
   fontSize: '32px',
   letterSpacing: 0,
@@ -68,7 +70,7 @@ const headline: TypographyStyleOptions = {
 };
 
 const title: TypographyStyleOptions = {
-  fontFamily: 'var(--fira)',
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 400,
   fontSize: '22px',
   letterSpacing: 0,
@@ -76,7 +78,7 @@ const title: TypographyStyleOptions = {
 };
 
 const body: TypographyStyleOptions = {
-  fontFamily: 'var(--fira)',
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 400,
   fontSize: '16px',
   letterSpacing: '0.5px',
@@ -84,7 +86,7 @@ const body: TypographyStyleOptions = {
 };
 
 const bodySmall: TypographyStyleOptions = {
-  fontFamily: 'var(--fira)',
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 400,
   fontSize: '12px',
   letterSpacing: '0.4px',
@@ -92,7 +94,7 @@ const bodySmall: TypographyStyleOptions = {
 };
 
 const label: TypographyStyleOptions = {
-  fontFamily: 'var(--fira)',
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 500,
   fontSize: '14px',
   letterSpacing: '0.1px',

@@ -1,0 +1,58 @@
+// Pixel sizes for border radii 
+$extra-large: 28px;
+$large: 16px;
+$medium: 12px;
+$small: 8px;
+$extra-small: 4px;
+
+@mixin full {
+  // Fully rounded borders are set such that the circular radius of each corner
+  // is 50% of the vertical height. Setting the border radius to a maximal value
+  // forces browsers to proportionally reduce the border radius.
+  // https://www.w3.org/TR/css-backgrounds-3/#corner-overlap.
+  border-radius: 10000px;
+}
+
+@mixin extra-large-top {
+  border-radius: $extra-large $extra-large 0 0;
+}
+
+@mixin extra-large {
+  border-radius: $extra-large;
+}
+
+@mixin large-top {
+  border-radius: $large $large 0 0;
+}
+
+@mixin large-end {
+  border-radius: 0 $large $large 0;
+}
+
+@mixin large-start {
+  border-radius: $large 0 0 $large;
+}
+
+@mixin large {
+  border-radius: $large;
+}
+
+@mixin medium {
+  border-radius: $medium;
+}
+
+@mixin small {
+  border-radius: $small;
+}
+
+@mixin extra-small-top {
+  border-radius: $extra-small $extra-small 0 0;
+}
+
+@mixin extra-small {
+  border-radius: $extra-small;
+}
+
+@mixin none {
+  border-radius: 0;
+}

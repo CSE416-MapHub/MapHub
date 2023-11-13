@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
 import ThemeProvider from '../context/themeProvider';
 import NavBar from './components/navBar';
-import './globals.scss';
+import './styles/globals.scss';
 
 const firaSans = Fira_Sans({
   weight: ['400', '500', '700'],
