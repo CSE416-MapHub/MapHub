@@ -34,6 +34,18 @@ export default function() {
                             value: "#FFFFFF"
                         }
                     }]
+                },
+                {
+                    name: "Gradient",
+                    items: [{
+                        name: "Feature gradientws",
+                        input: {
+                            type: "gradient",
+                            short: false,
+                            disabled: false,
+                            value: "#FFFFFF"
+                        }
+                    }]
                 }
             ]}/>
         </>

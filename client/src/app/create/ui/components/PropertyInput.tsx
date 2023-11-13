@@ -4,6 +4,8 @@ import style from "./Property.module.scss"
 import { Typography } from "@mui/material";
 import Button from "components/button";
 import { useState } from "react";
+import PropertyColorInput from "./PropertyColorInput";
+import PropertyInputGradient from "./PropertyInputGradient";
 
 export type PropertyPanelInputType = 
     | "number" 
@@ -13,6 +15,7 @@ export type PropertyPanelInputType =
     | "color" 
     | "svg" 
     | "dot" 
+    | "gradient"
 
 
 export interface IInputProps {
@@ -63,9 +66,24 @@ export default function(props : IInputProps) {
         </select>
     } else if (props.type === "delete") {
         inputField = <Button variant="error" onClick={getFunctionOfOption(props.value[0])}>{getNameOfOption(props.value[0])}</Button>
+    } else if (props.type === "gradient"){
+        inputField = <PropertyInputGradient 
+            minValue={0}
+            maxValue={100}
+            minColor="#00FF00"
+            maxColor="#FFFF00"
+        />
+    } else if (props.type === "color") {
+        inputField = <PropertyColorInput color="#00FF00" colorChangeHandler={()=>{}}/>
+    } else if (props.type === "svg") {
+
+    } else if (props.type === "dot") {
+
     } else {
-        inputField = <button> TODO ICON </button>
+
     }
+
+
     return <>
         {inputField}
         {typeof props.auxiliaryComponent === "function" ? props.auxiliaryComponent : <></>}
