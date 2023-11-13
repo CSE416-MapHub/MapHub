@@ -25,10 +25,11 @@ export default function Home() {
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center',
-          width: '1513px',
+          width: '1500px',
           height: '808px',
           borderRadius: 32,
-          margin: '50px 191px 86px 50px',
+          margin: '40px auto 86px auto',
+          marginRight: 500,
           bgcolor: 'primary.container'
         }}
       >
@@ -52,12 +53,12 @@ export default function Home() {
           mx: 'auto',
           marginLeft: '50px'
         }}>
-          <Link href="/about">
+          <Link href="/discover">
             <Button variant="outlined" sx={{ marginRight: '16px' }}>
                 Discover Maps
               </Button>
             </Link>
-          <Link href="/account/login">
+          <Link href="/register">
           <Button variant="filled">
               Start Creating
             </Button>
