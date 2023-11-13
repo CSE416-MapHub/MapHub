@@ -3,7 +3,7 @@
 
 import { Divider, ListItemIcon, ListItemText, MenuItem, MenuList, Paper, Typography } from "@mui/material"
 import { Undo, Redo } from '@mui/icons-material';
-import styles from "./EditorRibbon.module.css"
+import styles from "./EditorRibbon.module.scss"
 import { useState } from "react"
 import EditorMenu, {MenuProps} from "./EditorMenu"
 
@@ -43,24 +43,24 @@ export default function() {
 
         <div className={styles["dropdowns"]}>
             <Typography onClick={(e)=>{
-                setOpenMenu({items: menus.File, anchorEl: e.currentTarget, onClose: handleMenuClose})
+                setOpenMenu({items: menus.File, anchorEl: e.currentTarget, onClose: handleMenuClose, isTopLevel: true})
             }}> File </Typography>
             <Typography onClick={(e)=>{
-                setOpenMenu({items: menus.View, anchorEl: e.currentTarget, onClose: handleMenuClose})
+                setOpenMenu({items: menus.View, anchorEl: e.currentTarget, onClose: handleMenuClose, isTopLevel: true})
             }}> View </Typography>
                         <Typography onClick={(e)=>{
-                setOpenMenu({items: menus.Map, anchorEl: e.currentTarget, onClose: handleMenuClose})
+                setOpenMenu({items: menus.Map, anchorEl: e.currentTarget, onClose: handleMenuClose, isTopLevel: true})
             }}> Map </Typography>
         </div>
         <div className={styles["map-title"]}>
-            <Typography>
+            <Typography  variant="title">
                 Anglicans Down Under
             </Typography>
             
         </div>
         <div className={styles["undo-redo"]}>
-            <Undo fontSize="large" />
-            <Redo fontSize="large" />
+            <Undo fontSize="medium" />
+            <Redo fontSize="medium" />
         </div>
         {openMenu ? <EditorMenu {...openMenu} /> : <></>}
     </div>)

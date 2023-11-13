@@ -1,0 +1,31 @@
+@use 'colors';
+
+.properties-container {
+    height: calc(100vh - 80px - 56px);
+    min-width: 25%;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    background-color: colors.$surface-container-high;
+    padding: 4px;
+}
+
+.properties-panel-container {
+    width: 100%;
+    // background-color: maroon;
+    margin-bottom: 8px;
+}
+
+.prop-input {
+    padding: 4px;
+    border-radius: 4px;
+}
+
+// TODO: unhardcode
+.prop-input-short {
+    width: 81px;
+}
+
+.prop-input-long {
+    width: 100%;
+}

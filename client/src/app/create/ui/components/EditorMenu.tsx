@@ -6,6 +6,7 @@ export interface MenuProps {
     items : MenuSpec,
     anchorEl : HTMLElement | null,
     onClose: ()=>void,
+    isTopLevel?: boolean
 }
 
 interface MenuSpec {
@@ -21,7 +22,7 @@ function isMenuSpec(o : MenuSpec | (()=> void)) : o is MenuSpec {
 }
 
 
-export default function EditorMenu({items, anchorEl, onClose} : MenuProps) {
+export default function EditorMenu({items, anchorEl, onClose, isTopLevel} : MenuProps) {
     const [subanchorEl, setSubanchorEl] = useState<HTMLElement | null>(null)
     const [submenuName, setSubmenuName] = useState<string>("")
 
@@ -54,7 +55,11 @@ export default function EditorMenu({items, anchorEl, onClose} : MenuProps) {
         open={true}
         anchorEl={anchorEl}
         onClose={onClose}
-        anchorOrigin={{
+        anchorOrigin={(isTopLevel) ? {
+            vertical: 'bottom',
+            horizontal: 'left',
+        } :
+        {
             vertical: 'top',
             horizontal: 'right',
         }}

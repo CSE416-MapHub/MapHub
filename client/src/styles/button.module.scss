@@ -57,6 +57,49 @@
   }
 }
 
+// Filled/Contained Variant Button Styles
+.error {
+  // Enabled State Styles
+  &:enabled {
+    @include elevation.elevation-0;
+    background-color: colors.$error;
+
+    // Hover State Styles
+    &:hover {
+      @include elevation.elevation-1;
+      background-color: color-mix(
+        in hsl,
+        colors.$error,
+        colors.$on-error state.$hover-opacity
+      );
+    }
+
+    // Focus State Styles
+    &:focus-visible {
+      @include elevation.elevation-0;
+      background-color: color-mix(
+        in hsl,
+        colors.$error,
+        colors.$on-error state.$focus-opacity
+      );
+    }
+
+    // Press State Styles
+    &:active {
+      // Changes the state layer color to on primary.
+      // MUI ripple inherits the button color for the ripple background color.
+      color: colors.$on-error;
+    }
+  }
+
+  // Disabled State Styles
+  &:disabled {
+    background-color: rgba(colors.$on-surface, 12%);
+    color: rgba(colors.$on-surface, 38%);
+  }
+}
+
+
 // Outlined Variant Button Styles
 .outlined {
   border-color: colors.$outline;
