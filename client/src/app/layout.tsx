@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
 import ThemeProvider from '../context/themeProvider';
+import NavBar from './components/navBar';
 import './globals.scss';
 
 const firaSans = Fira_Sans({
@@ -30,6 +31,7 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
+          <NavBar />
           {children}
         </ThemeProvider>
       </body>

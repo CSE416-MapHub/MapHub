@@ -10,7 +10,9 @@
     "test": "jest --watch",
     "test:ci": "jest --ci",
     "cypress": "cypress open",
-    "cypress:run": "cypress run 'cypress/e2e/*.cy.ts'"
+    "cypress:run": "cypress run --e2e && cypress run --component",
+    "cypress:e2e": "cypress run --e2e",
+    "cypress:component": "cypress run --component"
   },
   "dependencies": {
     "@emotion/react": "^11.11.1",
