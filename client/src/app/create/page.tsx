@@ -46,6 +46,18 @@ export default function() {
                             value: "#FFFFFF"
                         }
                     }]
+                },
+                {
+                    name: "select icon",
+                    items: [{
+                        name: "symbol",
+                        input: {
+                            type: "svg",
+                            short: true,
+                            disabled: false,
+                            value: ""
+                        }
+                    }]
                 }
             ]}/>
         </>

@@ -33,3 +33,31 @@
 .prop-input-long {
     width: 100%;
 }
+
+.svg-grid-container  {
+    padding: 1px;
+    background-color: rgb(203, 203, 203);
+    width: 145px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 26px;
+    margin-bottom: 26px;
+}
+
+
+.svg-grid {
+    display: grid;
+    width: 145px;
+    height: 145px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 1px;
+
+}
+
+.svg-grid-item  {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+

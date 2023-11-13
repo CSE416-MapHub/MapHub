@@ -6,6 +6,7 @@ import Button from "components/button";
 import { useState } from "react";
 import PropertyColorInput from "./PropertyColorInput";
 import PropertyInputGradient from "./PropertyInputGradient";
+import PropertySVGInput from "./PropertySVGInput";
 
 export type PropertyPanelInputType = 
     | "number" 
@@ -76,7 +77,7 @@ export default function(props : IInputProps) {
     } else if (props.type === "color") {
         inputField = <PropertyColorInput color="#00FF00" colorChangeHandler={()=>{}}/>
     } else if (props.type === "svg") {
-
+        inputField = <PropertySVGInput />
     } else if (props.type === "dot") {
 
     } else {
