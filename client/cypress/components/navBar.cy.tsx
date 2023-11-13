@@ -27,7 +27,7 @@ describe('Navigation Bar', () => {
     cy.get('@discover-button').should('have.attr', 'href', '/discover');
   });
 
-  it('renders a login outlined button link.', () => {
+  it('renders a sign in outlined button link.', () => {
     cy.mount(<NavBar/>);
     cy.get('#signin').as('signin-button');
     cy.get('@signin-button').should('be.visible');

@@ -15,11 +15,10 @@
 
 // Import commands.js using ES2015 syntax:
 import './commands'
-
-// Alternatively you can use CommonJS syntax:
-// require('./commands')
-
+import React from 'react';
 import { mount } from 'cypress/react18'
+import ThemeProvider from '../../src/context/themeProvider';
+import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -33,7 +32,27 @@ declare global {
   }
 }
 
-Cypress.Commands.add('mount', mount)
+const firaSans = Fira_Sans({
+  weight: ['400', '500', '700'],
+  subsets: ['latin'],
+  variable: '--fira',
+});
+const sofiaSansCondensed = Sofia_Sans_Condensed({
+  subsets: ['latin'],
+  variable: '--sofia',
+});
+
+Cypress.Commands.add('mount', (component, options = {}) => {
+  return mount((
+    <>
+      <div className={`${firaSans.variable} ${sofiaSansCondensed.variable}`}>
+        <ThemeProvider>
+          {component}
+        </ThemeProvider>
+      </div>
+    </>
+  ), options);
+})
 
 // Example use:
 // cy.mount(<MyComponent />)
