@@ -1,9 +1,15 @@
 'use client'; // TODO: remove thid
-
+import { useState } from 'react';
 import EditorRibbon from './ui/components/EditorRibbon';
 import Properties from './ui/components/Property';
+import DeleteModal from './ui/components/modals/deleteInstance';
 
 export default function () {
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  //TODO: IMplemetn objetc
+  function deleteInstance() {
+    setOpenDeleteModal(false);
+  }
   return (
     <>
       <EditorRibbon />
@@ -124,7 +130,8 @@ export default function () {
                     [
                       'Delete Category',
                       () => {
-                        alert(1);
+                        console.log('DELETEING CATEGORY');
+                        setOpenDeleteModal(true);
                       },
                     ],
                   ],
@@ -133,6 +140,13 @@ export default function () {
             ],
           },
         ]}
+      />
+      <DeleteModal
+        open={openDeleteModal}
+        onClose={() => setOpenDeleteModal(false)}
+        onConfirm={deleteInstance}
+        deleteType="Category"
+        instanceToBeDeleted="Category X"
       />
     </>
   );
