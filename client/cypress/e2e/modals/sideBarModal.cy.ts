@@ -11,10 +11,15 @@ describe('All Side Bar Properties Modal Opens', () => {
     cy.get('button:contains("+ New Symbol")').click();
     cy.get('p:contains("Create New Symbol")');
   });
-  it('create new symbol open', () => {
+  it('create new category open', () => {
     cy.visit('/create');
     cy.get('#demo-simple-select').click();
     cy.get('li:contains("+ New Category")').click();
     cy.get('p:contains("Create New Category")');
+  });
+  it('delete category modal open', () => {
+    cy.visit('/create');
+    cy.get('button:contains("Delete Category")').click();
+    cy.get('p:contains("Delete Category")');
   });
 });
