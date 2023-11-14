@@ -1,0 +1,12 @@
+@use "colors";
+
+.card-grid {
+    display: grid;
+    width: 80%;
+
+    grid-template-columns: 1fr 1fr 1fr;
+    column-gap: 32px;
+    row-gap: 8px;
+    margin-left: auto;
+    margin-right: auto;
+}
