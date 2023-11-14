@@ -1,6 +1,6 @@
 /// <reference  types="cypress" />
 import React from 'react';
-import NavBar from '../../src/app/components/navBar';
+import NavBar from '../../../src/app/components/navBar';
 
 describe('Navigation Bar', () => {
   it('renders a home link.', () => {
@@ -10,7 +10,7 @@ describe('Navigation Bar', () => {
     cy.get('@home-link').should('be.visible');
     cy.get('@home-link').should('have.attr', 'href', '/');
   });
-
+  
   it('renders a create text button link.', () => {
     cy.mount(<NavBar/>);
     cy.get('#create').as('create-button');
