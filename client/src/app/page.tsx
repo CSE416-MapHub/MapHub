@@ -5,8 +5,6 @@ import Typography from '@mui/material/Typography';
 import { Box, Container, colors } from '@mui/material';
 
 import styles from './styles/home.module.scss';
-import Link from 'next/link';
-import Button from 'components/button';
 
 function Home() {
   return (
@@ -20,9 +18,6 @@ function Home() {
         }}
       >
         {/* TODO: Add NavBar here */}
-      <Typography variant="h1">
-        MAPHUB
-      </Typography>
       </Box>
       <Box
         sx={{
