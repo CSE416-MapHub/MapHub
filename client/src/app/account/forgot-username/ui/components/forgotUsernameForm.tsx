@@ -1,7 +1,7 @@
 'use client'
 
 import { useReducer, MouseEventHandler } from 'react';
-import { Button, Typography } from '@mui/material';
+import { Button, Link, Typography } from '@mui/material';
 
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
@@ -138,13 +138,15 @@ function ForgotUsernameForm() {
         validate={validateEmail}
         helperText={forgotUsernameState.email.errorText}
       />
-      <Button 
-        className={styles.confirmButton}
-        variant="contained"
-        onClick={handleSendEmailClick}
-      >
-        Send Email
-      </Button>
+      <Link href='/account/forgot-username/success'>
+        <Button 
+            className={styles.confirmButton}
+            variant="contained"
+            onClick={handleSendEmailClick}
+        >
+            Send Email
+        </Button>
+      </Link>
     </div>
   );
 }
