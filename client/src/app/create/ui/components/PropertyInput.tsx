@@ -7,6 +7,7 @@ import { useState } from "react";
 import PropertyColorInput from "./PropertyColorInput";
 import PropertyInputGradient from "./PropertyInputGradient";
 import PropertySVGInput from "./PropertySVGInput";
+import PropertyDotInput from "./PropertyDotInput";
 
 export type PropertyPanelInputType = 
     | "number" 
@@ -79,9 +80,9 @@ export default function(props : IInputProps) {
     } else if (props.type === "svg") {
         inputField = <PropertySVGInput />
     } else if (props.type === "dot") {
-
+        inputField = <PropertyDotInput items={props.value as Array<string>}/>
     } else {
-
+        throw new Error("Bad input type " + props.type)
     }
 
 

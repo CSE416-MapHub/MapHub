@@ -58,6 +58,18 @@ export default function() {
                             value: ""
                         }
                     }]
+                },
+                {
+                    name: "select dot",
+                    items: [{
+                        name: "dot type",
+                        input: {
+                            type: "dot",
+                            short: true,
+                            disabled: false,
+                            value: ["male", "female"]
+                        }
+                    }]
                 }
             ]}/>
         </>
