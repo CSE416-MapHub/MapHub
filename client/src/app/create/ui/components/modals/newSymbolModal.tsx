@@ -14,10 +14,26 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   onConfirm,
 }) => {
   const [name, setName] = useState('');
+  const [svgFile, setSvgFile] = useState<File | null>(null);
+  const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
     onConfirm();
     onClose();
+  };
+
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files ? event.target.files[0] : null;
+    if (file && file.type === 'image/svg+xml') {
+      setSvgFile(file);
+
+      // Create a preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   return (
@@ -28,14 +44,34 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
       title="Create New Symbol"
     >
       <TextField
-        label="Map Name"
+        label="Symbol Name"
         value={name}
         onChange={e => setName(e.target.value)}
-        fullWidth
         margin="normal"
       />
-      <TextField type="file" />
-      <Button variant="filled">Upload</Button>
+      <label htmlFor="upload-button">
+        <input
+          accept=".svg"
+          style={{ display: 'none' }}
+          id="upload-button"
+          type="file"
+          onChange={handleFileChange}
+        />
+        <Button variant="contained" component="span">
+          Upload SVG
+        </Button>
+      </label>
+
+      {preview && (
+        <Box>
+          <Typography>Preview:</Typography>
+          <img
+            src={preview}
+            alt="SVG Preview"
+            style={{ maxWidth: '100%', maxHeight: '200px' }}
+          />
+        </Box>
+      )}
     </GeneralizedDialog>
   );
 };
