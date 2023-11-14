@@ -8,6 +8,7 @@ import styles from '../styles/button.module.scss';
 declare module '@mui/material' {
   interface ButtonPropsVariantOverrides {
     filled: true,
+    error: true,
   }
 }
 
@@ -25,6 +26,7 @@ function Button({children, className, variant, ...props}: ButtonProps) {
         [styles.filled]: variant === 'filled' || variant === 'contained',
         [styles.outlined]: variant === 'outlined',
         [styles.text] : variant === 'text',
+        [styles.error] : variant === 'error',
       })} ${styles.button} ${className}`}
       variant={variant === 'filled' ? 'contained' : variant}
       disableFocusRipple

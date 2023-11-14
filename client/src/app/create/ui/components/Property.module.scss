@@ -1,0 +1,63 @@
+@use 'colors';
+
+.properties-container {
+    height: calc(100vh - 80px - 56px);
+    min-width: 25%;
+    position: fixed;
+    bottom: 0px;
+    right: 0px;
+    background-color: colors.$surface-container-high;
+    padding: 4px;
+}
+
+.properties-panel-container {
+    width: 100%;
+    // background-color: maroon;
+    margin-bottom: 8px;
+}
+
+.prop-input {
+    padding: 4px;
+    border-radius: 4px;
+}
+
+.prop-input-tiny {
+    width: 32px;
+}
+
+// TODO: unhardcode
+.prop-input-short {
+    width: 81px;
+}
+
+.prop-input-long {
+    width: 100%;
+}
+
+.svg-grid-container  {
+    padding: 1px;
+    background-color: rgb(203, 203, 203);
+    width: 145px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: 26px;
+    margin-bottom: 26px;
+}
+
+
+.svg-grid {
+    display: grid;
+    width: 145px;
+    height: 145px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr 1fr;
+    gap: 1px;
+
+}
+
+.svg-grid-item  {
+    width: 100%;
+    height: 100%;
+    background-color: white;
+}
+

@@ -1,0 +1,40 @@
+@use 'colors';
+
+
+.ribbon-container {
+    // height: 56px;
+    width: 100%;
+    display: grid;
+    // flex-direction: row;
+    // justify-content: space-between;
+    grid-template-columns: 1fr 1fr 1fr;
+    text-align: center;
+
+    background-color: colors.$surface;
+    padding: 16px 0px;
+}
+
+.map-title {
+    text-align: center;
+}
+
+.dropdowns {
+    display: flex;
+    flex-direction: row;
+    // justify-content: space-around;
+    // align-items: flex-start;
+    gap: 8px;
+    padding: 0px 2%;
+}
+
+.dropdowns > * {
+    padding-right: 12px;
+}
+
+.undo-redo {
+    display: flex;
+    flex-direction: row;
+    // align-items: flex-end;
+    justify-content: flex-end;
+    padding-right: 12px;
+}
