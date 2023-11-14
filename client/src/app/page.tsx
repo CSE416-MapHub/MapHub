@@ -10,30 +10,9 @@ function Home() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center p-24">
       <Box
-        sx={{
-          height: '80px', // Set the height to 80px
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center', // Center the content horizontally
-        }}
+        className={styles.hero__box}
       >
-      </Box>
-      <Box
-        sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          width: '1513px',
-          height: '808px',
-          borderRadius: 32,
-          margin: '50px 191px 86px 50px',
-          bgcolor: 'primary.container'
-        }}
-      >
-        <Container sx={{
-          marginLeft: '50px',
-          marginBottom: '30px'
-        }}>
+        <Container className={styles.hero__contentbox}>
           <Typography variant="h1">
             A Complete
             Map Visuals Studio.
