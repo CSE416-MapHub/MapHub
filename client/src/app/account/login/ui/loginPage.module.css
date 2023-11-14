@@ -1,0 +1,28 @@
+.container {
+    min-height: 100%;
+    background-color: #004D64;
+  
+    margin: 0 auto;
+    border: none;
+    padding: 50px 0;
+  }
+  
+  .title {
+    margin: 5% 0;
+  }
+  
+  .body {
+    display: block;
+    width: 50%;
+    margin: 0 auto;
+  }
+  
+  .navLink {
+    color: #0081A7;
+    text-decoration: underline;
+    transition: color 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+  
+  .navLink:hover {
+    color: #004D64;
+  }
