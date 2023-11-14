@@ -9,6 +9,9 @@ import Button from 'components/button';
 export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
+  // TODO: make SVG modal appear
+  function addSVG() {}
+
   return (
     <>
       <IconButton
@@ -44,7 +47,9 @@ export default function () {
               ))}
             </div>
           </div>
-          <Button variant="filled">+ New Symbol</Button>
+          <Button variant="filled" onClick={addSVG}>
+            + New Symbol
+          </Button>
         </Paper>
       </Popover>
     </>
