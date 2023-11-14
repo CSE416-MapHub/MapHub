@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Typography } from '@mui/material';
 
-import styles from './ui/loginPage.module.css';
+import styles from './ui/forgotUsername.module.css';
 import ForgotUsernameForm from './ui/components/forgotUsernameForm';
 
 function Page() {
