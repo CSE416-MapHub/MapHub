@@ -2,12 +2,8 @@
 
 import { IconButton, Paper, Popover } from '@mui/material';
 import { useState } from 'react';
-import { IconButton, Paper, Popover } from '@mui/material';
-import { useState } from 'react';
+
 import InterestsIcon from '@mui/icons-material/Interests';
-import styles from './Property.module.scss';
-import Button from 'components/button';
-import NewSymbolModal from './modals/newSymbolModal';
 import styles from './Property.module.scss';
 import Button from 'components/button';
 import NewSymbolModal from './modals/newSymbolModal';
@@ -71,6 +67,4 @@ export default function () {
       />
     </>
   );
-  );
 }
-
