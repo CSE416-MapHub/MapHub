@@ -47,15 +47,16 @@ function getFunctionOfOption(o : string | [string , ()=>void] ) : (()=>void) {
 }
 
 export default function(props : IInputProps) {
-    // const [value, setValue] = useState<string>("")
+    const [value, setValue] = useState<string>(props.value.toString())
 
     let inputField = <input />
     if (props.type === "number" || props.type === "text") {
+        // TODO: move this out
         inputField = <input 
             type={props.type}
-            value={props.value.toString()}
+            value={value}
             disabled={props.disabled}
-            // className={style["prop-input"]}
+            onChange={(e) => setValue(e.target.value)}
             className={clsx(style["prop-input"], props.short ? style["prop-input-short"] : style["prop-input-long"]) }
         />
     } else if (props.type === "dropdown") {
