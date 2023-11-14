@@ -3,7 +3,7 @@
 import React, { useState, useReducer, MouseEventHandler } from 'react';
 import { Button, Container, Link, Typography } from '@mui/material';
 
-import ValidatedTextField from './ValidatedTextField';
+import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from '../../../../../api/AccountAPI';
 
