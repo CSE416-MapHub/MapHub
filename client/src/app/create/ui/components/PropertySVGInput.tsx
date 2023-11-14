@@ -11,7 +11,9 @@ export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
-  function onConfirmSymbolModal() {}
+  function onConfirmSymbolModal(svgFile: File | null, preview: string | null) {
+    console.log(preview);
+  }
   return (
     <>
       <IconButton
