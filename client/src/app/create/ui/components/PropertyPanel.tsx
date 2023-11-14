@@ -28,6 +28,7 @@ export default function ({ name, items }: IPropertyPanelSectionProps) {
         {items.map((input, i) => {
           return (
             <div
+              key={i}
               style={{
                 display: 'flex',
                 flexDirection: 'row',
