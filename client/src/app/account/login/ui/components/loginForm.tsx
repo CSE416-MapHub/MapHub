@@ -173,8 +173,8 @@ function LoginForm() {
         helperText={loginState.password.errorText}
       />
       <Container sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-      <Link variant='body1'>Forgot Username</Link>
-      <Link variant='body1'>Forgot Password</Link>
+      <Link variant='body1' href='/account/forgot-username'>Forgot Username</Link>
+      <Link variant='body1' href='/account/forgot-password'>Forgot Password</Link>
       </Container>
       <Button
         className={styles.confirmButton}
