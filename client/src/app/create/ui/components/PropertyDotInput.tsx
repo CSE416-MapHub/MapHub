@@ -30,6 +30,8 @@ export default function ({ items }: PropertyDotInputProps) {
   return (
     <>
       <IconButton
+        aria-label="dotPopover"
+        id="dotPopover"
         onClick={e => {
           setAnchorEl(e.currentTarget);
         }}
