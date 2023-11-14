@@ -3,14 +3,14 @@ import { TextField } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import LabelSelector from './LabelSelector'; // Adjust the import path as needed
 
-interface ImportModalProps {
+interface ChoroModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (mapName: string, selectedOptions: string[]) => void; // Added mapName to the callback
   properties: string[];
 }
 
-const ImportModal: React.FC<ImportModalProps> = ({
+const ChoroplethModal: React.FC<ChoroModalProps> = ({
   open,
   onClose,
   onConfirm,
@@ -44,4 +44,4 @@ const ImportModal: React.FC<ImportModalProps> = ({
   );
 };
 
-export default ImportModal;
+export default ChoroplethModal;
