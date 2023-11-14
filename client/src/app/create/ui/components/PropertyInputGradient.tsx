@@ -64,7 +64,7 @@ export default function (props: GradientInputProps) {
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
-            setRanges({ ...ranges, minValue: parseFloat(e.target.value) });
+            setRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
           }}
           className={clsx(style['prop-input'], style['prop-input-tiny'])}
         />
