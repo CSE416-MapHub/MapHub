@@ -47,8 +47,8 @@ export default function () {
         >
           <div className={styles['svg-grid-container']}>
             <div className={styles['svg-grid']}>
-              {new Array(36).fill(0).map(() => (
-                <div className={styles['svg-grid-item']}></div>
+              {new Array(36).fill(0).map((_, i) => (
+                <div key={i} className={styles['svg-grid-item']}></div>
               ))}
             </div>
           </div>
