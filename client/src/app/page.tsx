@@ -17,7 +17,6 @@ function Home() {
           justifyContent: 'center', // Center the content horizontally
         }}
       >
-        {/* TODO: Add NavBar here */}
       </Box>
       <Box
         sx={{
@@ -51,12 +50,12 @@ function Home() {
           mx: 'auto',
           marginLeft: '50px'
         }}>
-          <Link href="/about">
+          <Link id="hero-discover" href="/about">
             <Button variant="outlined" sx={{ marginRight: '16px' }}>
                 Discover Maps
               </Button>
             </Link>
-          <Link href="/account/login">
+          <Link id="hero-create" href="/account/login">
           <Button variant="filled">
               Start Creating
             </Button>
