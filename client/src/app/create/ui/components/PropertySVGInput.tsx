@@ -5,13 +5,15 @@ import { useState } from 'react';
 import InterestsIcon from '@mui/icons-material/Interests';
 import styles from './Property.module.scss';
 import Button from 'components/button';
+import NewSymbolModal from './modals/newSymbolModal';
 
 export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
-  // TODO: make SVG modal appear
-  function addSVG() {}
-
+  function onConfirmSymbolModal(svgFile: File | null, preview: string | null) {
+    console.log(preview);
+  }
   return (
     <>
       <IconButton
@@ -42,16 +44,21 @@ export default function () {
         >
           <div className={styles['svg-grid-container']}>
             <div className={styles['svg-grid']}>
-              {new Array(36).fill(0).map((_, i) => (
-                <div key={i} className={styles['svg-grid-item']}></div>
+              {new Array(36).fill(0).map(() => (
+                <div className={styles['svg-grid-item']}></div>
               ))}
             </div>
           </div>
-          <Button variant="filled" onClick={addSVG}>
+          <Button variant="filled" onClick={() => setOpenSymbolModal(true)}>
             + New Symbol
           </Button>
         </Paper>
       </Popover>
+      <NewSymbolModal
+        open={openSymbolModal}
+        onClose={() => setOpenSymbolModal(false)}
+        onConfirm={onConfirmSymbolModal}
+      />
     </>
   );
 }

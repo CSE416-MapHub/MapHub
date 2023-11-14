@@ -16,6 +16,8 @@ import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
 import MultiMapLabelModal from './modals/multiLabelModal';
+import RecentMapModal from './modals/recentMapModal';
+import PublishMapModal from './modals/publishModal';
 
 export default function () {
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
@@ -25,7 +27,9 @@ export default function () {
         'Import File From Local Desktop': () => {
           setOpenImport(true);
         },
-        'Import User Owned Maps': () => {},
+        'Import User Owned Maps': () => {
+          setOpenRecentMapModal(true);
+        },
       },
       Export: {
         'Export As PNG': () => {},
@@ -33,7 +37,7 @@ export default function () {
         'Export As JSON': () => {},
       },
       Publish: () => {
-        alert('Published!');
+        setOpenPublishMapModal(true);
       },
     },
     View: {
@@ -54,6 +58,8 @@ export default function () {
   const [openImport, setOpenImport] = useState(false);
   const [openChoropleth, setOpenChoropleth] = useState(false);
   const [openMapLabelModal, setOpenMapLabelModal] = useState(false);
+  const [openRecentMapModal, setOpenRecentMapModal] = useState(false);
+  const [openPublishMapModal, setOpenPublishMapModal] = useState(false);
   const selectedOptions = [
     'Country Name',
     'Languages',
@@ -78,6 +84,14 @@ export default function () {
 
     setOpenMapLabelModal(false);
   }
+  function onRecentMapConfirm(mapId: string) {
+    setOpenRecentMapModal(false);
+  }
+
+  function onPublishMapConfirm() {
+    alert('Published!');
+  }
+
   return (
     <div className={styles['ribbon-container']}>
       <div className={styles['dropdowns']}>
@@ -137,7 +151,7 @@ export default function () {
       />
       <ChoroplethModal
         open={openChoropleth}
-        onClose={() => setOpenImport(false)}
+        onClose={() => setOpenChoropleth(false)}
         onConfirm={onChoroplethConfirm}
         properties={selectedOptions}
       />
@@ -146,6 +160,16 @@ export default function () {
         onClose={() => setOpenMapLabelModal(false)}
         onConfirm={onMultiMapConfirm}
         properties={selectedOptions}
+      />
+      <RecentMapModal
+        open={openRecentMapModal}
+        onClose={() => setOpenRecentMapModal(false)}
+        onConfirm={onRecentMapConfirm}
+      />
+      <PublishMapModal
+        open={openPublishMapModal}
+        onClose={() => setOpenPublishMapModal(false)}
+        onConfirm={onPublishMapConfirm}
       />
     </div>
   );

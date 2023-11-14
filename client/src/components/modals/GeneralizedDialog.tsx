@@ -47,7 +47,13 @@ const GeneralizedDialog: React.FC<GeneralizedDialogProps> = ({
         <Typography>{title}</Typography>
       </DialogTitle>
       <DialogContent>{children}</DialogContent>
-      <DialogActions>
+      <DialogActions
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          textAlign: 'center',
+        }}
+      >
         <Button onClick={onConfirm} variant="filled">
           <Typography>Confirm</Typography>
         </Button>
