@@ -1,7 +1,7 @@
 'use client'
 
 import { useReducer, MouseEventHandler } from 'react';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
@@ -125,6 +125,9 @@ function ForgotUsernameForm() {
 
   return (
     <div className={styles.container}>
+    <Typography className={styles.title} variant="h2">
+        Reset Username
+      </Typography>
       <ValidatedTextField
         id="email"
         type="email"
@@ -140,7 +143,7 @@ function ForgotUsernameForm() {
         variant="contained"
         onClick={handleSendEmailClick}
       >
-        Create Account
+        Send Email
       </Button>
     </div>
   );
