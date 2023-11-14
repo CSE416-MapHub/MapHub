@@ -16,8 +16,8 @@ import {
   Radio,
 } from '@mui/material';
 
-// import SearchIcon from '@mui/icons-material/Search';
-// import SortIcon from '@mui/icons-material/Sort';
+import SearchIcon from '@mui/icons-material/Search';
+import SortIcon from '@mui/icons-material/Sort';
 
 const ImportSortOptions = {
   NAMEASC: 'Name Ascending',
@@ -130,13 +130,15 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
                 ...params.InputProps,
                 startAdornment: (
                   <InputAdornment position="start">
-                    <IconButton>{/* <SearchIcon /> */}</IconButton>
+                    <IconButton>
+                      <SearchIcon />
+                    </IconButton>
                   </InputAdornment>
                 ),
                 endAdornment: (
                   <InputAdornment position="end">
                     <IconButton onClick={handleSortIconClick}>
-                      {/* <SortIcon /> */} sort
+                      <SortIcon />
                     </IconButton>
                   </InputAdornment>
                 ),
