@@ -11,6 +11,9 @@ export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
+  // TODO: make SVG modal appear
+  function addSVG() {}
+
   function onConfirmSymbolModal(svgFile: File | null, preview: string | null) {
     console.log(preview);
   }
