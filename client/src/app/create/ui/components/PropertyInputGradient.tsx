@@ -38,14 +38,18 @@ export default function (props: GradientInputProps) {
             // TODO: make this late validation
             setRanges({ ...ranges, minValue: parseFloat(e.target.value) });
           }}
-          className={clsx(style['prop-input'], style['prop-input-tiny'])}
+          className={clsx(
+            style['default-input'],
+            style['prop-input'],
+            style['prop-input-tiny'],
+          )}
         />
       </div>
 
       <div
         style={{
           minWidth: '60px',
-          maxWidth: '100%',
+          // maxWidth: '100%',
           height: '24px',
           marginTop: '12px',
           background: `linear-gradient(to right, ${ranges.minColor}, ${ranges.maxColor})`,
@@ -60,13 +64,17 @@ export default function (props: GradientInputProps) {
         />
         <input
           type="number"
-          value={ranges.minValue}
+          value={ranges.maxValue}
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
             setRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
           }}
-          className={clsx(style['prop-input'], style['prop-input-tiny'])}
+          className={clsx(
+            style['default-input'],
+            style['prop-input'],
+            style['prop-input-tiny'],
+          )}
         />
       </div>
     </div>
