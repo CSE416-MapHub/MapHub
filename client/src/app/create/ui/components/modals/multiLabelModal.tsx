@@ -1,22 +1,21 @@
 import React, { useState } from 'react';
 import { TextField } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
-import LabelSelector from './LabelSelector'; // Adjust the import path as needed
+import LabelSelector from './LabelSelector';
 
-interface ImportModalProps {
+interface MapLabelModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (mapName: string, selectedOptions: string[]) => void; // Added mapName to the callback
+  onConfirm: (selectedOptions: string[]) => void;
   properties: string[];
 }
 
-const ImportModal: React.FC<ImportModalProps> = ({
+const MultiMapLabelModal: React.FC<MapLabelModalProps> = ({
   open,
   onClose,
   onConfirm,
   properties,
 }) => {
-  const [mapName, setMapName] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const handleSelectionChange = (selection: string[]) => {
@@ -24,7 +23,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
   };
 
   const handleConfirm = () => {
-    onConfirm(mapName, selectedOptions);
+    onConfirm(selectedOptions);
     onClose();
   };
 
@@ -33,16 +32,8 @@ const ImportModal: React.FC<ImportModalProps> = ({
       open={open}
       onClose={onClose}
       onConfirm={handleConfirm}
-      title="Import Properties"
+      title="Map Label Multi-Selector"
     >
-      {}
-      <TextField
-        label="Map Name"
-        value={mapName}
-        onChange={e => setMapName(e.target.value)}
-        fullWidth
-        margin="normal"
-      />
       <LabelSelector
         properties={properties}
         isCheckbox={true}
@@ -52,4 +43,4 @@ const ImportModal: React.FC<ImportModalProps> = ({
   );
 };
 
-export default ImportModal;
+export default MultiMapLabelModal;

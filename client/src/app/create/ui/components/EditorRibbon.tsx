@@ -14,6 +14,8 @@ import styles from './EditorRibbon.module.scss';
 import { useState } from 'react';
 import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
+import ChoroplethModal from './modals/choroplethModal';
+import MultiMapLabelModal from './modals/multiLabelModal';
 
 export default function () {
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
@@ -35,15 +37,23 @@ export default function () {
       },
     },
     View: {
-      'Map Label Multi Select': () => {},
-      'Choropleth Label Select': () => {},
+      'Map Label Multi Select': () => {
+        setOpenMapLabelModal(true);
+      },
+      'Choropleth Label Select': () => {
+        setOpenChoropleth(true);
+      },
     },
     Map: {},
   };
   function handleMenuClose() {
     setOpenMenu(null);
   }
+
+  //--------- Modal States ---------
   const [openImport, setOpenImport] = useState(false);
+  const [openChoropleth, setOpenChoropleth] = useState(false);
+  const [openMapLabelModal, setOpenMapLabelModal] = useState(false);
   const selectedOptions = [
     'Country Name',
     'Languages',
@@ -51,14 +61,23 @@ export default function () {
     'chinese',
     '조선글',
   ];
-  const [opts, setOpts] = useState<string[]>([]);
 
   function onImportConfirm(mapName: string, optionsProps: string[]) {
     console.log(mapName, optionsProps);
-    setOpts(optionsProps);
+
     setOpenImport(false);
   }
 
+  function onChoroplethConfirm(optionsProps: string[]) {
+    console.log(optionsProps);
+
+    setOpenChoropleth(false);
+  }
+  function onMultiMapConfirm(optionsProps: string[]) {
+    console.log(optionsProps);
+
+    setOpenMapLabelModal(false);
+  }
   return (
     <div className={styles['ribbon-container']}>
       <div className={styles['dropdowns']}>
@@ -114,6 +133,18 @@ export default function () {
         open={openImport}
         onClose={() => setOpenImport(false)}
         onConfirm={onImportConfirm}
+        properties={selectedOptions}
+      />
+      <ChoroplethModal
+        open={openChoropleth}
+        onClose={() => setOpenImport(false)}
+        onConfirm={onChoroplethConfirm}
+        properties={selectedOptions}
+      />
+      <MultiMapLabelModal
+        open={openMapLabelModal}
+        onClose={() => setOpenMapLabelModal(false)}
+        onConfirm={onMultiMapConfirm}
         properties={selectedOptions}
       />
     </div>

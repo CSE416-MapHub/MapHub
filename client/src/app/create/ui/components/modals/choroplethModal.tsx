@@ -6,7 +6,7 @@ import LabelSelector from './LabelSelector'; // Adjust the import path as needed
 interface ChoroModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (mapName: string, selectedOptions: string[]) => void; // Added mapName to the callback
+  onConfirm: (selectedOptions: string[]) => void; // Added mapName to the callback
   properties: string[];
 }
 
@@ -16,7 +16,6 @@ const ChoroplethModal: React.FC<ChoroModalProps> = ({
   onConfirm,
   properties,
 }) => {
-  const [mapName, setMapName] = useState('');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const handleSelectionChange = (selection: string[]) => {
@@ -24,7 +23,7 @@ const ChoroplethModal: React.FC<ChoroModalProps> = ({
   };
 
   const handleConfirm = () => {
-    onConfirm(mapName, selectedOptions);
+    onConfirm(selectedOptions);
     onClose();
   };
 
