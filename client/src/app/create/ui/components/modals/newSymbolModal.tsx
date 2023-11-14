@@ -5,7 +5,7 @@ import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 interface NewSymbolModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (svgFile: File | null, preview: string | null) => void;
 }
 
 const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
@@ -18,7 +18,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(svgFile, preview);
     onClose();
   };
 
