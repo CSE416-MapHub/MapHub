@@ -22,6 +22,7 @@ export default function ({ name, items }: IPropertyPanelSectionProps) {
           display: 'grid',
           gridTemplateColumns: '47% 47%',
           gap: '6%',
+          //   padding: '8px',
         }}
       >
         {items.map((input, i) => {

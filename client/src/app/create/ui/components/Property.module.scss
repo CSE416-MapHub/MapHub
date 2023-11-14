@@ -61,3 +61,29 @@
     background-color: white;
 }
 
+.default-input {
+    border: none;
+    outline: none;
+    font-family: var(--fira);
+    max-height: 16px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+
+.default-dropdown {
+    border: none;
+    outline: none;
+    font-family: var(--fira);
+    max-height: 32px;
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+.dropdown-option {
+
+}
+
+.dropdown-option:hover {
+    background-color: white;
+}

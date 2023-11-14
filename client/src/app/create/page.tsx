@@ -37,9 +37,27 @@ export default function () {
                 },
               },
               {
-                name: 'efe Color',
+                name: 'Other Color',
                 input: {
                   type: 'color',
+                  short: true,
+                  disabled: false,
+                  value: '#FFFFFF',
+                },
+              },
+              {
+                name: 'Some Input',
+                input: {
+                  type: 'number',
+                  short: true,
+                  disabled: false,
+                  value: '#FFFFFF',
+                },
+              },
+              {
+                name: 'Some Button',
+                input: {
+                  type: 'svg',
                   short: true,
                   disabled: false,
                   value: '#FFFFFF',
@@ -73,11 +91,6 @@ export default function () {
                   value: '',
                 },
               },
-            ],
-          },
-          {
-            name: 'select dot',
-            items: [
               {
                 name: 'dot type',
                 input: {
@@ -85,6 +98,36 @@ export default function () {
                   short: true,
                   disabled: false,
                   value: ['male', 'female'],
+                },
+              },
+            ],
+          },
+          {
+            name: 'Nice Category',
+            items: [
+              {
+                name: 'categories',
+                input: {
+                  type: 'dropdown',
+                  short: false,
+                  disabled: false,
+                  value: ['pro USSR', 'anti USSR'],
+                },
+              },
+              {
+                name: 'Delete Category',
+                input: {
+                  type: 'delete',
+                  short: false,
+                  disabled: false,
+                  value: [
+                    [
+                      'Delete Category',
+                      () => {
+                        alert(1);
+                      },
+                    ],
+                  ],
                 },
               },
             ],
