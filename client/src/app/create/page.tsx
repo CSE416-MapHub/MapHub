@@ -69,7 +69,7 @@ export default function () {
             name: 'Gradient',
             items: [
               {
-                name: 'Feature gradientws',
+                name: 'Feature gradients',
                 input: {
                   type: 'gradient',
                   short: false,
@@ -80,10 +80,10 @@ export default function () {
             ],
           },
           {
-            name: 'select icon',
+            name: 'Select icon',
             items: [
               {
-                name: 'symbol',
+                name: 'Symbol',
                 input: {
                   type: 'svg',
                   short: true,
@@ -92,7 +92,7 @@ export default function () {
                 },
               },
               {
-                name: 'dot type',
+                name: 'Dot type',
                 input: {
                   type: 'dot',
                   short: true,
@@ -106,7 +106,7 @@ export default function () {
             name: 'Nice Category',
             items: [
               {
-                name: 'categories',
+                name: 'Categories',
                 input: {
                   type: 'dropdown',
                   short: false,
