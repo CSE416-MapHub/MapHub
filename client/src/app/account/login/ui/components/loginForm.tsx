@@ -7,7 +7,7 @@ import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from '../../../../../api/AccountAPI';
 
-import styles from './loginForm.module.css';
+import styles from '../../../components/form.module.css';
 
 interface LoginFieldState {
   value: string,
