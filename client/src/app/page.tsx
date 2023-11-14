@@ -35,12 +35,12 @@ function Home() {
           marginBottom: '30px'
         }}>
           <Typography variant="h1">
-            A Complete <br/>
+            A Complete
             Map Visuals Studio.
           </Typography>
           <Typography variant='body1' sx={{marginTop: '10px'}}>
-            Five Essential Templates.<br/>
-            A Plethora of Editing Tools.<br/>
+            Five Essential Templates.
+            A Plethora of Editing Tools.
             Unique data-driven approach.
           </Typography>
         </Container>
