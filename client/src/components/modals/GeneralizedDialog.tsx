@@ -1,20 +1,22 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode } from 'react';
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   Typography,
-} from '@mui/material'
-import Button from 'components/button'
-import style from 'styles/modal.module.scss'
+  useMediaQuery,
+  useTheme,
+} from '@mui/material';
+import Button from 'components/button';
+import style from 'styles/modal.module.scss';
 
 interface GeneralizedDialogProps {
-  open: boolean
-  onClose: () => void
-  title: string
-  children: ReactNode
-  onConfirm: () => void
+  open: boolean;
+  onClose: () => void;
+  title: string;
+  children: ReactNode;
+  onConfirm: () => void;
 }
 const GeneralizedDialog: React.FC<GeneralizedDialogProps> = ({
   open,
@@ -23,22 +25,38 @@ const GeneralizedDialog: React.FC<GeneralizedDialogProps> = ({
   children,
   onConfirm,
 }) => {
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('sm'));
+
   return (
-    <Dialog open={open} onClose={onClose}>
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullScreen={fullScreen}
+      PaperProps={{
+        style: {
+          minWidth: '50%',
+          minHeight: '60%',
+          width: 'auto',
+          height: 'auto',
+          overflow: 'auto',
+        },
+      }}
+    >
       <DialogTitle>
         <Typography>{title}</Typography>
       </DialogTitle>
       <DialogContent>{children}</DialogContent>
       <DialogActions>
-        <Button onClick={onConfirm} variant='filled'>
+        <Button onClick={onConfirm} variant="filled">
           <Typography>Confirm</Typography>
         </Button>
-        <Button onClick={onClose} variant='outlined'>
+        <Button onClick={onClose} variant="outlined">
           <Typography>Cancel</Typography>
         </Button>
       </DialogActions>
     </Dialog>
-  )
-}
+  );
+};
 
-export default GeneralizedDialog
+export default GeneralizedDialog;
