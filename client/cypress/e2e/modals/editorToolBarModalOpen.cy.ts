@@ -28,4 +28,11 @@ describe('All Editor Toolbar Modal Opens', () => {
     cy.get('span:contains("Choropleth Label Select")').click();
     cy.get('p:contains("Choropleth Label Select")');
   });
+
+  it('Publish modal open', () => {
+    cy.visit('/create');
+    cy.get('p:contains("File")').click();
+    cy.get('span:contains("Publish")').click();
+    cy.get('p:contains("Publish Map")');
+  });
 });

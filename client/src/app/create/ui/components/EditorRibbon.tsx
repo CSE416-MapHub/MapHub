@@ -17,6 +17,7 @@ import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
 import MultiMapLabelModal from './modals/multiLabelModal';
 import RecentMapModal from './modals/recentMapModal';
+import PublishMapModal from './modals/publishModal';
 
 export default function () {
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
@@ -36,7 +37,7 @@ export default function () {
         'Export As JSON': () => {},
       },
       Publish: () => {
-        alert('Published!');
+        setOpenPublishMapModal(true);
       },
     },
     View: {
@@ -58,7 +59,7 @@ export default function () {
   const [openChoropleth, setOpenChoropleth] = useState(false);
   const [openMapLabelModal, setOpenMapLabelModal] = useState(false);
   const [openRecentMapModal, setOpenRecentMapModal] = useState(false);
-
+  const [openPublishMapModal, setOpenPublishMapModal] = useState(false);
   const selectedOptions = [
     'Country Name',
     'Languages',
@@ -86,6 +87,11 @@ export default function () {
   function onRecentMapConfirm(mapId: string) {
     setOpenRecentMapModal(false);
   }
+
+  function onPublishMapConfirm() {
+    alert('Published!');
+  }
+
   return (
     <div className={styles['ribbon-container']}>
       <div className={styles['dropdowns']}>
@@ -159,6 +165,11 @@ export default function () {
         open={openRecentMapModal}
         onClose={() => setOpenRecentMapModal(false)}
         onConfirm={onRecentMapConfirm}
+      />
+      <PublishMapModal
+        open={openPublishMapModal}
+        onClose={() => setOpenPublishMapModal(false)}
+        onConfirm={onPublishMapConfirm}
       />
     </div>
   );
