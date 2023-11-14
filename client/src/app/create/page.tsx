@@ -57,7 +57,7 @@ export default function () {
               {
                 name: 'Some Button',
                 input: {
-                  type: 'svg',
+                  type: 'color',
                   short: true,
                   disabled: false,
                   value: '#FFFFFF',

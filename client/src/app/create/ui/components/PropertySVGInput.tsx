@@ -17,6 +17,8 @@ export default function () {
   return (
     <>
       <IconButton
+        aria-label="symbolPopover"
+        id="symbolPopover"
         onClick={e => {
           setAnchorEl(e.currentTarget);
         }}
