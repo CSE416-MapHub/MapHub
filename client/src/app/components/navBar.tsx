@@ -28,7 +28,7 @@ function NavBar() {
             Discover
           </Button>
         </Link>
-        <Link id="signin" href="/account/signin">
+        <Link id="signin" href="/account/login">
           <Button variant="outlined">
             Sign In
           </Button>
