@@ -3,11 +3,11 @@
 import { useReducer, MouseEventHandler } from 'react';
 import { Button } from '@mui/material';
 
-import ValidatedTextField from './ValidatedTextField';
+import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
 
-import styles from './createAccountForm.module.css';
+import styles from '../../../components/form.module.css';
 
 /**
  * The CreateAccountState is an object filled with states of text field 

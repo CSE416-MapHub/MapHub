@@ -24,13 +24,13 @@
   @include shape.extra-large;
 }
 
-.hero__content-box {
+.hero__contentbox {
   min-width: 320px;
   width: 30%;
   margin: 0 48px;
 }
 
-.hero__content-box--buttons {
+.hero__contentboxbuttons {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
