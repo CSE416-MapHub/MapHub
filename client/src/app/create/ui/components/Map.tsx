@@ -1,17 +1,11 @@
 'use client';
 
 import * as G from 'geojson';
-import {
-  MapContainer,
-  GeoJSON,
-  TileLayer,
-  Marker,
-  Popup,
-  SVGOverlay,
-} from 'react-leaflet';
+import React from 'react';
+import { MapContainer, GeoJSON, TileLayer } from 'react-leaflet';
+import 'leaflet/dist/leaflet.css';
 import style from './Map.module.scss';
-// import 'leaflet/dist/leaflet.css';
-// TODO: delete this
+
 const geojsonData: G.GeoJSON = {
   type: 'FeatureCollection',
   features: [
@@ -99,42 +93,21 @@ const geojsonData: G.GeoJSON = {
 };
 
 export default function Map() {
-  const position: [number, number] = [51.505, -0.09];
-  const bounds: [[number, number], [number, number]] = [
-    [51.49, -0.08],
-    [51.5, -0.06],
-  ];
+  const center: [number, number] = [42.7539, -75.4679]; // central coords for ny
+  const zoom = 6;
 
   return (
-    <div className={style['map-container']}>
-      <MapContainer
-        center={position}
-        zoom={13}
-        scrollWheelZoom={true}
-        style={{ flex: 1, width: '100%' }}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-        <SVGOverlay attributes={{ stroke: 'red' }} bounds={bounds}>
-          <rect x="0" y="0" width="100%" height="100%" fill="blue" />
-          <circle r="5" cx="10" cy="10" fill="red" />
-          <text x="50%" y="50%" stroke="white">
-            text
-          </text>
-        </SVGOverlay>
-      </MapContainer>
-    </div>
+    <MapContainer
+      center={center}
+      zoom={zoom}
+      style={{ height: '100%', width: '100%' }}
+    >
+      <TileLayer
+        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
+        attribution="&copy; OpenStreetMap contributors, &copy; CARTO"
+      />
+
+      <GeoJSON data={geojsonData} />
+    </MapContainer>
   );
-  //   return (
-  //     <MapContainer
-  //       center={[-73, 45]}
-  //       zoom={1}
-  //       scrollWheelZoom={false}
-  //       className={style['map-container']}
-  //     >
-  //       <GeoJSON data={geojsonData} />
-  //     </MapContainer>
-  //   );
 }
