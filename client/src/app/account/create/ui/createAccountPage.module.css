@@ -1,10 +1,9 @@
 .container {
-  width: 50%;
   min-height: 100%;
-
   margin: 0 auto;
   border: none;
   padding: 50px 0;
+  background: url('../../../background.jpg') center/cover no-repeat;
 }
 
 .title {
@@ -13,7 +12,7 @@
 
 .body {
   display: block;
-  width: 60%;
+  width: 50%;
   margin: 0 auto;
 }
 
