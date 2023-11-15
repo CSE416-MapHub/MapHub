@@ -1,0 +1,19 @@
+@use "colors";
+@use "elevation";
+
+.greet-banner {
+    height: 14rem;
+    padding-left: 10%;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    flex-direction: row;
+
+    align-items: center;
+    justify-content: left;
+
+    background-color: colors.$secondary-container;
+    color: colors.$on-secondary-container;
+
+    @include elevation.elevation-3
+}
