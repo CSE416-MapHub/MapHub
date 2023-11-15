@@ -1,6 +1,6 @@
 .container {
-  width: 50%;
   min-height: 100%;
+  background-color: #004D64;
 
   margin: 0 auto;
   border: none;
@@ -13,7 +13,7 @@
 
 .body {
   display: block;
-  width: 60%;
+  width: 50%;
   margin: 0 auto;
 }
 
