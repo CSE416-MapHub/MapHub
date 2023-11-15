@@ -75,6 +75,7 @@ function ValidatedTextField({
       variant='outlined'
       error={error}
       helperText={helperText}
+      inputProps={{ sx: { backgroundColor: 'white', borderRadius: '4px'} }}
     />
   );
 }
