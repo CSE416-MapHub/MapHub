@@ -8,11 +8,11 @@ import styles from './styles/home.module.scss';
 
 function Home() {
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
+    <main id="home-hero" className="flex min-h-screen flex-col items-center justify-center p-24">
       <Box
-        className={styles.hero__box}
+        id="hero-display" className={styles.hero__box}
       >
-        <Container className={styles.hero__contentbox}>
+        <Container id="hero-body" className={styles.hero__contentbox}>
           <Typography variant="h1">
             A Complete
             Map Visuals Studio.
