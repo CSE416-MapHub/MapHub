@@ -1,48 +1,94 @@
+# name: Frontend Tests
+
+# on: [push]
+
+# # jobs:
+# #   test:
+# #     runs-on: ubuntu-latest
+
+# #     steps:
+# #       - name: Checkout code
+# #         uses: actions/checkout@v2
+
+# #       - name: Set up Node.js
+# #         uses: actions/setup-node@v2
+# #         with:
+# #           node-version: 20 # Adjust to your Node.js version
+
+# #       - name: Install dependencies
+# #         run: npm install
+# #         working-directory: ./client
+
+# #       - name: Install Cypress
+# #         run: npm install cypress
+# #         working-directory: ./client
+
+# #       - name: Run Cypress tests
+# #         run: npx cypress run --headed #headed for GUI
+# #         working-directory: ./client
+
+# jobs:
+#   cypress-run:
+#     runs-on: ubuntu-22.04
+#     defaults:
+#       run:
+#         working-directory: ./client
+#     steps:
+#       - name: Checkout
+#         uses: actions/checkout@v4
+
+#       # Install NPM dependencies, cache them correctly
+#       # and run all Cypress tests
+#       - name: Cypress.io
+#         uses: cypress-io/github-action@v6.6.0     
+#         with:
+#           working-directory: ./client
+#           build: npm run build
+#           start: npm start
+
 name: Frontend Tests
 
 on: [push]
 
-# jobs:
-#   test:
-#     runs-on: ubuntu-latest
-
-#     steps:
-#       - name: Checkout code
-#         uses: actions/checkout@v2
-
-#       - name: Set up Node.js
-#         uses: actions/setup-node@v2
-#         with:
-#           node-version: 20 # Adjust to your Node.js version
-
-#       - name: Install dependencies
-#         run: npm install
-#         working-directory: ./client
-
-#       - name: Install Cypress
-#         run: npm install cypress
-#         working-directory: ./client
-
-#       - name: Run Cypress tests
-#         run: npx cypress run --headed #headed for GUI
-#         working-directory: ./client
-
 jobs:
-  cypress-run:
-    runs-on: ubuntu-22.04
-    defaults:
-      run:
-        working-directory: ./client
+  component-tests:
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
-      # Install NPM dependencies, cache them correctly
-      # and run all Cypress tests
-      - name: Cypress.io
-        uses: cypress-io/github-action@v6.6.0     
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
         with:
-          working-directory: ./client
-          run: npm run cypress:run
-          build: npm run build
-          start: npm start
+          node-version: 16
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./client
+
+      - name: Run Component Tests
+        run: npm run cypress:component
+        working-directory: ./client
+
+  e2e-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v2
+        with:
+          node-version: 16
+
+      - name: Install Dependencies
+        run: npm install
+        working-directory: ./client
+
+      - name: Start the app
+        run: npm start
+        working-directory: ./client
+
+      - name: Run Cypress E2E Tests
+        run: npm run cypress:e2e
+        working-directory: ./client
