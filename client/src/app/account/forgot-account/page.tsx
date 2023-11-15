@@ -1,8 +1,10 @@
+'use client'
+
 import Link from 'next/link';
 import { Typography } from '@mui/material';
 
-import styles from './ui/forgotUsername.module.css';
-import ForgotUsernameForm from './ui/components/forgotUsernameForm';
+import styles from './ui/forgotAccount.module.css';
+import ForgotAccountForm from './ui/components/forgotAccountForm';
 
 function Page() {
   return (
@@ -11,7 +13,7 @@ function Page() {
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography> */}
-      <ForgotUsernameForm />
+      <ForgotAccountForm />
     </div>
   );
 }

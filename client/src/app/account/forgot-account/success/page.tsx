@@ -2,9 +2,9 @@
 import Link from 'next/link';
 import { Button, Typography } from '@mui/material';
 
-import styles from '../ui/forgotUsername.module.css';
+import styles from '../ui/forgotAccount.module.css';
 import containerstyles from '../../components/form.module.css';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 function Page() {
 
@@ -14,6 +14,8 @@ function Page() {
         router.back();
         router.back();
     }
+    
+    const pathName = usePathname();
     return (
         <div className={styles.container}>
         {/* <Typography className={styles.body} variant="body1" align="left">
@@ -22,10 +24,10 @@ function Page() {
         </Typography> */}
             <div className={containerstyles.container}>
                 <Typography className={containerstyles.title} variant="h2">
-                    Reset Username
+                    Reset Account
                 </Typography>
                 <Typography className={containerstyles.title} variant='body1'>
-                    Username sent to provided email.
+                    Account sent to provided email.
                 </Typography>
                 <Button 
                     className={containerstyles.confirmButton}
