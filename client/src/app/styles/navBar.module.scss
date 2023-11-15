@@ -12,6 +12,10 @@
   background-color: colors.$surface;
 }
 
+.nav__bar--compact {
+  height: 80px;
+}
+
 .nav__box {
   display: flex;
   gap: 24px;
