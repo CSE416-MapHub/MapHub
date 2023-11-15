@@ -27,10 +27,7 @@ const boxIcons = localFont({
   ],
   weight: '400',
   style: 'normal',
-  declarations: [{
-    prop: 'font-family',
-    value: 'boxicons'
-  }],
+  variable: '--boxicons',
 });
 
 export {firaSans, sofiaSansCondensed, boxIcons};
