@@ -8,6 +8,11 @@ import { useState } from 'react';
 import DeleteModal from './ui/components/modals/deleteInstance';
 import mapStyle from './ui/components/Map.module.scss';
 
+// Dynamically import the Map component without server-side rendering
+const DynamicMap = dynamic(() => import('./ui/components/Map'), {
+  ssr: false,
+});
+
 export default function () {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   //TODO: IMplemetn objetc
@@ -17,7 +22,7 @@ export default function () {
   return (
     <>
       <EditorRibbon />
-      <Map />
+      <DynamicMap />
 
       <div className={mapStyle.container}>
         <div className={mapStyle.mapContainer}></div>
