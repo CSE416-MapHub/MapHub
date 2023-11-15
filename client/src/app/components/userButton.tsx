@@ -24,9 +24,21 @@ export default function () {
       >
         <MenuList>
           <MenuItem>
-            <Link href="/account/maps">My Maps</Link>
+            <Link
+              href="/account/maps"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              My Maps
+            </Link>
           </MenuItem>
-          <MenuItem>Settings</MenuItem>
+          <MenuItem>
+            <Link
+              href="/account/settings"
+              style={{ textDecoration: 'none', color: 'inherit' }}
+            >
+              Settings
+            </Link>
+          </MenuItem>
           <MenuItem>Logout</MenuItem>
         </MenuList>
       </Popover>
