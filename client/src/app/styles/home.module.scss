@@ -1,0 +1,37 @@
+@use 'colors';
+@use 'shape';
+
+.home__main {
+  width: 100%;
+  margin: 24px auto;
+}
+
+.hero__box {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 12px;
+
+  width: 80%;
+  height: 72vh;
+  margin: 0 auto;
+  padding: 0 0 48px;
+
+  background-color: colors.$primary-container;
+  color: colors.$on-primary-container;
+
+  @include shape.extra-large;
+}
+
+.hero__contentbox {
+  min-width: 320px;
+  width: 30%;
+  margin: 0 48px;
+}
+
+.hero__contentboxbuttons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}

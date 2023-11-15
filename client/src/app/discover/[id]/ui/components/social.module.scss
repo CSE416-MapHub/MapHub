@@ -1,0 +1,12 @@
+@use "colors";
+
+.social {
+    background-color: colors.$surface-dim;
+    border-radius: 32px;
+
+    // display: grid;
+    // grid-template-rows: 1fr 1fr 1fr 1fr;
+    display: flex;
+    flex-direction: column;
+    height: 80vh;
+}

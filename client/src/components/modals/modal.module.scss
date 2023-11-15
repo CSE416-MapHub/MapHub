@@ -1,0 +1,22 @@
+@use 'colors';
+@use 'elevation';
+@use 'state';
+
+.dialogMain {
+  min-width: 60vw;
+  min-height: 80vh;
+  width: auto;
+  height: auto;
+  overflow: auto;
+  padding: 0;
+}
+
+.dialogGeneral {
+  background-color: colors.$surface-dim;
+  // min-width: 80vw;
+  // min-height: 80vh;
+}
+
+.textField {
+  background-color: colors.$surface;
+}

@@ -1,0 +1,25 @@
+@use "colors";
+@use "elevation";
+
+
+// map cards 
+
+.map-card-container {
+    height: 187px;
+    background-color: colors.$primary-container;
+    border-radius: 12px;
+}
+
+.map-preview {
+    height: 128px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: colors.$primary;
+}
+
+.map-details {
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+}
+

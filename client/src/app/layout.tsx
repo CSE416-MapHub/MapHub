@@ -1,12 +1,13 @@
 import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-
-const inter = Inter({ subsets: ['latin'] });
+import { firaSans, sofiaSansCondensed, boxIcons } from './fonts/fonts';
+import ThemeProvider from '../context/themeProvider';
+import NavBar from './components/navBar';
+import './styles/globals.scss';
+import './styles/boxicons.css';
 
 export const metadata: Metadata = {
   title: 'MapHub',
-  description: 'Your one stop map editor ',
+  description: 'A complete map visuals studio.',
 };
 
 export default function RootLayout({
@@ -15,8 +16,16 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className={inter.className}>{children}</body>
+    <html 
+      lang="en"
+      className={`${firaSans.variable} ${sofiaSansCondensed.variable} ${boxIcons.variable}`}
+    >
+      <body>
+        <ThemeProvider>
+          <NavBar />
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

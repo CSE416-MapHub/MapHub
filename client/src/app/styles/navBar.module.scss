@@ -1,0 +1,22 @@
+@use 'colors';
+
+.nav__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  height: 120px;
+  width: 80%;
+  padding: 0 10%;
+
+  background-color: colors.$surface;
+}
+
+.nav__bar--compact {
+  height: 80px;
+}
+
+.nav__box {
+  display: flex;
+  gap: 24px;
+}

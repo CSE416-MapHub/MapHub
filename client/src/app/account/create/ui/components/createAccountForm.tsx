@@ -1,13 +1,13 @@
 'use client'
 
 import { useReducer, MouseEventHandler } from 'react';
-import { Button } from '@mui/material';
+import { Button, Typography } from '@mui/material';
 
-import ValidatedTextField from './ValidatedTextField';
+import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
 
-import styles from './createAccountForm.module.css';
+import styles from '../../../components/form.module.css';
 
 /**
  * The CreateAccountState is an object filled with states of text field 
@@ -309,6 +309,13 @@ function CreateAccountForm() {
 
   return (
     <div className={styles.container}>
+      <Typography className={styles.title} variant="h2" align="left">
+        Create an account
+      </Typography>
+      <Typography className={styles.body} variant="body1" align="left">
+        Join MapHub to edit maps in any way you can imagine. Get access to
+        liking, commenting, and sharing others' maps.
+      </Typography>
       <ValidatedTextField
         id="username"
         type="text"

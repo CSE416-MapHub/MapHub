@@ -1,0 +1,33 @@
+@use 'colors';
+
+.gridList {
+  background-color: colors.$surface;
+  border-radius: 8px;
+  overflow-y: scroll;
+  height: 40vh;
+  margin-top: 10px;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.gridItem {
+  margin: 0;
+  padding: 0;
+}
+
+.textField {
+  background-color: colors.$surface;
+  border-radius: 8px;
+}
+.divider {
+  background-color: black;
+  width: 80%;
+  margin-left: 0;
+}
+
+.whiteBg {
+  background-color: colors.$surface;
+  min-height: 60vh;
+  border-radius: 8px;
+  padding: 1rem;
+}
