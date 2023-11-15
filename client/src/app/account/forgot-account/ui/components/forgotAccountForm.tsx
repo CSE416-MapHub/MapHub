@@ -1,41 +1,43 @@
 'use client'
 
 import { useReducer, MouseEventHandler } from 'react';
-import { Button, Link, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
+import Link from 'next/link';
 
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
+import { usePathname, useSearchParams } from 'next/navigation';
 
-interface ForgotUsernameFieldState {
+interface ForgotAccountFieldState {
   value: string,
   error: boolean,
   errorText: string,
 };
-interface ForgotUsernameState {
-  email: ForgotUsernameFieldState
+interface ForgotAccountState {
+  email: ForgotAccountFieldState
 };
 
 
-enum ForgotUsernameActionType {
+enum ForgotAccountActionType {
   updateEmail = 'updateEmail',
   validateEmail = 'validateEmail',
   sendEmail = 'sendEmail',
 };
-interface ForgotUsernameAction {
-  type: ForgotUsernameActionType,
+interface ForgotAccountAction {
+  type: ForgotAccountActionType,
   value?: any,
 }
 
 
-function forgotUsernameReducer(
-  state: ForgotUsernameState,
-  action: ForgotUsernameAction
-): ForgotUsernameState {
+function forgotAccountReducer(
+  state: ForgotAccountState,
+  action: ForgotAccountAction
+): ForgotAccountState {
   switch (action.type) {
-    case ForgotUsernameActionType.updateEmail: {
+    case ForgotAccountActionType.updateEmail: {
         return {
             ...state,
             email: {
@@ -44,7 +46,7 @@ function forgotUsernameReducer(
             },
         };
     }
-    case ForgotUsernameActionType.validateEmail: {
+    case ForgotAccountActionType.validateEmail: {
       // Checks if the email address is well-formed. An email address is
       // well-formed if it starts with a set of alphanumeric characters,
       // underscores, and dots, followed by an @ symbol, followed by a domain
@@ -65,16 +67,20 @@ function forgotUsernameReducer(
       };
     }
 
-    case ForgotUsernameActionType.sendEmail: {
+    case ForgotAccountActionType.sendEmail: {
       // Creates a new account by validating all input text fields and sending
       // the registration request to the backend.
-      const validatedState = forgotUsernameReducer(state, {
-        type: ForgotUsernameActionType.validateEmail,
+      const validatedState = forgotAccountReducer(state, {
+        type: ForgotAccountActionType.validateEmail,
       });
       const { email } = validatedState;
+      //Valid email
       if (!email.error) {
         console.log("IN SEND EMAIL")
-        //Authentication API
+        //TODO: Authentication API
+        //If searchParams is username, send email with username
+
+        //If searchParams is password, send email with link to reset password
       }
       // TODO: Navigate to another page upon successfully creating an account
       // or modify the form state.
@@ -87,14 +93,21 @@ function forgotUsernameReducer(
 }
 
 /**
- * The forgotUsernameForm renders a frontend form with the following text fields:
- * username, email address, password, and confirm password. The form also 
+ * The forgotAccountForm renders a frontend form with the following text fields:
+ * Account, email address, password, and confirm password. The form also 
  * includes a button for submission. The state of the form and its verification
- * is handled by the forgotUsernameReducer.
+ * is handled by the forgotAccountReducer.
  */
-function ForgotUsernameForm() {
-  const [ forgotUsernameState, forgotUsernameDispatch ] = useReducer(
-    forgotUsernameReducer,
+function ForgotAccountForm() {
+  // const pathName = usePathname();
+  // console.log(pathName);
+
+  const searchParams = useSearchParams();
+  console.log(searchParams.get('query'));
+
+  var usernameOrPassword = searchParams.get('query');
+  const [ forgotAccountState, forgotAccountDispatch ] = useReducer(
+    forgotAccountReducer,
     {
       email: {
         value: '',
@@ -105,40 +118,40 @@ function ForgotUsernameForm() {
   );
 
   const setEmail = (value: string) => {
-    forgotUsernameDispatch({
-      type: ForgotUsernameActionType.updateEmail,
+    forgotAccountDispatch({
+      type: ForgotAccountActionType.updateEmail,
       value,
     });
   };
 
   const validateEmail = () => {
-    forgotUsernameDispatch({
-      type: ForgotUsernameActionType.validateEmail,
+    forgotAccountDispatch({
+      type: ForgotAccountActionType.validateEmail,
     });
   };
 
   const handleSendEmailClick : MouseEventHandler = (event) => {
-    forgotUsernameDispatch({
-      type: ForgotUsernameActionType.sendEmail,
+    forgotAccountDispatch({
+      type: ForgotAccountActionType.sendEmail,
     });
   }
 
   return (
     <div className={styles.container}>
     <Typography className={styles.title} variant="h2">
-        Reset Username
+        Reset {usernameOrPassword}
       </Typography>
       <ValidatedTextField
         id="email"
         type="email"
         label="Email Address"
-        value={forgotUsernameState.email.value}
+        value={forgotAccountState.email.value}
         setValue={setEmail}
-        error={forgotUsernameState.email.error}
+        error={forgotAccountState.email.error}
         validate={validateEmail}
-        helperText={forgotUsernameState.email.errorText}
+        helperText={forgotAccountState.email.errorText}
       />
-      <Link href='/account/forgot-username/success'>
+      <Link href='/account/forgot-account/success?query=[usernameOrPassword]' as={`/account/forgot-account/success?query=${usernameOrPassword}`}>
         <Button 
             className={styles.confirmButton}
             variant="contained"
@@ -151,4 +164,4 @@ function ForgotUsernameForm() {
   );
 }
 
-export default ForgotUsernameForm;
+export default ForgotAccountForm;
