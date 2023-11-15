@@ -36,8 +36,8 @@ const GeneralizedDialog: React.FC<GeneralizedDialogProps> = ({
       onClose={onClose}
       fullScreen={fullScreen}
     >
-      <DialogTitle className={style.dialogGeneral}>
-        <Typography variant="h2">{title}</Typography>
+      <DialogTitle className={style.dialogGeneral} variant="h2">
+        {title}
       </DialogTitle>
 
       {/* <Divider className={style.divider} /> */}
