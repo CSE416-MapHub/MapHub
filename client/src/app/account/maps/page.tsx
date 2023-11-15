@@ -8,10 +8,12 @@ export default function () {
       <CardCarousel
         title="My Published Maps"
         ids={['1', '2', '3', '4', '2', '3', '4']}
+        published={true}
       />
       <CardCarousel
         title="My Unpublished Maps"
         ids={['1', '2', '3', '4', '2', '3', '4']}
+        published={false}
       />
     </main>
   );
