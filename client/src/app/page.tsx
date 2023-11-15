@@ -29,12 +29,12 @@ function Home() {
           mx: 'auto',
           marginLeft: '50px'
         }}>
-          <Link id="hero-discover" href="/about">
+          <Link id="hero-discover" href="/discover">
             <Button variant="outlined" sx={{ marginRight: '16px' }}>
                 Discover Maps
               </Button>
             </Link>
-          <Link id="hero-create" href="/account/login">
+          <Link id="hero-create" href="/create">
           <Button variant="filled">
               Start Creating
             </Button>
