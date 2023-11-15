@@ -2,11 +2,11 @@
 
 import clsx from 'clsx';
 import Icon, { IconProps } from './icon';
-import { ButtonBaseProps, IconButton as MaterialIconButton } from '@mui/material';
+import { ButtonBaseProps, IconButtonOwnProps, IconButton as MaterialIconButton } from '@mui/material';
 
 import styles from '../styles/iconButton.module.scss';
 
-interface IconButtonProps extends ButtonBaseProps {
+interface IconButtonProps extends IconButtonOwnProps {
   variant?: 'filled' | 'tonal' | 'outlined' | 'standard'
   iconType?: 'regular' | 'solid' | 'logo',
   iconName: string,
@@ -15,7 +15,6 @@ interface IconButtonProps extends ButtonBaseProps {
 
 function IconButton({
   children,
-  className,
   variant,
   iconType,
   iconName,
@@ -27,7 +26,7 @@ function IconButton({
       className={`${clsx({
         [styles['icon-button']]: true,
         [styles['icon-button--selected']]: selected,
-      })} ${className}`}
+      })}`}
       disableFocusRipple
       TouchRippleProps={{ classes: { rippleVisible: styles.rippleVisible } } }
       {...props}
