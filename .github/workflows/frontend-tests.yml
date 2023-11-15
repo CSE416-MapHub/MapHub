@@ -71,24 +71,19 @@ jobs:
         working-directory: ./client
 
   e2e-tests:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        working-directory: ./client
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v2
+      # Install NPM dependencies, cache them correctly
+      # and run all Cypress tests
+      - name: Cypress.io
+        uses: cypress-io/github-action@v6.6.0     
         with:
-          node-version: 16
-
-      - name: Install Dependencies
-        run: npm install
-        working-directory: ./client
-
-      - name: Start the app
-        run: npm start
-        working-directory: ./client
-
-      - name: Run Cypress E2E Tests
-        run: npm run cypress:e2e
-        working-directory: ./client
+          working-directory: ./client
+          build: npm run build
+          start: npm start
