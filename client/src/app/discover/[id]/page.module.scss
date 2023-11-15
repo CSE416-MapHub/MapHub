@@ -1,0 +1,23 @@
+@use "colors";
+
+
+#map-post {
+    display: grid;
+    grid-template-columns: 52.7vw 25.57vw;
+    gap: 1.6vw;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80vw;
+    height: 80vh;
+}
+
+.map-container {
+    // width: 52.7vw;
+    // height: 86.6vh;
+    // width: 40vw;
+    // height: 62vh;
+    width: 100%;
+    height: 100%;
+    background-color: colors.$primary-container;
+    border-radius: 32px;
+}
