@@ -7,7 +7,7 @@ import Map from './ui/components/Map';
 import { useState } from 'react';
 import DeleteModal from './ui/components/modals/deleteInstance';
 import mapStyle from './ui/components/Map.module.scss';
-
+import Toolbar from './ui/components/toolbar';
 // Dynamically import the Map component without server-side rendering
 const DynamicMap = dynamic(() => import('./ui/components/Map'), {
   ssr: false,
@@ -22,6 +22,7 @@ export default function () {
   return (
     <>
       <EditorRibbon />
+      <Toolbar />
       <DynamicMap />
 
       <div className={mapStyle.container}>
