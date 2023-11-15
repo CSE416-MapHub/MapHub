@@ -3,6 +3,8 @@ import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../PropertyColorInput';
 import style from './LabelSelector.module.scss';
+import { SketchPicker, ColorResult } from 'react-color';
+
 interface NewCategoryModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,7 +17,11 @@ const NewCategoryModal: React.FC<NewCategoryModalProps> = ({
   onConfirm,
 }) => {
   const [name, setName] = useState('');
+  const [color, setColor] = useState<string>('#FFFFF');
 
+  function handleColorChange(c: ColorResult) {
+    setColor(c.hex);
+  }
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -64,7 +70,7 @@ const NewCategoryModal: React.FC<NewCategoryModalProps> = ({
           >
             Color
           </Typography>
-          <PropertyColorInput color="#00FF00" colorChangeHandler={() => {}} />
+          <SketchPicker onChange={handleColorChange} color={color} />
         </Box>
       </Box>
     </GeneralizedDialog>

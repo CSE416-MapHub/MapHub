@@ -3,6 +3,7 @@ import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../PropertyColorInput';
 import style from './LabelSelector.module.scss';
+import { SketchPicker, ColorResult } from 'react-color';
 interface NewDotModalProps {
   open: boolean;
   onClose: () => void;
@@ -17,6 +18,11 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
   const [name, setName] = useState('');
   const [opacity, setOpacity] = useState(1);
   const [size, setSize] = useState(1);
+  const [color, setColor] = useState<string>('#FFFFF');
+
+  function handleColorChange(c: ColorResult) {
+    setColor(c.hex);
+  }
   const handleConfirm = () => {
     onConfirm();
     onClose();
@@ -121,7 +127,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           >
             Color
           </Typography>
-          <PropertyColorInput color="#00FF00" colorChangeHandler={() => {}} />
+          <SketchPicker onChange={handleColorChange} color={color} />
         </Box>
       </Box>
     </GeneralizedDialog>
