@@ -97,11 +97,7 @@ export default function Map() {
   const zoom = 6;
 
   return (
-    <MapContainer
-      center={center}
-      zoom={zoom}
-      style={{ height: '100%', width: '100%' }}
-    >
+    <MapContainer center={center} zoom={zoom} className={style['mapContainer']}>
       <TileLayer
         url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png"
         attribution="&copy; OpenStreetMap contributors, &copy; CARTO"
