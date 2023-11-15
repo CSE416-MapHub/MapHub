@@ -13,9 +13,6 @@ const sofiaSansCondensed = Sofia_Sans_Condensed({
 const boxIcons = localFont({
   src: [
     {
-      path: './boxicons.eot',
-    },
-    {
       path: './boxicons.woff2',
     },
     {

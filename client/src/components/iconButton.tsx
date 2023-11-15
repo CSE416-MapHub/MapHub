@@ -1,12 +1,12 @@
 'use client';
 
 import clsx from 'clsx';
-import Icon, { IconProps } from './icon';
-import { ButtonBaseProps, IconButtonOwnProps, IconButton as MaterialIconButton } from '@mui/material';
+import Icon from './icon';
+import { IconButtonProps as MaterialIconButtonProps, IconButton as MaterialIconButton } from '@mui/material';
 
 import styles from '../styles/iconButton.module.scss';
 
-interface IconButtonProps extends IconButtonOwnProps {
+interface IconButtonProps extends MaterialIconButtonProps {
   variant?: 'filled' | 'tonal' | 'outlined' | 'standard'
   iconType?: 'regular' | 'solid' | 'logo',
   iconName: string,
