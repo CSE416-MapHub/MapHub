@@ -57,7 +57,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
             noWrap
             style={{ marginRight: '10px', flex: '0 0 auto', minWidth: '100px' }}
           >
-            Dot Size
+            Symbol Name
           </Typography>
 
           <TextField
