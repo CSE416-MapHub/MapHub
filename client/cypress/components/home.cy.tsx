@@ -1,7 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react';
 import Home from '../../src/app/page';
-import ThemeProvider from '../../src/context/themeProvider';
 
 const expected = {
   heroDisplay: 'A Complete Map Visuals Studio',
