@@ -7,9 +7,10 @@ import {
   Typography,
   useMediaQuery,
   useTheme,
+  Divider,
 } from '@mui/material';
 import Button from 'components/button';
-import style from 'styles/modal.module.scss';
+import style from './modal.module.scss';
 
 interface GeneralizedDialogProps {
   open: boolean;
@@ -30,24 +31,25 @@ const GeneralizedDialog: React.FC<GeneralizedDialogProps> = ({
 
   return (
     <Dialog
+      classes={{ paper: style.dialogMain }}
       open={open}
       onClose={onClose}
       fullScreen={fullScreen}
-      PaperProps={{
-        style: {
-          minWidth: '50%',
-          minHeight: '60%',
-          width: 'auto',
-          height: 'auto',
-          overflow: 'auto',
-        },
-      }}
     >
-      <DialogTitle>
-        <Typography>{title}</Typography>
+      <DialogTitle className={style.dialogGeneral}>
+        <Typography variant="h2">{title}</Typography>
       </DialogTitle>
-      <DialogContent>{children}</DialogContent>
-      <DialogActions>
+
+      {/* <Divider className={style.divider} /> */}
+      <DialogContent className={style.dialogGeneral}>{children}</DialogContent>
+      <DialogActions
+        className={style.dialogGeneral}
+        style={{
+          display: 'flex',
+          justifyContent: 'center',
+          textAlign: 'center',
+        }}
+      >
         <Button onClick={onConfirm} variant="filled">
           <Typography>Confirm</Typography>
         </Button>
