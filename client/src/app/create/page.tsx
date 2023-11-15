@@ -1,7 +1,10 @@
 'use client'; // TODO: remove thid
-import { useState } from 'react';
+
 import EditorRibbon from './ui/components/EditorRibbon';
 import Properties from './ui/components/Property';
+import dynamic from 'next/dynamic';
+import Map from './ui/components/Map';
+import { useState } from 'react';
 import DeleteModal from './ui/components/modals/deleteInstance';
 
 export default function () {
