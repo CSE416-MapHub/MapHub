@@ -73,10 +73,13 @@ function forgotAccountReducer(
         type: ForgotAccountActionType.validateEmail,
       });
       const { email } = validatedState;
+      //Valid email
       if (!email.error) {
         console.log("IN SEND EMAIL")
-        //Authentication API
-        //Check url if it is username or password
+        //TODO: Authentication API
+        //If searchParams is username, send email with username
+
+        //If searchParams is password, send email with link to reset password
       }
       // TODO: Navigate to another page upon successfully creating an account
       // or modify the form state.
