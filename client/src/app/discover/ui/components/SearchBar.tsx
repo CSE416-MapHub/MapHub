@@ -46,6 +46,7 @@ export default function () {
             className={style['search-input']}
             value={searchBar}
             onChange={e => setSearchBar(e.target.value)}
+            placeholder="Search for map inspiration"
           />
         </div>
         <div

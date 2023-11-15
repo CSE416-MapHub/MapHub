@@ -10,6 +10,19 @@
     border-radius: 12px;
 }
 
+.map-preview {
+    height: 192px;
+    width: 100%;
+    border-radius: 12px;
+    background-color: colors.$primary;
+}
+
+.map-details {
+    display: flex;
+    flex-direction: column;
+    padding: 6px;
+}
+
 
 // discover
 .search-container {
