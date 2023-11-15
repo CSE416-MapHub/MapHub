@@ -39,12 +39,9 @@ jobs:
 
       # Install NPM dependencies, cache them correctly
       # and run all Cypress tests
-      - name: Run component tests
-        run: npm run cypress:run
-
       - name: Cypress.io
         uses: cypress-io/github-action@v6.6.0     
         with:
           working-directory: ./client
-          build: npm run build
+          build: npm run cypress:run
           start: npm start
