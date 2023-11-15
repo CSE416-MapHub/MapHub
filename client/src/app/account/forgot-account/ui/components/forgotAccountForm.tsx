@@ -1,7 +1,8 @@
 'use client'
 
 import { useReducer, MouseEventHandler } from 'react';
-import { Button, Link, Typography } from '@mui/material';
+import { Button, Typography } from '@mui/material';
+import Link from 'next/link';
 
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
@@ -150,7 +151,7 @@ function ForgotAccountForm() {
         validate={validateEmail}
         helperText={forgotAccountState.email.errorText}
       />
-      <Link href='/account/forgot-account/success'>
+      <Link href='/account/forgot-account/success?query=[usernameOrPassword]' as={`/account/forgot-account/success?query=${usernameOrPassword}`}>
         <Button 
             className={styles.confirmButton}
             variant="contained"
