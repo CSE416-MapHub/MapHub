@@ -1,0 +1,21 @@
+@use 'colors';
+@use 'elevation';
+@use 'shape';
+
+.toolbar {
+  @include elevation.elevation-1;
+  @include shape.large-end;
+
+  display: flex;
+  flex-direction: column;
+
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  
+  padding: shape.$extra-small;
+
+  background-color: colors.$surface-container-low;
+  color: colors.$on-surface;
+
+}

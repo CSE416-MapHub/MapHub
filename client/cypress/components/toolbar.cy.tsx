@@ -1,6 +1,6 @@
 /// <reference types="cypress" />
 import React from 'react';
-import Toolbar from '../../src/components/toolbar';
+import Toolbar from '../../src/app/create/ui/components/toolbar';
 
 describe('Tool bar renders.', () => {
   beforeEach(() => {
@@ -31,11 +31,11 @@ describe('The Toolbar "Select" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@select').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@select').click();
     cy.get('@select')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });
 
@@ -52,11 +52,11 @@ describe('The Toolbar "Pan" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@pan').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@pan').click();
     cy.get('@pan')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });
 
@@ -73,11 +73,11 @@ describe('The Toolbar "Erase" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@erase').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@erase').click();
     cy.get('@erase')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });
 
@@ -94,11 +94,11 @@ describe('The Toolbar "Point" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@point').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@point').click();
     cy.get('@point')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });
 
@@ -115,11 +115,11 @@ describe('The Toolbar "Icon" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@icon').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@icon').click();
     cy.get('@icon')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });
 
@@ -136,10 +136,10 @@ describe('The Toolbar "Path" Icon Button', () => {
   it('is clickable.', () => {
     cy.get('@path').click();
   });
-  it('is active after a click.', () => {
+  it('is selected after a click.', () => {
     cy.get('@path').click();
     cy.get('@path')
       .invoke('attr', 'class')
-      .should('contain', 'active');
+      .should('contain', 'selected');
   });
 });

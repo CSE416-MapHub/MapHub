@@ -13,17 +13,27 @@ interface IconButtonProps extends ButtonBaseProps {
   selected?: boolean,
 }
 
-function IconButton({ iconType, iconName, selected = false }: IconButtonProps) {
+function IconButton({
+  children,
+  className,
+  variant,
+  iconType,
+  iconName,
+  selected = false,
+  ...props
+}: IconButtonProps) {
   return (
     <MaterialIconButton
-      className={clsx({
+      className={`${clsx({
         [styles['icon-button']]: true,
         [styles['icon-button--selected']]: selected,
-      })}
+      })} ${className}`}
       disableFocusRipple
       TouchRippleProps={{ classes: { rippleVisible: styles.rippleVisible } } }
-      >
+      {...props}
+    >
       <Icon type={iconType} name={iconName} />
+      {children}
     </MaterialIconButton>
   )
 }
