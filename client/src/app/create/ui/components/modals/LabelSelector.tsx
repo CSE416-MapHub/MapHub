@@ -15,7 +15,7 @@ import {
   Checkbox,
   Radio,
 } from '@mui/material';
-
+import style from './LabelSelector.module.scss';
 import SearchIcon from '@mui/icons-material/Search';
 import SortIcon from '@mui/icons-material/Sort';
 
@@ -105,7 +105,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
   const id = openPopover ? 'sort-filter-popover' : undefined;
 
   return (
-    <Box>
+    <Box style={{ padding: '1rem' }}>
       <Box
         style={{
           display: 'flex',
@@ -113,7 +113,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
           justifyContent: 'space-between',
         }}
       >
-        <Typography>Built-In Map Labels</Typography>
+        <Typography variant="h3">Built-In Map Labels</Typography>
         <Autocomplete
           value={searchInput}
           onChange={(event, newValue) => setSearchInput(newValue || '')}
@@ -126,6 +126,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
             <TextField
               {...params}
               label="Search"
+              className={style.textField}
               InputProps={{
                 ...params.InputProps,
                 startAdornment: (
@@ -145,7 +146,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
               }}
             />
           )}
-          style={{ minWidth: '60%' }}
+          style={{ minWidth: '40%' }}
           freeSolo
         />
       </Box>
@@ -189,14 +190,15 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
           ))}
         </List>
       </Popover>
-      <Grid container spacing={2} style={{ marginTop: '10px' }}>
+      <Grid container spacing={2} className={style.gridList}>
         {filteredProperties
           .filter(prop =>
             prop.toLowerCase().includes(searchInput.toLowerCase()),
           )
           .map((property, index) => (
-            <Grid item xs={6} key={index}>
+            <Grid item xs={4} key={index} className={style.gridItem}>
               <FormControlLabel
+                style={{ height: '100%' }}
                 control={
                   isCheckbox ? (
                     <Checkbox

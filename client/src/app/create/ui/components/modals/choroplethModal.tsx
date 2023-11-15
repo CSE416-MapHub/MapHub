@@ -32,7 +32,7 @@ const ChoroplethModal: React.FC<ChoroModalProps> = ({
       open={open}
       onClose={onClose}
       onConfirm={handleConfirm}
-      title="Choropleth Properties"
+      title="Choropleth Label Select"
     >
       <LabelSelector
         properties={properties}

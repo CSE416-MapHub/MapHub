@@ -1,43 +1,46 @@
-import { Typography } from '@mui/material';
+import React from 'react';
+import Link from 'next/link';
+import Button from '../components/button';
+import Typography from '@mui/material/Typography';
+import { Box, Container, colors } from '@mui/material';
 
 import styles from './styles/home.module.scss';
-import Link from 'next/link';
-import Button from 'components/button';
 
 function Home() {
   return (
-    <main className={styles['home__main']}>
-      <div id="home-hero" className={styles['hero__box']}>
-        <div className={styles['hero__content-box']}>
-          <Typography id="hero-display" variant="display">
-            A Complete Map Visuals Studio
+    <main id="home-hero" className="flex min-h-screen flex-col items-center justify-center p-24">
+      <Box
+        id="hero-display" className={styles.hero__box}
+      >
+        <Container id="hero-body" className={styles.hero__contentbox}>
+          <Typography variant="h1">
+            A Complete
+            Map Visuals Studio.
           </Typography>
-        </div>
-        <div className={styles['hero__content-box']}>
-          <Typography id="hero-body" variant="body">
+          <Typography variant='body1' sx={{marginTop: '10px'}}>
             Five Essential Templates.
             A Plethora of Editing Tools.
             Unique data-driven approach.
           </Typography>
-        </div>
-        <div 
-          className={`
-            ${styles['hero__content-box']} 
-            ${styles['hero__content-box--buttons']}`
-          }
-        >
+        </Container>
+        <Container sx={{
+          alignItems: 'center',
+          justifyContent: 'center',
+          mx: 'auto',
+          marginLeft: '50px'
+        }}>
           <Link id="hero-discover" href="/discover">
-            <Button variant="outlined">
-              Discover Maps
-            </Button>
-          </Link>
+            <Button variant="outlined" sx={{ marginRight: '16px' }}>
+                Discover Maps
+              </Button>
+            </Link>
           <Link id="hero-create" href="/create">
-            <Button variant="filled">
+          <Button variant="filled">
               Start Creating
             </Button>
           </Link>
-        </div>
-      </div>
+        </Container>
+      </Box>
     </main>
   );
 }

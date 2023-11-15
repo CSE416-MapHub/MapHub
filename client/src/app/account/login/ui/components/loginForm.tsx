@@ -3,11 +3,11 @@
 import React, { useState, useReducer, MouseEventHandler } from 'react';
 import { Button, Container, Link, Typography } from '@mui/material';
 
-import ValidatedTextField from './ValidatedTextField';
+import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from '../../../../../api/AccountAPI';
 
-import styles from './loginForm.module.css';
+import styles from '../../../components/form.module.css';
 
 interface LoginFieldState {
   value: string,
@@ -173,8 +173,8 @@ function LoginForm() {
         helperText={loginState.password.errorText}
       />
       <Container sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-      <Link variant='body1'>Forgot Username</Link>
-      <Link variant='body1'>Forgot Password</Link>
+      <Link variant='body1' href='/account/forgot-username'>Forgot Username</Link>
+      <Link variant='body1' href='/account/forgot-password'>Forgot Password</Link>
       </Container>
       <Button
         className={styles.confirmButton}
