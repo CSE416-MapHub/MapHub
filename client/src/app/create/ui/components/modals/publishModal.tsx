@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
-
+import style from './LabelSelector.module.scss';
+import LabelSelector from './LabelSelector';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
@@ -27,22 +28,46 @@ const PublishMapModal: React.FC<PublishModalProps> = ({
       onConfirm={handleConfirm}
       title="Publish Map"
     >
-      <TextField
-        label="Map Name"
-        value={mapName}
-        onChange={e => setMapName(e.target.value)}
-        fullWidth
-        margin="normal"
-      />{' '}
-      <TextField
-        label="Description"
-        value={description}
-        onChange={e => setDescription(e.target.value)}
-        fullWidth
-        multiline
-        rows={8}
-        margin="normal"
-      />
+      <Box
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'left',
+          marginBottom: '20px',
+        }}
+      >
+        <Typography noWrap style={{ marginRight: '10px' }}>
+          Map Name
+        </Typography>
+        <TextField
+          value={mapName}
+          onChange={e => setMapName(e.target.value)}
+          margin="normal"
+          className={style.textField}
+          style={{ flexGrow: 1 }}
+        />{' '}
+      </Box>
+      <Box
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'left',
+          marginBottom: '20px',
+        }}
+      >
+        <Typography noWrap style={{ marginRight: '10px' }}>
+          Description
+        </Typography>
+        <TextField
+          value={description}
+          onChange={e => setDescription(e.target.value)}
+          multiline
+          rows={8}
+          className={style.textField}
+          style={{ flexGrow: 1 }}
+          margin="normal"
+        />
+      </Box>
     </GeneralizedDialog>
   );
 };

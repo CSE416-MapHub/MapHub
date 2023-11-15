@@ -66,6 +66,8 @@ export default function () {
     'Population',
     'chinese',
     '조선글',
+    'arabic',
+    'Christians',
   ];
 
   function onImportConfirm(mapName: string, optionsProps: string[]) {

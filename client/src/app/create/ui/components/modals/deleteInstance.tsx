@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../PropertyColorInput';
-
+import style from './LabelSelector.module.scss';
 interface DeleteModalProps {
   open: boolean;
   onClose: () => void;
@@ -33,14 +33,28 @@ const DeleteModal: React.FC<DeleteModalProps> = ({
       onConfirm={handleConfirm}
       title={title}
     >
-      <Typography>
-        Are you sure you want to{' '}
-        <span style={{ fontWeight: 'bold' }}>permanently delete</span> the
-        following items, and all similiar instances globally:
-      </Typography>
-      <Typography style={{ display: 'flex', justifyContent: 'center' }}>
-        ({deleteType}): {instanceToBeDeleted}
-      </Typography>
+      <Box
+        className={style.whiteBg}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignContent: 'center',
+          alignItems: 'center',
+        }}
+      >
+        <Typography variant="h3">
+          Are you sure you want to{' '}
+          <span style={{ fontWeight: 'bold' }}>permanently delete</span> the
+          following items, and all similiar instances globally:
+        </Typography>
+        <Typography
+          style={{
+            marginTop: '20%',
+          }}
+        >
+          ({deleteType}): {instanceToBeDeleted}
+        </Typography>
+      </Box>
     </GeneralizedDialog>
   );
 };
