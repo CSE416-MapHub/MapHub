@@ -1,10 +1,9 @@
 .container {
   min-height: 100%;
-  background-color: #004D64;
-
   margin: 0 auto;
   border: none;
   padding: 50px 0;
+  background: url('../../../background.jpg') center/cover no-repeat;
 }
 
 .title {
