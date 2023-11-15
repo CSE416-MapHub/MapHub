@@ -13,7 +13,7 @@ export interface CommentsProps {
 export default function (props: CommentsProps) {
   let pfpComponent = <AccountCircleIcon fontSize="large" />;
   let reply = (
-    <IconButton onClick={props.onReply}>
+    <IconButton onClick={props.onReply} className="replyButton">
       <ReplyIcon fontSize="small" />
     </IconButton>
   );

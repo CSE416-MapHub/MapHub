@@ -1,7 +1,7 @@
 'use client';
 import { useParams } from 'next/navigation';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import { Typography } from '@mui/material';
+import { Divider, Typography } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 
 // import { MapCardProps } from "../../../ui/components/MapCard"
@@ -25,37 +25,40 @@ export default function () {
   //     </img>
   //   }
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'row',
-        gap: '4px',
-        margin: '16px',
-      }}
-    >
-      {pfpComponent}
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          // TODO: hardcoded value
-          height: '48px',
-          width: '100%',
-        }}
-      >
-        <Typography variant="h3">{title}</Typography>
-        <Typography variant="caption">Created by {author}</Typography>
-      </div>
+    <div>
       <div
         style={{
           display: 'flex',
           flexDirection: 'row',
           gap: '4px',
+          margin: '16px',
         }}
       >
-        <FavoriteIcon fontSize="small" />
-        <Typography variant="caption">{numLikes}</Typography>
+        {pfpComponent}
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            // TODO: hardcoded value
+            // height: '48px',
+            width: '100%',
+          }}
+        >
+          <Typography variant="h3">{title}</Typography>
+          <Typography variant="caption">Created by {author}</Typography>
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            gap: '4px',
+          }}
+        >
+          <FavoriteIcon fontSize="small" />
+          <Typography variant="caption">{numLikes}</Typography>
+        </div>
       </div>
+      <Divider />
     </div>
   );
 }

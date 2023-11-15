@@ -7,6 +7,7 @@ import Comment, { CommentsProps } from './Comment';
 import { useState } from 'react';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import SendIcon from '@mui/icons-material/Send';
+import CloseIcon from '@mui/icons-material/Close';
 
 export default function () {
   const params: { id: string } = useParams();
@@ -107,13 +108,53 @@ export default function () {
     },
   ];
 
-  return (
-    <div className={style['social']}>
-      <AuthorData />
+  let replyHint = (
+    <>
       <Divider />
       <div
         style={{
-          height: '55vh',
+          display: 'flex',
+          justifyContent: 'space-between',
+          padding: '6px',
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            marginLeft: '12%',
+          }}
+        >
+          <Typography variant="button">
+            Replying to {replyingTo.username}
+          </Typography>
+        </div>
+
+        <IconButton
+          id="cancelReply"
+          onClick={() =>
+            setReplyingTo({
+              username: '',
+              id: '',
+            })
+          }
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      </div>
+    </>
+  );
+
+  if (replyingTo.username === '') {
+    replyHint = <></>;
+  }
+
+  return (
+    <div className={style['social']}>
+      <AuthorData />
+      <div
+        style={{
           overflow: 'auto',
         }}
       >
@@ -121,14 +162,12 @@ export default function () {
           <Comment {...c} key={i}></Comment>
         ))}
       </div>
+      {replyHint}
       <div
         style={{
           padding: '8px',
         }}
       >
-        <Typography variant="caption">
-          {replyingTo.username !== '' && `Replying to ${replyingTo.username}`}
-        </Typography>
         <div
           style={{
             display: 'flex',
