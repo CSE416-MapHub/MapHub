@@ -18,7 +18,7 @@ import './commands'
 import React from 'react';
 import { mount } from 'cypress/react18'
 import ThemeProvider from '../../src/context/themeProvider';
-import { Fira_Sans, Sofia_Sans_Condensed } from 'next/font/google';
+import { firaSans, sofiaSansCondensed, boxIcons } from '../../src/app/fonts/fonts';
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -32,25 +32,13 @@ declare global {
   }
 }
 
-const firaSans = Fira_Sans({
-  weight: ['400', '500', '700'],
-  subsets: ['latin'],
-  variable: '--fira',
-});
-const sofiaSansCondensed = Sofia_Sans_Condensed({
-  subsets: ['latin'],
-  variable: '--sofia',
-});
-
 Cypress.Commands.add('mount', (component, options = {}) => {
   return mount((
-    <>
-      <div className={`${firaSans.variable} ${sofiaSansCondensed.variable}`}>
-        <ThemeProvider>
-          {component}
-        </ThemeProvider>
-      </div>
-    </>
+    <body className={`${firaSans.variable} ${sofiaSansCondensed.variable} ${boxIcons.variable}`}>
+      <ThemeProvider>
+        {component}
+      </ThemeProvider>
+    </body>
   ), options);
 })
 
