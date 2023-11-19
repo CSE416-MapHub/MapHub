@@ -1,23 +1,23 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextField, Typography, Box } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import LabelSelector from './LabelSelector'; // Adjust the import path as needed
 import style from './LabelSelector.module.scss';
+import { EditorContext } from 'context/EditorProvider';
 interface ImportModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (mapName: string, selectedOptions: string[]) => void; // Added mapName to the callback
-  properties: string[];
 }
 
 const ImportModal: React.FC<ImportModalProps> = ({
   open,
   onClose,
   onConfirm,
-  properties,
-}) => {
+}: ImportModalProps) => {
   const [mapName, setMapName] = useState('My New Map');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const editorContext = useContext(EditorContext);
 
   const handleSelectionChange = (selection: string[]) => {
     setSelectedOptions(selection);
@@ -56,7 +56,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
       </Box>
 
       <LabelSelector
-        properties={properties}
+        properties={editorContext.state.mapDetails.availableProps}
         isCheckbox={true}
         onSelect={handleSelectionChange}
       />

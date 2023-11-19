@@ -1,6 +1,7 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
 import { MHJSON } from 'types/MHJSON';
+import { GeoJSONVisitor } from './editorHelpers/GeoJSONVisitor';
 
 // the global state interface
 export interface IEditorState {
@@ -47,6 +48,11 @@ function reducer(
     case EditorActions.SET_MAP: {
       if (action.payload.map) {
         newState.map = action.payload.map;
+        let v = new GeoJSONVisitor(action.payload.map.geoJSON);
+        v.visitRoot();
+        newState.mapDetails.availableProps = Array.from(
+          v.getFeatureResults().aggregate.globallyAvailableKeys,
+        );
       } else {
         throw new Error('SET_MAP must have a map in its payload');
       }

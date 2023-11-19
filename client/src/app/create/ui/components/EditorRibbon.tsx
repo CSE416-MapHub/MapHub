@@ -147,7 +147,10 @@ export default function () {
     // TODO: Handle more file extensions listed in the accept string.
     // TODO: Verify files more rigorously (not through file extension).
     // TODO: Verify file combinations.
-    if (files.length === 1 && files[0].name.split('.').pop() === 'json') {
+    if (
+      (files.length === 1 && files[0].name.split('.').pop() === 'json') ||
+      files[0].name.split('.').pop() === 'geojson'
+    ) {
       // Handle shape file conversion to GeoJSON.
       const reader = new FileReader();
       reader.onload = e => {
@@ -334,7 +337,6 @@ export default function () {
         open={openImport}
         onClose={() => setOpenImport(false)}
         onConfirm={onImportConfirm}
-        properties={selectedOptions}
       />
       <ChoroplethModal
         open={openChoropleth}
