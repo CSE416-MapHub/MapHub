@@ -21,4 +21,37 @@ describe('Uploads', () => {
     cy.get('#import-file-upload-button').attachFile(['VAT_adm0.shx']);
     cy.get('h2:contains("Import Properties")').should('not.exist');
   });
+
+  it('should read out properties for the Vatican correctly', () => {
+    cy.visit('/create');
+    cy.get('button:contains("File")').click();
+    cy.get('span:contains("Import")').click();
+    cy.get('span:contains("Import File From Local Desktop")').click();
+    cy.get('#import-file-upload-button').attachFile(['VAT_adm0.geojson']);
+    // this is a semirandom subset of properties available
+    const props = [
+      'ID_0',
+      'ISO',
+      'NAME_0',
+      'OBJECTID_1',
+      'ISO3',
+      'NAME_ENGLI',
+      'SOVEREIGN',
+      'ISO2',
+      'Transition',
+      'OECD',
+      'WBREGION',
+      'ECOWAS',
+      'IGAD',
+      'UMA',
+      'PALOP',
+      'EU',
+      'CAN',
+      'ACP',
+      'Landlocked',
+    ];
+    for (let p of props) {
+      cy.get(`span:contains("${p}")`);
+    }
+  });
 });
