@@ -4,12 +4,8 @@ import User from '../models/user-model';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 
-
-
 export const registerUser = async (req: Request, res: Response) => {
   try {
-
-
     const { username, email, password, passwordVerify } = req.body;
 
     const defaultProfilePic = Buffer.alloc(0);
@@ -23,7 +19,7 @@ export const registerUser = async (req: Request, res: Response) => {
         ' ' +
         password +
         ' ' +
-        passwordVerify
+        passwordVerify,
     );
     if (!username || !email || !password || !passwordVerify) {
       return res
@@ -54,7 +50,7 @@ export const registerUser = async (req: Request, res: Response) => {
         username,
         email,
         password: passwordHash,
-        maps: emptyMapList
+        maps: emptyMapList,
       });
       const savedUser = await newUser.save();
       console.log('New user saved: ' + savedUser._id);
@@ -81,7 +77,7 @@ export const registerUser = async (req: Request, res: Response) => {
       console.log('Token sent');
     } catch (err: any) {
       if (err.code === 11000) {
-        console.log(err)
+        console.log(err);
         // Duplicate key error - usualyl in the form of "dupKey": dupValue
         const duplicateField = Object.keys(err.keyValue)[0];
         // To make it look pretty :#
@@ -91,7 +87,7 @@ export const registerUser = async (req: Request, res: Response) => {
         return res.status(400).json({
           success: false,
           errorMessage: `${capitalizedField} already in use.`,
-        })
+        });
       } else {
         // Handle other errors - idk for now, we can expand on this
         console.error('Error while saving the user:', err.message);
