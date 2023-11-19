@@ -1,31 +1,44 @@
 'use client';
 
-import {
-  Divider,
-  ListItemIcon,
-  ListItemText,
-  MenuItem,
-  MenuList,
-  Paper,
-  Typography,
-} from '@mui/material';
+import { Typography } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
-import { useState } from 'react';
+import { useContext, useRef, useState } from 'react';
 import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
 import MultiMapLabelModal from './modals/multiLabelModal';
 import RecentMapModal from './modals/recentMapModal';
 import PublishMapModal from './modals/publishModal';
+import Button from 'components/button';
+import { EditorActions, EditorContext } from 'context/EditorProvider';
+import { buildMHJSON } from 'app/create/MHJsonBuilder';
+import * as G from 'geojson';
+import { handleFiles } from './helpers/ImportHelpers';
+import { MHJSON } from 'types/MHJSON';
+import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
+
+// A list of all accepted file types.
+const accept: string =
+  '.shp, .shx, .dbf, ' + // Shape Files
+  '.json, .geojson, application/geo+json, ' + // GeoJSON Files
+  '.kml, .kmz, application/vnd.google-earth.kml+xml, ' + // Keyhole Files
+  'application/vnd.google-earth.kmz';
 
 export default function () {
+  const editorContext = useContext(EditorContext);
+  // const [inputError, setInputError] = useState<string>('');
+  const fileUpload = useRef<HTMLInputElement | null>(null);
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
+  const [userGeoJSON, setUserGeoJSON] = useState<G.GeoJSON>({
+    type: 'Point',
+    coordinates: [0, 0],
+  });
   const menus = {
     File: {
       Import: {
         'Import File From Local Desktop': () => {
-          setOpenImport(true);
+          fileUpload.current?.click();
         },
         'Import User Owned Maps': () => {
           setOpenRecentMapModal(true);
@@ -50,6 +63,7 @@ export default function () {
     },
     Map: {},
   };
+
   function handleMenuClose() {
     setOpenMenu(null);
   }
@@ -72,18 +86,22 @@ export default function () {
 
   function onImportConfirm(mapName: string, optionsProps: string[]) {
     console.log(mapName, optionsProps);
-
+    let mh: MHJSON = buildMHJSON(userGeoJSON);
+    mh.title = mapName;
+    mh.labels = optionsProps;
+    editorContext.dispatch({
+      type: EditorActions.SET_MAP,
+      payload: {
+        map: mh,
+      },
+    });
     setOpenImport(false);
   }
 
   function onChoroplethConfirm(optionsProps: string[]) {
-    console.log(optionsProps);
-
     setOpenChoropleth(false);
   }
   function onMultiMapConfirm(optionsProps: string[]) {
-    console.log(optionsProps);
-
     setOpenMapLabelModal(false);
   }
   function onRecentMapConfirm(mapId: string) {
@@ -97,7 +115,8 @@ export default function () {
   return (
     <div className={styles['ribbon-container']}>
       <div className={styles['dropdowns']}>
-        <Typography
+        <Button
+          variant="text"
           onClick={e => {
             setOpenMenu({
               items: menus.File,
@@ -107,10 +126,10 @@ export default function () {
             });
           }}
         >
-          {' '}
-          File{' '}
-        </Typography>
-        <Typography
+          File
+        </Button>
+        <Button
+          variant="text"
           onClick={e => {
             setOpenMenu({
               items: menus.View,
@@ -120,10 +139,10 @@ export default function () {
             });
           }}
         >
-          {' '}
-          View{' '}
-        </Typography>
-        <Typography
+          View
+        </Button>
+        <Button
+          variant="text"
           onClick={e => {
             setOpenMenu({
               items: menus.Map,
@@ -133,12 +152,13 @@ export default function () {
             });
           }}
         >
-          {' '}
-          Map{' '}
-        </Typography>
+          Map
+        </Button>
       </div>
       <div className={styles['map-title']}>
-        <Typography variant="title">Anglicans Down Under</Typography>
+        <Typography variant="title">
+          {editorContext.state.map?.title ?? 'My Map'}
+        </Typography>
       </div>
       <div className={styles['undo-redo']}>
         <Undo fontSize="medium" />
@@ -149,7 +169,13 @@ export default function () {
         open={openImport}
         onClose={() => setOpenImport(false)}
         onConfirm={onImportConfirm}
-        properties={selectedOptions}
+        properties={((): string[] => {
+          let visitor = new GeoJSONVisitor(userGeoJSON);
+          visitor.visitRoot();
+          return Array.from(
+            visitor.getFeatureResults().aggregate.globallyAvailableKeys,
+          );
+        })()}
       />
       <ChoroplethModal
         open={openChoropleth}
@@ -172,6 +198,32 @@ export default function () {
         open={openPublishMapModal}
         onClose={() => setOpenPublishMapModal(false)}
         onConfirm={onPublishMapConfirm}
+      />
+      <input
+        type="file"
+        multiple
+        accept={accept}
+        onChange={ev => {
+          let targ = ev.target as HTMLInputElement;
+          if (targ.files && targ.files.length) {
+            handleFiles(targ.files)
+              .then(v => {
+                setUserGeoJSON(v);
+                setOpenImport(true);
+              })
+              .catch(e => {
+                alert(e);
+              });
+          }
+        }}
+        id="import-file-upload-button"
+        ref={fileUpload}
+        style={{
+          visibility: 'hidden',
+          position: 'absolute',
+          marginTop: '-100px',
+          marginLeft: '-100px',
+        }}
       />
     </div>
   );
