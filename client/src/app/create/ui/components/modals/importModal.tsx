@@ -8,16 +8,17 @@ interface ImportModalProps {
   open: boolean;
   onClose: () => void;
   onConfirm: (mapName: string, selectedOptions: string[]) => void; // Added mapName to the callback
+  properties: string[];
 }
 
 const ImportModal: React.FC<ImportModalProps> = ({
   open,
   onClose,
   onConfirm,
+  properties,
 }: ImportModalProps) => {
   const [mapName, setMapName] = useState('My New Map');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const editorContext = useContext(EditorContext);
 
   const handleSelectionChange = (selection: string[]) => {
     setSelectedOptions(selection);
@@ -56,7 +57,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
       </Box>
 
       <LabelSelector
-        properties={editorContext.state.mapDetails.availableProps}
+        properties={properties}
         isCheckbox={true}
         onSelect={handleSelectionChange}
       />
