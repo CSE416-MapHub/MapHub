@@ -1,9 +1,17 @@
 import * as G from 'geojson';
 
+export enum MapType {
+  CHOROPLETH = 'choropleth',
+  CATEGORICAL = 'categorical',
+  SYMBOL = 'symbol',
+  DOT = 'dot',
+  FLOW = 'flow',
+}
+
 export interface MHJSON {
   title: string;
   owner: string;
-  mapType: string;
+  mapType: MapType;
   labels: Array<string>;
   globalChoroplethData: IChoroplethProps;
   globalCategoryData: Array<ICategoryProps>;
