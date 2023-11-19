@@ -11,7 +11,7 @@ import {
 } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
-import { ChangeEvent, useCallback, useContext, useState } from 'react';
+import { ChangeEvent, useCallback, useContext, useRef, useState } from 'react';
 import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
@@ -74,28 +74,13 @@ function mergeData(
 export default function () {
   const editorContext = useContext(EditorContext);
   // const [inputError, setInputError] = useState<string>('');
+  const fileUpload = useRef<HTMLInputElement | null>(null);
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
   const menus = {
     File: {
       Import: {
         'Import File From Local Desktop': () => {
-          var input = document.createElement('input');
-          input.type = 'file';
-          input.multiple = true;
-          input.accept = accept;
-          input.addEventListener('change', (ev: Event) => {
-            let targ = ev.target as HTMLInputElement;
-            if (targ.files && targ.files.length) {
-              let err = handleFiles(targ.files);
-              if (err) {
-                // TODO: make a modal out of this
-                alert(err);
-              } else {
-                setOpenImport(true);
-              }
-            }
-          });
-          input.click();
+          fileUpload.current?.click();
         },
         'Import User Owned Maps': () => {
           setOpenRecentMapModal(true);
@@ -373,6 +358,31 @@ export default function () {
         open={openPublishMapModal}
         onClose={() => setOpenPublishMapModal(false)}
         onConfirm={onPublishMapConfirm}
+      />
+      <input
+        type="file"
+        multiple
+        accept={accept}
+        onChange={ev => {
+          let targ = ev.target as HTMLInputElement;
+          if (targ.files && targ.files.length) {
+            let err = handleFiles(targ.files);
+            if (err) {
+              // TODO: make a modal out of this
+              alert(err);
+            } else {
+              setOpenImport(true);
+            }
+          }
+        }}
+        id="import-file-upload-button"
+        ref={fileUpload}
+        style={{
+          visibility: 'hidden',
+          position: 'absolute',
+          marginTop: '-100px',
+          marginLeft: '-100px',
+        }}
       />
     </div>
   );
