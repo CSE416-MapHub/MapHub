@@ -54,4 +54,15 @@ describe('Uploads', () => {
       cy.get(`span:contains("${p}")`);
     }
   });
+
+  it('should change the name of the map when I import it', () => {
+    cy.visit('/create');
+    cy.get('button:contains("File")').click();
+    cy.get('span:contains("Import")').click();
+    cy.get('span:contains("Import File From Local Desktop")').click();
+    cy.get('#import-file-upload-button').attachFile(['VAT_adm0.geojson']);
+    cy.get('[value="My New Map"]').type('My Cool Map Name');
+    cy.get(`p:contains("Confirm")`).click();
+    cy.get('h3:contains("My New MapMy Cool Map Name")');
+  });
 });
