@@ -25,7 +25,6 @@ import { DataTable } from 'dbf-reader/models/dbf-file';
 import * as shp from 'shapefile';
 import tj from '@mapbox/togeojson';
 import { Dbf } from 'dbf-reader/dbf';
-window.Buffer = Buffer;
 
 // A list of all accepted file types.
 const accept: string =

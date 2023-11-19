@@ -12,4 +12,13 @@ describe('Uploads', () => {
     ]);
     cy.get('h2:contains("Import Properties")');
   });
+
+  it('should fail when given a single shx', () => {
+    cy.visit('/create');
+    cy.get('button:contains("File")').click();
+    cy.get('span:contains("Import")').click();
+    cy.get('span:contains("Import File From Local Desktop")').click();
+    cy.get('#import-file-upload-button').attachFile(['VAT_adm0.shx']);
+    cy.get('h2:contains("Import Properties")').should('not.exist');
+  });
 });
