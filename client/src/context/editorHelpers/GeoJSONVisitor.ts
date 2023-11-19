@@ -17,14 +17,14 @@ export interface IFeatureAggregateResults {
   globallyAvailableKeys: Set<string>;
 }
 
-function addPointToLocalBBox(x: number, y: number, b: BBox) {
+export function addPointToLocalBBox(x: number, y: number, b: BBox) {
   b[0] = Math.min(b[0], x);
   b[1] = Math.min(b[1], y);
   b[2] = Math.max(b[2], x - b[0]);
   b[3] = Math.max(b[3], y - b[1]);
 }
 
-function mergeBBox(...boxes: [BBox, ...[BBox]]): BBox {
+export function mergeBBox(...boxes: [BBox, ...[BBox]]): BBox {
   let box: BBox = boxes[0];
   for (let b of boxes) {
     let l = Math.min(box[0], b[0]);
