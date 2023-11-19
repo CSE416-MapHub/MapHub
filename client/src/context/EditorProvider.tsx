@@ -1,19 +1,23 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
+import { MHJSON } from 'types/MHJSON';
 
 // the global state interface
 export interface IEditorState {
   propertiesPanel: Array<IPropertyPanelSectionProps>;
+  map: MHJSON | null;
 }
 
 // initial global state
 let initialState: IEditorState = {
   propertiesPanel: [],
+  map: null,
 };
 
 // actions the reducer can take
 export enum EditorActions {
   SET_PANEL,
+  SET_MAP,
 }
 
 // the reducer
@@ -31,6 +35,14 @@ function reducer(
         newState.propertiesPanel = action.payload.propertiesPanel;
       } else {
         throw new Error('SET_PANEL must have a propertiesPanel in its payload');
+      }
+      break;
+    }
+    case EditorActions.SET_MAP: {
+      if (action.payload.map) {
+        newState.map = action.payload.map;
+      } else {
+        throw new Error('SET_MAP must have a map in its payload');
       }
       break;
     }
