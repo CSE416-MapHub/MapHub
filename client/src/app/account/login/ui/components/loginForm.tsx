@@ -88,6 +88,13 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
       const { username, password } = validatedState;
       if (!username.error && !password.error) {
         // Call your authentication API here
+        AccountAPI.loginUser(validatedState.username.value, 
+          validatedState.password.value).then(response => {
+            console.log("Login successful:", response);
+          })
+          .catch(error => {
+            console.log("Login failed:", error);
+          });
       }
       // TODO: Handle login success or failure
       return validatedState;
