@@ -3,44 +3,32 @@ import { EditorActions, EditorContext } from 'context/EditorProvider';
 import * as G from 'geojson';
 import { Path } from 'leaflet';
 import { useContext, useState, useEffect } from 'react';
-import { GeoJSON, TileLayer } from 'react-leaflet';
+import { GeoJSON, TileLayer, useMap } from 'react-leaflet';
 
 export default function () {
   const editorContext = useContext(EditorContext);
-
-  const [geoJSON, setGeoJSON] = useState<G.GeoJSON>({
-    type: 'Point',
-    coordinates: [0, 0],
-  });
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [rerender, setRerender] = useState(0);
+  const map = useMap();
+  const [eBBox, setEBBox] = useState<[number, number]>([0, 0]);
 
   useEffect(() => {
-    if (!isLoaded) {
-      fetch(
-        'https://raw.githubusercontent.com/loganpowell/census-geojson/master/GeoJSON/20m/2022/state.json',
-      )
-        .then(res => res.json())
-        .then((g: G.GeoJSON) => {
-          console.log(g);
-          setGeoJSON(g);
-          setRerender(rerender + 1);
-          setIsLoaded(true);
-        });
-    } else {
-      console.log('new gjeson');
-      console.log(geoJSON);
+    let b = editorContext.state.mapDetails.bbox;
+    if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
+      let c: [number, number] = [b[1], b[0]];
+      console.log('center');
+      console.log(editorContext.state.mapDetails.bbox);
+      setEBBox(c);
+      map.setView([c[0] + b[3] / 2, c[1] + b[2] / 2], 10 - Math.log2(b[2]));
     }
   });
 
-  if (!isLoaded) {
-    return <div>Loading</div>;
+  if (editorContext.state.map === null) {
+    return <div></div>;
   }
 
   return (
     <GeoJSON
-      key={rerender}
-      data={geoJSON}
+      //   key={rerender}
+      data={editorContext.state.map?.geoJSON}
       onEachFeature={(feature, layer) => {
         layer.addEventListener('click', () => {
           editorContext.dispatch({
