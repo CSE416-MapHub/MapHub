@@ -6,12 +6,18 @@ import { MHJSON } from 'types/MHJSON';
 export interface IEditorState {
   propertiesPanel: Array<IPropertyPanelSectionProps>;
   map: MHJSON | null;
+  mapDetails: {
+    availableProps: Array<string>;
+  };
 }
 
 // initial global state
 let initialState: IEditorState = {
   propertiesPanel: [],
   map: null,
+  mapDetails: {
+    availableProps: [],
+  },
 };
 
 // actions the reducer can take

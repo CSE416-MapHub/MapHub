@@ -16,7 +16,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
   onConfirm,
   properties,
 }) => {
-  const [mapName, setMapName] = useState('');
+  const [mapName, setMapName] = useState('My New Map');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   const handleSelectionChange = (selection: string[]) => {
