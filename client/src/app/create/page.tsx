@@ -25,13 +25,9 @@ export default function () {
       <Toolbar />
       <DynamicMap />
 
-      {/* <div className={mapStyle.container}> */}
-      {/* <div className={mapStyle.mapContainer}></div> */}
       <div className={mapStyle.propertiesPanel}>
-        {' '}
         <Properties />
       </div>
-      {/* </div> */}
 
       <DeleteModal
         open={openDeleteModal}
