@@ -1,5 +1,3 @@
-import 'cypress-file-upload';
-
 beforeEach(() => {
   cy.log('Running Initialization');
 });
