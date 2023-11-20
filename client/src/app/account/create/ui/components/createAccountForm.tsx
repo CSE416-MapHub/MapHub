@@ -1,8 +1,9 @@
-'use client'
+'use client';
 
 import React, { useReducer, MouseEventHandler, useEffect } from 'react';
-import { Button, Stack, Typography } from '@mui/material';
+import { Stack, Typography } from '@mui/material';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
@@ -14,7 +15,7 @@ import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 /**
- * The CreateAccountState is an object filled with states of text field 
+ * The CreateAccountState is an object filled with states of text field
  * parameters. Each text field parameter holds the following:
  *     * value - the actual text value of the input text field,
  *     * error - a boolean indicating whether or not the input is valid, and
@@ -24,7 +25,8 @@ interface CreateAccountFieldState {
   value: string,
   error: boolean,
   errorText: string,
-};
+}
+
 interface CreateAccountState {
   username: CreateAccountFieldState,
   email: CreateAccountFieldState,
@@ -36,7 +38,7 @@ interface CreateAccountState {
 /**
  * CreateAccountActionType represents the type of action the reducer must
  * perform. CreateAccountAction represents the type of action and the values
- * that needs to be passed to the reducer to perform the action. 
+ * that needs to be passed to the reducer to perform the action.
  */
 enum CreateAccountActionType {
   updateUsername = 'updateUsername',
@@ -62,13 +64,13 @@ interface CreateAccountAction {
 /**
  * The createAccountReducer function takes the current state along with an
  * action to perform on the state. It returns a new state with the action
- * performed. The actions include: updating the value of text fields and 
+ * performed. The actions include: updating the value of text fields and
  * validating the text field values. Validation checks the current value in the
  * state and modifies the error and errorText states for the text field.
  */
 function createAccountReducer(
   state: CreateAccountState,
-  action: CreateAccountAction
+  action: CreateAccountAction,
 ): CreateAccountState {
   switch (action.type) {
     case CreateAccountActionType.updateUsername: {
@@ -87,9 +89,9 @@ function createAccountReducer(
       // characters.
       // TODO: Implement unique username checking.
       const { username } = state;
-      if (!/^[\w\.]{2,15}[\w]$/.test(username.value)) {
+      if (!/^[\w.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
-        username.errorText = 'Please enter a valid username between 3-16 ' + 
+        username.errorText = 'Please enter a valid username between 3-16 ' +
           'alphanumeric, underscore, or dot characters.';
       } else {
         username.error = false;
@@ -117,9 +119,9 @@ function createAccountReducer(
       // it ends with a dot), and followed by a top-level domain name (a set of
       // alphanumeric characters and underscores of length 2-4). 
       const { email } = state;
-      if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
+      if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
         email.error = true;
-        email.errorText = 'Please enter a valid email address.'
+        email.errorText = 'Please enter a valid email address.';
       } else {
         email.error = false;
         email.errorText = '';
@@ -167,12 +169,12 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validatePasswordConfirm: {
       // Checks if the password confirmation is well-formed and matches the 
-      // first password input value. Only checks whether or not the passwords
+      // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
       if (password.value !== passwordConfirm.value || passwordConfirm.value.length === 0) {
         passwordConfirm.error = true;
-        passwordConfirm.errorText = 'Please reconfirm the password.'
+        passwordConfirm.errorText = 'Please reconfirm the password.';
       } else {
         passwordConfirm.error = false;
         passwordConfirm.errorText = '';
@@ -203,7 +205,7 @@ function createAccountReducer(
       const validatedState = createAccountReducer(state, {
         type: CreateAccountActionType.validate,
       });
-      console.log("IN CREATE ACCOUNT")
+      console.log('IN CREATE ACCOUNT');
       if (!validatedState.username.error &&
         !validatedState.email.error &&
         !validatedState.password.error &&
@@ -267,7 +269,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
 
 /**
  * The CreateAccountForm renders a frontend form with the following text fields:
- * username, email address, password, and confirm password. The form also 
+ * username, email address, password, and confirm password. The form also
  * includes a button for submission. The state of the form and its verification
  * is handled by the createAccountReducer.
  */
@@ -340,14 +342,14 @@ function CreateAccountForm() {
     createAccountDispatch({
       type: CreateAccountActionType.validatePassword,
     });
-  }
+  };
 
   const setPasswordConfirm = (value: string) => {
     createAccountDispatch({
       type: CreateAccountActionType.updatePasswordConfirm,
       value,
     });
-  }
+  };
 
   const validatePasswordConfirm = () => {
     createAccountDispatch({
@@ -438,14 +440,14 @@ function CreateAccountForm() {
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant="body1" align="left">
+      <Typography className={styles.body} variant='body1' align='left'>
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -454,9 +456,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id="email"
-        type="email"
-        label="Email Address"
+        id='email'
+        type='email'
+        label='Email Address'
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -464,9 +466,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -474,18 +476,17 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id="password-confirm"
-        type="password"
-        label="Confirm Password"
+        id='password-confirm'
+        type='password'
+        label='Confirm Password'
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button 
-        className={styles.confirmButton}
-        variant="contained"
+      <Button
+        variant='filled'
         onClick={handleCreateAccountClick}
       >
         Create Account

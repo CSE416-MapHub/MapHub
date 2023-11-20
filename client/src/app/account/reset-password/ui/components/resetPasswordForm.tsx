@@ -1,11 +1,10 @@
-'use client'
+'use client';
 
-import React, { useState, useReducer, MouseEventHandler } from 'react';
-import { Button, Container, Link, Typography } from '@mui/material';
+import React, { useReducer } from 'react';
+import { Link, Typography } from '@mui/material';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
-
-import AccountAPI from '../../../../../api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
 
@@ -135,19 +134,15 @@ function ResetPasswordForm() {
     });
   };
 
-  const handleResetPasswordClick: MouseEventHandler = (event) => {
-
-  };
-
   return (
     <div className={styles.container}>
-    <Typography className={styles.title} variant="h2">
+      <Typography className={styles.title} variant='h2'>
         Reset Password
       </Typography>
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={ResetPasswordState.password.value}
         setValue={setPassword}
         error={ResetPasswordState.password.error}
@@ -155,23 +150,22 @@ function ResetPasswordForm() {
         helperText={ResetPasswordState.password.errorText}
       />
       <ValidatedTextField
-        id="passwordConfirm"
-        type="password"
-        label="Confirm Password"
+        id='passwordConfirm'
+        type='password'
+        label='Confirm Password'
         value={ResetPasswordState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={ResetPasswordState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={ResetPasswordState.passwordConfirm.errorText}
       />
-    <Link href='/account/reset-password/success'>
-      <Button
-        className={styles.confirmButton}
-        variant="contained"
-      >
-        Reset Password
-      </Button>
-    </Link>
+      <Link href='/account/reset-password/success'>
+        <Button
+          variant='filled'
+        >
+          Reset Password
+        </Button>
+      </Link>
     </div>
   );
 }

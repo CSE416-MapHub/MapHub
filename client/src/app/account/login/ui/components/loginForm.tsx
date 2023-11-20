@@ -1,11 +1,10 @@
-'use client'
+'use client';
 
-import React, { useState, useReducer, MouseEventHandler } from 'react';
-import { Button, Container, Link, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler } from 'react';
+import { Container, Link, Typography } from '@mui/material';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
-
-import AccountAPI from '../../../../../api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
 
@@ -148,7 +147,7 @@ function LoginForm() {
     });
   };
 
-  const handleLoginClick: MouseEventHandler = (event) => {
+  const handleLoginClick: MouseEventHandler = () => {
     loginDispatch({
       type: LoginActionType.login,
     });
@@ -156,13 +155,13 @@ function LoginForm() {
 
   return (
     <div className={styles.container}>
-    <Typography className={styles.title} variant="h2">
+      <Typography className={styles.title} variant='h2'>
         Login
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={loginState.username.value}
         setValue={setUsername}
         error={loginState.username.error}
@@ -170,24 +169,23 @@ function LoginForm() {
         helperText={loginState.username.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={loginState.password.value}
         setValue={setPassword}
         error={loginState.password.error}
         validate={validatePassword}
         helperText={loginState.password.errorText}
       />
-      <Container sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-      <Link variant='body1' href='/account/forgot-account?query=username'>
-        Forgot Username
+      <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Link variant='body1' href='/account/forgot-account?query=username'>
+          Forgot Username
         </Link>
-      <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
+        <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
       </Container>
       <Button
-        className={styles.confirmButton}
-        variant="contained"
+        variant='filled'
         onClick={handleLoginClick}
       >
         Login
