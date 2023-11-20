@@ -10,14 +10,14 @@ import styles from '../../../components/form.module.css';
 import AccountAPI from 'api/AccountAPI';
 
 interface LoginFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface LoginState {
-  username: LoginFieldState,
-  password: LoginFieldState,
+  username: LoginFieldState;
+  password: LoginFieldState;
 }
 
 enum LoginActionType {
@@ -29,8 +29,8 @@ enum LoginActionType {
 }
 
 interface LoginAction {
-  type: LoginActionType,
-  value?: any,
+  type: LoginActionType;
+  value?: any;
 }
 
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
@@ -106,21 +106,18 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
 }
 
 function LoginForm() {
-  const [loginState, loginDispatch] = useReducer(
-    loginReducer,
-    {
-      username: {
-        value: '',
-        error: false,
-        errorText: '',
-      },
-      password: {
-        value: '',
-        error: false,
-        errorText: '',
-      },
+  const [loginState, loginDispatch] = useReducer(loginReducer, {
+    username: {
+      value: '',
+      error: false,
+      errorText: '',
     },
-  );
+    password: {
+      value: '',
+      error: false,
+      errorText: '',
+    },
+  });
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -156,13 +153,13 @@ function LoginForm() {
 
   return (
     <div className={styles.container}>
-      <Typography className={styles.title} variant='h2'>
+      <Typography className={styles.title} variant="h2">
         Login
       </Typography>
       <ValidatedTextField
-        id='username'
-        type='text'
-        label='Username'
+        id="username"
+        type="text"
+        label="Username"
         value={loginState.username.value}
         setValue={setUsername}
         error={loginState.username.error}
@@ -170,25 +167,30 @@ function LoginForm() {
         helperText={loginState.username.errorText}
       />
       <ValidatedTextField
-        id='password'
-        type='password'
-        label='Password'
+        id="password"
+        type="password"
+        label="Password"
         value={loginState.password.value}
         setValue={setPassword}
         error={loginState.password.error}
         validate={validatePassword}
         helperText={loginState.password.errorText}
       />
-      <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Link variant='body1' href='/account/forgot-account?query=username'>
+      <Container
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
         </Link>
-        <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
+        <Link variant="body1" href="/account/forgot-account?query=password">
+          Forgot Password
+        </Link>
       </Container>
-      <Button
-        variant='filled'
-        onClick={handleLoginClick}
-      >
+      <Button variant="filled" onClick={handleLoginClick}>
         Login
       </Button>
     </div>
