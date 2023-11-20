@@ -1,5 +1,3 @@
-// TODO: change surface and onerror
-
 // Primary Colors
 $primary: #0081A7;
 $primary-light: #66B3CA;
@@ -33,16 +31,24 @@ $error-container: #FCE3E1;
 $on-error-container: #301715;
 
 // Surface Colors
-$neutral50: #7E7B4E;
-$surface: #FAFAF8;
-$surface-bright: #FAFAF8;
-$surface-dim: #DDDDD1;
+$surface: #FDF9F0;
+$on-surface: #1D1C16;
+$surface-variant: #E1E2EC;
+$on-surface-variant: #44474F;
+
 $surface-container-lowest: #FFFFFF;
-$surface-container-low: #F5F4F1;
-$surface-container: #F0EFEA;
-$surface-container-high: #EAEAE3;
-$surface-container-highest: #E5E5DC;
-$on-surface: #191910;
-$on-surface-variant: #2D2F36;
+$surface-container-low: #F8F3EA;
+$surface-container: #F2EDE4;
+$surface-container-high: #ECE8DF;
+$surface-container-highest: #E6E2D9;
+
 $outline: #707686;
+$outline-variant: #44474F;
+
+$inverse: #1D1C16;
+$inverse-on-surface: #E6E2D9;
+$inverse-primary: #006685;
+
+// Surface Add-Ons
 $shadow: #000000;
+$scrim: #000000;

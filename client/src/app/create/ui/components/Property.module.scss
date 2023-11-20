@@ -4,9 +4,9 @@
   height: calc(100vh - 80px - 56px);
   min-width: 25%;
   position: fixed;
-  bottom: 0px;
-  right: 0px;
-  background-color: colors.$surface-container-high;
+  bottom: 0;
+  right: 0;
+  background-color: colors.$surface-container;
   padding: 4px;
   z-index: 999;
 }
@@ -39,10 +39,7 @@
   padding: 1px;
   background-color: rgb(203, 203, 203);
   width: 145px;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 26px;
-  margin-bottom: 26px;
+  margin: 26px auto;
 }
 
 .svg-grid {

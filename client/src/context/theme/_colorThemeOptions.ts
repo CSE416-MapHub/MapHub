@@ -1,4 +1,4 @@
-import { ThemeOptions, createTheme } from '@mui/material';
+import { ThemeOptions } from '@mui/material';
 
 declare module '@mui/material/styles' {
   interface Palette {
@@ -24,20 +24,21 @@ declare module '@mui/material/styles' {
   }
 
   interface PaletteNeutralColorOptions extends SimplePaletteColorOptions {
-    dim?: string,
-    dark?: string,
-    bright?: string,
-    light?: string,
+    on?: string,
+    variant?: string,
+    onVariant?: string,
     containerLowest?: string,
     containerLow?: string,
     container?: string,
     containerHigh?: string,
     containerHighest?: string,
-    onSurface?: string,
-    onSurfaceVariant?: string,
     outline?: string,
     outlineVariant?: string,
+    inverse?: string,
+    onInverse?: string,
+    inversePrimary?: string,
     shadow?: string,
+    scrim?: string,
   }
 }
 
@@ -82,21 +83,23 @@ const colorThemeOptions: ThemeOptions = {
       onContainer: '#301715',
     },
     surface: {
-      main: '#FAFAF8',
-      light: '#FAFAF8',
-      dark: '#DDDDD1',
-      contrastText: '#191910',
-      dim: '#DDDDD1',
-      bright: '#FAFAF8',
+      main: '#FDF9F0',
+      on: '#1D1C16',
+      variant: '#E1E2EC',
+      onVariant: '#44474F',
       containerLowest: '#FFFFFF',
-      containerLow: '#F5F4F1',
-      container: '#F0EFEA',
-      containerHigh: '#EAEAE3',
-      containerHighest: '#E5E5DC',
-      onSurface: '#191910',
-      outline: '#7E7B4E',
+      containerLow: '#F8F3EA',
+      container: '#F2EDE4',
+      containerHigh: '#ECE8DF',
+      containerHighest: '#E6E2D9',
+      outline: '#707686',
+      outlineVariant: '#44474F',
+      inverse: '#1D1C16',
+      onInverse: '#E6E2D9',
+      inversePrimary: '#006685',
       shadow: '#000000',
-    }
+      scrim: '#000000',
+    },
   },
 };
 
