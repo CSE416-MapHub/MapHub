@@ -182,17 +182,6 @@ function LoginForm() {
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}
-      <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Link variant="body1" href="/account/forgot-account?query=username">
-          Forgot Username
-        </Link>
-        <Link variant="body1" href="/account/forgot-account?query=password">
-          Forgot Password
-        </Link>
-      </Container>
-      <Button
-        variant='filled'
-        onClick={handleLoginClick}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
