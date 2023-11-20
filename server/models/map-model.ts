@@ -2,81 +2,11 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-type MapType = 'choropleth' | 'categorical' | 'symbol' | 'dot' | 'flow';
-
-interface IChoroplethProps {
-  minIntensity: number;
-  maxIntensity: number;
-  minColor: string;
-  maxColor: string;
-  indexingKey: string;
-}
-
-interface ICategoryProps {
-  color: string;
-  name: string;
-}
-
-interface ISymbolProps {
-  svg: string;
-  name: string;
-}
-
-interface IDotDensityProps {
-  name: string;
-  opacity: number;
-  size: number;
-  color: string;
-}
-
-interface IRegionProperties {
-  color: string;
-  intensity: number;
-  category: string;
-}
-
-interface ISymbolInstance {
-  x: number;
-  y: number;
-  scale: number;
-  symbol: string;
-}
-
-interface IDotInstance {
-  x: number;
-  y: number;
-  scale: number;
-  dot: string;
-}
-
-interface IArrowInstance {
-  label: string;
-  color: string;
-  opacity: number;
-  capacity: number;
-  interpolationPoints: {
-    x: number;
-    y: number;
-  }[];
-}
-
-interface Map {
-  mapType: MapType;
-  globalChoroplethData: IChoroplethProps | null;
-  globalCategoryData: ICategoryProps[] | null;
-  globalSymbolData: ISymbolProps[] | null;
-  globalDotDensityData: IDotDensityProps[] | null;
-
-  regionsData: IRegionProperties[];
-  symbolsData: ISymbolInstance[] | null;
-  dotsData: IDotInstance[] | null;
-  arrowsData: IArrowInstance[] | null;
-
-  geoJSON: string;
-}
-
-const mapSchema = new Schema<Map>({
+const mapSchema = new Schema({
+  title: { type: String, required: true },
+  owner: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
   mapType: { type: String, required: true },
+  labels: { type: [String], require: true },
   globalChoroplethData: {
     type: {
       minIntensity: Number,
@@ -96,7 +26,7 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
   globalSymbolData: {
     type: [
@@ -106,9 +36,8 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
-
   globalDotDensityData: {
     type: [
       {
@@ -119,7 +48,7 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
   regionsData: [
     {
@@ -139,7 +68,7 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
   dotsData: {
     type: [
@@ -151,7 +80,7 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
   arrowsData: {
     type: [
@@ -169,9 +98,12 @@ const mapSchema = new Schema<Map>({
       },
     ],
     required: false,
-    default: null,
+    default: [],
   },
-  geoJSON: String,
+  geoJSON: {
+    type: String,
+    require: true,
+  },
 });
 
 const Map = mongoose.model('Map', mapSchema);
