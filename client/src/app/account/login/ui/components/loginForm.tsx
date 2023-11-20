@@ -9,6 +9,7 @@ import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import styles from '../../../components/form.module.css';
 import AccountAPI from 'api/AccountAPI';
+import { useRouter } from 'next/navigation';
 
 interface LoginFieldState {
   value: string;
@@ -96,12 +97,12 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
         AccountAPI.loginUser(validatedState.username.value, 
           validatedState.password.value).then(response => {
             console.log("Login successful:", response);
+            //Redirect to user dashboard
           })
           .catch(error => {
             console.log("Login failed:", error.response.data.errorMessage);
           });
       }
-      // TODO: Handle login success or failure
       return validatedState;
       
     }
@@ -140,6 +141,7 @@ function LoginForm() {
     },
     alertOpen: false
   });
+  const router = useRouter();
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -167,11 +169,6 @@ function LoginForm() {
     });
   };
 
-  // const handleLoginClick: MouseEventHandler = () => {
-  //   loginDispatch({
-  //     type: LoginActionType.login,
-  //   });
-  // };
 
   const handleLoginClick: MouseEventHandler = () => {
     const { username, password } = loginState;
@@ -181,6 +178,9 @@ function LoginForm() {
       AccountAPI.loginUser(username.value, password.value)
         .then(response => {
           console.log("Login successful:", response);
+          //Redirect to dashboard
+          router.replace('/account/maps');
+
         })
         .catch(error => {
           console.log("Login failed:", error.response?.data?.errorMessage);
