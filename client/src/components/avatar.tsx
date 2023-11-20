@@ -1,9 +1,9 @@
 'use client';
 import { Avatar as MaterialAvatar } from '@mui/material';
 import { AvatarProps } from '@mui/material';
-import Icon from '../../components/icon';
+import Icon from './icon';
 
-import styles from '../../styles/avatar.module.scss';
+import styles from '../styles/avatar.module.scss';
 
 function Avatar({ className, src, ...props }: AvatarProps) {
   if (src) {

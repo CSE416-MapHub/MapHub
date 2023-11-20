@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import Avatar from '../components/avatar';
+import Avatar from '../../components/avatar';
 import Button from '../../components/button';
 import styles from '../styles/navBar.module.scss';
 
