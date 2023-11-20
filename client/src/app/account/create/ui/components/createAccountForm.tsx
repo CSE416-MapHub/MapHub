@@ -424,13 +424,13 @@ function CreateAccountForm() {
     }
   }, [createAccountState.registrationError]);
 
-  // useEffect(() => {
-  //   // Check if registration succeeded and display success snackbar accordingly
-  //   if (showSuccessSnackbar) {
-  //     setSuccessSnackbarOpen(true);
-  //     //Call prop function
-  //   }
-  // }, [createAccountState.registrationError]);
+  useEffect(() => {
+    // Check if registration succeeded and display success snackbar accordingly
+    if (showSuccessSnackbar) {
+      setSuccessSnackbarOpen(true);
+      //Call prop function
+    }
+  }, [createAccountState.registrationError]);
   return (
     
     <div className={styles.container}>
