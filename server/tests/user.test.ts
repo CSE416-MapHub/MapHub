@@ -95,6 +95,6 @@ describe('User Retrieval API', () => {
   });
 });
 
-afterAll(() => {
-  server.close();
+afterAll(done => {
+  server.close(done);
 });
