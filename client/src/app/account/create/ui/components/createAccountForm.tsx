@@ -1,13 +1,17 @@
 'use client'
 
-import { useReducer, MouseEventHandler } from 'react';
-import { Button, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import { Button, Stack, Typography } from '@mui/material';
 
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
+import { useRouter } from 'next/navigation';
+
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 /**
  * The CreateAccountState is an object filled with states of text field 
@@ -26,6 +30,7 @@ interface CreateAccountState {
   email: CreateAccountFieldState,
   password: CreateAccountFieldState,
   passwordConfirm: CreateAccountFieldState,
+  registrationError: string | null,
 };
 
 /**
@@ -44,11 +49,15 @@ enum CreateAccountActionType {
   validatePasswordConfirm = 'validatePasswordConfirm',
   validate = 'validate',
   createAccount = 'createAccount',
+  registrationSuccess = 'registrationSuccess',
+  registrationFailure = 'registrationFailure',
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
   value?: any,
+  error?: string | null;
 }
+
 
 /**
  * The createAccountReducer function takes the current state along with an
@@ -199,22 +208,62 @@ function createAccountReducer(
         !validatedState.email.error &&
         !validatedState.password.error &&
         !validatedState.password.error) {
-        AccountAPI.registerUser(
-          validatedState.username.value,
-          validatedState.email.value,
-          validatedState.password.value,
-          validatedState.passwordConfirm.value,
-        );
+          AccountAPI.registerUser(
+              validatedState.username.value,
+              validatedState.email.value,
+              validatedState.password.value,
+              validatedState.passwordConfirm.value,
+            )
+            .then((result) => {
+              if(result.data.success) {
+                console.log("success");
+              }
+            })
+            .catch((error: any) => {
+              console.error('Registration failed:', error.response.data.errorMessage);
+              return {
+                ...state,
+                registrationError: error.response.data.errorMessage || null, // Set registrationError
+              };
+          });
       }
-      // TODO: Navigate to another page upon successfully creating an account
-      // or modify the form state.
+      // TODO: Redirect
+
+
       return validatedState;
     }
-    default: {
-      return state;
+
+    case CreateAccountActionType.registrationSuccess: {
+      // Handle registration success, maybe reset the form state
+      return {
+        ...state,
+        registrationError: null, // Reset registrationError
+        username: { value: '', error: false, errorText: '' },
+        email: { value: '', error: false, errorText: '' },
+        password: { value: '', error: false, errorText: '' },
+        passwordConfirm: { value: '', error: false, errorText: '' },
+      };
     }
+
+    case CreateAccountActionType.registrationFailure: {
+      // Handle registration failure, set error state
+      console.error('Registration failed:', action.error);
+      return {
+        ...state,
+        registrationError: action.error || null, // Set registrationError
+      };
+    }
+
   }
 }
+
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
 
 /**
  * The CreateAccountForm renders a frontend form with the following text fields:
@@ -223,6 +272,10 @@ function createAccountReducer(
  * is handled by the createAccountReducer.
  */
 function CreateAccountForm() {
+  const router = useRouter();
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);  
+  const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
   const [ createAccountState, createAccountDispatch ] = useReducer(
     createAccountReducer,
     {
@@ -246,6 +299,7 @@ function CreateAccountForm() {
         error: false,
         errorText: '',
       },
+      registrationError: null
     },
   );
 
@@ -301,14 +355,85 @@ function CreateAccountForm() {
     });
   };
 
-  const handleCreateAccountClick : MouseEventHandler = (event) => {
-    createAccountDispatch({
-      type: CreateAccountActionType.createAccount,
-    });
+
+  const handleCreateAccountClick : MouseEventHandler = async (event) => {
+    // createAccountDispatch({
+    //   type: CreateAccountActionType.createAccount,
+    // });
+    try {
+      const result = await AccountAPI.registerUser(
+        createAccountState.username.value,
+        createAccountState.email.value,
+        createAccountState.password.value,
+        createAccountState.passwordConfirm.value
+      );
+  
+      // Handle the result accordingly, dispatch actions, etc.
+      if (result.data.success) {
+        createAccountDispatch({
+          type: CreateAccountActionType.registrationSuccess,
+        });
+        setShowSuccessSnackbar(true);
+      }
+    } catch (error: any) {
+      console.error('Registration failed:', error.message);
+      createAccountDispatch({
+        type: CreateAccountActionType.registrationFailure,
+        error: error.response.data.errorMessage || 'Registration failed.',
+      });
+    }
   }
 
+
+  const handleSnackbarClose = () => {
+    setSuccessSnackbarOpen(false);
+    setErrorSnackbarOpen(false);  
+    createAccountDispatch({
+      type: CreateAccountActionType.registrationFailure,
+      error: null
+    });
+  };
+
+  useEffect(() => {
+    // This effect runs after the component has rendered
+    console.log(successSnackbarOpen);
+    if (successSnackbarOpen) {
+      // If either snackbar is open, initiate the redirect after a delay
+      const timer = setTimeout(() => {
+        router.replace('/account/login');
+      }, 3000); // Adjust the delay as needed
+
+      // Cleanup function to clear the timer if the component unmounts
+      return () => clearTimeout(timer);
+    }
+  }, [successSnackbarOpen, router]);
+
+  useEffect(() => {
+    // Check if registration failed and display error snackbar accordingly
+    if (createAccountState.registrationError !== null) {
+      setErrorSnackbarOpen(true);
+    }
+  }, [createAccountState.registrationError]);
+
+  useEffect(() => {
+    // Check if registration succeeded and display success snackbar accordingly
+    if (showSuccessSnackbar) {
+      setSuccessSnackbarOpen(true);
+      //Call prop function
+    }
+  }, [createAccountState.registrationError]);
   return (
+    
     <div className={styles.container}>
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+          <Alert onClose={handleSnackbarClose} severity="error">
+            {createAccountState.registrationError || 'Account creation failed!'}
+          </Alert>
+      </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
@@ -364,6 +489,15 @@ function CreateAccountForm() {
       >
         Create Account
       </Button>
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Account created successfully! Redirecting to login...
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
