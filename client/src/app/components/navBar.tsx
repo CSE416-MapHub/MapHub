@@ -13,30 +13,30 @@ function NavBar() {
   return (
     <nav className={clsx({
       [styles['nav__bar']]: true,
-      [styles['nav__bar--compact']]: usePathname() === '/create'
+      [styles['nav__bar--compact']]: usePathname() === '/create',
     })}>
       <div>
-        <Link id="home" href="/">
+        <Link className={styles.nav__logo} id='home' href='/'>
           <Image
-            src="/maphub.svg"
+            src='/maphub.svg'
             width={96}
             height={24}
-            alt="The MapHub logo with a cerulean pin over a circle on the right"
+            alt='The MapHub logo with a cerulean pin over a circle on the right'
           />
         </Link>
       </div>
       <div className={styles['nav__box']}>
-        <Link id="create" href="/create">
-          <Button variant="text">Create</Button>
+        <Link id='create' href='/create'>
+          <Button variant='text'>Create</Button>
         </Link>
-        <Link id="discover" href="/discover">
-          <Button variant="text">Discover</Button>
+        <Link id='discover' href='/discover'>
+          <Button variant='text'>Discover</Button>
         </Link>
-        <Link id="signin" href="/account/login">
-          <Button variant="outlined">Sign In</Button>
+        <Link id='signin' href='/account/login'>
+          <Button variant='outlined'>Sign In</Button>
         </Link>
-        <Link id="join-now" href="/account/create">
-          <Button variant="filled">Join Now</Button>
+        <Link id='join-now' href='/account/create'>
+          <Button variant='filled'>Join Now</Button>
         </Link>
         {/* TODO: DELETE THIS */}
         <UserButton />
