@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import { useReducer, MouseEventHandler, useEffect } from 'react';
 import { Stack, Typography } from '@mui/material';
 
 import Button from '../../../../../components/button';
@@ -363,7 +363,7 @@ function CreateAccountForm() {
     });
   };
 
-  const handleCreateAccountClick : MouseEventHandler = async (event) => {
+  const handleCreateAccountClick  : MouseEventHandler = async (event) => {
     // createAccountDispatch({
     //   type: CreateAccountActionType.createAccount,
     // });
@@ -443,6 +443,15 @@ function CreateAccountForm() {
             {createAccountState.registrationError || 'Account creation failed!'}
           </Alert>
       </Snackbar>
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+          <Alert onClose={handleSnackbarClose} severity="error">
+            {createAccountState.registrationError || 'Account creation failed!'}
+          </Alert>
+      </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
@@ -494,6 +503,15 @@ function CreateAccountForm() {
       <Button variant="filled" onClick={handleCreateAccountClick}>
         Create Account
       </Button>
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Account created successfully! Redirecting to login...
+        </Alert>
+      </Snackbar>
       <Snackbar
         open={successSnackbarOpen}
         autoHideDuration={6000} // Adjust as needed
