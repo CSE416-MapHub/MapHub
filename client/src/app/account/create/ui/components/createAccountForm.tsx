@@ -22,9 +22,9 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
  *     * errorText - an error message indicating why the value is not valid.
  */
 interface CreateAccountFieldState {
-  value: string;
-  error: boolean;
-  errorText: string;
+  value: string,
+  error: boolean,
+  errorText: string,
 }
 
 interface CreateAccountState {
@@ -52,7 +52,7 @@ enum CreateAccountActionType {
   validate = 'validate',
   createAccount = 'createAccount',
   registrationSuccess = 'registrationSuccess',
-  registrationFailure = 'registrationFailure'
+  registrationFailure = 'registrationFailure',
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
@@ -91,8 +91,7 @@ function createAccountReducer(
       const { username } = state;
       if (!/^[\w.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
-        username.errorText =
-          'Please enter a valid username between 3-16 ' +
+        username.errorText = 'Please enter a valid username between 3-16 ' +
           'alphanumeric, underscore, or dot characters.';
       } else {
         username.error = false;
@@ -170,7 +169,7 @@ function createAccountReducer(
       };
     }
     case CreateAccountActionType.validatePasswordConfirm: {
-      // Checks if the password confirmation is well-formed and matches the
+      // Checks if the password confirmation is well-formed and matches the 
       // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
@@ -211,9 +210,9 @@ function createAccountReducer(
         type: CreateAccountActionType.validate,
       });
       console.log('IN CREATE ACCOUNT');
-      if (
-        !validatedState.username.error &&
+      if (!validatedState.username.error &&
         !validatedState.email.error &&
+        !validatedState.password.error &&
         !validatedState.password.error) {
           AccountAPI.registerUser(
               validatedState.username.value,
@@ -362,8 +361,6 @@ function CreateAccountForm() {
     });
   };
 
-
-
   const handleCreateAccountClick : MouseEventHandler = async (event) => {
     // createAccountDispatch({
     //   type: CreateAccountActionType.createAccount,
@@ -383,6 +380,7 @@ function CreateAccountForm() {
         });
         console.log("successfully registered")
         setSuccessSnackbarOpen(true);
+
       }
     } catch (error: any) {
       console.error('Registration failed:', error.message);
@@ -410,7 +408,7 @@ function CreateAccountForm() {
       // If either snackbar is open, initiate the redirect after a delay
       const timer = setTimeout(() => {
         router.replace('/account/login');
-      }, 3000); // Adjust the delay as needed
+      }, 1000); // Adjust the delay as needed
 
       // Cleanup function to clear the timer if the component unmounts
       return () => clearTimeout(timer);
@@ -424,13 +422,6 @@ function CreateAccountForm() {
     }
   }, [createAccountState.registrationError]);
 
-  useEffect(() => {
-    // Check if registration succeeded and display success snackbar accordingly
-    if (showSuccessSnackbar) {
-      setSuccessSnackbarOpen(true);
-      //Call prop function
-    }
-  }, [createAccountState.registrationError]);
   return (
     
     <div className={styles.container}>
@@ -443,26 +434,17 @@ function CreateAccountForm() {
             {createAccountState.registrationError || 'Account creation failed!'}
           </Alert>
       </Snackbar>
-      <Snackbar
-        open={errorSnackbarOpen}
-        autoHideDuration={6000} // Adjust as needed
-        onClose={handleSnackbarClose}
-      >
-          <Alert onClose={handleSnackbarClose} severity="error">
-            {createAccountState.registrationError || 'Account creation failed!'}
-          </Alert>
-      </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant="body1" align="left">
+      <Typography className={styles.body} variant='body1' align='left'>
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -471,9 +453,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id="email"
-        type="email"
-        label="Email Address"
+        id='email'
+        type='email'
+        label='Email Address'
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -481,9 +463,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -491,27 +473,21 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id="password-confirm"
-        type="password"
-        label="Confirm Password"
+        id='password-confirm'
+        type='password'
+        label='Confirm Password'
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button variant="filled" onClick={handleCreateAccountClick}>
+      <Button
+        variant='filled'
+        onClick={handleCreateAccountClick}
+      >
         Create Account
       </Button>
-      <Snackbar
-        open={successSnackbarOpen}
-        autoHideDuration={6000} // Adjust as needed
-        onClose={handleSnackbarClose}
-      >
-        <Alert onClose={handleSnackbarClose} severity="success">
-          Account created successfully! Redirecting to login...
-        </Alert>
-      </Snackbar>
       <Snackbar
         open={successSnackbarOpen}
         autoHideDuration={6000} // Adjust as needed
