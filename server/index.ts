@@ -45,8 +45,12 @@ if (require.main?.filename.indexOf('.test.') === -1) {
     .catch(e => {
       console.error('Connection error', e.message);
     });
-
-  const server = app.listen(port, () => {
+}
+if (
+  require.main?.filename.indexOf('.test.') === -1 &&
+  require.main?.filename.indexOf('testServer') === -1
+) {
+  app.listen(port, () => {
     console.log(`Server is running on port ${port}`);
   });
 }
