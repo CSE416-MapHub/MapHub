@@ -124,12 +124,13 @@ export const handleFiles = (fileList: FileList): Promise<G.GeoJSON> => {
       files[1].name.split('.').pop() === 'shp' &&
       files[2].name.split('.').pop() === 'shx')
   ) {
-    let gjson: GeoJSON.GeoJSON | null = null;
-    let dtable: DataTable | null = null;
     // Handle shape file conversion to GeoJSON.
-    const shpReader = new FileReader();
-    const dbfReader = new FileReader();
+
     return new Promise((resolve, reject) => {
+      let gjson: GeoJSON.GeoJSON | null = null;
+      let dtable: DataTable | null = null;
+      const shpReader = new FileReader();
+
       shpReader.onload = async e => {
         if (e.target?.result) {
           const arrayBuffer = e.target.result as ArrayBuffer;
@@ -143,9 +144,11 @@ export const handleFiles = (fileList: FileList): Promise<G.GeoJSON> => {
       shpReader.readAsArrayBuffer(files[1]);
 
       // Handle DBF conversion to GeoJSON
+      const dbfReader = new FileReader();
       dbfReader.onload = () => {
         var arrayBuffer: ArrayBuffer = dbfReader.result as ArrayBuffer;
         if (arrayBuffer) {
+          console.log(arrayBuffer);
           let buffer: Buffer = Buffer.from(arrayBuffer);
           dtable = Dbf.read(buffer);
           let result = mergeData(gjson, dtable);

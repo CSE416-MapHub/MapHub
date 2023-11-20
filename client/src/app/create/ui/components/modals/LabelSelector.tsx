@@ -34,12 +34,16 @@ interface LabelSelectorProps {
   properties: string[];
   isCheckbox: boolean;
   onSelect: (selection: string[]) => void;
+  selectedOptions: Array<string>;
+  setSelectedOptions: (s: Array<string>) => void;
 }
 
 const LabelSelector: React.FC<LabelSelectorProps> = ({
   properties,
   isCheckbox,
   onSelect,
+  selectedOptions,
+  setSelectedOptions,
 }) => {
   const [searchInput, setSearchInput] = useState('');
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
@@ -47,7 +51,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
   const [selectedFilter, setSelectedFilter] = useState(ImportFilterOptions.ALL);
   const [filteredProperties, setFilteredProperties] =
     useState<string[]>(properties);
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  // const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
 
   useEffect(() => {
     // Sort and Filter logic
@@ -74,14 +78,16 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
     event: React.ChangeEvent<HTMLInputElement>,
     property: string,
   ) => {
-    setSelectedOptions(prev => {
-      const newSelectedOptions = event.target.checked
-        ? [...prev, property]
-        : prev.filter(opt => opt !== property);
-      console.log(newSelectedOptions);
-      onSelect(newSelectedOptions);
-      return newSelectedOptions;
-    });
+    setSelectedOptions(
+      (prev => {
+        const newSelectedOptions = event.target.checked
+          ? [...prev, property]
+          : prev.filter(opt => opt !== property);
+        console.log(newSelectedOptions);
+        onSelect(newSelectedOptions);
+        return newSelectedOptions;
+      })(selectedOptions),
+    );
   };
 
   const handleRadioChange = (

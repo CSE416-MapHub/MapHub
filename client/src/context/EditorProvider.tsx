@@ -2,6 +2,7 @@ import { IPropertyPanelSectionProps } from 'app/create/ui/components/PropertyPan
 import { Dispatch, createContext, useReducer } from 'react';
 import { MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
+import * as G from 'geojson';
 
 // the global state interface
 export interface IEditorState {
@@ -10,6 +11,7 @@ export interface IEditorState {
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
+    originalRegions: Array<G.Feature>;
   };
 }
 
@@ -20,6 +22,7 @@ let initialState: IEditorState = {
   mapDetails: {
     availableProps: [],
     bbox: [0, 0, 0, 0],
+    originalRegions: [],
   },
 };
 
@@ -61,6 +64,9 @@ function reducer(
             (prev, curr) => mergeBBox(prev, curr.box),
             v.getFeatureResults().perFeature[0].box,
           );
+        newState.mapDetails.originalRegions = v
+          .getFeatureResults()
+          .perFeature.map(x => x.originalFeature);
       } else {
         throw new Error('SET_MAP must have a map in its payload');
       }

@@ -4,6 +4,7 @@ import * as G from 'geojson';
 import { Path } from 'leaflet';
 import { useContext, useState, useEffect } from 'react';
 import { GeoJSON, TileLayer, useMap } from 'react-leaflet';
+import { IInputProps } from './PropertyInput';
 
 export default function () {
   const editorContext = useContext(EditorContext);
@@ -30,28 +31,41 @@ export default function () {
       //   key={rerender}
       data={editorContext.state.map?.geoJSON}
       onEachFeature={(feature, layer) => {
+        console.log(editorContext.state.mapDetails.originalRegions);
         layer.addEventListener('click', () => {
-          editorContext.dispatch({
+          alert('dispatching');
+          let action = {
             type: EditorActions.SET_PANEL,
             payload: {
               propertiesPanel: [
                 {
                   name: 'Labels',
-                  items: [
-                    {
-                      name: 'ISO_NAME',
-                      input: {
-                        type: 'text',
-                        short: false,
-                        disabled: false,
-                        value: 'CHAD',
-                      },
+                  // TODO: force unundefined
+                  items: editorContext.state.map!.labels.map(
+                    (
+                      lbl,
+                    ): {
+                      name: string;
+                      input: IInputProps;
+                    } => {
+                      return {
+                        name: lbl,
+                        input: {
+                          type: 'text',
+                          short: false,
+                          disabled: false,
+                          value:
+                            // TODO: force unundefined
+                            feature.properties[lbl],
+                        },
+                      };
                     },
-                  ],
+                  ),
                 },
               ],
             },
-          });
+          };
+          editorContext.dispatch(action);
         });
         let p = layer as Path;
         p.setStyle({
