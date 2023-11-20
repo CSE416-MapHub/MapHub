@@ -18,13 +18,13 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
  * The CreateAccountState is an object filled with states of text field
  * parameters. Each text field parameter holds the following:
  *     * value - the actual text value of the input text field,
- *     * error - a boolean indicating whether or not the input is valid, and
+ *     * error - a boolean indicating whether the input is valid, and
  *     * errorText - an error message indicating why the value is not valid.
  */
 interface CreateAccountFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface CreateAccountState {
@@ -84,14 +84,15 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validateUsername: {
       // Checks if the username is well-formed. A well-formed username must
-      // include alphanumeric characters, underscores, or dots such that the 
+      // include alphanumeric characters, underscores, or dots such that the
       // last character is not a dot. The username must also be between 3 to 16
       // characters.
       // TODO: Implement unique username checking.
       const { username } = state;
       if (!/^[\w.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
-        username.errorText = 'Please enter a valid username between 3-16 ' +
+        username.errorText =
+          'Please enter a valid username between 3-16 ' +
           'alphanumeric, underscore, or dot characters.';
       } else {
         username.error = false;
@@ -117,7 +118,7 @@ function createAccountReducer(
       // underscores, and dots, followed by an @ symbol, followed by a domain
       // name (set of alphanumeric characters, underscores, and dots such that
       // it ends with a dot), and followed by a top-level domain name (a set of
-      // alphanumeric characters and underscores of length 2-4). 
+      // alphanumeric characters and underscores of length 2-4).
       const { email } = state;
       if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
         email.error = true;
@@ -142,12 +143,13 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validatePassword: {
       // Checks if the password is well-formed. A password is well-formed if it
-      // is a set of characters such that it is longer than 8 characters and 
+      // is a set of characters such that it is longer than 8 characters and
       // contains one uppercase letter, one lowercase letter, and one digit.
       const { password } = state;
       if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password.value)) {
         password.error = true;
-        password.errorText = 'Please enter a password with at least eight ' +
+        password.errorText =
+          'Please enter a password with at least eight ' +
           'characters with one uppercase, one lowercase, and one digit';
       } else {
         password.error = false;
@@ -168,11 +170,14 @@ function createAccountReducer(
       };
     }
     case CreateAccountActionType.validatePasswordConfirm: {
-      // Checks if the password confirmation is well-formed and matches the 
+      // Checks if the password confirmation is well-formed and matches the
       // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
-      if (password.value !== passwordConfirm.value || passwordConfirm.value.length === 0) {
+      if (
+        password.value !== passwordConfirm.value ||
+        passwordConfirm.value.length === 0
+      ) {
         passwordConfirm.error = true;
         passwordConfirm.errorText = 'Please reconfirm the password.';
       } else {
@@ -206,7 +211,8 @@ function createAccountReducer(
         type: CreateAccountActionType.validate,
       });
       console.log('IN CREATE ACCOUNT');
-      if (!validatedState.username.error &&
+      if (
+        !validatedState.username.error &&
         !validatedState.email.error &&
         !validatedState.password.error &&
         !validatedState.password.error) {
@@ -440,14 +446,14 @@ function CreateAccountForm() {
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant='body1' align='left'>
+      <Typography className={styles.body} variant="body1" align="left">
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id='username'
-        type='text'
-        label='Username'
+        id="username"
+        type="text"
+        label="Username"
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -456,9 +462,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id='email'
-        type='email'
-        label='Email Address'
+        id="email"
+        type="email"
+        label="Email Address"
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -466,9 +472,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id='password'
-        type='password'
-        label='Password'
+        id="password"
+        type="password"
+        label="Password"
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -476,19 +482,16 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id='password-confirm'
-        type='password'
-        label='Confirm Password'
+        id="password-confirm"
+        type="password"
+        label="Confirm Password"
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button
-        variant='filled'
-        onClick={handleCreateAccountClick}
-      >
+      <Button variant="filled" onClick={handleCreateAccountClick}>
         Create Account
       </Button>
       <Snackbar
