@@ -153,13 +153,17 @@ function LoginForm() {
 
   return (
     <div className={styles.container}>
+<<<<<<< HEAD
       <Typography className={styles.title} variant="h2">
+=======
+      <Typography className={styles.title} variant='h2'>
+>>>>>>> b74db87 (Refactored Button Imports)
         Login
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={loginState.username.value}
         setValue={setUsername}
         error={loginState.username.error}
@@ -167,21 +171,33 @@ function LoginForm() {
         helperText={loginState.username.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={loginState.password.value}
         setValue={setPassword}
         error={loginState.password.error}
         validate={validatePassword}
         helperText={loginState.password.errorText}
       />
+<<<<<<< HEAD
       <Container
         sx={{
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}
+=======
+      <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
+        <Link variant='body1' href='/account/forgot-account?query=username'>
+          Forgot Username
+        </Link>
+        <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
+      </Container>
+      <Button
+        variant='filled'
+        onClick={handleLoginClick}
+>>>>>>> b74db87 (Refactored Button Imports)
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
