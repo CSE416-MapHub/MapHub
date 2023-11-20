@@ -9,8 +9,12 @@ import { isGeometry, isGeometryCollection } from './utility';
 
 type BBox = [x: number, y: number, w: number, h: number];
 
-export interface IFeatureVisitResults {
+export interface IGeometryVisitResults {
   box: BBox;
+}
+
+export interface IFeatureVisitResults extends IGeometryVisitResults {
+  originalFeature: G.Feature;
 }
 
 export interface IFeatureAggregateResults {
@@ -77,7 +81,12 @@ export class GeoJSONVisitor {
   }
 
   private visitFeature(feature: GeoJSON.Feature) {
-    this.featureResults.push(this.visitGeometry(feature.geometry));
+    let res: IFeatureVisitResults = {
+      originalFeature: feature,
+      box: [0, 0, 0, 0],
+    };
+    res = { ...res, ...this.visitGeometry(feature.geometry) };
+    this.featureResults.push(res);
     let props = feature.properties;
     if (props) {
       for (let p of Object.keys(props)) {
@@ -99,13 +108,13 @@ export class GeoJSONVisitor {
     throw new Error('Found malformed position ' + p);
   }
 
-  private visitPoint(p: GeoJSON.Position): IFeatureVisitResults {
+  private visitPoint(p: GeoJSON.Position): IGeometryVisitResults {
     return {
       box: [p[0], p[1], 0, 0],
     };
   }
 
-  private visitLine(coordinates: GeoJSON.Position[]): IFeatureVisitResults {
+  private visitLine(coordinates: GeoJSON.Position[]): IGeometryVisitResults {
     let bbox: BBox = [coordinates[0][0], coordinates[0][1], 0, 0];
     for (let p of coordinates) {
       addPointToLocalBBox(p[0], p[1], bbox);
@@ -123,7 +132,7 @@ export class GeoJSONVisitor {
    */
   private visitPolygon(
     coordinates: GeoJSON.Position[][],
-  ): IFeatureVisitResults {
+  ): IGeometryVisitResults {
     if (coordinates.length < 1 || coordinates[0].length < 1) {
       throw new Error('No bounding polygon specified');
     }
@@ -152,9 +161,9 @@ export class GeoJSONVisitor {
    * @param geometry Some GeoJSON.Geometry
    * @returns An array of SVG elements and a bounding box containing all elements
    */
-  private visitGeometry(geometry: GeoJSON.Geometry): IFeatureVisitResults {
+  private visitGeometry(geometry: GeoJSON.Geometry): IGeometryVisitResults {
     if (isGeometryCollection(geometry)) {
-      let res: IFeatureVisitResults = this.visitGeometry(
+      let res: IGeometryVisitResults = this.visitGeometry(
         geometry.geometries[0],
       );
       geometry.geometries.forEach((g, i) => {
@@ -168,7 +177,7 @@ export class GeoJSONVisitor {
         return this.visitPoint(geometry.coordinates);
       }
       case 'MultiPoint': {
-        let res: IFeatureVisitResults = this.visitPoint(
+        let res: IGeometryVisitResults = this.visitPoint(
           geometry.coordinates[0],
         );
         geometry.coordinates.forEach((c, i) => {
@@ -181,7 +190,9 @@ export class GeoJSONVisitor {
         return this.visitLine(geometry.coordinates);
       }
       case 'MultiLineString': {
-        let res: IFeatureVisitResults = this.visitLine(geometry.coordinates[0]);
+        let res: IGeometryVisitResults = this.visitLine(
+          geometry.coordinates[0],
+        );
         geometry.coordinates.forEach((pline, i) => {
           let t = this.visitLine(pline);
           res.box = mergeBBox(res.box, t.box);
@@ -192,7 +203,7 @@ export class GeoJSONVisitor {
         return this.visitPolygon(geometry.coordinates);
       }
       case 'MultiPolygon': {
-        let res: IFeatureVisitResults = this.visitPolygon(
+        let res: IGeometryVisitResults = this.visitPolygon(
           geometry.coordinates[0],
         );
         geometry.coordinates.forEach((poly, i) => {

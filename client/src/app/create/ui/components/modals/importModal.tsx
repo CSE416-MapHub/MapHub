@@ -60,6 +60,8 @@ const ImportModal: React.FC<ImportModalProps> = ({
         properties={properties}
         isCheckbox={true}
         onSelect={handleSelectionChange}
+        selectedOptions={selectedOptions}
+        setSelectedOptions={setSelectedOptions}
       />
     </GeneralizedDialog>
   );
