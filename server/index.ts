@@ -5,7 +5,6 @@ import mapRouter from './routes/map-router';
 import postRouter from './routes/post-router';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
-
 // const dotenv = require('dotenv');
 
 // dotenv.config();
@@ -46,10 +45,10 @@ if (require.main?.filename.indexOf('.test.') === -1) {
     .catch(e => {
       console.error('Connection error', e.message);
     });
-}
 
-export const server = app.listen(port, () => {
-  console.log(`Server is running on port ${port}`);
-});
+  const server = app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+  });
+}
 
 export default app;
