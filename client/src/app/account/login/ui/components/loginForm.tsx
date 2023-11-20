@@ -153,15 +153,7 @@ function LoginForm() {
 
   return (
     <div className={styles.container}>
-<<<<<<< HEAD
-<<<<<<< HEAD
       <Typography className={styles.title} variant="h2">
-=======
-      <Typography className={styles.title} variant='h2'>
->>>>>>> b74db87 (Refactored Button Imports)
-=======
-      <Typography className={styles.title} variant="h2">
->>>>>>> 12634a1 (Formatted on Prettier.)
         Login
       </Typography>
       <ValidatedTextField
@@ -184,35 +176,23 @@ function LoginForm() {
         validate={validatePassword}
         helperText={loginState.password.errorText}
       />
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
->>>>>>> 12634a1 (Formatted on Prettier.)
       <Container
         sx={{
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}
-<<<<<<< HEAD
-=======
       <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Link variant='body1' href='/account/forgot-account?query=username'>
-=======
-      >
         <Link variant="body1" href="/account/forgot-account?query=username">
->>>>>>> 12634a1 (Formatted on Prettier.)
           Forgot Username
         </Link>
         <Link variant="body1" href="/account/forgot-account?query=password">
           Forgot Password
         </Link>
       </Container>
-<<<<<<< HEAD
       <Button
         variant='filled'
         onClick={handleLoginClick}
->>>>>>> b74db87 (Refactored Button Imports)
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
@@ -221,8 +201,6 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-=======
->>>>>>> 12634a1 (Formatted on Prettier.)
       <Button variant="filled" onClick={handleLoginClick}>
         Login
       </Button>

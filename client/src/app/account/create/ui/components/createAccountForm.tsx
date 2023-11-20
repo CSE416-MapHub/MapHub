@@ -214,7 +214,6 @@ function createAccountReducer(
       if (
         !validatedState.username.error &&
         !validatedState.email.error &&
-        !validatedState.password.error &&
         !validatedState.password.error) {
           AccountAPI.registerUser(
               validatedState.username.value,
@@ -362,6 +361,7 @@ function CreateAccountForm() {
       type: CreateAccountActionType.validatePasswordConfirm,
     });
   };
+
 
 
   const handleCreateAccountClick : MouseEventHandler = async (event) => {

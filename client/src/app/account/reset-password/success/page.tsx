@@ -13,7 +13,6 @@ function Page() {
   const searchParams = useSearchParams();
   const usernameOrPassword = searchParams.get('query');
 
-
   const handleReturnToLogin = () => {
     router.replace('/account/login');
   };
