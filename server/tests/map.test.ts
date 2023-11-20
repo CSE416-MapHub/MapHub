@@ -6,10 +6,13 @@ import mongoose from 'mongoose';
 import auth from '../auth/index';
 
 beforeAll(async () => {
+  console.log('STARTING SERVER IN MAP');
   await startServer(); // Choose your test port
 });
 
 afterAll(async () => {
+  console.log('CLOSING SERVER IN MAP');
+
   await stopServer();
 });
 beforeEach(() => {

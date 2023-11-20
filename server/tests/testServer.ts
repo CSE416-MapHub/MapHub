@@ -8,7 +8,7 @@ export const startServer = (): Promise<void> => {
   return new Promise((resolve, reject) => {
     server = app
       .listen(port, () => {
-        console.log(`Server is running on port ${port}`);
+        console.log(`TEST Server is running on port ${port}`);
         resolve();
       })
       .on('error', reject);
