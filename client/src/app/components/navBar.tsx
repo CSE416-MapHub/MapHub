@@ -5,7 +5,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
-import Avatar from '../../components/avatar';
+import NavAvatar from './navAvatar';
 import Button from '../../components/button';
 import styles from '../styles/navBar.module.scss';
 
@@ -40,7 +40,7 @@ function NavBar() {
         <Link id="join-now" href="/account/create">
           <Button variant="filled">Join Now</Button>
         </Link>
-        <Avatar />
+        <NavAvatar />
       </div>
     </nav>
   );
