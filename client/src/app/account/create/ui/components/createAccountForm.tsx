@@ -275,7 +275,7 @@ function CreateAccountForm() {
   const router = useRouter();
   const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
   const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);  
-  const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
+  // const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
   const [ createAccountState, createAccountDispatch ] = useReducer(
     createAccountReducer,
     {
@@ -373,7 +373,8 @@ function CreateAccountForm() {
         createAccountDispatch({
           type: CreateAccountActionType.registrationSuccess,
         });
-        setShowSuccessSnackbar(true);
+        console.log("successfully registered")
+        setSuccessSnackbarOpen(true);
       }
     } catch (error: any) {
       console.error('Registration failed:', error.message);
@@ -415,13 +416,13 @@ function CreateAccountForm() {
     }
   }, [createAccountState.registrationError]);
 
-  useEffect(() => {
-    // Check if registration succeeded and display success snackbar accordingly
-    if (showSuccessSnackbar) {
-      setSuccessSnackbarOpen(true);
-      //Call prop function
-    }
-  }, [createAccountState.registrationError]);
+  // useEffect(() => {
+  //   // Check if registration succeeded and display success snackbar accordingly
+  //   if (showSuccessSnackbar) {
+  //     setSuccessSnackbarOpen(true);
+  //     //Call prop function
+  //   }
+  // }, [createAccountState.registrationError]);
   return (
     
     <div className={styles.container}>
