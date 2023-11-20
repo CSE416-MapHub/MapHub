@@ -62,12 +62,17 @@ const MapController = {
 
     const mapID = savedMap._id.toString();
     console.log('MAP ID HERE:', mapID);
+
     const saveFilePath = path.join(
       __dirname,
       '..',
       'jsonStore',
       `${mapID}.geojson`,
     );
+    const dir = path.dirname(saveFilePath);
+    if (!fs.existsSync(dir)) {
+      await fs.promises.mkdir(dir, { recursive: true });
+    }
 
     try {
       await fs.promises.writeFile(saveFilePath, JSON.stringify(geoJSON));
