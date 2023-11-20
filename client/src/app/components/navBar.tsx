@@ -5,9 +5,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
+import Avatar from '../components/avatar';
 import Button from '../../components/button';
 import styles from '../styles/navBar.module.scss';
-import UserButton from './userButton';
 
 function NavBar() {
   return (
@@ -40,8 +40,7 @@ function NavBar() {
         <Link id="join-now" href="/account/create">
           <Button variant="filled">Join Now</Button>
         </Link>
-        {/* TODO: DELETE THIS */}
-        <UserButton />
+        <Avatar />
       </div>
     </nav>
   );

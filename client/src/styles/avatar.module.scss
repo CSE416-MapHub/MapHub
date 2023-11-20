@@ -1,0 +1,10 @@
+@use 'colors';
+
+.avatar {
+  background: hsla(194, 100%, 33%, 1);
+  background: linear-gradient(45deg, hsla(194, 100%, 33%, 1) 0%, hsla(193, 49%, 73%, 1) 100%);
+  background: -moz-linear-gradient(45deg, hsla(194, 100%, 33%, 1) 0%, hsla(193, 49%, 73%, 1) 100%);
+  background: -webkit-linear-gradient(45deg, hsla(194, 100%, 33%, 1) 0%, hsla(193, 49%, 73%, 1) 100%);
+
+  color: colors.$on-primary;
+}
