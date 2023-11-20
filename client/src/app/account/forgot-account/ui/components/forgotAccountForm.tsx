@@ -11,15 +11,14 @@ import styles from '../../../components/form.module.css';
 import { useSearchParams } from 'next/navigation';
 
 interface ForgotAccountFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface ForgotAccountState {
   email: ForgotAccountFieldState;
 }
-
 
 enum ForgotAccountActionType {
   updateEmail = 'updateEmail',
@@ -28,10 +27,9 @@ enum ForgotAccountActionType {
 }
 
 interface ForgotAccountAction {
-  type: ForgotAccountActionType,
-  value?: any,
+  type: ForgotAccountActionType;
+  value?: any;
 }
-
 
 function forgotAccountReducer(
   state: ForgotAccountState,
@@ -53,7 +51,7 @@ function forgotAccountReducer(
       // underscores, and dots, followed by an @ symbol, followed by a domain
       // name (set of alphanumeric characters, underscores, and dots such that
       // it ends with a dot), and followed by a top-level domain name (a set of
-      // alphanumeric characters and underscores of length 2-4). 
+      // alphanumeric characters and underscores of length 2-4).
       const { email } = state;
       if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
         email.error = true;
@@ -139,25 +137,24 @@ function ForgotAccountForm() {
 
   return (
     <div className={styles.container}>
-      <Typography className={styles.title} variant='h2'>
+      <Typography className={styles.title} variant="h2">
         Reset {usernameOrPassword}
       </Typography>
       <ValidatedTextField
-        id='email'
-        type='email'
-        label='Email Address'
+        id="email"
+        type="email"
+        label="Email Address"
         value={forgotAccountState.email.value}
         setValue={setEmail}
         error={forgotAccountState.email.error}
         validate={validateEmail}
         helperText={forgotAccountState.email.errorText}
       />
-      <Link href='/account/forgot-account/success?query=[usernameOrPassword]'
-            as={`/account/forgot-account/success?query=${usernameOrPassword}`}>
-        <Button
-          variant='filled'
-          onClick={handleSendEmailClick}
-        >
+      <Link
+        href="/account/forgot-account/success?query=[usernameOrPassword]"
+        as={`/account/forgot-account/success?query=${usernameOrPassword}`}
+      >
+        <Button variant="filled" onClick={handleSendEmailClick}>
           Send Email
         </Button>
       </Link>
