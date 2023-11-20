@@ -57,6 +57,33 @@ class AccountAPI {
       passwordVerify: passwordConfirm,
     });
   }
+ /**
+   * Sends a POST request to the server to login to an existing account
+   * with a valid username and password. Returns a response from
+   * the server.
+   *
+   * @param username - the existing account username
+   * @param password - the existing account password
+   * @returns the server response
+   */
+  static async loginUser(
+    username: string,
+    password: string
+  ) {
+    return this.api.post('/auth/login', {
+      username,
+      password
+    });
+  }
+
+ /**
+   * Sends a POST request to the server to logout a user.
+   *
+   * @returns the server response
+   */
+  static async logoutUser() {
+    return this.api.post('/auth/logout')
+  }
 
     /**
    * Sends a GET request to the server to fetch all registered users.
