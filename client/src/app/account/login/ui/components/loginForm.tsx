@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler } from 'react';
-import { Container, Link, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler, useState, useEffect } from 'react';
+import { Alert, AlertProps, Container, Link, Snackbar, Typography } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
 import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
@@ -18,6 +19,7 @@ interface LoginFieldState {
 interface LoginState {
   username: LoginFieldState;
   password: LoginFieldState;
+  alertOpen: boolean;
 }
 
 enum LoginActionType {
@@ -26,6 +28,8 @@ enum LoginActionType {
   updatePassword = 'updatePassword',
   validatePassword = 'validatePassword',
   login = 'login',
+  showAlert = 'showAlert',
+  hideAlert = 'hideAlert',
 }
 
 interface LoginAction {
@@ -86,6 +90,7 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
         type: LoginActionType.validateUsername,
       });
       const { username, password } = validatedState;
+      console.log(validatedState);
       if (!username.error && !password.error) {
         // Call your authentication API here
         AccountAPI.loginUser(validatedState.username.value, 
@@ -93,15 +98,31 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
             console.log("Login successful:", response);
           })
           .catch(error => {
-            console.log("Login failed:", error);
+            console.log("Login failed:", error.response.data.errorMessage);
           });
       }
       // TODO: Handle login success or failure
       return validatedState;
+      
+    }
+
+    case LoginActionType.showAlert: {
+      return {
+        ...state,
+        alertOpen: true,
+      };
+    }
+
+    case LoginActionType.hideAlert: {
+      return {
+        ...state,
+        alertOpen: false,
+      };
     }
     default: {
       return state;
     }
+
   }
 }
 
@@ -117,6 +138,7 @@ function LoginForm() {
       error: false,
       errorText: '',
     },
+    alertOpen: false
   });
 
   const setUsername = (value: string) => {
@@ -145,11 +167,51 @@ function LoginForm() {
     });
   };
 
+  // const handleLoginClick: MouseEventHandler = () => {
+  //   loginDispatch({
+  //     type: LoginActionType.login,
+  //   });
+  // };
+
   const handleLoginClick: MouseEventHandler = () => {
+    const { username, password } = loginState;
+
+    if (!username.error && !password.error) {
+      // Call your authentication API here
+      AccountAPI.loginUser(username.value, password.value)
+        .then(response => {
+          console.log("Login successful:", response);
+        })
+        .catch(error => {
+          console.log("Login failed:", error.response?.data?.errorMessage);
+          // Update the state to show the alert
+          loginDispatch({
+            type: LoginActionType.showAlert,
+          });
+        });
+    }
+  };
+
+  const handleAlertClose = () => {
     loginDispatch({
-      type: LoginActionType.login,
+      type: LoginActionType.hideAlert,
     });
   };
+
+  useEffect(() => {
+    // Show the alert when alertOpen becomes true
+    if (!loginState.alertOpen) {
+      handleAlertClose();
+    }
+  }, [loginState.alertOpen]);
+
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
 
   return (
     <div className={styles.container}>
@@ -193,6 +255,12 @@ function LoginForm() {
       <Button variant="filled" onClick={handleLoginClick}>
         Login
       </Button>
+
+      <Snackbar open={loginState.alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+        <Alert severity="error" onClose={handleAlertClose}>
+          Incorrect username or password!
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
