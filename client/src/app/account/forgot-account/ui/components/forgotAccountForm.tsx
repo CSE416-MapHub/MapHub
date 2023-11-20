@@ -11,13 +11,9 @@ import styles from '../../../components/form.module.css';
 import { useSearchParams } from 'next/navigation';
 
 interface ForgotAccountFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
-}
-
-interface ForgotAccountState {
-  email: ForgotAccountFieldState;
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface ForgotAccountState {
@@ -28,11 +24,6 @@ enum ForgotAccountActionType {
   updateEmail = 'updateEmail',
   validateEmail = 'validateEmail',
   sendEmail = 'sendEmail',
-}
-
-interface ForgotAccountAction {
-  type: ForgotAccountActionType,
-  value?: any,
 }
 
 interface ForgotAccountAction {
@@ -146,25 +137,24 @@ function ForgotAccountForm() {
 
   return (
     <div className={styles.container}>
-      <Typography className={styles.title} variant='h2'>
+      <Typography className={styles.title} variant="h2">
         Reset {usernameOrPassword}
       </Typography>
       <ValidatedTextField
-        id='email'
-        type='email'
-        label='Email Address'
+        id="email"
+        type="email"
+        label="Email Address"
         value={forgotAccountState.email.value}
         setValue={setEmail}
         error={forgotAccountState.email.error}
         validate={validateEmail}
         helperText={forgotAccountState.email.errorText}
       />
-      <Link href='/account/forgot-account/success?query=[usernameOrPassword]'
-            as={`/account/forgot-account/success?query=${usernameOrPassword}`}>
-        <Button
-          variant='filled'
-          onClick={handleSendEmailClick}
-        >
+      <Link
+        href="/account/forgot-account/success?query=[usernameOrPassword]"
+        as={`/account/forgot-account/success?query=${usernameOrPassword}`}
+      >
+        <Button variant="filled" onClick={handleSendEmailClick}>
           Send Email
         </Button>
       </Link>

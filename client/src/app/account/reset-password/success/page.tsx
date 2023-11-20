@@ -10,17 +10,6 @@ import { useRouter, useSearchParams } from 'next/navigation';
 function Page() {
   const router = useRouter();
 
-<<<<<<< HEAD
-  const searchParams = useSearchParams();
-  const usernameOrPassword = searchParams.get('query');
-
-  const handleReturnToLogin = () => {
-    router.replace('/account/login');
-  };
-
-=======
-  const router = useRouter();
-
   const searchParams = useSearchParams();
   const usernameOrPassword = searchParams.get('query');
 
@@ -29,7 +18,6 @@ function Page() {
     router.replace('/account/login');
   };
 
->>>>>>> b74db87 (Refactored Button Imports)
   return (
     <div className={styles.container}>
       {/* <Typography className={styles.body} variant="body1" align="left">
@@ -37,15 +25,6 @@ function Page() {
             liking, commenting, and sharing others' maps.
         </Typography> */}
       <div className={containerstyles.container}>
-<<<<<<< HEAD
-        <Typography className={containerstyles.title} variant="h2">
-          Reset {usernameOrPassword}
-        </Typography>
-        <Typography className={containerstyles.title} variant="body1">
-          Password has been reset successfully.
-        </Typography>
-        <Button variant="filled" onClick={handleReturnToLogin}>
-=======
         <Typography className={containerstyles.title} variant='h2'>
           Reset {usernameOrPassword}
         </Typography>
@@ -56,7 +35,6 @@ function Page() {
           variant='filled'
           onClick={handleReturnToLogin}
         >
->>>>>>> b74db87 (Refactored Button Imports)
           Return to Login
         </Button>
       </div>
@@ -64,8 +42,4 @@ function Page() {
   );
 }
 
-<<<<<<< HEAD
 export default Page;
-=======
-export default Page;
->>>>>>> b74db87 (Refactored Button Imports)

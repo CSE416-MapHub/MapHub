@@ -154,16 +154,20 @@ function LoginForm() {
   return (
     <div className={styles.container}>
 <<<<<<< HEAD
+<<<<<<< HEAD
       <Typography className={styles.title} variant="h2">
 =======
       <Typography className={styles.title} variant='h2'>
 >>>>>>> b74db87 (Refactored Button Imports)
+=======
+      <Typography className={styles.title} variant="h2">
+>>>>>>> 12634a1 (Formatted on Prettier.)
         Login
       </Typography>
       <ValidatedTextField
-        id='username'
-        type='text'
-        label='Username'
+        id="username"
+        type="text"
+        label="Username"
         value={loginState.username.value}
         setValue={setUsername}
         error={loginState.username.error}
@@ -171,9 +175,9 @@ function LoginForm() {
         helperText={loginState.username.errorText}
       />
       <ValidatedTextField
-        id='password'
-        type='password'
-        label='Password'
+        id="password"
+        type="password"
+        label="Password"
         value={loginState.password.value}
         setValue={setPassword}
         error={loginState.password.error}
@@ -181,19 +185,30 @@ function LoginForm() {
         helperText={loginState.password.errorText}
       />
 <<<<<<< HEAD
+<<<<<<< HEAD
+=======
+>>>>>>> 12634a1 (Formatted on Prettier.)
       <Container
         sx={{
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
         }}
+<<<<<<< HEAD
 =======
       <Container sx={{ display: 'flex', flexDirection: 'row', justifyContent: 'space-between' }}>
         <Link variant='body1' href='/account/forgot-account?query=username'>
+=======
+      >
+        <Link variant="body1" href="/account/forgot-account?query=username">
+>>>>>>> 12634a1 (Formatted on Prettier.)
           Forgot Username
         </Link>
-        <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
+        <Link variant="body1" href="/account/forgot-account?query=password">
+          Forgot Password
+        </Link>
       </Container>
+<<<<<<< HEAD
       <Button
         variant='filled'
         onClick={handleLoginClick}
@@ -206,6 +221,8 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
+=======
+>>>>>>> 12634a1 (Formatted on Prettier.)
       <Button variant="filled" onClick={handleLoginClick}>
         Login
       </Button>
