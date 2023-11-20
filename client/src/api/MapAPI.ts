@@ -36,7 +36,9 @@ class MapAPI {
     return this.api.post('/map/map', { map });
   }
 
-  //   static async updateMap()
+  // static async updateMap(mapID: string, delta: Delta){
+
+  // }
 
   /**
    * Sends a GET request to the server to fetch all registered users.
