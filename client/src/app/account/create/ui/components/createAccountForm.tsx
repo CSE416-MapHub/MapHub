@@ -22,9 +22,9 @@ import MuiAlert, { AlertProps } from '@mui/material/Alert';
  *     * errorText - an error message indicating why the value is not valid.
  */
 interface CreateAccountFieldState {
-  value: string;
-  error: boolean;
-  errorText: string;
+  value: string,
+  error: boolean,
+  errorText: string,
 }
 
 interface CreateAccountState {
@@ -170,7 +170,7 @@ function createAccountReducer(
       };
     }
     case CreateAccountActionType.validatePasswordConfirm: {
-      // Checks if the password confirmation is well-formed and matches the
+      // Checks if the password confirmation is well-formed and matches the 
       // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
@@ -211,8 +211,7 @@ function createAccountReducer(
         type: CreateAccountActionType.validate,
       });
       console.log('IN CREATE ACCOUNT');
-      if (
-        !validatedState.username.error &&
+      if (!validatedState.username.error &&
         !validatedState.email.error &&
         !validatedState.password.error &&
         !validatedState.password.error) {
@@ -455,14 +454,14 @@ function CreateAccountForm() {
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant="body1" align="left">
+      <Typography className={styles.body} variant='body1' align='left'>
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -471,9 +470,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id="email"
-        type="email"
-        label="Email Address"
+        id='email'
+        type='email'
+        label='Email Address'
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -481,9 +480,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -491,16 +490,19 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id="password-confirm"
-        type="password"
-        label="Confirm Password"
+        id='password-confirm'
+        type='password'
+        label='Confirm Password'
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button variant="filled" onClick={handleCreateAccountClick}>
+      <Button
+        variant='filled'
+        onClick={handleCreateAccountClick}
+      >
         Create Account
       </Button>
       <Snackbar

@@ -27,6 +27,7 @@ enum ResetPasswordActionType {
   resetPassword = 'resetPassword',
 }
 
+
 interface ResetPasswordAction {
   type: ResetPasswordActionType;
   value?: any;
@@ -139,13 +140,13 @@ function ResetPasswordForm() {
 
   return (
     <div className={styles.container}>
-      <Typography className={styles.title} variant="h2">
+      <Typography className={styles.title} variant='h2'>
         Reset Password
       </Typography>
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={ResetPasswordState.password.value}
         setValue={setPassword}
         error={ResetPasswordState.password.error}
@@ -153,17 +154,21 @@ function ResetPasswordForm() {
         helperText={ResetPasswordState.password.errorText}
       />
       <ValidatedTextField
-        id="passwordConfirm"
-        type="password"
-        label="Confirm Password"
+        id='passwordConfirm'
+        type='password'
+        label='Confirm Password'
         value={ResetPasswordState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={ResetPasswordState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={ResetPasswordState.passwordConfirm.errorText}
       />
-      <Link href="/account/reset-password/success">
-        <Button variant="filled">Reset Password</Button>
+      <Link href='/account/reset-password/success'>
+        <Button
+          variant='filled'
+        >
+          Reset Password
+        </Button>
       </Link>
     </div>
   );
