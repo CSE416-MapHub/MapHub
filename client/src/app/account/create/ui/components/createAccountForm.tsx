@@ -52,7 +52,7 @@ enum CreateAccountActionType {
   validate = 'validate',
   createAccount = 'createAccount',
   registrationSuccess = 'registrationSuccess',
-  registrationFailure = 'registrationFailure',
+  registrationFailure = 'registrationFailure'
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
