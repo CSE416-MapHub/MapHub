@@ -1,6 +1,6 @@
 'use client';
 
-import { useReducer, MouseEventHandler, useEffect } from 'react';
+import React, { useReducer, MouseEventHandler, useEffect } from 'react';
 import { Stack, Typography } from '@mui/material';
 
 import Button from '../../../../../components/button';
@@ -363,7 +363,8 @@ function CreateAccountForm() {
     });
   };
 
-  const handleCreateAccountClick  : MouseEventHandler = async (event) => {
+
+  const handleCreateAccountClick : MouseEventHandler = async (event) => {
     // createAccountDispatch({
     //   type: CreateAccountActionType.createAccount,
     // });
@@ -382,7 +383,6 @@ function CreateAccountForm() {
         });
         console.log("successfully registered")
         setSuccessSnackbarOpen(true);
-
       }
     } catch (error: any) {
       console.error('Registration failed:', error.message);
@@ -410,7 +410,7 @@ function CreateAccountForm() {
       // If either snackbar is open, initiate the redirect after a delay
       const timer = setTimeout(() => {
         router.replace('/account/login');
-      }, 1000); // Adjust the delay as needed
+      }, 3000); // Adjust the delay as needed
 
       // Cleanup function to clear the timer if the component unmounts
       return () => clearTimeout(timer);
