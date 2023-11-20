@@ -38,6 +38,8 @@ const MultiMapLabelModal: React.FC<MapLabelModalProps> = ({
         properties={properties}
         isCheckbox={true}
         onSelect={handleSelectionChange}
+        selectedOptions={selectedOptions}
+        setSelectedOptions={setSelectedOptions}
       />
     </GeneralizedDialog>
   );
