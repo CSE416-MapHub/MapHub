@@ -33,6 +33,7 @@ const MapController = {
       geoJSON,
     } = req.body;
     let newMap;
+    let savedMap;
     try {
       const placeholderID = new mongoose.Types.ObjectId();
 
@@ -51,19 +52,28 @@ const MapController = {
         arrowsData,
         geoJSON: 'placeholder',
       });
-      await newMap.save();
+      savedMap = await newMap.save();
     } catch (err: any) {
+      console.error(err.message);
       return res
         .status(500)
         .json({ error: `map saving error: ${err.message}` });
     }
 
-    const mapID = newMap._id.toString();
-    const saveFilePath = `server/jsonStore/${mapID}.geojson`;
+    const mapID = savedMap._id.toString();
+    console.log('MAP ID HERE:', mapID);
+    const saveFilePath = path.join(
+      __dirname,
+      '..',
+      'jsonStore',
+      `${mapID}.geojson`,
+    );
 
     try {
       await fs.promises.writeFile(saveFilePath, JSON.stringify(geoJSON));
     } catch (err: any) {
+      console.error(err.message);
+
       return res
         .status(500)
         .json({ error: `File system error: ${err.messge}` });
@@ -71,8 +81,10 @@ const MapController = {
 
     try {
       newMap.geoJSON = saveFilePath;
-      newMap = await newMap.save();
+      savedMap = await newMap.save();
     } catch (err: any) {
+      console.error(err.message);
+
       return res
         .status(500)
         .json({ error: `DB geoJSON path update error: ${err.message}` });
@@ -80,7 +92,7 @@ const MapController = {
 
     res.status(200).json({
       success: true,
-      mapID: mapID,
+      map: { mapID: savedMap._id },
     });
   },
 
