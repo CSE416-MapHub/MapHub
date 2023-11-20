@@ -9,14 +9,14 @@ function Avatar({ className, src, ...props }: AvatarProps) {
   if (src) {
     return (
       <MaterialAvatar
-        className={`${styles.avatar} ${className}`}
+        className={`${styles['avatar']} ${className}`}
         src={src}
         {...props}
       />
     );
   }
   return (
-    <MaterialAvatar className={`${styles.avatar} ${className}`} {...props}>
+    <MaterialAvatar className={`${styles['avatar']} ${className}`} {...props}>
       <Icon type="solid" name="user" />
     </MaterialAvatar>
   );
