@@ -10,10 +10,10 @@ export enum MapType {
 
 export interface MHJSON {
   title: string;
-  owner: string;
+  owner: string; //dont need cause we authorize the user.
   mapType: MapType;
   labels: Array<string>;
-  globalChoroplethData: IChoroplethProps;
+  globalChoroplethData: IChoroplethProps | null;
   globalCategoryData: Array<ICategoryProps>;
   globalSymbolData: Array<ISymbolProps>;
   globalDotDensityData: Array<IDotDensityProps>;
