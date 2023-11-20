@@ -1,15 +1,25 @@
 import supertest from 'supertest';
 import app from '../index';
-import { server } from '../index';
+import { startServer, stopServer } from './testServer';
 import mapModel from '../models/map-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
+
+beforeAll(async () => {
+  await startServer(); // Choose your test port
+});
+
+afterAll(async () => {
+  await stopServer();
+});
+beforeEach(() => {
+  jest.setTimeout(6000);
+});
 
 jest.mock('../models/map-model');
 
 describe('POST /map/map', () => {
   it('create a new map', async () => {
-    jest.setTimeout(10000);
     const mapData = {
       title: 'mapNice',
       owner: new mongoose.Types.ObjectId(),
@@ -58,8 +68,4 @@ describe('POST /map/map', () => {
 
     expect(response.body).toHaveProperty('map');
   });
-});
-
-afterAll(done => {
-  server.close(done);
 });
