@@ -219,7 +219,7 @@ export default function () {
         id="import-file-upload-button"
         ref={fileUpload}
         style={{
-          visibility: 'hidden',
+          // visibility: 'hidden',
           position: 'absolute',
           marginTop: '-100px',
           marginLeft: '-100px',
