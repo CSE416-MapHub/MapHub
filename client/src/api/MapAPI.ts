@@ -40,6 +40,14 @@ class MapAPI {
 
   // }
 
+  static async getMapById(mapID: string) {
+    return this.api.get(`/map/${mapID}`);
+  }
+
+  static async getRecentMapIds(numOfMaps: number) {
+    return this.api.get(`/map/recents/`, { params: { numOfMaps } });
+  }
+
   /**
    * Sends a GET request to the server to fetch all registered users.
    * Returns a list of usernames from the server.
