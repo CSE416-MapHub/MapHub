@@ -41,7 +41,7 @@ function NavBar() {
           <Button variant="filled">Join Now</Button>
         </Link>
         {/* TODO: DELETE THIS */}
-        {/* <UserButton /> */}
+        <UserButton />
       </div>
     </nav>
   );
