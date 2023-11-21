@@ -6,7 +6,10 @@ describe('Files should be exported in different forms', () => {
     cy.get('span:contains("Export As SVG")').click();
 
     // check the downloads
-    cy.readFile('./cypress/downloads/map.svg');
+    cy.readFile('./cypress/downloads/map.svg').then(() => {
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.task('emptyDirectory', downloadsFolder);
+    });
   });
 
   it('should properly export as a png', () => {
@@ -16,7 +19,10 @@ describe('Files should be exported in different forms', () => {
     cy.get('span:contains("Export As PNG")').click();
 
     // check the downloads
-    cy.readFile('./cypress/downloads/map.png');
+    cy.readFile('./cypress/downloads/map.png').then(() => {
+      const downloadsFolder = Cypress.config('downloadsFolder');
+      cy.task('emptyDirectory', downloadsFolder);
+    });
   });
 
   it('should properly export as a json', () => {
@@ -27,5 +33,7 @@ describe('Files should be exported in different forms', () => {
 
     // check the downloads
     cy.readFile('./cypress/downloads/map.json');
+    const downloadsFolder = Cypress.config('downloadsFolder');
+    cy.task('emptyDirectory', downloadsFolder);
   });
 });
