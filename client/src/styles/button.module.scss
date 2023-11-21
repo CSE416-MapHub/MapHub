@@ -1,9 +1,11 @@
 @use 'colors';
 @use 'elevation';
 @use 'state';
+@use 'typography';
 
 // Common Button Styles
 .button {
+  @include typography.label-large;
   height: 40px;
   padding: 0 24px;
   border-radius: 20px;
