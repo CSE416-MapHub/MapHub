@@ -1,78 +1,121 @@
 'use client';
-import { EditorActions, EditorContext } from 'context/EditorProvider';
+import { EditorActions, EditorContext, ToolbarButtons, IEditorState } from 'context/EditorProvider';
 import * as G from 'geojson';
-import { Path } from 'leaflet';
-import { useContext, useState, useEffect } from 'react';
+import * as L from "leaflet"
+import { useContext, useState, useEffect, useRef } from 'react';
 import { GeoJSON, TileLayer, useMap } from 'react-leaflet';
 import { IInputProps } from './PropertyInput';
 
+import {Dispatch} from "react"
+
+const OPEN_BOUNDS = L.latLngBounds(
+  L.latLng(-900, 1800),
+  L.latLng(900, -1800)
+)
+
 export default function () {
-  const editorContext = useContext(EditorContext);
+  const editorContextStaleable = useContext<{
+    state: IEditorState,
+    dispatch: Dispatch<{
+        type: EditorActions,
+        payload: Partial<IEditorState>,
+    }>}>(EditorContext);
   const map = useMap();
   const [eBBox, setEBBox] = useState<[number, number]>([0, 0]);
   const [rerender, setRerender] = useState(0);
+  const editorContextRef = useRef<{
+    state: IEditorState,
+    dispatch: Dispatch<{
+        type: EditorActions,
+        payload: Partial<IEditorState>,
+    }>}>(editorContextStaleable)
+
+  editorContextRef.current = editorContextStaleable
+
 
   useEffect(() => {
-    let b = editorContext.state.mapDetails.bbox;
+    let b = editorContextStaleable.state.mapDetails.bbox;
     if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
       let c: [number, number] = [b[1], b[0]];
       setEBBox(c);
       setRerender(rerender + 1);
       map.setView([c[0] + b[3] / 2, c[1] + b[2] / 2], 10 - Math.log2(b[2]));
     }
+
+    // if the tool selected is pan, allow for panning
+    if (editorContextStaleable.state.selectedTool !== ToolbarButtons.pan) {
+      map.setMaxBounds(map.getBounds())
+    } else {
+      // else restrict the bounds
+      
+      map.setMaxBounds(OPEN_BOUNDS)
+      // map.on('drag', function() {
+      //     map.panInsideBounds(map.getBounds(), { animate: false });
+      // });
+    }
+    
+
   });
 
-  if (editorContext.state.map === null) {
+  function perFeatureHandler(feature: G.Feature, layer:L.Layer) {
+    layer.addEventListener('click', () => {
+      console.log("clicked a feature")
+      if (editorContextRef.current.state.selectedTool !==  ToolbarButtons.select) {
+        console.log("but the current tool isnt select; it is " + editorContextRef.current.state.selectedTool)
+        return;
+      }
+      let action = {
+        type: EditorActions.SET_PANEL,
+        payload: {
+          propertiesPanel: [
+            {
+              name: 'Labels',
+              // TODO: force unundefined
+              items: editorContextRef.current.state.map!.labels.map(
+                (
+                  lbl,
+                ): {
+                  name: string;
+                  input: IInputProps;
+                } => {
+                  return {
+                    name: lbl,
+                    input: {
+                      type: 'text',
+                      short: false,
+                      disabled: false,
+                      value: feature.properties? (feature.properties[lbl]).toString() : "undefined"
+                    },
+                  };
+                },
+              ),
+            },
+          ],
+        },
+      };
+      editorContextRef.current.dispatch(action);
+    });
+    let p = layer as L.Path;
+    p.setStyle({
+      color: '#000000',
+      fillColor: 'white',
+      fillOpacity: 1,
+      opacity: 1,
+      stroke: true,
+      weight: 1,
+    });
+  }
+
+  if (editorContextStaleable.state.map === null) {
     return <div></div>;
   }
 
   return (
     <GeoJSON
       key={rerender}
-      data={editorContext.state.map?.geoJSON}
-      onEachFeature={(feature, layer) => {
-        layer.addEventListener('click', () => {
-          let action = {
-            type: EditorActions.SET_PANEL,
-            payload: {
-              propertiesPanel: [
-                {
-                  name: 'Labels',
-                  // TODO: force unundefined
-                  items: editorContext.state.map!.labels.map(
-                    (
-                      lbl,
-                    ): {
-                      name: string;
-                      input: IInputProps;
-                    } => {
-                      return {
-                        name: lbl,
-                        input: {
-                          type: 'text',
-                          short: false,
-                          disabled: false,
-                          value: feature.properties[lbl],
-                        },
-                      };
-                    },
-                  ),
-                },
-              ],
-            },
-          };
-          editorContext.dispatch(action);
-        });
-        let p = layer as Path;
-        p.setStyle({
-          color: '#000000',
-          fillColor: 'white',
-          fillOpacity: 1,
-          opacity: 1,
-          stroke: true,
-          weight: 1,
-        });
-      }}
+      data={editorContextStaleable.state.map?.geoJSON}
+      
+      onEachFeature={perFeatureHandler}
     />
   );
 }

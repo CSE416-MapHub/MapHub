@@ -85,12 +85,11 @@ function reducer(
       break;
     }
     case EditorActions.SET_TOOL: {
-      if (action.payload.selectedTool === undefined) {
-        action.payload.selectedTool = null;
+      if (action.payload.selectedTool !== undefined ) {
+        newState.selectedTool = action.payload.selectedTool;
+      } else {
+        throw new Error('SET_TOOL must have a tool in its payload');
       }
-      newState.selectedTool = action.payload.selectedTool;
-        
-
       break;
     }
     default:
