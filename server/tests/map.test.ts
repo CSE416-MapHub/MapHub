@@ -161,6 +161,7 @@ describe('GET /map/recents/', () => {
         png: { type: 'Buffer', data: [] },
       },
     ];
+
     // console.log('EXPECTEED', JSON.stringify(expectedMapOutput));
     // Assertions for success case
     expect(response.statusCode).toBe(200);
