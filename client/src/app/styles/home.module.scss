@@ -1,22 +1,18 @@
 @use 'colors';
 @use 'shape';
 
-.home__main {
-  width: 100%;
-  margin: 24px auto;
-}
 
 .hero__box {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
   justify-content: flex-end;
-  gap: 12px;
+  gap: shape.$extra-large;
 
   width: 80%;
-  height: 72vh;
+  height: 76vh;
   margin: 0 auto;
-  padding: 0 0 48px;
+
 
   background-color: colors.$primary-container;
   color: colors.$on-primary-container;
@@ -24,14 +20,20 @@
   @include shape.extra-large;
 }
 
-.hero__contentbox {
+.hero__container {
+  display: flex;
+  gap: shape.$large;
   min-width: 320px;
   width: 30%;
-  margin: 0 48px;
+  margin: 0 72px;
+  padding: 0;
 }
 
-.hero__contentboxbuttons {
-  display: flex;
+.hero__container--copy {
+  flex-direction: column;
+}
+
+.hero__container--buttons {
   justify-content: flex-end;
-  gap: 12px;
+  margin-bottom: 72px;
 }
