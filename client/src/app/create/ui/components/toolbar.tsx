@@ -1,61 +1,82 @@
 'use client'
 
-import { useState, MouseEventHandler } from 'react';
+import { useState, MouseEventHandler, useContext } from 'react';
 import styles from './toolbar.module.scss';
 import IconButton from '../../../../components/iconButton';
+import { EditorActions, EditorContext, ToolbarButtons } from 'context/EditorProvider';
 
-enum ToolbarButtons {
-  select = 'select',
-  pan = 'pan',
-  erase = 'erase',
-  point = 'point',
-  icon = 'icon',
-  path = 'path',
-}
+
 
 function Toolbar() {
-  const [ selectedIconButton, setIconButton ] = useState<ToolbarButtons | null>(null);
+  // const [ selectedIconButton, setIconButton ] = useState<ToolbarButtons | null>(null);
+  const editorContext = useContext(EditorContext)
 
-  const handleSelectClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.select
-      ? ToolbarButtons.select
-      : null
-    );
+
+  const handleSelectClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.select
+        ? ToolbarButtons.select
+        : null
+      }
+    })
+
   };
 
-  const handlePanClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.pan
-      ? ToolbarButtons.pan
-      : null
-    );
+  const handlePanClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.pan
+        ? ToolbarButtons.pan
+        : null
+      }
+    })
   };
 
-  const handleEraseClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.erase
-      ? ToolbarButtons.erase
-      : null
-    );
+  const handleEraseClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.erase
+        ? ToolbarButtons.erase
+        : null
+      }
+    })
   };
 
-  const handlePointClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.point
-      ? ToolbarButtons.point
-      : null
-    );
+  const handlePointClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.point
+        ? ToolbarButtons.point
+        : null
+      }
+    })
   };
 
-  const handleIconClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.icon
-      ? ToolbarButtons.icon
-      : null
-    );
+  const handleIconClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.icon
+        ? ToolbarButtons.icon
+        : null
+      }
+    })
   };
 
-  const handlePathClick: MouseEventHandler  = (event) => {
-    setIconButton(selectedIconButton !== ToolbarButtons.path
-      ? ToolbarButtons.path
-      : null
-    );
+  const handlePathClick: MouseEventHandler  = () => {
+    editorContext.dispatch({
+      type: EditorActions.SET_TOOL,
+      payload: {
+        selectedTool: editorContext.state.selectedTool !== ToolbarButtons.path
+        ? ToolbarButtons.path
+        : null
+      }
+    })
   };
 
   return (
@@ -66,7 +87,7 @@ function Toolbar() {
         iconName="pointer"
         variant="standard"
         onClick={handleSelectClick}
-        selected={selectedIconButton === ToolbarButtons.select}
+        selected={editorContext.state.selectedTool === ToolbarButtons.select}
       />
       <IconButton 
         id="toolbar-pan"
@@ -74,7 +95,7 @@ function Toolbar() {
         iconName="hand"
         variant="standard"
         onClick={handlePanClick}
-        selected={selectedIconButton === ToolbarButtons.pan}
+        selected={editorContext.state.selectedTool === ToolbarButtons.pan}
       />
       <IconButton
         id="toolbar-erase"
@@ -82,7 +103,7 @@ function Toolbar() {
         iconName="eraser"
         variant="standard"
         onClick={handleEraseClick}
-        selected={selectedIconButton === ToolbarButtons.erase}  
+        selected={editorContext.state.selectedTool === ToolbarButtons.erase}  
       />
       <IconButton
         id="toolbar-point"
@@ -90,7 +111,7 @@ function Toolbar() {
         iconName="circle"
         variant="standard"
         onClick={handlePointClick}
-        selected={selectedIconButton === ToolbarButtons.point}
+        selected={editorContext.state.selectedTool === ToolbarButtons.point}
       />
       <IconButton
         id="toolbar-icon"
@@ -98,7 +119,7 @@ function Toolbar() {
         iconName="shapes"
         variant="standard"
         onClick={handleIconClick}
-        selected={selectedIconButton === ToolbarButtons.icon}
+        selected={editorContext.state.selectedTool === ToolbarButtons.icon}
         />
       <IconButton
         id="toolbar-path"
@@ -106,7 +127,7 @@ function Toolbar() {
         iconName="right-top-arrow-circle"
         variant="standard"
         onClick={handlePathClick}
-        selected={selectedIconButton === ToolbarButtons.path}
+        selected={editorContext.state.selectedTool === ToolbarButtons.path}
       />
     </div>
   );

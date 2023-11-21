@@ -4,10 +4,20 @@ import { MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 
+export enum ToolbarButtons {
+  select = 'select',
+  pan = 'pan',
+  erase = 'erase',
+  point = 'point',
+  icon = 'icon',
+  path = 'path',
+}
+
 // the global state interface
 export interface IEditorState {
   propertiesPanel: Array<IPropertyPanelSectionProps>;
   map: MHJSON | null;
+  selectedTool: ToolbarButtons  | null
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
@@ -19,6 +29,7 @@ export interface IEditorState {
 let initialState: IEditorState = {
   propertiesPanel: [],
   map: null,
+  selectedTool: null,
   mapDetails: {
     availableProps: [],
     bbox: [0, 0, 0, 0],
@@ -30,6 +41,7 @@ let initialState: IEditorState = {
 export enum EditorActions {
   SET_PANEL,
   SET_MAP,
+  SET_TOOL
 }
 
 // the reducer
@@ -70,6 +82,15 @@ function reducer(
       } else {
         throw new Error('SET_MAP must have a map in its payload');
       }
+      break;
+    }
+    case EditorActions.SET_TOOL: {
+      if (action.payload.selectedTool === undefined) {
+        action.payload.selectedTool = null;
+      }
+      newState.selectedTool = action.payload.selectedTool;
+        
+
       break;
     }
     default:
