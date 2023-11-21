@@ -38,6 +38,8 @@ const ChoroplethModal: React.FC<ChoroModalProps> = ({
         properties={properties}
         isCheckbox={false}
         onSelect={handleSelectionChange}
+        selectedOptions={selectedOptions}
+        setSelectedOptions={setSelectedOptions}
       />
     </GeneralizedDialog>
   );
