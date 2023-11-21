@@ -1,16 +1,8 @@
 import supertest from 'supertest';
-import app from '../index';
-import { startServer, stopServer } from './testServer';
+import app from '../app';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 
-beforeAll(async () => {
-  await startServer(); // Choose your test port
-});
-
-afterAll(async () => {
-  await stopServer();
-});
 beforeEach(() => {
   jest.setTimeout(6000);
 });
