@@ -2,6 +2,7 @@ import { MHJSON } from 'types/MHJSON';
 import { Layer, Map, GeoJSON } from 'leaflet';
 import * as L from 'leaflet';
 import { SVGBuilder } from './MHJSONVisitor';
+import { BBox } from 'context/editorHelpers/GeoJSONVisitor';
 
 export type ExportType = 'png' | 'svg' | 'json';
 
@@ -25,49 +26,86 @@ export default async function exportMap(map: MHJSON | null, type: ExportType) {
       b = await jsonOfMap(map);
       break;
   }
+  console.log('going to download the blob');
   download(fileName, b);
 }
 
-function makeSVG(map: MHJSON): string {
+function makeSVG(map: MHJSON): [string, BBox] {
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
   let box = builder.getBBox();
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">
-  <!-- Background -->
   <rect x="${box[0]}" y="${box[1]}" width="100%" height="100%" fill="#CCEFF1" />
-  <!-- Contents -->
   ${svg}
 </svg>`;
-  return svgRepr;
+  return [svgRepr, box];
 }
 
 function svgOfMap(map: MHJSON): Blob {
   let svgRepr = makeSVG(map);
-  return new Blob([svgRepr]);
+  return new Blob([svgRepr[0]]);
 }
+// given the map bounding box, return the width and height of the
+// map (as a png)
+const TARGET_SIZE = 2_073_600;
+function getDimensions(b: BBox): [w: number, h: number] {
+  let a0 = b[2] * b[3];
+  let f = Math.sqrt(TARGET_SIZE / a0);
+  return [b[2] * (1 + f), b[3] * f];
+}
+
 async function pngOfMap(map: MHJSON): Promise<Blob> {
-  // var xml = makeSVG(map);
-  // var svg64 = btoa(xml); //for utf8: btoa(unescape(encodeURIComponent(xml)))
-  // var b64start = 'data:image/svg+xml;base64,';
-  // var image64 = b64start + svg64;
-  // const canvas = new OffscreenCanvas()
-  // const ctx = canvas.getContext('2d');
-  // const img = new Image();
-  // img.src = 'data:image/svg+xml,' + encodeURIComponent(imageb4);
-  // img.onload = function () {
-  //   ctx.drawImage(img, 0, 0);
-  //   // Convert canvas to data URL (PNG)
-  //   const pngDataUrl = canvas.toDataURL('image/png');
-  //   // Create a download link
-  //   const link = document.createElement('a');
-  //   link.href = pngDataUrl;
-  //   link.download = 'output.png';
-  //   link.click();
-  // };
-  // return new Blob([image64]);
-  throw new Error('Unimplemented');
+  var [xml, box] = makeSVG(map);
+  let svgBlob = new Blob([xml], { type: 'image/svg+xml' });
+  let svgURL = URL.createObjectURL(svgBlob);
+
+  console.log(svgURL);
+
+  const canvas = document.createElement('canvas');
+  let [x, y] = getDimensions(box);
+  const img = new Image(x, y);
+  canvas.width = x;
+  canvas.height = y;
+
+  img.onerror = (ev, src, lno, colno, err) => {
+    console.log('ERROR');
+    console.log(err);
+  };
+
+  let prom: Promise<Blob> = new Promise((resolve, reject) => {
+    img.onload = function () {
+      let ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.drawImage(img, 0, 0);
+        console.log('DREW IMAGE');
+        canvas.toBlob(
+          b => {
+            if (b === null) {
+              // img.remove();
+              reject('Created a null blob');
+            } else {
+              // img.remove();
+              resolve(b);
+            }
+          },
+          'image/png',
+          1,
+        );
+      } else {
+        // img.remove();
+        reject('ctx is null');
+      }
+    };
+  });
+
+  img.src = svgURL;
+  console.log('returning da promise');
+  console.log(prom);
+  return prom;
+
+  // throw new Error('Unimplemented');
 }
 function jsonOfMap(map: MHJSON): Blob {
   throw new Error('Unimplemented');
