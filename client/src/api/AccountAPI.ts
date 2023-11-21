@@ -57,6 +57,39 @@ class AccountAPI {
       passwordVerify: passwordConfirm,
     });
   }
+ /**
+   * Sends a POST request to the server to login to an existing account
+   * with a valid username and password. Returns a response from
+   * the server.
+   *
+   * @param username - the existing account username
+   * @param password - the existing account password
+   * @returns the server response
+   */
+  static async loginUser(
+    username: string,
+    password: string
+  ) {
+    return this.api.post('/auth/login', {
+      username,
+      password
+    });
+  }
+
+ /**
+   * Sends a POST request to the server to logout a user.
+   *
+   * @returns the server response
+   */
+  static async logoutUser() {
+    try {
+      const response = await this.api.post('/auth/logout');
+      return response.data; // Assuming your server returns relevant data upon successful logout
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error; // Propagate the error for handling in the calling code
+    }  
+  }
 
     /**
    * Sends a GET request to the server to fetch all registered users.
