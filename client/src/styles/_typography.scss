@@ -1,0 +1,143 @@
+$fallback-type: Helvetica, Arial, sans-serif;
+
+@mixin display-large {
+  font-family: var(--sofia), $fallback-type;
+  font-weight: 400;
+  font-size: 57px;
+  letter-spacing: -0.25px;
+  line-height: 64px;
+}
+
+@mixin display-medium {
+  font-family: var(--sofia), $fallback-type;
+  font-weight: 400;
+  font-size: 45px;
+  letter-spacing: 0;
+  line-height: 52px;
+}
+
+@mixin display-small {
+  font-family: var(--sofia), $fallback-type;
+  font-weight: 400;
+  font-size: 36px;
+  letter-spacing: 0;
+  line-height: 44px;
+}
+
+@mixin headline-large {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 32px;
+  letter-spacing: 0;
+  line-height: 40px;
+}
+
+@mixin headline-medium {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 28px;
+  letter-spacing: 0;
+  line-height: 36px;
+}
+
+@mixin headline-small {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 24px;
+  letter-spacing: 0;
+  line-height: 32px;
+}
+
+@mixin title-large {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 22px;
+  letter-spacing: 0;
+  line-height: 28px;
+}
+
+@mixin title-medium {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 500;
+  font-size: 16px;
+  letter-spacing: 0.15px;
+  line-height: 24px;
+}
+
+@mixin title-small {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+}
+
+@mixin body-large {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  line-height: 24px;
+}
+
+@mixin body-medium {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 14px;
+  letter-spacing: 0.25px;
+  line-height: 20px;
+}
+
+@mixin body-small {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 400;
+  font-size: 12px;
+  letter-spacing: 0.4px;
+  line-height: 16px;
+}
+
+@mixin label-large {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 500;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  text-transform: none;
+}
+
+@mixin label-large-prominent {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: 0.1px;
+  line-height: 20px;
+  text-transform: none;
+}
+
+@mixin label-medium {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 500;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  text-transform: none;
+}
+
+@mixin label-medium-prominent {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  text-transform: none;
+}
+
+@mixin label-small {
+  font-family: var(--fira), $fallback-type;
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  line-height: 16px;
+  text-transform: none;
+}
+
