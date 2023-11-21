@@ -7,7 +7,7 @@ import { fill } from 'cypress/types/lodash';
 import GeoJSON, * as G from 'geojson';
 import { isGeometry, isGeometryCollection } from './utility';
 
-type BBox = [x: number, y: number, w: number, h: number];
+export type BBox = [x: number, y: number, w: number, h: number];
 
 export interface IGeometryVisitResults {
   box: BBox;
@@ -22,10 +22,20 @@ export interface IFeatureAggregateResults {
 }
 
 export function addPointToLocalBBox(x: number, y: number, b: BBox) {
+  let oldx = b[0],
+    oldy = b[1];
   b[0] = Math.min(b[0], x);
   b[1] = Math.min(b[1], y);
-  b[2] = Math.max(b[2], x - b[0]);
-  b[3] = Math.max(b[3], y - b[1]);
+  if (x > oldx + b[2]) {
+    b[2] = x - oldx;
+  } else if (x < oldx) {
+    b[2] = oldx + b[2] - x;
+  }
+  if (y > oldy + b[3]) {
+    b[3] = y - oldy;
+  } else if (y < oldy) {
+    b[3] = oldy + b[3] - y;
+  }
 }
 
 export function mergeBBox(...boxes: [BBox, ...[BBox]]): BBox {
