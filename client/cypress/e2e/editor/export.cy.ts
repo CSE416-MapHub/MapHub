@@ -18,4 +18,14 @@ describe('Files should be exported in different forms', () => {
     // check the downloads
     cy.readFile('./cypress/downloads/map.png');
   });
+
+  it('should properly export as a json', () => {
+    cy.loadVatican();
+    cy.get('button:contains("File")').click();
+    cy.get('span:contains("Export")').click();
+    cy.get('span:contains("Export As JSON")').click();
+
+    // check the downloads
+    cy.readFile('./cypress/downloads/map.json');
+  });
 });

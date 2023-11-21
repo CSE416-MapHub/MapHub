@@ -10,7 +10,7 @@ export default async function exportMap(map: MHJSON | null, type: ExportType) {
   let fileName = `${'map'}.${type}`;
 
   if (map === null) {
-    console.log('map is null');
+    alert('TODO: what if map is null');
     return download(fileName, new Blob());
   }
 
@@ -26,7 +26,6 @@ export default async function exportMap(map: MHJSON | null, type: ExportType) {
       b = await jsonOfMap(map);
       break;
   }
-  console.log('going to download the blob');
   download(fileName, b);
 }
 
@@ -61,25 +60,17 @@ async function pngOfMap(map: MHJSON): Promise<Blob> {
   let svgBlob = new Blob([xml], { type: 'image/svg+xml' });
   let svgURL = URL.createObjectURL(svgBlob);
 
-  console.log(svgURL);
-
   const canvas = document.createElement('canvas');
   let [x, y] = getDimensions(box);
   const img = new Image(x, y);
   canvas.width = x;
   canvas.height = y;
 
-  img.onerror = (ev, src, lno, colno, err) => {
-    console.log('ERROR');
-    console.log(err);
-  };
-
   let prom: Promise<Blob> = new Promise((resolve, reject) => {
     img.onload = function () {
       let ctx = canvas.getContext('2d');
       if (ctx) {
         ctx.drawImage(img, 0, 0);
-        console.log('DREW IMAGE');
         canvas.toBlob(
           b => {
             if (b === null) {
@@ -101,14 +92,12 @@ async function pngOfMap(map: MHJSON): Promise<Blob> {
   });
 
   img.src = svgURL;
-  console.log('returning da promise');
-  console.log(prom);
   return prom;
 
   // throw new Error('Unimplemented');
 }
 function jsonOfMap(map: MHJSON): Blob {
-  throw new Error('Unimplemented');
+  return new Blob([JSON.stringify(map)], { type: 'application/json' });
 }
 
 function download(fileName: string, fileContents: Blob) {
