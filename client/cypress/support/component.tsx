@@ -14,11 +14,11 @@
 // ***********************************************************
 
 // Import commands.js using ES2015 syntax:
-import './commands'
-import React from 'react';
-import { mount } from 'cypress/react18'
+import './commands';
+import { mount } from 'cypress/react18';
 import ThemeProvider from '../../src/context/themeProvider';
-import { firaSans, sofiaSansCondensed, boxIcons } from '../../src/app/fonts/fonts';
+import './styles.css';
+import '../../src/app/styles/boxicons.css';
 
 // Augment the Cypress namespace to include type definitions for
 // your custom command.
@@ -27,20 +27,19 @@ import { firaSans, sofiaSansCondensed, boxIcons } from '../../src/app/fonts/font
 declare global {
   namespace Cypress {
     interface Chainable {
-      mount: typeof mount
+      mount: typeof mount;
     }
   }
 }
 
 Cypress.Commands.add('mount', (component, options = {}) => {
-  return mount((
-    <body className={`${firaSans.variable} ${sofiaSansCondensed.variable} ${boxIcons.variable}`}>
-      <ThemeProvider>
-        {component}
-      </ThemeProvider>
-    </body>
-  ), options);
-})
+  return mount(
+    <body>
+      <ThemeProvider>{component}</ThemeProvider>
+    </body>,
+    options,
+  );
+});
 
 // Example use:
 // cy.mount(<MyComponent />)
