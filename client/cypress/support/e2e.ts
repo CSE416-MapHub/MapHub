@@ -4,11 +4,6 @@ beforeEach(() => {
   cy.log('Running Initialization');
 });
 
-afterEach(() => {
-  const downloadsFolder = Cypress.config('downloadsFolder');
-  cy.task('emptyDirectory', downloadsFolder);
-});
-
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
@@ -19,8 +14,6 @@ declare global {
 }
 
 Cypress.on('log:added', logObject => console.log(logObject));
-
-const special = 'file.spss';
 
 Cypress.Commands.add('loadVatican', () => {
   cy.visit('/create');

@@ -24,30 +24,30 @@ export default defineConfig({
         emptyDirectory(folderName: string) {
           console.log('emptying folder %s', folderName);
 
-          return new Promise((resolve, reject) => {
-            fs.readdir(folderName, (err, files) => {
-              if (err) throw err;
+          let files = fs.readdirSync(folderName);
+          for (const file of files) {
+            if (file === 'README.md') {
+              continue;
+            }
+            fs.unlinkSync(path.join(folderName, file));
+          }
 
-              for (const file of files) {
-                fs.unlink(path.join(folderName, file), err => {
-                  if (err) reject(err);
-                });
-              }
-              resolve(null);
-            });
-            // rmdir(folderName, { maxRetries: 10, recursive: true }, err => {
-            //   if (err) {
-            //     console.error(err);
-            //     return reject(err);
-            //   }
-            //   resolve(null);
-            // });
-          });
+          return null;
         },
       });
+
+      // fs.rmdir(folderName, { maxRetries: 10, recursive: true }, err => {
+      //   if (err) {
+      //     console.error(err);
+      //     return reject(err);
+      //   }
+      //   resolve(null);
+      // });
     },
-    trashAssetsBeforeRuns: true,
   },
+
+  trashAssetsBeforeRuns: false,
+
   component: {
     devServer: {
       framework: 'next',
