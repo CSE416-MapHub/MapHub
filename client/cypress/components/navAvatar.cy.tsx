@@ -1,9 +1,11 @@
 /// <reference types="cypress" />
 import '../support/component';
 import NavAvatar from '../../src/app/components/navAvatar';
+import mockAccountAPI from '../mock/mockAccountAPI';
 import MockAppRouterProvider from '../mock/MockAppRouterProvider';
 
 function setUpNavAvatar() {
+  mockAccountAPI();
   cy.mount(
     <MockAppRouterProvider>
       <NavAvatar />
@@ -81,7 +83,7 @@ describe('Sign Out menu item ', () => {
     cy.get('@sign-out').should('be.visible');
   });
 
-  it('clicks and calls router.push()', () => {
+  it('clicks and calls router.replace()', () => {
     cy.get('@sign-out').click();
     cy.get('@replace').should('be.called');
     cy.get('@replace').should('be.calledWith', '/');
