@@ -11,12 +11,14 @@ import UserButton from './userButton';
 
 function NavBar() {
   return (
-    <nav className={clsx({
-      [styles['nav__bar']]: true,
-      [styles['nav__bar--compact']]: usePathname() === '/create'
-    })}>
+    <nav
+      className={clsx({
+        [styles['nav__bar']]: true,
+        [styles['nav__bar--compact']]: usePathname() === '/create',
+      })}
+    >
       <div>
-        <Link id="home" href="/">
+        <Link className={styles.nav__logo} id="home" href="/">
           <Image
             src="/maphub.svg"
             width={96}
@@ -39,7 +41,7 @@ function NavBar() {
           <Button variant="filled">Join Now</Button>
         </Link>
         {/* TODO: DELETE THIS */}
-        <UserButton />
+        {/* <UserButton /> */}
       </div>
     </nav>
   );

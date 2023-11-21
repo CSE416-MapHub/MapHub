@@ -4,50 +4,50 @@ import { CSSProperties } from 'react';
 
 declare module '@mui/material/styles' {
   interface TypographyVariants {
-    display: CSSProperties,
-    headline: CSSProperties,
-    title: CSSProperties,
-    body: CSSProperties,
-    bodySmall: CSSProperties,
-    label: CSSProperties,
-    labelProminent: CSSProperties,
+    display: CSSProperties;
+    headline: CSSProperties;
+    title: CSSProperties;
+    body: CSSProperties;
+    bodySmall: CSSProperties;
+    label: CSSProperties;
+    labelProminent: CSSProperties;
   }
 
   // allow configuration using `createTheme`
   interface TypographyVariantsOptions {
-    display?: CSSProperties,
-    headline?: CSSProperties,
-    title?: CSSProperties,
-    body?: CSSProperties,
-    bodySmall?: CSSProperties,
-    label?: CSSProperties,
-    labelProminent?: CSSProperties,
+    display?: CSSProperties;
+    headline?: CSSProperties;
+    title?: CSSProperties;
+    body?: CSSProperties;
+    bodySmall?: CSSProperties;
+    label?: CSSProperties;
+    labelProminent?: CSSProperties;
   }
 }
 
 // Update the Typography's variant prop options
 declare module '@mui/material/Typography' {
   interface TypographyPropsVariantOverrides {
-    display: true,
-    headline: true,
-    title: true,
-    body: true,
-    bodySmall: true,
-    label: true,
-    labelProminent: true,
-    h1: true,
-    h2: true,
-    h3: true,
-    h4: false,
-    h5: false,
-    h6: false,
-    subtitle1: false,
-    subtitle2: false,
-    body1: true,
-    body2: false,
-    button: true,
-    caption: true,
-    overline: false,
+    display: true;
+    headline: true;
+    title: true;
+    body: true;
+    bodySmall: true;
+    label: true;
+    labelProminent: true;
+    h1: true;
+    h2: true;
+    h3: true;
+    h4: false;
+    h5: false;
+    h6: false;
+    subtitle1: false;
+    subtitle2: false;
+    body1: true;
+    body2: false;
+    button: true;
+    caption: true;
+    overline: false;
   }
 }
 

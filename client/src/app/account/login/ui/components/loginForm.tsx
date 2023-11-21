@@ -1,23 +1,26 @@
-'use client'
+'use client';
 
-import React, { useState, useReducer, MouseEventHandler } from 'react';
-import { Button, Container, Link, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler, useState, useEffect } from 'react';
+import { Alert, AlertProps, Container, Link, Snackbar, Typography } from '@mui/material';
+import MuiAlert from '@mui/material/Alert';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
-import AccountAPI from '../../../../../api/AccountAPI';
-
 import styles from '../../../components/form.module.css';
+import AccountAPI from 'api/AccountAPI';
+import { useRouter } from 'next/navigation';
 
 interface LoginFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface LoginState {
-  username: LoginFieldState,
-  password: LoginFieldState,
+  username: LoginFieldState;
+  password: LoginFieldState;
+  alertOpen: boolean;
 }
 
 enum LoginActionType {
@@ -26,11 +29,13 @@ enum LoginActionType {
   updatePassword = 'updatePassword',
   validatePassword = 'validatePassword',
   login = 'login',
+  showAlert = 'showAlert',
+  hideAlert = 'hideAlert',
 }
 
 interface LoginAction {
-  type: LoginActionType,
-  value?: any,
+  type: LoginActionType;
+  value?: any;
 }
 
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
@@ -86,34 +91,57 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
         type: LoginActionType.validateUsername,
       });
       const { username, password } = validatedState;
+      console.log(validatedState);
       if (!username.error && !password.error) {
         // Call your authentication API here
+        AccountAPI.loginUser(validatedState.username.value, 
+          validatedState.password.value).then(response => {
+            console.log("Login successful:", response);
+            //Redirect to user dashboard
+          })
+          .catch(error => {
+            console.log("Login failed:", error.response.data.errorMessage);
+          });
       }
-      // TODO: Handle login success or failure
       return validatedState;
+      
+    }
+
+    case LoginActionType.showAlert: {
+      return {
+        ...state,
+        alertOpen: true,
+      };
+    }
+
+    case LoginActionType.hideAlert: {
+      return {
+        ...state,
+        alertOpen: false,
+      };
     }
     default: {
       return state;
     }
+
   }
 }
 
 function LoginForm() {
-  const [loginState, loginDispatch] = useReducer(
-    loginReducer,
-    {
-      username: {
-        value: '',
-        error: false,
-        errorText: '',
-      },
-      password: {
-        value: '',
-        error: false,
-        errorText: '',
-      },
+  const [loginState, loginDispatch] = useReducer(loginReducer, {
+    username: {
+      value: '',
+      error: false,
+      errorText: '',
     },
-  );
+    password: {
+      value: '',
+      error: false,
+      errorText: '',
+    },
+    alertOpen: false
+  });
+  const router = useRouter();
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -141,15 +169,53 @@ function LoginForm() {
     });
   };
 
-  const handleLoginClick: MouseEventHandler = (event) => {
+
+  const handleLoginClick: MouseEventHandler = () => {
+    const { username, password } = loginState;
+
+    if (!username.error && !password.error) {
+      // Call your authentication API here
+      AccountAPI.loginUser(username.value, password.value)
+        .then(response => {
+          console.log("Login successful:", response);
+          //Redirect to dashboard
+          router.replace('/account/maps');
+
+        })
+        .catch(error => {
+          console.log("Login failed:", error.response?.data?.errorMessage);
+          // Update the state to show the alert
+          loginDispatch({
+            type: LoginActionType.showAlert,
+          });
+        });
+    }
+  };
+
+  const handleAlertClose = () => {
     loginDispatch({
-      type: LoginActionType.login,
+      type: LoginActionType.hideAlert,
     });
   };
 
+  useEffect(() => {
+    // Show the alert when alertOpen becomes true
+    if (!loginState.alertOpen) {
+      handleAlertClose();
+    }
+  }, [loginState.alertOpen]);
+
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+    props,
+    ref,
+  ) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
+
   return (
     <div className={styles.container}>
-    <Typography className={styles.title} variant="h2">
+      <Typography className={styles.title} variant="h2">
         Login
       </Typography>
       <ValidatedTextField
@@ -172,19 +238,29 @@ function LoginForm() {
         validate={validatePassword}
         helperText={loginState.password.errorText}
       />
-      <Container sx={{display: 'flex', flexDirection: 'row', justifyContent: 'space-between'}}>
-      <Link variant='body1' href='/account/forgot-account?query=username'>
-        Forgot Username
-        </Link>
-      <Link variant='body1' href='/account/forgot-account?query=password'>Forgot Password</Link>
-      </Container>
-      <Button
-        className={styles.confirmButton}
-        variant="contained"
-        onClick={handleLoginClick}
+      <Container
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
       >
+        <Link variant="body1" href="/account/forgot-account?query=username">
+          Forgot Username
+        </Link>
+        <Link variant="body1" href="/account/forgot-account?query=password">
+          Forgot Password
+        </Link>
+      </Container>
+      <Button variant="filled" onClick={handleLoginClick}>
         Login
       </Button>
+
+      <Snackbar open={loginState.alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+        <Alert severity="error" onClose={handleAlertClose}>
+          Incorrect username or password!
+        </Alert>
+      </Snackbar>
     </div>
   );
 }
