@@ -1,7 +1,14 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useState, useEffect } from 'react';
-import { Alert, AlertProps, Container, Link, Snackbar, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import {
+  Alert,
+  AlertProps,
+  Container,
+  Link,
+  Snackbar,
+  Typography,
+} from '@mui/material';
 import MuiAlert from '@mui/material/Alert';
 
 import Button from '../../../../../components/button';
@@ -94,17 +101,19 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
       console.log(validatedState);
       if (!username.error && !password.error) {
         // Call your authentication API here
-        AccountAPI.loginUser(validatedState.username.value, 
-          validatedState.password.value).then(response => {
-            console.log("Login successful:", response);
+        AccountAPI.loginUser(
+          validatedState.username.value,
+          validatedState.password.value,
+        )
+          .then(response => {
+            console.log('Login successful:', response);
             //Redirect to user dashboard
           })
           .catch(error => {
-            console.log("Login failed:", error.response.data.errorMessage);
+            console.log('Login failed:', error.response.data.errorMessage);
           });
       }
       return validatedState;
-      
     }
 
     case LoginActionType.showAlert: {
@@ -123,7 +132,6 @@ function loginReducer(state: LoginState, action: LoginAction): LoginState {
     default: {
       return state;
     }
-
   }
 }
 
@@ -139,7 +147,7 @@ function LoginForm() {
       error: false,
       errorText: '',
     },
-    alertOpen: false
+    alertOpen: false,
   });
   const router = useRouter();
 
@@ -169,7 +177,6 @@ function LoginForm() {
     });
   };
 
-
   const handleLoginClick: MouseEventHandler = () => {
     const { username, password } = loginState;
 
@@ -177,13 +184,12 @@ function LoginForm() {
       // Call your authentication API here
       AccountAPI.loginUser(username.value, password.value)
         .then(response => {
-          console.log("Login successful:", response);
+          console.log('Login successful:', response);
           //Redirect to dashboard
-          router.replace('/account/maps');
-
+          router.replace('/account/dashboard');
         })
         .catch(error => {
-          console.log("Login failed:", error.response?.data?.errorMessage);
+          console.log('Login failed:', error.response?.data?.errorMessage);
           // Update the state to show the alert
           loginDispatch({
             type: LoginActionType.showAlert,
@@ -205,13 +211,11 @@ function LoginForm() {
     }
   }, [loginState.alertOpen]);
 
-  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-    props,
-    ref,
-  ) {
-    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-  });
-
+  const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+    function Alert(props, ref) {
+      return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+    },
+  );
 
   return (
     <div className={styles.container}>
@@ -256,7 +260,11 @@ function LoginForm() {
         Login
       </Button>
 
-      <Snackbar open={loginState.alertOpen} autoHideDuration={6000} onClose={handleAlertClose}>
+      <Snackbar
+        open={loginState.alertOpen}
+        autoHideDuration={6000}
+        onClose={handleAlertClose}
+      >
         <Alert severity="error" onClose={handleAlertClose}>
           Incorrect username or password!
         </Alert>
