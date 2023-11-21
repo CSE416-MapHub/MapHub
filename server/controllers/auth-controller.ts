@@ -111,6 +111,7 @@ export const loginUser = async (req: Request, res: Response) => {
   try {
     const { username, password } = req.body;
 
+    console.log(req.body);
     if(!username || !password) {
       return res
         .status(400)
@@ -118,6 +119,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const user = await User.findOne({username});
+    console.log(user);
 
     if(!user) {
       return res

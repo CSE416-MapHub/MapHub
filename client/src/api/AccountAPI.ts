@@ -82,7 +82,13 @@ class AccountAPI {
    * @returns the server response
    */
   static async logoutUser() {
-    return this.api.post('/auth/logout')
+    try {
+      const response = await this.api.post('/auth/logout');
+      return response.data; // Assuming your server returns relevant data upon successful logout
+    } catch (error) {
+      console.error('Logout failed:', error);
+      throw error; // Propagate the error for handling in the calling code
+    }  
   }
 
     /**

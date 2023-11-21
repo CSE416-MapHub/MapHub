@@ -1,11 +1,26 @@
 'use client';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import { IconButton, MenuItem, MenuList, Popover } from '@mui/material';
+import AccountAPI from 'api/AccountAPI';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+
+  const router = useRouter();
+  const handleLogout = () => {
+    AccountAPI.logoutUser()
+      .then(response => {
+        console.log("Logout successful:", response);
+        router.replace('');
+      })
+      .catch(error => {
+        console.log("Logout failed:", error);
+      });
+
+  }
   return (
     <>
       <IconButton onClick={e => setAnchorEl(e.currentTarget)}>
@@ -39,7 +54,7 @@ export default function () {
               Settings
             </Link>
           </MenuItem>
-          <MenuItem>Logout</MenuItem>
+          <MenuItem onClick={handleLogout}>Logout</MenuItem>
         </MenuList>
       </Popover>
     </>
