@@ -10,14 +10,14 @@ export default function () {
   const editorContext = useContext(EditorContext);
   const map = useMap();
   const [eBBox, setEBBox] = useState<[number, number]>([0, 0]);
+  const [rerender, setRerender] = useState(0);
 
   useEffect(() => {
     let b = editorContext.state.mapDetails.bbox;
     if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
       let c: [number, number] = [b[1], b[0]];
-      console.log('center');
-      console.log(editorContext.state.mapDetails.bbox);
       setEBBox(c);
+      setRerender(rerender + 1);
       map.setView([c[0] + b[3] / 2, c[1] + b[2] / 2], 10 - Math.log2(b[2]));
     }
   });
@@ -28,12 +28,10 @@ export default function () {
 
   return (
     <GeoJSON
-      //   key={rerender}
+      key={rerender}
       data={editorContext.state.map?.geoJSON}
       onEachFeature={(feature, layer) => {
-        console.log(editorContext.state.mapDetails.originalRegions);
         layer.addEventListener('click', () => {
-          alert('dispatching');
           let action = {
             type: EditorActions.SET_PANEL,
             payload: {
@@ -54,9 +52,7 @@ export default function () {
                           type: 'text',
                           short: false,
                           disabled: false,
-                          value:
-                            // TODO: force unundefined
-                            feature.properties[lbl],
+                          value: feature.properties[lbl],
                         },
                       };
                     },

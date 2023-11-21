@@ -1,3 +1,5 @@
+import { rmdir } from 'fs';
+
 beforeEach(() => {
   cy.log('Running Initialization');
 });
@@ -6,13 +8,12 @@ declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       loadVatican(): Chainable<Element>;
+      clearDownloads(): Chainable<Element>;
     }
   }
 }
 
 Cypress.on('log:added', logObject => console.log(logObject));
-
-const special = 'file.spss';
 
 Cypress.Commands.add('loadVatican', () => {
   cy.visit('/create');
@@ -33,6 +34,9 @@ Cypress.Commands.add('loadVatican', () => {
   );
   cy.get('span:contains("NAME_ISO")').click();
   cy.get('p:contains("Confirm")').click();
+  // TODO: less hackish way
+  cy.get('.MuiBackdrop-invisible').last().click();
+  cy.get('.MuiBackdrop-invisible').last().click();
 });
 
 export {};
