@@ -15,6 +15,9 @@ router.delete('/map/:id', auth.verify, MapController.deleteMapById);
 // Handles a get a map request
 router.get('/map/:id', auth.verify, MapController.getMapById);
 
+// Handles a get a map request
+router.get('/recents/', auth.verify, MapController.getRecentMaps);
+
 // Handles publish a map request
 router.post('/map/:id', auth.verify, MapController.publishMapById);
 
