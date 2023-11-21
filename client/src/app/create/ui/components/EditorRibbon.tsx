@@ -17,6 +17,7 @@ import * as G from 'geojson';
 import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
+import exportMap from './helpers/ExportHelpers';
 
 // A list of all accepted file types.
 const accept: string =
@@ -45,9 +46,15 @@ export default function () {
         },
       },
       Export: {
-        'Export As PNG': () => {},
-        'Export As SVG': () => {},
-        'Export As JSON': () => {},
+        'Export As PNG': () => {
+          exportMap(editorContext.state.map, 'png');
+        },
+        'Export As SVG': () => {
+          exportMap(editorContext.state.map, 'svg');
+        },
+        'Export As JSON': () => {
+          exportMap(editorContext.state.map, 'json');
+        },
       },
       Publish: () => {
         setOpenPublishMapModal(true);

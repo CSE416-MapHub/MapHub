@@ -112,9 +112,8 @@ export const handleFiles = (fileList: FileList): Promise<G.GeoJSON> => {
           resolve(converted);
         }
       };
+      reader.readAsText(files[0]);
     });
-
-    reader.readAsText(files[0]);
   } else if (
     (files.length === 2 &&
       files[0].name.split('.').pop() === 'dbf' &&

@@ -1,11 +1,19 @@
+import { rmdir } from 'fs';
+
 beforeEach(() => {
   cy.log('Running Initialization');
+});
+
+afterEach(() => {
+  const downloadsFolder = Cypress.config('downloadsFolder');
+  cy.task('emptyDirectory', downloadsFolder);
 });
 
 declare global {
   namespace Cypress {
     interface Chainable<Subject> {
       loadVatican(): Chainable<Element>;
+      clearDownloads(): Chainable<Element>;
     }
   }
 }
@@ -33,6 +41,9 @@ Cypress.Commands.add('loadVatican', () => {
   );
   cy.get('span:contains("NAME_ISO")').click();
   cy.get('p:contains("Confirm")').click();
+  // TODO: less hackish way
+  cy.get('.MuiBackdrop-invisible').last().click();
+  cy.get('.MuiBackdrop-invisible').last().click();
 });
 
 export {};
