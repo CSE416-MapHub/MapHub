@@ -1,19 +1,18 @@
 /// <reference types="cypress" />
-import React from 'react';
+import '../support/component';
 import Home from '../../src/app/page';
 
 const expected = {
   heroDisplay: 'A Complete Map Visuals Studio',
-  heroBody: 'Five Essential Templates. A Plethora of Editing Tools. Unique data-driven approach.',
+  heroBody:
+    'Five Essential Templates. A Plethora of Editing Tools. Unique data-driven approach.',
 };
 
 describe('Home page hero renders.', () => {
   beforeEach(() => {
-    cy.mount(
-      <Home />
-    );
+    cy.mount(<Home />);
     cy.get('#home-hero').as('hero');
-  })
+  });
   it('Hero box is visible.', () => {
     cy.get('@hero').should('be.visible');
   });
@@ -21,9 +20,7 @@ describe('Home page hero renders.', () => {
 
 describe('Home page contains copy.', () => {
   beforeEach(() => {
-    cy.mount(
-      <Home />
-    );
+    cy.mount(<Home />);
     cy.get('#home-hero').as('hero');
   });
   it('Contains expected hero display.', () => {
@@ -36,9 +33,7 @@ describe('Home page contains copy.', () => {
 
 describe('Home page contains navigation buttons.', () => {
   beforeEach(() => {
-    cy.mount(
-      <Home />
-    );
+    cy.mount(<Home />);
     cy.get('#home-hero').as('hero');
   });
   it('Renders a "Discover Maps" outlined button.', () => {
