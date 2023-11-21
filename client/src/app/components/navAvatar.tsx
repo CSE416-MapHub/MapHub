@@ -42,15 +42,15 @@ function NavAvatar() {
           'aria-labelledby': 'basic-button',
         }}
       >
-        <MenuItem>
+        <MenuItem id="account-dashboard">
           <Icon type="solid" name="dashboard" />
           Dashboard
         </MenuItem>
-        <MenuItem>
+        <MenuItem id="account-settings">
           <Icon type="solid" name="cog" />
           Settings
         </MenuItem>
-        <MenuItem>
+        <MenuItem id="account-sign-out">
           <Icon type="solid" name="log-out" />
           Sign Out
         </MenuItem>
