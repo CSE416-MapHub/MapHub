@@ -130,6 +130,8 @@ export default function () {
     mh.title = mapName;
     mh.labels = optionsProps;
     mh.mapType = mapType;
+    console.log('SAVING');
+    console.log(mh);
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {
       createMapProm = createNewMap(mh);
