@@ -64,16 +64,25 @@ export default function () {
     }
   });
 
+  map.addEventListener('click', _ => {
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
+      let action = {
+        type: EditorActions.SET_PANEL,
+        payload: {
+          propertiesPanel: [],
+        },
+      };
+      editorContextRef.current.dispatch(action);
+      return;
+    }
+  });
+
   function perFeatureHandler(feature: G.Feature, layer: L.Layer) {
-    layer.addEventListener('click', () => {
-      console.log('clicked a feature');
+    layer.addEventListener('click', ev => {
       if (
         editorContextRef.current.state.selectedTool !== ToolbarButtons.select
       ) {
-        console.log(
-          'but the current tool isnt select; it is ' +
-            editorContextRef.current.state.selectedTool,
-        );
+        L.DomEvent.stopPropagation(ev);
         return;
       }
       let action = {
@@ -108,6 +117,7 @@ export default function () {
         },
       };
       editorContextRef.current.dispatch(action);
+      L.DomEvent.stopPropagation(ev);
     });
     let p = layer as L.Path;
     p.setStyle({
