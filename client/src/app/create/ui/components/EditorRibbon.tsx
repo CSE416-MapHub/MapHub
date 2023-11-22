@@ -81,8 +81,8 @@ export default function () {
         onclick: () => {
           setOpenPublishMapModal(true);
         },
-        // TODO: user context
-        disabled: editorContext.state.map === null,
+        disabled:
+          !authContext.state.isLoggedIn || editorContext.state.map === null,
       },
     },
     View: {
@@ -137,13 +137,7 @@ export default function () {
       createMapProm = Promise.resolve(GUEST_MAP_ID);
     }
     createMapProm.then(id => {
-      editorContext.dispatch({
-        type: EditorActions.SET_MAP,
-        payload: {
-          map_id: id,
-          map: mh,
-        },
-      });
+      editorContext.helpers.setLoadedMap(editorContext, id, mh);
       setOpenImport(false);
     });
   }
