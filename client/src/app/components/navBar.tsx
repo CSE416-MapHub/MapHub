@@ -34,12 +34,6 @@ function NavBar() {
         <Link id="discover" href="/discover">
           <Button variant="text">Discover</Button>
         </Link>
-        <Link id="signin" href="/account/login">
-          <Button variant="outlined">Sign In</Button>
-        </Link>
-        <Link id="join-now" href="/account/create">
-          <Button variant="filled">Join Now</Button>
-        </Link>
         <NavAvatar />
       </div>
     </nav>
