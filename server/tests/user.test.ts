@@ -34,7 +34,9 @@ describe('POST /auth/register', () => {
     expect(response.body).toHaveProperty('user');
     console.log(response.body.user);
     expect(response.body.user).toEqual({
-      user: savedUser
+      _id: mockId,
+      username: userData.username,
+      email: userData.email
     });
   });
   it('no body provided', async () => {
