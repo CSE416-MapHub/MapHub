@@ -1,7 +1,9 @@
 'use client';
 
+import { useContext } from 'react';
 import { Box, Typography } from '@mui/material';
 
+import { AuthContext } from '../../../context/AuthProvider';
 import Avatar from 'components/avatar';
 import Button from 'components/button';
 import Icon from 'components/icon';
@@ -11,6 +13,10 @@ import TextField from '../../../components/textField';
 import styles from './styles/settings.module.scss';
 
 function Settings() {
+  const {
+    state: { user },
+  } = useContext(AuthContext);
+
   return (
     <main id="settings" className={styles['settings__box']}>
       <Box className={styles['settings__head']}>
@@ -46,7 +52,7 @@ function Settings() {
             className={styles['settings__text-field']}
             variant="outlined"
             label="Username"
-            value={''}
+            value={user ? user.username : ''}
             endAdornment={<Icon type="solid" name="pencil" />}
           />
         </Box>
