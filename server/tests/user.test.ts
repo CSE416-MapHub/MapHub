@@ -33,8 +33,8 @@ describe('POST /auth/register', () => {
 
     expect(response.body).toHaveProperty('user');
     expect(response.body.user).toEqual({
-      username: savedUser.username,
-      email: savedUser.email,
+      id: savedUser._id,
+      username: savedUser.username
     });
   });
   it('no body provided', async () => {
