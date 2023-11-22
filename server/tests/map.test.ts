@@ -3,8 +3,11 @@ import app from '../app';
 import mapModel from '../models/map-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
-
+import fs from 'fs';
+import util from 'util';
+import path from 'path';
 let mapData = {
+  _id: new mongoose.Types.ObjectId(),
   title: 'mapNice',
   owner: new mongoose.Types.ObjectId(),
   mapType: 'categorical',
@@ -31,7 +34,7 @@ let mapData = {
     },
     properties: {
       name: 'Point',
-      description: 'description point',
+      description: 'From TESTING point',
     },
   },
   updatedAt: Math.floor(new Date().getTime() * Math.random()),
@@ -99,14 +102,50 @@ describe('POST /map/map', () => {
     };
     mapModel.prototype.save = jest.fn().mockResolvedValue(savedMap);
 
+    jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
+    jest.spyOn(fs.promises, 'writeFile').mockResolvedValue(undefined);
+
     const response = await supertest(app)
-      .post('/map/map')
+      .post('/map/create')
       .send(mapData)
       .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
 
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('map');
+  });
+});
+
+describe('GET /map/:mapID', () => {
+  it('successfully retrieves a map by ID', async () => {
+    // Mock data
+
+    const mockMapId = new mongoose.Types.ObjectId();
+
+    const mockMap = {
+      ...mapData,
+      _id: mockMapId,
+      geoJson: 'mock/filePath',
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    // Mock only the readFile method
+    jest
+      .spyOn(fs.promises, 'readFile')
+      .mockResolvedValue(JSON.stringify(mockMap.geoJSON));
+
+    // Making the request
+    const response = await supertest(app)
+      .get(`/map/map/${mockMapId}`)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    // Assertions
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map._id.toString()).toBe(mockMapId.toString());
+    expect(response.body.map.geoJSON).toEqual(mockMap.geoJSON);
   });
 });
 
@@ -134,11 +173,6 @@ describe('GET /map/recents/', () => {
     };
 
     jest.spyOn(mapModel, 'find').mockImplementation(() => queryMock);
-  });
-
-  afterEach(() => {
-    // Reset mock after the test
-    jest.restoreAllMocks();
   });
 
   it('gets a specified number of recent maps', async () => {
@@ -186,4 +220,9 @@ describe('GET /map/recents/', () => {
       'Number of maps must be a positive number',
     );
   });
+});
+
+afterEach(() => {
+  // Reset mock after the test
+  jest.restoreAllMocks();
 });

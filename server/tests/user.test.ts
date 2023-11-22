@@ -97,3 +97,7 @@ describe('User Retrieval API', () => {
     expect(userModel.find).toHaveBeenCalled();
   });
 });
+afterEach(() => {
+  // Reset mock after the test
+  jest.restoreAllMocks();
+});
