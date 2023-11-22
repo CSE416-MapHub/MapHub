@@ -1,6 +1,6 @@
 'use client';
 
-import { MouseEventHandler, useState } from 'react';
+import { MouseEventHandler, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import AccountAPI from 'api/AccountAPI';
 import Avatar from '../../components/avatar';
@@ -10,11 +10,14 @@ import Menu from '../../components/menu';
 import MenuItem from '../../components/menuItem';
 
 import styles from '../styles/navAvatar.module.scss';
+import { AuthContext } from 'context/AuthProvider';
+import Link from 'next/link';
 
 function NavAvatar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
+  const authContext = useContext(AuthContext);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -43,6 +46,19 @@ function NavAvatar() {
       router.replace('/');
     }
   };
+
+  if (!authContext.state.isLoggedIn) {
+    return (
+      <>
+        <Link id="signin" href="/account/login">
+          <Button variant="outlined">Sign In</Button>
+        </Link>
+        <Link id="join-now" href="/account/create">
+          <Button variant="filled">Join Now</Button>
+        </Link>
+      </>
+    );
+  }
 
   return (
     <>

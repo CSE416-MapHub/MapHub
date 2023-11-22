@@ -1,20 +1,55 @@
+'use client';
+import { useEffect, useState } from 'react';
+// TODO: make this not use client?
 import CardCarousel from './ui/components/CardCarousel';
 import Greeting from './ui/components/Greeting';
+import {
+  getRecentPublished,
+  getRecentUnpublished,
+} from '../helpers/EditorAPICalls';
 
 export default function () {
+  const [firstRender, setFirstRender] = useState(0);
+  const [pms, setPMS] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      png: Buffer;
+    }>
+  >([]);
+  const [ums, setUMS] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      png: Buffer;
+    }>
+  >([]);
+
+  useEffect(() => {
+    if (firstRender === 0) {
+      getRecentPublished().then(p => {
+        setPMS(
+          p.map(i => {
+            return {
+              _id: i.postID,
+              title: i.title,
+              png: i.png,
+            };
+          }),
+        );
+      });
+      getRecentUnpublished().then(p => {
+        setUMS(p);
+      });
+      setFirstRender(firstRender + 1);
+    }
+  });
+
   return (
     <main>
-      <Greeting pfp={Buffer.from('')} username="Michael" />
-      <CardCarousel
-        title="My Published Maps"
-        ids={['1', '2', '3', '4', '2', '3', '4']}
-        published={true}
-      />
-      <CardCarousel
-        title="My Unpublished Maps"
-        ids={['1', '2', '3', '4', '2', '3', '4']}
-        published={false}
-      />
+      <Greeting />
+      <CardCarousel title="My Published Maps" maps={pms} published={true} />
+      <CardCarousel title="My Unpublished Maps" maps={ums} published={false} />
     </main>
   );
 }

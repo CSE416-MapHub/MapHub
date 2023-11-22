@@ -17,6 +17,7 @@ export enum ToolbarButtons {
 export interface IEditorState {
   propertiesPanel: Array<IPropertyPanelSectionProps>;
   map: MHJSON | null;
+  map_id: string;
   selectedTool: ToolbarButtons | null;
   mapDetails: {
     availableProps: Array<string>;
@@ -29,6 +30,7 @@ export interface IEditorState {
 let initialState: IEditorState = {
   propertiesPanel: [],
   map: null,
+  map_id: '',
   selectedTool: null,
   mapDetails: {
     availableProps: [],
@@ -64,8 +66,9 @@ function reducer(
       break;
     }
     case EditorActions.SET_MAP: {
-      if (action.payload.map) {
+      if (action.payload.map && action.payload.map_id) {
         newState.map = action.payload.map;
+        newState.map_id = action.payload.map_id;
         let v = new GeoJSONVisitor(action.payload.map.geoJSON);
         v.visitRoot();
         newState.mapDetails.availableProps = Array.from(
@@ -81,7 +84,7 @@ function reducer(
           .getFeatureResults()
           .perFeature.map(x => x.originalFeature);
       } else {
-        throw new Error('SET_MAP must have a map in its payload');
+        throw new Error('SET_MAP must have a map and a map_id in its payload');
       }
       break;
     }
@@ -121,6 +124,16 @@ class helpers {
       },
     });
   }
+
+  public setLoadedMap(ctx: IEditorContext, id: string, map: MHJSON) {
+    ctx.dispatch({
+      type: EditorActions.SET_MAP,
+      payload: {
+        map_id: id,
+        map: map,
+      },
+    });
+  }
 }
 
 export interface IEditorContext {
@@ -146,3 +159,6 @@ export const EditorProvider = ({ children }: React.PropsWithChildren) => {
     </EditorContext.Provider>
   );
 };
+
+export const GUEST_MAP_ID =
+  'THISyMAPyWASyMADEyBYyAyGUESTyANDySHOULDyNOTyBEyUSEDyINyDB';

@@ -10,7 +10,7 @@ import { convertJsonToPng } from './map-controller';
 
 const PostController = {
   createPost: async (req: Request, res: Response) => {
-    const { mapId, title, description } = req.body;
+    const { mapID, title, description } = req.body;
     const userId = (req as any).userId;
     console.log(
       'Starting the publish of',
@@ -19,11 +19,13 @@ const PostController = {
       description,
       'to user with id of',
       userId,
+      'of id ',
+      mapID,
     );
     let savedPost;
     let newPost;
 
-    const map = await Map.findById(mapId).exec();
+    const map = await Map.findById(mapID).exec();
     if (!map) {
       return res.status(404).json({ success: false, message: 'Map not found' });
     }
@@ -32,7 +34,7 @@ const PostController = {
       newPost = new Post({
         title: title,
         description: description,
-        map: mapId,
+        map: mapID,
         owner: userId,
         comments: [],
         likes: [],
