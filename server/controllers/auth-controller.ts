@@ -57,7 +57,7 @@ export const registerUser = async (req: Request, res: Response) => {
       .status(200)
       .json({
         success: true,
-        user: newUser
+        user: savedUser,
       })
   } catch (error) {
     console.error(error);
