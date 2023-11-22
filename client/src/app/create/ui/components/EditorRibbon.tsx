@@ -52,6 +52,8 @@ export default function () {
           onclick: () => {
             setOpenRecentMapModal(true);
           },
+          // TODO not actually this condition; user logged in condition
+          disabled: editorContext.state.map === null,
         },
       },
       Export: {
@@ -151,9 +153,6 @@ export default function () {
   function onMultiMapConfirm(optionsProps: string[]) {
     setOpenMapLabelModal(false);
   }
-  function onRecentMapConfirm(mapId: string) {
-    setOpenRecentMapModal(false);
-  }
 
   return (
     <div className={styles['ribbon-container']}>
@@ -235,7 +234,6 @@ export default function () {
       <RecentMapModal
         open={openRecentMapModal}
         onClose={() => setOpenRecentMapModal(false)}
-        onConfirm={onRecentMapConfirm}
       />
       <PublishMapModal
         open={openPublishMapModal}
