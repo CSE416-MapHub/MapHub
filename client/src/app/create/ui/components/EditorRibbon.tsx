@@ -19,7 +19,7 @@ import {
 import { buildMHJSON } from 'app/create/MHJsonBuilder';
 import * as G from 'geojson';
 import { handleFiles } from './helpers/ImportHelpers';
-import { MHJSON } from 'types/MHJSON';
+import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
 import { createNewMap } from './helpers/EditorAPICalls';
@@ -117,13 +117,18 @@ export default function () {
     'Christians',
   ];
 
-  function onImportConfirm(mapName: string, optionsProps: string[]) {
+  function onImportConfirm(
+    mapName: string,
+    mapType: MapType,
+    optionsProps: string[],
+  ) {
     console.log(mapName, optionsProps);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
+    mh.mapType = mapType;
     let createMapProm: Promise<string>;
-    if ('TODO: user is logged in') {
+    if (!'TODO: user is logged in') {
       createMapProm = createNewMap(mh);
     } else {
       createMapProm = Promise.resolve(GUEST_MAP_ID);
