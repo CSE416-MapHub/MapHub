@@ -21,7 +21,7 @@ describe('POST /auth/register', () => {
     const mockId = new mongoose.Types.ObjectId();
 
     const savedUser = {
-      _id: mockId,
+      _id: mockId.toString(),
       username: userData.username,
       email: userData.email,
     };
@@ -32,10 +32,8 @@ describe('POST /auth/register', () => {
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('user');
-    expect(response.body.user).toEqual({
-      username: savedUser.username,
-      email: savedUser.email,
-    });
+    console.log(response.body.user);
+    expect(response.body.user).toEqual(savedUser);
   });
   it('no body provided', async () => {
     const userData = {};

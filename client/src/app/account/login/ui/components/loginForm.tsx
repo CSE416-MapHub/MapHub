@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import React, { useReducer, MouseEventHandler, useEffect, useContext } from 'react';
 import {
   Alert,
   AlertProps,
@@ -15,8 +15,10 @@ import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import styles from '../../../components/form.module.css';
-import AccountAPI from 'api/AccountAPI';
+import AccountAPI from '../../../../../api/AccountAPI';
 import { useRouter } from 'next/navigation';
+import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
+
 
 interface LoginFieldState {
   value: string;
@@ -44,7 +46,7 @@ interface LoginAction {
   type: LoginActionType;
   value?: any;
 }
-
+ 
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
   switch (action.type) {
     case LoginActionType.updateUsername: {
@@ -150,6 +152,8 @@ function LoginForm() {
     alertOpen: false,
   });
   const router = useRouter();
+  const { dispatch: authDispatch } = useContext(AuthContext); // Access the auth context
+
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -185,6 +189,16 @@ function LoginForm() {
       AccountAPI.loginUser(username.value, password.value)
         .then(response => {
           console.log('Login successful:', response);
+
+          authDispatch({
+            type: AuthActions.LOGIN,
+            payload: {
+              user: {
+                id: response.data.user.id,
+                username: response.data.user.username,
+              },
+            },
+          });
           //Redirect to dashboard
           router.replace('/account/dashboard');
         })
