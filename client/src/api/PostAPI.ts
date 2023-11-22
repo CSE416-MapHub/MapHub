@@ -26,28 +26,16 @@ function getBaseUrl(): string {
  * The MapAPI is responsible for sending and receiving requests from the
  * server for account login, creation, deletion, and modifications.
  */
-class MapAPI {
+class PostAPI {
   static api = axios.create({
     baseURL: getBaseUrl(),
     withCredentials: true,
   });
 
-  static async createMap(map: MHJSON) {
-    return this.api.post('/map/map', { map });
-  }
-
-  // static async updateMap(mapID: string, delta: Delta){
-
-  // }
-
-  static async getMapById(mapID: string) {
-    return this.api.get(`/map/${mapID}`);
-  }
-
-  static async getRecentMapIds(numOfMaps: number) {
-    return this.api.get(`/map/recents/`, { params: { numOfMaps } });
+  static async publishMap(mapID: string, title: string, description: string ) {
+    return this.api.post('/posts/post/publish', { params: { mapID, title, description } });
   }
 
 }
 
-export default MapAPI;
+export default PostAPI;
