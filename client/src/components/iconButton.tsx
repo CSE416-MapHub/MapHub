@@ -17,6 +17,7 @@ interface IconButtonProps extends MaterialIconButtonProps {
 }
 
 function IconButton({
+  className,
   children,
   variant,
   iconType,
@@ -30,7 +31,7 @@ function IconButton({
         [styles['icon-button']]: true,
         [styles['icon-button--filled']]: variant === 'filled',
         [styles['icon-button--selected']]: selected,
-      })}`}
+      })} ${className}`}
       disableFocusRipple
       TouchRippleProps={{ classes: { rippleVisible: styles.rippleVisible } }}
       {...props}
