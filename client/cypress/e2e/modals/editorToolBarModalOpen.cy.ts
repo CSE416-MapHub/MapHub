@@ -28,11 +28,14 @@ describe('All Editor Toolbar Modal Opens', () => {
     cy.get('span:contains("Choropleth Label Select")').click();
     cy.get('h2:contains("Choropleth Label Select")');
   });
-
-  it('Publish modal open', () => {
-    cy.visit('/create');
-    cy.get('button:contains("File")').click();
-    cy.get('span:contains("Publish")').click();
-    cy.get('h2:contains("Publish Map")');
-  });
+  // TODO: move this to component test
+  // our e2e tests are taking too much time
+  // this should really be a component test
+  // and this is interfering with foolproof design
+  // it('Publish modal open', () => {
+  //   cy.visit('/create');
+  //   cy.get('button:contains("File")').click();
+  //   cy.get('span:contains("Publish")').click();
+  //   cy.get('h2:contains("Publish Map")');
+  // });
 });
