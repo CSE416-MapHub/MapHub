@@ -11,13 +11,19 @@ import MultiMapLabelModal from './modals/multiLabelModal';
 import RecentMapModal from './modals/recentMapModal';
 import PublishMapModal from './modals/publishModal';
 import Button from 'components/button';
-import { EditorActions, EditorContext } from 'context/EditorProvider';
+import {
+  EditorActions,
+  EditorContext,
+  GUEST_MAP_ID,
+} from 'context/EditorProvider';
 import { buildMHJSON } from 'app/create/MHJsonBuilder';
 import * as G from 'geojson';
 import { handleFiles } from './helpers/ImportHelpers';
-import { MHJSON } from 'types/MHJSON';
+import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
+import { createNewMap } from './helpers/EditorAPICalls';
+import { AuthContext } from 'context/AuthProvider';
 
 // A list of all accepted file types.
 const accept: string =
@@ -28,6 +34,7 @@ const accept: string =
 
 export default function () {
   const editorContext = useContext(EditorContext);
+  const authContext = useContext(AuthContext);
   // const [inputError, setInputError] = useState<string>('');
   const fileUpload = useRef<HTMLInputElement | null>(null);
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
@@ -47,6 +54,7 @@ export default function () {
           onclick: () => {
             setOpenRecentMapModal(true);
           },
+          disabled: !authContext.state.isLoggedIn,
         },
       },
       Export: {
@@ -73,8 +81,8 @@ export default function () {
         onclick: () => {
           setOpenPublishMapModal(true);
         },
-        // TODO: user context
-        disabled: editorContext.state.map === null,
+        disabled:
+          !authContext.state.isLoggedIn || editorContext.state.map === null,
       },
     },
     View: {
@@ -112,18 +120,28 @@ export default function () {
     'Christians',
   ];
 
-  function onImportConfirm(mapName: string, optionsProps: string[]) {
+  function onImportConfirm(
+    mapName: string,
+    mapType: MapType,
+    optionsProps: string[],
+  ) {
     console.log(mapName, optionsProps);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
-    editorContext.dispatch({
-      type: EditorActions.SET_MAP,
-      payload: {
-        map: mh,
-      },
+    mh.mapType = mapType;
+    console.log('SAVING');
+    console.log(mh);
+    let createMapProm: Promise<string>;
+    if (authContext.state.isLoggedIn) {
+      createMapProm = createNewMap(mh);
+    } else {
+      createMapProm = Promise.resolve(GUEST_MAP_ID);
+    }
+    createMapProm.then(id => {
+      editorContext.helpers.setLoadedMap(editorContext, id, mh);
+      setOpenImport(false);
     });
-    setOpenImport(false);
   }
 
   function onChoroplethConfirm(optionsProps: string[]) {
@@ -131,9 +149,6 @@ export default function () {
   }
   function onMultiMapConfirm(optionsProps: string[]) {
     setOpenMapLabelModal(false);
-  }
-  function onRecentMapConfirm(mapId: string) {
-    setOpenRecentMapModal(false);
   }
 
   return (
@@ -216,7 +231,6 @@ export default function () {
       <RecentMapModal
         open={openRecentMapModal}
         onClose={() => setOpenRecentMapModal(false)}
-        onConfirm={onRecentMapConfirm}
       />
       <PublishMapModal
         open={openPublishMapModal}

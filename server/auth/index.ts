@@ -46,6 +46,7 @@ function authManager() {
     try {
       console.log('RETURN seom decoded token');
       // return decodedToken?.userId || null;
+      //TODO NENED TO MAKE THIS ACTUALL FIND A USER AND VERIFIY IT;
     } catch (err) {
       return null;
     }
