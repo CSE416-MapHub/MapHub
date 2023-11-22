@@ -73,8 +73,6 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
 class AuthHelpers {
   public login(ctx: IAuthContext, user: { id: string; username: string }) {
     // Perform login logic, e.g., send a request to your server
-    console.log('logging in helper');
-    console.log(ctx);
     ctx.dispatch({
       type: AuthActions.LOGIN,
       payload: { user },
