@@ -1,6 +1,7 @@
 /// <reference types="cypress" />
 import '../support/component';
 import Toolbar from '../../src/app/create/ui/components/toolbar';
+import React from 'react';
 
 describe('Tool bar renders.', () => {
   beforeEach(() => {
