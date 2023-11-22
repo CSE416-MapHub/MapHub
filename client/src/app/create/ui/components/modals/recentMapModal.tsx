@@ -1,21 +1,22 @@
 import React, { useState } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
+import { getRecents } from '../helpers/EditorAPICalls';
 
-const caledoniaSVG = (
-  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="50" cy="50" r="50" />
-  </svg>
-);
+// const caledoniaSVG = (
+//   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+//     <circle cx="50" cy="50" r="50" />
+//   </svg>
+// );
 const rectangSvg = (
   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
     <rect width="150" height="150" />
   </svg>
 );
-const svgItems = [
-  { name: 'PieChart', map: caledoniaSVG },
-  { name: 'RectMap', map: rectangSvg },
-];
+// const svgItems = [
+//   { name: 'PieChart', map: caledoniaSVG },
+//   { name: 'RectMap', map: rectangSvg },
+// ];
 interface RecentMapModalProps {
   open: boolean;
   onClose: () => void;
@@ -28,7 +29,13 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({
   onConfirm,
 }) => {
   const [selectedMap, setSelectedMap] = useState<string>('');
-
+  const [svgItems, setSvgItems] = useState<
+    Array<{
+      _id: string;
+      title: string;
+      png: Buffer;
+    }>
+  >([]);
   const handleSelectionChange = (selection: string) => {
     setSelectedMap(selection);
   };
@@ -37,6 +44,10 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({
     onConfirm(selectedMap);
     onClose();
   };
+
+  getRecents().then(items => {
+    setSvgItems(items);
+  });
 
   return (
     <GeneralizedDialog
@@ -57,8 +68,8 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({
                   margin: 'auto',
                 }}
               >
-                {item.map}
-                <Typography>{item.name}</Typography>
+                {rectangSvg}
+                <Typography>{item.title}</Typography>
               </Box>
             </Grid>
           ))}

@@ -9,7 +9,11 @@ import MapCard from './MapCard';
 
 export interface CardCarouselProps {
   title: string;
-  ids: Array<string>;
+  maps: Array<{
+    _id: string;
+    title: string;
+    png: Buffer;
+  }>;
   published: boolean;
 }
 
@@ -29,7 +33,7 @@ export default function (props: CardCarouselProps) {
   if (page === 0) {
     leftArrow = <></>;
   }
-  if ((page + 1) * 5 >= props.ids.length) {
+  if ((page + 1) * 5 >= props.maps.length) {
     rightArrow = <></>;
   }
 
@@ -49,15 +53,15 @@ export default function (props: CardCarouselProps) {
 
       <div className={style['carousel-cards-container']}>
         <div className={style['carousel-arrow-container']}>{leftArrow}</div>
-        {props.ids
+        {props.maps
           .filter((_, i) => {
             return i >= page * 5 && i < (page + 1) * 5;
           })
-          .map((id, i) => (
+          .map((map, i) => (
             <MapCard
               key={i}
               published={props.published}
-              id={id}
+              id={map.title}
               userId={'123'}
               numLikes={123}
               userLiked={false}
