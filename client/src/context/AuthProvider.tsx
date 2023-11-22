@@ -67,7 +67,6 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
       default:
         return prev;
     }
-  }
 }
 
 // Define helpers for authentication
