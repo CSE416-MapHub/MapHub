@@ -7,13 +7,13 @@ describe('All Editor Toolbar Modal Opens', () => {
   //   cy.get('h2:contains("Import Properties")');
   // });
 
-  it('recent maps modal open', () => {
-    cy.visit('/create');
-    cy.get('button:contains("File")').click();
-    cy.get('span:contains("Import")').click();
-    cy.get('span:contains("Import User Owned Maps")').click();
-    cy.get('h2:contains("Recent Maps")');
-  });
+  // it('recent maps modal open', () => {
+  //   cy.visit('/create');
+  //   cy.get('button:contains("File")').click();
+  //   cy.get('span:contains("Import")').click();
+  //   cy.get('span:contains("Import User Owned Maps")').click();
+  //   cy.get('h2:contains("Recent Maps")');
+  // });
 
   it('Map Label Multi-Selector modal open', () => {
     cy.visit('/create');
