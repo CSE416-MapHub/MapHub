@@ -23,14 +23,17 @@ function NavAvatar() {
   };
 
   const handleDashboardClick: MouseEventHandler = () => {
+    setAnchorEl(null);
     router.push('/account/dashboard');
   };
 
   const handleSettingsClick: MouseEventHandler = () => {
+    setAnchorEl(null);
     router.push('/account/settings');
   };
 
   const handleSignOutClick: MouseEventHandler = async () => {
+    setAnchorEl(null);
     try {
       const response = await AccountAPI.logoutUser();
       console.log('Logout Successful: ', response);
