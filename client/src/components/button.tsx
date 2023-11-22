@@ -9,6 +9,7 @@ declare module '@mui/material' {
   interface ButtonPropsVariantOverrides {
     filled: true;
     error: true;
+    errorOutlined: true;
   }
 }
 
@@ -27,6 +28,7 @@ function Button({ children, className, variant, ...props }: ButtonProps) {
         [styles.outlined]: variant === 'outlined',
         [styles.text]: variant === 'text',
         [styles.error]: variant === 'error',
+        [styles['error-outlined']]: variant === 'errorOutlined',
       })} ${styles.button}`}
       variant={variant === 'filled' ? 'contained' : variant}
       disableFocusRipple

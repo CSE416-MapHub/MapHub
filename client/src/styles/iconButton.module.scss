@@ -1,5 +1,6 @@
 @use 'colors';
 @use 'state';
+@use 'shape';
 
 // Icon Styles
 .icon-button {
@@ -48,6 +49,47 @@
         color: colors.$on-surface;
         opacity: 38%;
       }
+    }
+  }
+}
+
+.icon-button--filled {
+  @include shape.full;
+  height: 40px;
+  width: 40px;
+  background-color: colors.$primary;
+
+  .rippleVisible {
+    color: colors.$on-primary;
+    opacity: state.$press-opacity;
+  }
+
+  & > i {
+    color: colors.$on-primary;
+  }
+
+  &:disabled {
+    background-color: rgba(colors.$on-surface, 12%);
+
+    & > i {
+      color: rgba(colors.$on-surface, 38%);
+    }
+  }
+
+  &:enabled {
+    &:hover {
+      background-color: color-mix(
+        in hsl,
+        colors.$primary,
+        colors.$on-primary state.$hover-opacity
+      );
+    }
+    &:focus-visible {
+      background-color: color-mix(
+        in hsl,
+        colors.$primary,
+        colors.$on-primary state.$focus-opacity
+      );
     }
   }
 }
