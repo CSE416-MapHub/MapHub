@@ -91,6 +91,10 @@ const MapController = {
     try {
       newMap.geoJSON = saveFilePath;
       savedMap = await newMap.save();
+      res.status(200).json({
+        success: true,
+        map: { mapID: savedMap._id },
+      });
     } catch (err: any) {
       console.error(err.message);
 
@@ -98,11 +102,6 @@ const MapController = {
         .status(500)
         .json({ error: `DB geoJSON path update error: ${err.message}` });
     }
-
-    res.status(200).json({
-      success: true,
-      map: { mapID: savedMap._id },
-    });
   },
 
   updateMap: async (req: Request, res: Response) => {

@@ -1,5 +1,6 @@
 // const jwt = require("jsonwebtoken")
 import { Request, Response, NextFunction } from 'express';
+import User from '../models/user-model';
 import jwt, { Secret } from 'jsonwebtoken';
 const jwtSecret = process.env.JWT_SECRET ?? 'AOIHFAOUHFSHUSDFWEIUFHEIOWJ';
 
@@ -26,7 +27,8 @@ function authManager() {
         });
       }
       const verified = jwt.verify(token, secretOrPrivateKey) as jwt.JwtPayload;
-      console.log('verified.userId: ' + verified.userId);
+      console.log('decrypted userId: ' + verified.userId);
+      // const userInQ = await verifyUser(verified);
       (req as any).userId = verified.userId;
 
       next();
@@ -40,21 +42,10 @@ function authManager() {
     }
   };
 
-  const verifyUser = (req: Request) => {
+  const verifyUser = async (tokenInQ: jwt.JwtPayload) => {
     try {
-      const token = req.cookies.token;
-      if (!token) {
-        return null;
-      }
-
-      const secretOrPublicKey: Secret | undefined = jwtSecret;
-      if (!secretOrPublicKey) {
-        return null;
-      }
-      const decodedToken = jwt.verify(token, secretOrPublicKey, {
-        ignoreExpiration: true,
-      }) as { userId: string } | undefined;
-      return decodedToken?.userId || null;
+      console.log('RETURN seom decoded token');
+      // return decodedToken?.userId || null;
     } catch (err) {
       return null;
     }
