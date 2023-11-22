@@ -26,13 +26,6 @@ function Settings() {
           >
             Profile
           </Typography>
-          <TextField
-            className={styles['settings__text-field']}
-            variant="outlined"
-            label="Username"
-            value={''}
-            endAdornment={<Icon type="solid" name="pencil" />}
-          />
           <Box className={styles['settings__option']}>
             <Typography
               className={styles['settings__label']}
@@ -49,6 +42,13 @@ function Settings() {
               />
             </Avatar>
           </Box>
+          <TextField
+            className={styles['settings__text-field']}
+            variant="outlined"
+            label="Username"
+            value={''}
+            endAdornment={<Icon type="solid" name="pencil" />}
+          />
         </Box>
         <Box id="settings-security" className={styles['settings__group']}>
           <Typography
