@@ -4,7 +4,7 @@ import PostController from '../controllers/post-controller';
 const router = express.Router();
 
 // Handles publishing a map post
-router.post('/post/publish/', auth.verify, PostController.createPost);
+router.post('/publish/', auth.verify, PostController.createPost);
 // Handles updating an existing post request
 router.put('/post/:id', auth.verify, PostController.updatePostById);
 
@@ -15,17 +15,13 @@ router.delete('/post/:id', auth.verify, PostController.deletePostById);
 router.get('/post/:id', auth.verify, PostController.getPostById);
 
 //Handles a get posts request
-router.get('/posts/', auth.verify, PostController.queryPosts);
+router.get('/all', auth.verify, PostController.queryPosts);
 
 //Handles a create a comment request
-router.post(
-  '/posts/:postId/comments',
-  auth.verify,
-  PostController.createComment,
-);
+router.post('/comments/:postId', auth.verify, PostController.createComment);
 
 //Handles a get a comment request
-router.get('/comments/:id', auth.verify, PostController.getCommentById);
+router.get('/comments/:commentId/', auth.verify, PostController.getCommentById);
 
 //Handles an update comment request
 router.put(

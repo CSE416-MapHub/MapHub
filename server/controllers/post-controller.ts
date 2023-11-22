@@ -9,10 +9,10 @@ import path from 'path';
 
 const PostController = {
   createPost: async (req: Request, res: Response) => {
-    const { mapId, title, description } = req.query;
+    const { mapId, title, description } = req.body;
     const userId = (req as any).userId;
     console.log(
-      'Publishing',
+      'Starting the publish of',
       title,
       'with Desription of:',
       description,

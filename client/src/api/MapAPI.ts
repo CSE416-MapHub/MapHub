@@ -33,7 +33,7 @@ class MapAPI {
   });
 
   static async createMap(map: MHJSON) {
-    return this.api.post('/map/map', { map });
+    return this.api.post('/map/create', { map });
   }
 
   // static async updateMap(mapID: string, delta: Delta){
@@ -41,13 +41,12 @@ class MapAPI {
   // }
 
   static async getMapById(mapID: string) {
-    return this.api.get(`/map/${mapID}`);
+    return this.api.get(`/map/map/${mapID}`);
   }
 
   static async getRecentMapIds(numOfMaps: number) {
     return this.api.get(`/map/recents/`, { params: { numOfMaps } });
   }
-
 }
 
 export default MapAPI;

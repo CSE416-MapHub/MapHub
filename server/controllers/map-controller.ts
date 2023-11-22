@@ -5,6 +5,9 @@ import Map from '../models/map-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
+import util from 'util';
+
+const readFile = util.promisify(fs.readFile); // Promisify readFile for use with async/await
 
 enum MapType {
   CHOROPLETH = 'choropleth',
@@ -21,6 +24,8 @@ async function convertJsonToPng(map: mongoose.Document) {
 const MapController = {
   createMap: async (req: Request, res: Response) => {
     // Implementation of creating a map
+
+    //TODO: NEED TO VALIDATE THE GEOJSON data to make sure its good.
     const {
       title,
       owner,
@@ -113,12 +118,52 @@ const MapController = {
   },
 
   getMapById: async (req: Request, res: Response) => {
-    // Implementation of getting a map by ID
+    try {
+      const mapId = req.params.mapId;
+      console.log('THIS IS THE MAPID', JSON.stringify(req.params));
+
+      if (!mapId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Map ID is required' });
+      }
+
+      const userId = (req as any).userId;
+      const map = await Map.findById(mapId);
+
+      if (!map) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Map not found' });
+      }
+      if (map.owner.toString() !== userId.toString()) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Unauthorized, not users map' });
+      }
+
+      if (map.geoJSON && typeof map.geoJSON === 'string') {
+        try {
+          const geoJSONData = await readFile(map.geoJSON, 'utf8');
+          map.geoJSON = JSON.parse(geoJSONData);
+        } catch (fileReadError) {
+          console.error('Error reading GeoJSON file:', fileReadError);
+        }
+      }
+      console.log(JSON.stringify(map.geoJSON));
+      res.status(200).json({ success: true, map: map });
+    } catch (error) {
+      console.error('Error in getMapById:', error);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    }
   },
 
   publishMapById: async (req: Request, res: Response) => {
     // Implementation of publishing a map by ID
   },
+
   getRecentMaps: async (req: Request, res: Response) => {
     try {
       const userId = (req as any).userId; // or use a proper type if available
