@@ -40,7 +40,9 @@ const MapController = {
       dotsData,
       arrowsData,
       geoJSON,
-    } = req.body;
+    } = req.body.map;
+    console.log('REQ BODY IS');
+    console.log(req.body);
     let newMap;
     let savedMap;
     try {
@@ -60,6 +62,7 @@ const MapController = {
         dotsData,
         arrowsData,
         geoJSON: 'placeholder',
+        owner: (req as any).userId,
       });
       savedMap = await newMap.save();
     } catch (err: any) {
