@@ -35,6 +35,10 @@ class PostAPI {
   static async publishMap(mapID: string, title: string, description: string) {
     return this.api.post('/posts/publish', { mapID, title, description });
   }
+
+  static async queryPosts(searchQuery: string) {
+    return this.api.get('/posts/all', { params: { searchQuery } });
+  }
 }
 
 export default PostAPI;
