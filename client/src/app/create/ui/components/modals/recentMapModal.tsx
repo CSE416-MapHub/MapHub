@@ -20,14 +20,10 @@ const rectangSvg = (
 interface RecentMapModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (mapId: string) => void;
 }
 
-const RecentMapModal: React.FC<RecentMapModalProps> = ({
-  open,
-  onClose,
-  onConfirm,
-}) => {
+const RecentMapModal: React.FC<RecentMapModalProps> = ({ open, onClose }) => {
+  // this is the id
   const [selectedMap, setSelectedMap] = useState<string>('');
   const [svgItems, setSvgItems] = useState<
     Array<{
@@ -41,7 +37,7 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({
   };
 
   const handleConfirm = () => {
-    onConfirm(selectedMap);
+    // TODO: get map by id
     onClose();
   };
 
@@ -61,6 +57,9 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({
           {svgItems.map((item, index) => (
             <Grid item xs={6} sm={4} key={index}>
               <Box
+                onClick={() => {
+                  handleSelectionChange(item._id);
+                }}
                 sx={{
                   textAlign: 'center',
                   height: '50%',
