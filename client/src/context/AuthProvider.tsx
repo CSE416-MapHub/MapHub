@@ -8,11 +8,13 @@ export interface IAuthState {
         id: string;
         username: string;
     } | null;
+    error: string;
 }
 
 const initialState: IAuthState = {
     isLoggedIn: false,
     user: null,
+    error: ''
 };
 
 export enum AuthActions {
@@ -56,6 +58,7 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
             ...prev,
             isLoggedIn: false,
             user: null,
+            error: action.payload.error,
         };
       default:
         return prev;
