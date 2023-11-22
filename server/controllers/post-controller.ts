@@ -25,7 +25,9 @@ const PostController = {
     let savedPost;
     let newPost;
 
-    const map = await Map.findById(mapId).exec();
+
+    const map = await Map.findById(mapID).exec();
+
     if (!map) {
       return res.status(404).json({ success: false, message: 'Map not found' });
     }
@@ -119,7 +121,9 @@ const PostController = {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
-            const map = await Map.findById(post.map);
+
+            const map = await Map.findById(post.map).exec();
+
             console.log(JSON.stringify(map));
             const png = map ? await convertJsonToPng(map) : null;
 

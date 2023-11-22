@@ -126,6 +126,7 @@ describe('GET /posts/all', () => {
 
     expect(response.body.posts[0].title).toEqual(returnMock[0].title);
   });
+
 });
 
 describe('GET /posts/user', () => {
