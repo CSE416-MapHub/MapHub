@@ -93,8 +93,13 @@ export function createNewMap(map: MHJSON): Promise<string> {
   });
 }
 
-// export function loadMapById(id : string) : Promise<MHJSON> {
-//     return MapAPI.getMapById(id).then((val) => {
-
-//     })
-// }
+export function loadMapById(id: string): Promise<MHJSON> {
+  return MapAPI.getMapById(id).then(res => {
+    // TODO: verify MHJSON
+    if (res.status === 200) {
+      let map = res.data.map as MHJSON;
+      return map;
+    }
+    throw new Error(res.status.toString() + JSON.stringify(res.data));
+  });
+}

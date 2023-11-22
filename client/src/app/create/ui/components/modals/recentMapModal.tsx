@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
-import { getRecents } from '../helpers/EditorAPICalls';
+import { getRecents, loadMapById } from '../helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
+import { EditorContext } from 'context/EditorProvider';
 
 // const caledoniaSVG = (
 //   <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
@@ -24,9 +25,10 @@ interface RecentMapModalProps {
 }
 
 const RecentMapModal: React.FC<RecentMapModalProps> = ({ open, onClose }) => {
-  // this is the id
   const authContext = useContext(AuthContext);
+  const editorContext = useContext(EditorContext);
   const [firstRender, setFirstRender] = useState(true);
+  // this is the id
   const [selectedMap, setSelectedMap] = useState<string>('');
   const [svgItems, setSvgItems] = useState<
     Array<{
@@ -51,8 +53,10 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({ open, onClose }) => {
   });
 
   const handleConfirm = () => {
-    // TODO: get map by id
-    onClose();
+    loadMapById(selectedMap).then(map => {
+      editorContext.helpers.setLoadedMap(editorContext, selectedMap, map);
+      onClose();
+    });
   };
 
   return (

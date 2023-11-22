@@ -124,6 +124,16 @@ class helpers {
       },
     });
   }
+
+  public setLoadedMap(ctx: IEditorContext, id: string, map: MHJSON) {
+    ctx.dispatch({
+      type: EditorActions.SET_MAP,
+      payload: {
+        map_id: id,
+        map: map,
+      },
+    });
+  }
 }
 
 export interface IEditorContext {

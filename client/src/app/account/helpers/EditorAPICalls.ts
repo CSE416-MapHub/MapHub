@@ -9,28 +9,6 @@ import PostAPI from 'api/PostAPI';
 import { MHJSON } from 'types/MHJSON';
 
 /**
- * Send a request to publish a map
- * @param mapID the id of the map to publish
- * @param title the title to publish it under
- * @param description a description for the map
- * @returns the post id it was successfully published under
- */
-export function publishMap(
-  mapID: string,
-  title: string,
-  description: string,
-): Promise<string> {
-  return PostAPI.publishMap(mapID, title, description).then(res => {
-    if (res.status === 200) {
-      return res.data.post.postId;
-    } else {
-      // TODO: raise an error
-      throw new Error(res.status.toString() + JSON.stringify(res.data));
-    }
-  });
-}
-
-/**
  * Validate that an object is a recents object
  * @param a
  * @returns
@@ -56,9 +34,9 @@ function validateRecents(a: any): a is Array<{
 
 /**
  *
- * @returns The six most recently edited maps
+ * @returns The 10 most recently edited maps
  */
-export function getRecents(): Promise<
+export function getRecentUnpublished(): Promise<
   Array<{
     _id: string;
     title: string;
@@ -81,20 +59,27 @@ export function getRecents(): Promise<
 
 /**
  *
- * @param map the map to create
- * @returns the id of the newly created map
+ * @returns The 10 most recently published maps
  */
-export function createNewMap(map: MHJSON): Promise<string> {
-  return MapAPI.createMap(map).then(res => {
-    if (res.status === 200) {
-      return res.data.map.mapID;
-    }
-    throw new Error(res.status.toString() + JSON.stringify(res.data));
-  });
-}
-
-// export function loadMapById(id : string) : Promise<MHJSON> {
-//     return MapAPI.getMapById(id).then((val) => {
-
-//     })
+// export function getRecentPublished(): Promise<
+//   Array<{
+//     title: string;
+//     description: string;
+//     postID: string;
+//     mapID: string;
+//     png: Buffer;
+//   }>
+// > {
+//   return PostAPI.queryPosts(6).then(res => {
+//     if (res.status === 200) {
+//       let maps = res.data.maps;
+//       if (typeof maps !== 'object') {
+//         throw new Error(`Unexpected maps type ` + typeof maps);
+//       }
+//       if (validateRecents(maps)) {
+//         return maps;
+//       }
+//     }
+//     throw new Error(res.status.toString() + JSON.stringify(res.data));
+//   });
 // }
