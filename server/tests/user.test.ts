@@ -21,7 +21,7 @@ describe('POST /auth/register', () => {
     const mockId = new mongoose.Types.ObjectId();
 
     const savedUser = {
-      _id: mockId,
+      _id: mockId.toString(),
       username: userData.username,
       email: userData.email,
     };
