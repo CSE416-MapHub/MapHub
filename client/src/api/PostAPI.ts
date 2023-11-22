@@ -39,6 +39,9 @@ class PostAPI {
   static async queryPosts(searchQuery: string) {
     return this.api.get('/posts/all', { params: { searchQuery } });
   }
+  static async getAllUserPosts() {
+    return this.api.get('/posts/user');
+  }
 }
 
 export default PostAPI;
