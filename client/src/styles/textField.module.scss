@@ -1,0 +1,120 @@
+@use 'colors';
+@use 'shape';
+@use 'typography';
+
+.text-field {
+  &__container {
+    height: 56px;
+  }
+
+  &__input {
+    color: colors.$on-surface;
+    @include typography.body-large;
+    caret-color: colors.$primary;
+    padding-left: 16px;
+  }
+
+  &__outline {
+    @include shape.extra-small;
+    border-style: solid;
+    border-width: 1px;
+    border-color: colors.$outline;
+    padding: 0 12px;
+
+    transition:
+      border-color 200ms cubic-bezier(0.0, 0, 0.2, 1),
+      border-width 200ms cubic-bezier(0.0, 0, 0.2, 1);
+
+    // Notched outline styles
+    & > legend {
+      @include typography.body-small;
+      height: 16px;
+      padding: 0;
+
+      & > span {
+        padding: 0 4px;
+      }
+    }
+  }
+
+  @mixin text-field--icon {
+    display: inline-flex;
+    gap: 16px;
+
+    i {
+      color: colors.$on-surface-variant;
+      font-size: 24px;
+    }
+  }
+
+  &__leading {
+    @include text-field--icon;
+    padding-left: 16px;
+  }
+
+  &__trailing {
+    @include text-field--icon;
+    padding-right: 16px;
+  }
+
+  &:hover {
+    .text-field__outline {
+      border-color: colors.$on-surface;
+    }
+  }
+
+  .text-field--focused {
+    & > .text-field__outline {
+      border-width: 2px;
+      border-color: colors.$primary;
+    }
+  }
+
+  .text-field--disabled {
+    .text-field__label {
+      opacity: 38%;
+    }
+    .text-field__trailing {
+      opacity: 38%;
+    }
+    .text-field__leading {
+      opacity: 38%;
+    }
+    & > .text-field__outline {
+      border-color: colors.$on-surface;
+      opacity: 12%;
+    }
+  }
+
+  .text-field--error {
+    & > .text-field__outline {
+      border-color: colors.$error;
+    }
+    .text-field__label {
+      color: colors.$error;
+    }
+    .text-field__support {
+      color: colors.$error;
+    }
+    .text-field__trailing {
+      color: colors.$error;
+    }
+  }
+}
+
+.text-field__label {
+  @include typography.body-large;
+  color: colors.$on-surface-variant;
+
+  &--populated {
+    @include typography.body-small;
+    transform: translate(16px, -8px);
+  }
+}
+
+.text-field__support {
+  @include typography.body-small;
+  color: colors.$on-surface-variant;
+
+  margin: 4px 16px 0;
+}
