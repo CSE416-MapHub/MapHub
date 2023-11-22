@@ -65,7 +65,7 @@ export default function (props: CardCarouselProps) {
               userId={'123'}
               numLikes={123}
               userLiked={false}
-              title={'dummy title'}
+              title={map.title}
               author={'some author'}
             />
           ))}
