@@ -23,7 +23,7 @@ export enum AuthActions {
 }
 
 type AuthAction =
-    | { type: AuthActions.LOGIN; payload: { user: { username: string, password: string}}}
+    | { type: AuthActions.LOGIN; payload: { user: { id: string, username: string}}}
     | { type: AuthActions.LOGOUT }
     | { type: AuthActions.REGISTER_SUCCESS; payload: { user: { id: string, username: string}} }
     | { type: AuthActions.REGISTER_FAILURE; payload: { error: string }}
@@ -37,6 +37,7 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
         return {
           ...prev,
           isLoggedIn: true,
+          user: action.payload.user,
         };
       case AuthActions.LOGOUT:
         return {
@@ -63,7 +64,7 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
   
   // Define helpers for authentication
   class AuthHelpers {
-    public login(ctx: IAuthContext, user: { username: string; password: string }) {
+    public login(ctx: IAuthContext, user: { id: string; username: string }) {
       // Perform login logic, e.g., send a request to your server
       ctx.dispatch({
         type: AuthActions.LOGIN,
