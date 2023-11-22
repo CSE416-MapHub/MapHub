@@ -61,25 +61,25 @@ export function getRecentUnpublished(): Promise<
  *
  * @returns The 10 most recently published maps
  */
-// export function getRecentPublished(): Promise<
-//   Array<{
-//     title: string;
-//     description: string;
-//     postID: string;
-//     mapID: string;
-//     png: Buffer;
-//   }>
-// > {
-//   return PostAPI.queryPosts(6).then(res => {
-//     if (res.status === 200) {
-//       let maps = res.data.maps;
-//       if (typeof maps !== 'object') {
-//         throw new Error(`Unexpected maps type ` + typeof maps);
-//       }
-//       if (validateRecents(maps)) {
-//         return maps;
-//       }
-//     }
-//     throw new Error(res.status.toString() + JSON.stringify(res.data));
-//   });
-// }
+export function getRecentPublished(): Promise<
+  Array<{
+    title: string;
+    description: string;
+    postID: string;
+    mapID: string;
+    png: Buffer;
+  }>
+> {
+  return PostAPI.getAllUserPosts().then(res => {
+    if (res.status === 200) {
+      let maps = res.data.posts;
+      console.log('GET AL USEWR POSTS');
+      console.log(res.data);
+      // if (typeof maps !== 'object') {
+      //   throw new Error(`Unexpected maps type ` + typeof maps);
+      // }
+      return maps;
+    }
+    throw new Error(res.status.toString() + JSON.stringify(res.data));
+  });
+}
