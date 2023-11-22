@@ -4,6 +4,10 @@ import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
 import LabelSelector from './LabelSelector';
 import { EditorContext } from 'context/EditorProvider';
+import MapAPI from 'api/MapAPI';
+import PostAPI from 'api/PostAPI';
+import { publishMap } from '../helpers/EditorAPICalls';
+import { useRouter } from 'next/navigation';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
@@ -14,12 +18,24 @@ const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
   const [mapName, setMapName] = useState(
     editorContext.state.map?.title ?? 'My New Map',
   );
-
+  const router = useRouter();
   const [description, setDescription] = useState('');
 
   const handleConfirm = () => {
     editorContext.helpers.changeTitle(editorContext, mapName);
-    // TODO: send publish
+    if (editorContext.state.map) {
+      publishMap(editorContext.state.map_id, mapName, description).then(id => {
+        if (id === 'ERROR') {
+          //error handling
+        } else {
+          router.push('/discover/' + id);
+          return;
+        }
+      });
+    } else {
+      alert('Cannot publish a map with no id');
+    }
+
     onClose();
   };
 

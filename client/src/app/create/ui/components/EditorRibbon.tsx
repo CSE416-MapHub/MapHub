@@ -11,13 +11,18 @@ import MultiMapLabelModal from './modals/multiLabelModal';
 import RecentMapModal from './modals/recentMapModal';
 import PublishMapModal from './modals/publishModal';
 import Button from 'components/button';
-import { EditorActions, EditorContext } from 'context/EditorProvider';
+import {
+  EditorActions,
+  EditorContext,
+  GUEST_MAP_ID,
+} from 'context/EditorProvider';
 import { buildMHJSON } from 'app/create/MHJsonBuilder';
 import * as G from 'geojson';
 import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
+import { createNewMap } from './helpers/EditorAPICalls';
 
 // A list of all accepted file types.
 const accept: string =
@@ -117,13 +122,22 @@ export default function () {
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
-    editorContext.dispatch({
-      type: EditorActions.SET_MAP,
-      payload: {
-        map: mh,
-      },
+    let createMapProm: Promise<string>;
+    if ('TODO: user is logged in') {
+      createMapProm = createNewMap(mh);
+    } else {
+      createMapProm = Promise.resolve(GUEST_MAP_ID);
+    }
+    createMapProm.then(id => {
+      editorContext.dispatch({
+        type: EditorActions.SET_MAP,
+        payload: {
+          map_id: id,
+          map: mh,
+        },
+      });
+      setOpenImport(false);
     });
-    setOpenImport(false);
   }
 
   function onChoroplethConfirm(optionsProps: string[]) {
