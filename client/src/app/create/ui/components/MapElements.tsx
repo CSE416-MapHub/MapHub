@@ -19,13 +19,7 @@ const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
 
 export default function () {
-  const editorContextStaleable = useContext<{
-    state: IEditorState;
-    dispatch: Dispatch<{
-      type: EditorActions;
-      payload: Partial<IEditorState>;
-    }>;
-  }>(EditorContext);
+  const editorContextStaleable = useContext(EditorContext);
   const map = useMap();
   const [eBBox, setEBBox] = useState<[number, number]>([0, 0]);
   const [rerender, setRerender] = useState(0);

@@ -1,23 +1,25 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
 import LabelSelector from './LabelSelector';
+import { EditorContext } from 'context/EditorProvider';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
 }
 
-const PublishMapModal: React.FC<PublishModalProps> = ({
-  open,
-  onClose,
-  onConfirm,
-}) => {
-  const [mapName, setMapName] = useState('');
+const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
+  const editorContext = useContext(EditorContext);
+  const [mapName, setMapName] = useState(
+    editorContext.state.map?.title ?? 'My New Map',
+  );
+
   const [description, setDescription] = useState('');
+
   const handleConfirm = () => {
-    onConfirm();
+    editorContext.helpers.changeTitle(editorContext, mapName);
+    // TODO: send publish
     onClose();
   };
 
