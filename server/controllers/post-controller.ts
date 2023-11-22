@@ -21,6 +21,12 @@ const PostController = {
     );
     let savedPost;
     let newPost;
+
+    const map = await Map.findById(mapId);
+    if (!map) {
+      return res.status(404).json({ success: false, message: 'Map not found' });
+    }
+
     try {
       newPost = new Post({
         title: title,
@@ -30,7 +36,11 @@ const PostController = {
         comments: [],
         likes: [],
       });
+
+      map.title = title;
       savedPost = await newPost.save();
+      await map.save();
+
       res.status(200).json({
         success: true,
         post: { postId: savedPost._id },
