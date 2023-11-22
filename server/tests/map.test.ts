@@ -6,6 +6,7 @@ import auth from '../auth/index';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
+
 let mapData = {
   _id: new mongoose.Types.ObjectId(),
   title: 'mapNice',
@@ -164,11 +165,7 @@ describe('GET /map/recents/', () => {
 
         return queryMock;
       }),
-      // limit: jest.fn().mockImplementation(limitNumber => {
-      //   sortedAndLimitedData = sortedAndLimitedData.slice(0, limitNumber);
-      //   console.log('LIMIT AMOUNT', sortedAndLimitedData.length);
-      //   return queryMock;
-      // }),
+
       exec: jest.fn().mockResolvedValue(sortedAndLimitedData),
     };
 

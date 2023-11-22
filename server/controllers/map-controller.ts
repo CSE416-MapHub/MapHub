@@ -17,7 +17,7 @@ enum MapType {
   FLOW = 'flow',
 }
 
-async function convertJsonToPng(map: mongoose.Document) {
+export async function convertJsonToPng(map: mongoose.Document) {
   return Buffer.alloc(0);
 }
 
