@@ -1,6 +1,11 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useEffect, useContext } from 'react';
+import React, {
+  useReducer,
+  MouseEventHandler,
+  useEffect,
+  useContext,
+} from 'react';
 import {
   Alert,
   AlertProps,
@@ -18,7 +23,6 @@ import styles from '../../../components/form.module.css';
 import AccountAPI from '../../../../../api/AccountAPI';
 import { useRouter } from 'next/navigation';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
-
 
 interface LoginFieldState {
   value: string;
@@ -46,7 +50,7 @@ interface LoginAction {
   type: LoginActionType;
   value?: any;
 }
- 
+
 function loginReducer(state: LoginState, action: LoginAction): LoginState {
   switch (action.type) {
     case LoginActionType.updateUsername: {
@@ -153,7 +157,6 @@ function LoginForm() {
   });
   const router = useRouter();
   const { dispatch: authDispatch } = useContext(AuthContext); // Access the auth context
-
 
   const setUsername = (value: string) => {
     loginDispatch({

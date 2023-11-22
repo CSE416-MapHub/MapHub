@@ -23,6 +23,7 @@ import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
 import { createNewMap } from './helpers/EditorAPICalls';
+import { AuthContext } from 'context/AuthProvider';
 
 // A list of all accepted file types.
 const accept: string =
@@ -33,6 +34,7 @@ const accept: string =
 
 export default function () {
   const editorContext = useContext(EditorContext);
+  const authContext = useContext(AuthContext);
   // const [inputError, setInputError] = useState<string>('');
   const fileUpload = useRef<HTMLInputElement | null>(null);
   const [openMenu, setOpenMenu] = useState<MenuProps | null>(null);
@@ -52,8 +54,7 @@ export default function () {
           onclick: () => {
             setOpenRecentMapModal(true);
           },
-          // TODO not actually this condition; user logged in condition
-          disabled: editorContext.state.map === null,
+          disabled: !authContext.state.isLoggedIn,
         },
       },
       Export: {
@@ -130,7 +131,7 @@ export default function () {
     mh.labels = optionsProps;
     mh.mapType = mapType;
     let createMapProm: Promise<string>;
-    if (!'TODO: user is logged in') {
+    if (authContext.state.isLoggedIn) {
       createMapProm = createNewMap(mh);
     } else {
       createMapProm = Promise.resolve(GUEST_MAP_ID);

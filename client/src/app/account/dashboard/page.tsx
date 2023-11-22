@@ -4,15 +4,27 @@ import Greeting from './ui/components/Greeting';
 export default function () {
   return (
     <main>
-      <Greeting pfp={Buffer.from('')} username="Michael" />
+      <Greeting />
       <CardCarousel
         title="My Published Maps"
-        ids={['1', '2', '3', '4', '2', '3', '4']}
+        maps={[
+          {
+            _id: '1',
+            title: 'map',
+            png: Buffer.alloc(0),
+          },
+        ]}
         published={true}
       />
       <CardCarousel
         title="My Unpublished Maps"
-        ids={['1', '2', '3', '4', '2', '3', '4']}
+        maps={[
+          {
+            _id: '1',
+            title: 'map',
+            png: Buffer.alloc(0),
+          },
+        ]}
         published={false}
       />
     </main>
