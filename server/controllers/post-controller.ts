@@ -53,6 +53,49 @@ const PostController = {
         .json({ error: `post saving error: ${err.message}` });
     }
   },
+  getUserPosts: async (req: Request, res: Response) => {
+    try {
+      const userId = (req as any).userId;
+
+      const posts = await Post.find({ owner: userId }).exec();
+
+      console.log('These are the posts', JSON.stringify(posts), posts.length);
+      if (posts && posts.length > 0) {
+        const transformedPosts = await Promise.all(
+          posts.map(async post => {
+            console.log('STARTING POST BY POST', JSON.stringify(post));
+            const map = await Map.findById(post.map).exec();
+            console.log(JSON.stringify(map));
+            const png = map ? await convertJsonToPng(map) : null;
+
+            return {
+              title: post.title,
+              description: post.description,
+              postID: post._id,
+              mapID: post.map,
+              png: png,
+            };
+          }),
+        );
+
+        res.status(200).json({
+          success: true,
+          posts: transformedPosts,
+        });
+      } else {
+        res.status(200).json({
+          success: true,
+          posts: [],
+        });
+      }
+    } catch (error) {
+      console.error('Error in queryPosts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
   updatePostById: async (req: Request, res: Response) => {},
   deletePostById: async (req: Request, res: Response) => {},
   getPostById: async (req: Request, res: Response) => {},
@@ -74,7 +117,7 @@ const PostController = {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
-            const map = await Map.findById(post.map);
+            const map = await Map.findById(post.map).exec();
             console.log(JSON.stringify(map));
             const png = map ? await convertJsonToPng(map) : null;
 
