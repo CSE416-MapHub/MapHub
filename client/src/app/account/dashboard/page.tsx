@@ -1,3 +1,5 @@
+'use client';
+// TODO: make this not use client?
 import CardCarousel from './ui/components/CardCarousel';
 import Greeting from './ui/components/Greeting';
 
