@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import React, { useReducer, MouseEventHandler, useEffect, useContext } from 'react';
 import { Stack, Typography } from '@mui/material';
 
 import Button from '../../../../../components/button';
@@ -13,6 +13,7 @@ import { useRouter } from 'next/navigation';
 
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
+import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
 
 /**
  * The CreateAccountState is an object filled with states of text field
@@ -27,12 +28,11 @@ interface CreateAccountFieldState {
   errorText: string,
 }
 
-interface CreateAccountState {
+export interface CreateAccountState {
   username: CreateAccountFieldState,
   email: CreateAccountFieldState,
   password: CreateAccountFieldState,
   passwordConfirm: CreateAccountFieldState,
-  registrationError: string | null,
 };
 
 /**
@@ -50,9 +50,6 @@ enum CreateAccountActionType {
   updatePasswordConfirm = 'updatePasswordConfirm',
   validatePasswordConfirm = 'validatePasswordConfirm',
   validate = 'validate',
-  createAccount = 'createAccount',
-  registrationSuccess = 'registrationSuccess',
-  registrationFailure = 'registrationFailure',
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
@@ -68,7 +65,7 @@ interface CreateAccountAction {
  * validating the text field values. Validation checks the current value in the
  * state and modifies the error and errorText states for the text field.
  */
-function createAccountReducer(
+export function createAccountReducer(
   state: CreateAccountState,
   action: CreateAccountAction,
 ): CreateAccountState {
@@ -203,62 +200,7 @@ function createAccountReducer(
       });
       return newState;
     }
-    case CreateAccountActionType.createAccount: {
-      // Creates a new account by validating all input text fields and sending
-      // the registration request to the backend.
-      const validatedState = createAccountReducer(state, {
-        type: CreateAccountActionType.validate,
-      });
-      console.log('IN CREATE ACCOUNT');
-      if (!validatedState.username.error &&
-        !validatedState.email.error &&
-        !validatedState.password.error &&
-        !validatedState.password.error) {
-          AccountAPI.registerUser(
-              validatedState.username.value,
-              validatedState.email.value,
-              validatedState.password.value,
-              validatedState.passwordConfirm.value,
-            )
-            .then((result) => {
-              if(result.data.success) {
-                console.log("success");
-              }
-            })
-            .catch((error: any) => {
-              console.error('Registration failed:', error.response.data.errorMessage);
-              return {
-                ...state,
-                registrationError: error.response.data.errorMessage || null, // Set registrationError
-              };
-          });
-      }
-      // TODO: Redirect
 
-
-      return validatedState;
-    }
-
-    case CreateAccountActionType.registrationSuccess: {
-      // Handle registration success, maybe reset the form state
-      return {
-        ...state,
-        registrationError: null, // Reset registrationError
-        username: { value: '', error: false, errorText: '' },
-        email: { value: '', error: false, errorText: '' },
-        password: { value: '', error: false, errorText: '' },
-        passwordConfirm: { value: '', error: false, errorText: '' },
-      };
-    }
-
-    case CreateAccountActionType.registrationFailure: {
-      // Handle registration failure, set error state
-      console.error('Registration failed:', action.error);
-      return {
-        ...state,
-        registrationError: action.error || null, // Set registrationError
-      };
-    }
 
   }
 }
@@ -279,6 +221,7 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
  */
 function CreateAccountForm() {
   const router = useRouter();
+  const { state: authState, dispatch: authDispatch, helpers: authHelpers } = useContext(AuthContext);
   const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
   const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);  
   // const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
@@ -305,7 +248,6 @@ function CreateAccountForm() {
         error: false,
         errorText: '',
       },
-      registrationError: null
     },
   );
 
@@ -375,19 +317,28 @@ function CreateAccountForm() {
   
       // Handle the result accordingly, dispatch actions, etc.
       if (result.data.success) {
-        createAccountDispatch({
-          type: CreateAccountActionType.registrationSuccess,
+        authDispatch({
+          type: AuthActions.REGISTER_SUCCESS,
+          payload: {
+            user: {
+              id: result.data._id,
+              username: createAccountState.username.value,
+            },
+          },
         });
         console.log("successfully registered")
         setSuccessSnackbarOpen(true);
-
+        console.log(authState);
       }
     } catch (error: any) {
-      console.error('Registration failed:', error.message);
-      createAccountDispatch({
-        type: CreateAccountActionType.registrationFailure,
-        error: error.response.data.errorMessage || 'Registration failed.',
+      console.log('Registration failed:', error);
+      authDispatch({
+        type: AuthActions.REGISTER_FAILURE,
+        payload: {
+          error: error.response?.data?.errorMessage || 'Registration failed.',
+        },
       });
+      console.log(authState);
     }
   }
 
@@ -395,10 +346,6 @@ function CreateAccountForm() {
   const handleSnackbarClose = () => {
     setSuccessSnackbarOpen(false);
     setErrorSnackbarOpen(false);  
-    createAccountDispatch({
-      type: CreateAccountActionType.registrationFailure,
-      error: null
-    });
   };
 
   useEffect(() => {
@@ -417,10 +364,11 @@ function CreateAccountForm() {
 
   useEffect(() => {
     // Check if registration failed and display error snackbar accordingly
-    if (createAccountState.registrationError !== null) {
+    if (authState.error !== '') {
       setErrorSnackbarOpen(true);
     }
-  }, [createAccountState.registrationError]);
+    console.log(authState.error)
+  }, [authState.error]);
 
   return (
     
@@ -429,9 +377,10 @@ function CreateAccountForm() {
         open={errorSnackbarOpen}
         autoHideDuration={6000} // Adjust as needed
         onClose={handleSnackbarClose}
+        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
       >
           <Alert onClose={handleSnackbarClose} severity="error">
-            {createAccountState.registrationError || 'Account creation failed!'}
+            {authState.error || 'Account creation failed!'}
           </Alert>
       </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
@@ -493,7 +442,7 @@ function CreateAccountForm() {
         autoHideDuration={6000} // Adjust as needed
         onClose={handleSnackbarClose}
       >
-        <Alert onClose={handleSnackbarClose} severity="success">
+        <Alert id='success-alert' onClose={handleSnackbarClose} severity="success">
           Account created successfully! Redirecting to login...
         </Alert>
       </Snackbar>
