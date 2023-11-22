@@ -1,0 +1,120 @@
+@use 'colors';
+@use 'elevation';
+@use 'layout';
+@use 'shape';
+
+.settings__box {
+  display: grid;
+  grid-template-columns: 2fr 3fr 3fr 2fr;
+  grid-template-rows: 1fr;
+  grid-template-areas:
+    ". head pane .";
+  align-items: center;
+
+  height: calc(100% - 120px);
+
+  color: colors.$on-surface;
+}
+
+.settings__head {
+  grid-area: head;
+}
+
+.settings__pane {
+  @include elevation.elevation-1;
+  @include shape.extra-large;
+  grid-area: pane;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+
+  width: calc(100% - 48px);
+  height: 80%;
+  padding: shape.$extra-large;
+
+  background-color: colors.$surface-container;
+
+  overflow: scroll;
+}
+
+.settings__group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: shape.$extra-large;
+}
+
+.settings__type-group {
+  display: flex;
+  flex-direction: column;
+  gap: shape.$extra-small;
+}
+
+.settings__option {
+  width: 80%;
+}
+
+.settings__text-field {
+  width: 80%;
+
+  &:hover {
+    div, input {
+      cursor: pointer;
+    }
+  }
+}
+
+.settings__avatar {
+  margin: 0 auto;
+
+  @include layout.expanded {
+    height: 192px;
+    width: 192px;
+  }
+  @include layout.medium {
+    height: 128px;
+    width: 128px;
+  }
+  @include layout.compact {
+    height: 96px;
+    width: 96px;
+  }
+
+  & > i{
+    @include layout.expanded {
+      font-size: 96px;
+    }
+    @include layout.medium {
+      font-size: 64px;
+    }
+    @include layout.compact {
+      font-size: 48px;
+    }
+  }
+}
+
+.settings__title {
+  align-self: flex-start;
+
+  &--warn {
+    color: colors.$error;
+  }
+}
+
+.settings__label {
+  padding-left: 16px;
+  color: colors.$on-surface-variant;
+}
+
+.settings__edit-icon-button {
+  position: absolute;
+  top: calc(85% - 20px);
+  left: calc(85% - 20px);
+
+  outline: colors.$surface-container solid shape.$extra-small;
+}
+
+.settings__delete-button {
+  align-self: flex-end;
+}
