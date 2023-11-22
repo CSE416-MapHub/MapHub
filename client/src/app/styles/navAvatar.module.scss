@@ -1,0 +1,44 @@
+@use 'colors';
+@use 'elevation';
+@use 'state';
+
+#nav-avatar__button.nav-avatar__button {
+  padding: 0;
+  min-width: fit-content;
+
+  &:hover {
+    &>.nav-avatar {
+      @include elevation.elevation-1;
+      background: hsla(194, 80%, 38%, 1);
+      background: linear-gradient(45deg, hsla(194, 80%, 38%, 1) 0%, hsla(193, 48%, 75%, 1) 100%);
+      background: -moz-linear-gradient(45deg, hsla(194, 80%, 38%, 1) 0%, hsla(193, 48%, 75%, 1) 100%);
+      background: -webkit-linear-gradient(45deg, hsla(194, 80%, 38%, 1) 0%, hsla(193, 48%, 75%, 1) 100%);
+    }
+  }
+
+  &:active {
+    &>.nav-avatar {
+      background: hsla(194, 76%, 39%, 1);
+      background: linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+      background: -moz-linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+      background: -webkit-linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+    }
+  }
+
+  &:focus-visible {
+    &>.nav-avatar {
+      background: hsla(194, 76%, 39%, 1);
+      background: linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+      background: -moz-linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+      background: -webkit-linear-gradient(45deg, hsla(194, 76%, 39%, 1) 0%, hsla(193, 49%, 75%, 1) 100%);
+    }
+  }
+}
+
+.nav-avatar {
+  transition:
+    background 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    border-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,
+    color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms;
+}

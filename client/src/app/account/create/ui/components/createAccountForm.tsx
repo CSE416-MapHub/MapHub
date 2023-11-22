@@ -1,37 +1,44 @@
-'use client'
+'use client';
 
-import { useReducer, MouseEventHandler } from 'react';
-import { Button, Typography } from '@mui/material';
+import React, { useReducer, MouseEventHandler, useEffect } from 'react';
+import { Stack, Typography } from '@mui/material';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
 
 import AccountAPI from 'api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
+import { useRouter } from 'next/navigation';
+
+import Snackbar from '@mui/material/Snackbar';
+import MuiAlert, { AlertProps } from '@mui/material/Alert';
 
 /**
- * The CreateAccountState is an object filled with states of text field 
+ * The CreateAccountState is an object filled with states of text field
  * parameters. Each text field parameter holds the following:
  *     * value - the actual text value of the input text field,
- *     * error - a boolean indicating whether or not the input is valid, and
+ *     * error - a boolean indicating whether the input is valid, and
  *     * errorText - an error message indicating why the value is not valid.
  */
 interface CreateAccountFieldState {
   value: string,
   error: boolean,
   errorText: string,
-};
+}
+
 interface CreateAccountState {
   username: CreateAccountFieldState,
   email: CreateAccountFieldState,
   password: CreateAccountFieldState,
   passwordConfirm: CreateAccountFieldState,
+  registrationError: string | null,
 };
 
 /**
  * CreateAccountActionType represents the type of action the reducer must
  * perform. CreateAccountAction represents the type of action and the values
- * that needs to be passed to the reducer to perform the action. 
+ * that needs to be passed to the reducer to perform the action.
  */
 enum CreateAccountActionType {
   updateUsername = 'updateUsername',
@@ -44,22 +51,26 @@ enum CreateAccountActionType {
   validatePasswordConfirm = 'validatePasswordConfirm',
   validate = 'validate',
   createAccount = 'createAccount',
+  registrationSuccess = 'registrationSuccess',
+  registrationFailure = 'registrationFailure',
 };
 interface CreateAccountAction {
   type: CreateAccountActionType,
   value?: any,
+  error?: string | null;
 }
+
 
 /**
  * The createAccountReducer function takes the current state along with an
  * action to perform on the state. It returns a new state with the action
- * performed. The actions include: updating the value of text fields and 
+ * performed. The actions include: updating the value of text fields and
  * validating the text field values. Validation checks the current value in the
  * state and modifies the error and errorText states for the text field.
  */
 function createAccountReducer(
   state: CreateAccountState,
-  action: CreateAccountAction
+  action: CreateAccountAction,
 ): CreateAccountState {
   switch (action.type) {
     case CreateAccountActionType.updateUsername: {
@@ -73,14 +84,14 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validateUsername: {
       // Checks if the username is well-formed. A well-formed username must
-      // include alphanumeric characters, underscores, or dots such that the 
+      // include alphanumeric characters, underscores, or dots such that the
       // last character is not a dot. The username must also be between 3 to 16
       // characters.
       // TODO: Implement unique username checking.
       const { username } = state;
-      if (!/^[\w\.]{2,15}[\w]$/.test(username.value)) {
+      if (!/^[\w.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
-        username.errorText = 'Please enter a valid username between 3-16 ' + 
+        username.errorText = 'Please enter a valid username between 3-16 ' +
           'alphanumeric, underscore, or dot characters.';
       } else {
         username.error = false;
@@ -106,11 +117,11 @@ function createAccountReducer(
       // underscores, and dots, followed by an @ symbol, followed by a domain
       // name (set of alphanumeric characters, underscores, and dots such that
       // it ends with a dot), and followed by a top-level domain name (a set of
-      // alphanumeric characters and underscores of length 2-4). 
+      // alphanumeric characters and underscores of length 2-4).
       const { email } = state;
-      if (!/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
+      if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email.value)) {
         email.error = true;
-        email.errorText = 'Please enter a valid email address.'
+        email.errorText = 'Please enter a valid email address.';
       } else {
         email.error = false;
         email.errorText = '';
@@ -131,12 +142,13 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validatePassword: {
       // Checks if the password is well-formed. A password is well-formed if it
-      // is a set of characters such that it is longer than 8 characters and 
+      // is a set of characters such that it is longer than 8 characters and
       // contains one uppercase letter, one lowercase letter, and one digit.
       const { password } = state;
       if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password.value)) {
         password.error = true;
-        password.errorText = 'Please enter a password with at least eight ' +
+        password.errorText =
+          'Please enter a password with at least eight ' +
           'characters with one uppercase, one lowercase, and one digit';
       } else {
         password.error = false;
@@ -158,12 +170,15 @@ function createAccountReducer(
     }
     case CreateAccountActionType.validatePasswordConfirm: {
       // Checks if the password confirmation is well-formed and matches the 
-      // first password input value. Only checks whether or not the passwords
+      // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
-      if (password.value !== passwordConfirm.value || passwordConfirm.value.length === 0) {
+      if (
+        password.value !== passwordConfirm.value ||
+        passwordConfirm.value.length === 0
+      ) {
         passwordConfirm.error = true;
-        passwordConfirm.errorText = 'Please reconfirm the password.'
+        passwordConfirm.errorText = 'Please reconfirm the password.';
       } else {
         passwordConfirm.error = false;
         passwordConfirm.errorText = '';
@@ -194,35 +209,79 @@ function createAccountReducer(
       const validatedState = createAccountReducer(state, {
         type: CreateAccountActionType.validate,
       });
-      console.log("IN CREATE ACCOUNT")
+      console.log('IN CREATE ACCOUNT');
       if (!validatedState.username.error &&
         !validatedState.email.error &&
         !validatedState.password.error &&
         !validatedState.password.error) {
-        AccountAPI.registerUser(
-          validatedState.username.value,
-          validatedState.email.value,
-          validatedState.password.value,
-          validatedState.passwordConfirm.value,
-        );
+          AccountAPI.registerUser(
+              validatedState.username.value,
+              validatedState.email.value,
+              validatedState.password.value,
+              validatedState.passwordConfirm.value,
+            )
+            .then((result) => {
+              if(result.data.success) {
+                console.log("success");
+              }
+            })
+            .catch((error: any) => {
+              console.error('Registration failed:', error.response.data.errorMessage);
+              return {
+                ...state,
+                registrationError: error.response.data.errorMessage || null, // Set registrationError
+              };
+          });
       }
-      // TODO: Navigate to another page upon successfully creating an account
-      // or modify the form state.
+      // TODO: Redirect
+
+
       return validatedState;
     }
-    default: {
-      return state;
+
+    case CreateAccountActionType.registrationSuccess: {
+      // Handle registration success, maybe reset the form state
+      return {
+        ...state,
+        registrationError: null, // Reset registrationError
+        username: { value: '', error: false, errorText: '' },
+        email: { value: '', error: false, errorText: '' },
+        password: { value: '', error: false, errorText: '' },
+        passwordConfirm: { value: '', error: false, errorText: '' },
+      };
     }
+
+    case CreateAccountActionType.registrationFailure: {
+      // Handle registration failure, set error state
+      console.error('Registration failed:', action.error);
+      return {
+        ...state,
+        registrationError: action.error || null, // Set registrationError
+      };
+    }
+
   }
 }
 
+
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
+  props,
+  ref,
+) {
+  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+});
+
 /**
  * The CreateAccountForm renders a frontend form with the following text fields:
- * username, email address, password, and confirm password. The form also 
+ * username, email address, password, and confirm password. The form also
  * includes a button for submission. The state of the form and its verification
  * is handled by the createAccountReducer.
  */
 function CreateAccountForm() {
+  const router = useRouter();
+  const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);  
+  // const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
   const [ createAccountState, createAccountDispatch ] = useReducer(
     createAccountReducer,
     {
@@ -246,6 +305,7 @@ function CreateAccountForm() {
         error: false,
         errorText: '',
       },
+      registrationError: null
     },
   );
 
@@ -286,14 +346,14 @@ function CreateAccountForm() {
     createAccountDispatch({
       type: CreateAccountActionType.validatePassword,
     });
-  }
+  };
 
   const setPasswordConfirm = (value: string) => {
     createAccountDispatch({
       type: CreateAccountActionType.updatePasswordConfirm,
       value,
     });
-  }
+  };
 
   const validatePasswordConfirm = () => {
     createAccountDispatch({
@@ -301,25 +361,90 @@ function CreateAccountForm() {
     });
   };
 
-  const handleCreateAccountClick : MouseEventHandler = (event) => {
-    createAccountDispatch({
-      type: CreateAccountActionType.createAccount,
-    });
+  const handleCreateAccountClick : MouseEventHandler = async (event) => {
+    // createAccountDispatch({
+    //   type: CreateAccountActionType.createAccount,
+    // });
+    try {
+      const result = await AccountAPI.registerUser(
+        createAccountState.username.value,
+        createAccountState.email.value,
+        createAccountState.password.value,
+        createAccountState.passwordConfirm.value
+      );
+  
+      // Handle the result accordingly, dispatch actions, etc.
+      if (result.data.success) {
+        createAccountDispatch({
+          type: CreateAccountActionType.registrationSuccess,
+        });
+        console.log("successfully registered")
+        setSuccessSnackbarOpen(true);
+
+      }
+    } catch (error: any) {
+      console.error('Registration failed:', error.message);
+      createAccountDispatch({
+        type: CreateAccountActionType.registrationFailure,
+        error: error.response.data.errorMessage || 'Registration failed.',
+      });
+    }
   }
 
+
+  const handleSnackbarClose = () => {
+    setSuccessSnackbarOpen(false);
+    setErrorSnackbarOpen(false);  
+    createAccountDispatch({
+      type: CreateAccountActionType.registrationFailure,
+      error: null
+    });
+  };
+
+  useEffect(() => {
+    // This effect runs after the component has rendered
+    console.log(successSnackbarOpen);
+    if (successSnackbarOpen) {
+      // If either snackbar is open, initiate the redirect after a delay
+      const timer = setTimeout(() => {
+        router.replace('/account/login');
+      }, 1000); // Adjust the delay as needed
+
+      // Cleanup function to clear the timer if the component unmounts
+      return () => clearTimeout(timer);
+    }
+  }, [successSnackbarOpen, router]);
+
+  useEffect(() => {
+    // Check if registration failed and display error snackbar accordingly
+    if (createAccountState.registrationError !== null) {
+      setErrorSnackbarOpen(true);
+    }
+  }, [createAccountState.registrationError]);
+
   return (
+    
     <div className={styles.container}>
+      <Snackbar
+        open={errorSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+          <Alert onClose={handleSnackbarClose} severity="error">
+            {createAccountState.registrationError || 'Account creation failed!'}
+          </Alert>
+      </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant="body1" align="left">
+      <Typography className={styles.body} variant='body1' align='left'>
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id="username"
-        type="text"
-        label="Username"
+        id='username'
+        type='text'
+        label='Username'
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -328,9 +453,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id="email"
-        type="email"
-        label="Email Address"
+        id='email'
+        type='email'
+        label='Email Address'
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -338,9 +463,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id="password"
-        type="password"
-        label="Password"
+        id='password'
+        type='password'
+        label='Password'
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -348,22 +473,30 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id="password-confirm"
-        type="password"
-        label="Confirm Password"
+        id='password-confirm'
+        type='password'
+        label='Confirm Password'
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button 
-        className={styles.confirmButton}
-        variant="contained"
+      <Button
+        variant='filled'
         onClick={handleCreateAccountClick}
       >
         Create Account
       </Button>
+      <Snackbar
+        open={successSnackbarOpen}
+        autoHideDuration={6000} // Adjust as needed
+        onClose={handleSnackbarClose}
+      >
+        <Alert onClose={handleSnackbarClose} severity="success">
+          Account created successfully! Redirecting to login...
+        </Alert>
+      </Snackbar>
     </div>
   );
 }

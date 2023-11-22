@@ -1,0 +1,20 @@
+$expanded-width: 840px;
+$medium-width: 600px;
+
+@mixin expanded {
+  @media only screen and (min-width: 840px) {
+    @content
+  }
+}
+
+@mixin medium {
+  @media only screen and (min-width: 600px) and (max-width: $expanded-width - 1px) {
+    @content
+  }
+}
+
+@mixin compact {
+  @media only screen and (max-width: $medium-width - 1px) {
+    @content
+  }
+}

@@ -1,7 +1,4 @@
-'use client'
-
-import Link from 'next/link';
-import { Typography } from '@mui/material';
+'use client';
 
 import styles from './ui/resetPassword.module.css';
 import ResetPasswordForm from './ui/components/resetPasswordForm';

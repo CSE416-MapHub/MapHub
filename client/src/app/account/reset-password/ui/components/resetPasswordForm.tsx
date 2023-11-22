@@ -1,23 +1,22 @@
-'use client'
+'use client';
 
-import React, { useState, useReducer, MouseEventHandler } from 'react';
-import { Button, Container, Link, Typography } from '@mui/material';
+import React, { useReducer } from 'react';
+import { Link, Typography } from '@mui/material';
 
+import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
-
-import AccountAPI from '../../../../../api/AccountAPI';
 
 import styles from '../../../components/form.module.css';
 
 interface ResetPasswordFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 interface ResetPasswordState {
-  password: ResetPasswordFieldState,
-  passwordConfirm: ResetPasswordFieldState,
+  password: ResetPasswordFieldState;
+  passwordConfirm: ResetPasswordFieldState;
 }
 
 enum ResetPasswordActionType {
@@ -28,12 +27,16 @@ enum ResetPasswordActionType {
   resetPassword = 'resetPassword',
 }
 
+
 interface ResetPasswordAction {
-  type: ResetPasswordActionType,
-  value?: any,
+  type: ResetPasswordActionType;
+  value?: any;
 }
 
-function ResetPasswordReducer(state: ResetPasswordState, action: ResetPasswordAction): ResetPasswordState {
+function ResetPasswordReducer(
+  state: ResetPasswordState,
+  action: ResetPasswordAction,
+): ResetPasswordState {
   switch (action.type) {
     case ResetPasswordActionType.updatePassword: {
       return {
@@ -135,13 +138,9 @@ function ResetPasswordForm() {
     });
   };
 
-  const handleResetPasswordClick: MouseEventHandler = (event) => {
-
-  };
-
   return (
     <div className={styles.container}>
-    <Typography className={styles.title} variant="h2">
+      <Typography className={styles.title} variant="h2">
         Reset Password
       </Typography>
       <ValidatedTextField
@@ -164,14 +163,9 @@ function ResetPasswordForm() {
         validate={validatePasswordConfirm}
         helperText={ResetPasswordState.passwordConfirm.errorText}
       />
-    <Link href='/account/reset-password/success'>
-      <Button
-        className={styles.confirmButton}
-        variant="contained"
-      >
-        Reset Password
-      </Button>
-    </Link>
+      <Link href="/account/reset-password/success">
+        <Button variant="filled">Reset Password</Button>
+      </Link>
     </div>
   );
 }

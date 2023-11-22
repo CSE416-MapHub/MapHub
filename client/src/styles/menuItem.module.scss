@@ -1,0 +1,55 @@
+@use 'colors';
+@use 'shape';
+@use 'state';
+@use 'typography';
+
+.menu__item {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: shape.$medium;
+
+  height: 48px;
+  width: 100%;
+  padding: 0 shape.$medium;
+
+  // Label Text
+  @include typography.label-large;
+  color: colors.$on-surface;
+
+  // Icon Size
+  & i {
+    font-size: 24px;
+    color: colors.$on-surface-variant;
+  }
+
+  // Disabled State
+  &--disabled {
+    color: rgba(colors.$on-surface, 38%);
+    & i {
+      color: rgba(colors.$on-surface, 38%);
+    }
+
+    &:hover {
+      background-color: transparent;
+    }
+
+
+  }
+
+  // Hover State
+  &:hover {
+    background-color: rgba(colors.$on-surface, state.$hover-opacity);
+  }
+
+  // Visible State
+  &:focus-visible {
+    background-color: rgba(colors.$on-surface, state.$focus-opacity);
+  }
+
+  // Press State
+  .menu__item--active {
+    color: colors.$on-surface;
+    opacity: state.$press-opacity;
+  }
+}

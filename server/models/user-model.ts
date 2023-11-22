@@ -10,7 +10,7 @@ const userSchema = new Schema(
     profilePic: { type: Buffer, default: Buffer.alloc(0) },
     maps: [{ type: Schema.Types.ObjectId, required: true, ref: 'Map' }],
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
 const userModel = mongoose.model('User', userSchema);

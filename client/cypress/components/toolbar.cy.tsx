@@ -1,28 +1,25 @@
 /// <reference types="cypress" />
-import React from 'react';
+import '../support/component';
 import Toolbar from '../../src/app/create/ui/components/toolbar';
+import React from 'react';
 
 describe('Tool bar renders.', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').as('toolbar');
   });
   it('Is visible.', () => {
-    cy.get('@toolbar').should('be.visible')
+    cy.get('@toolbar').should('be.visible');
   });
   it('renders a "select" icon button.', () => {
     cy.get('@toolbar').find('#toolbar-select').as('select');
-    cy.get('@select')
-  })
+    cy.get('@select');
+  });
 });
 
 describe('The Toolbar "Select" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-select').as('select');
   });
   it('renders visibly.', () => {
@@ -33,17 +30,13 @@ describe('The Toolbar "Select" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@select').click();
-    cy.get('@select')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@select').invoke('attr', 'class').should('contain', 'selected');
   });
 });
 
 describe('The Toolbar "Pan" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-pan').as('pan');
   });
   it('renders visibly.', () => {
@@ -54,17 +47,13 @@ describe('The Toolbar "Pan" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@pan').click();
-    cy.get('@pan')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@pan').invoke('attr', 'class').should('contain', 'selected');
   });
 });
 
 describe('The Toolbar "Erase" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-erase').as('erase');
   });
   it('renders visibly.', () => {
@@ -75,17 +64,13 @@ describe('The Toolbar "Erase" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@erase').click();
-    cy.get('@erase')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@erase').invoke('attr', 'class').should('contain', 'selected');
   });
 });
 
 describe('The Toolbar "Point" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-point').as('point');
   });
   it('renders visibly.', () => {
@@ -96,17 +81,13 @@ describe('The Toolbar "Point" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@point').click();
-    cy.get('@point')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@point').invoke('attr', 'class').should('contain', 'selected');
   });
 });
 
 describe('The Toolbar "Icon" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-icon').as('icon');
   });
   it('renders visibly.', () => {
@@ -117,17 +98,13 @@ describe('The Toolbar "Icon" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@icon').click();
-    cy.get('@icon')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@icon').invoke('attr', 'class').should('contain', 'selected');
   });
 });
 
 describe('The Toolbar "Path" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(
-      <Toolbar />
-    );
+    cy.mount(<Toolbar />);
     cy.get('#toolbar').find('#toolbar-path').as('path');
   });
   it('renders visibly.', () => {
@@ -138,8 +115,6 @@ describe('The Toolbar "Path" Icon Button', () => {
   });
   it('is selected after a click.', () => {
     cy.get('@path').click();
-    cy.get('@path')
-      .invoke('attr', 'class')
-      .should('contain', 'selected');
+    cy.get('@path').invoke('attr', 'class').should('contain', 'selected');
   });
 });

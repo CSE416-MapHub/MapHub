@@ -1,0 +1,16 @@
+@import url("https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;700&family=Noto+Sans:wght@500&family=Sofia+Sans+Condensed&display=swap");
+@font-face {
+    font-family: "Box Icons";
+    src: url("../../src/app/fonts/boxicons.eot");
+    src: url('../../src/app/fonts/boxicons.eot') format('embedded-opentype'),
+        url('../../src/app/fonts/boxicons.woff2') format('woff2'),
+        url('../../src/app/fonts/boxicons.woff') format('woff'),
+        url('../../src/app/fonts/boxicons.ttf') format('truetype'),
+        url('../../src/app/fonts/boxicons.svg?#boxicons') format('svg');
+}
+
+:root {
+    --sofia: "Sofia Sans Condensed";
+    --fira: "Fira Sans";
+    --boxicons: "Box Icons";
+}

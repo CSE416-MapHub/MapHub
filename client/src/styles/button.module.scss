@@ -1,9 +1,11 @@
 @use 'colors';
 @use 'elevation';
 @use 'state';
+@use 'typography';
 
 // Common Button Styles
 .button {
+  @include typography.label-large;
   height: 40px;
   padding: 0 24px;
   border-radius: 20px;
@@ -59,6 +61,10 @@
 
 // Filled/Contained Variant Button Styles
 .error {
+  border-color: colors.$outline;
+  border-style: solid;
+  border-width: 1px;
+
   // Enabled State Styles
   &:enabled {
     @include elevation.elevation-0;
@@ -96,6 +102,42 @@
   &:disabled {
     background-color: rgba(colors.$on-surface, 12%);
     color: rgba(colors.$on-surface, 38%);
+  }
+}
+
+
+.error-outlined {
+  color: colors.$error;
+  border-color: colors.$outline;
+  border-style: solid;
+  border-width: 1px;
+
+  // Enabled State Styles
+  &:enabled {
+    // Hover State Styles
+    &:hover {
+      background-color: colors.$error;
+      color: colors.$on-error;
+      border: 0;
+    }
+
+    // Focus State Styles
+    &:focus-visible {
+      background-color: colors.$error;
+      color: colors.$on-error;
+      border: 0;
+    }
+
+    // Press State Styles
+    &:active {
+      color: colors.$on-error;
+    }
+  }
+
+  // Disabled State Styles
+  &:disabled {
+    color: rgba(colors.$on-surface, 38%);
+    border-color: rgba(colors.$on-surface, 12%);
   }
 }
 

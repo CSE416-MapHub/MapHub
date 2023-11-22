@@ -1,41 +1,101 @@
-import request from 'supertest';
-import app from '../index';
-import * as db from './db'
+import supertest from 'supertest';
+import app from '../app';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
-import {server} from '../index'
 
-beforeAll(async () => {
-
-  await db.connect()
-});
-afterEach(async () => {
-  await db.clearDatabase()
-});
-afterAll(async ()=> {
-  await db.closeDatabase()
-  server.close()
+beforeEach(() => {
+  jest.setTimeout(6000);
 });
 
-//we test using the same email all the time so we want t osee if the duplcation works
-describe('User Registration API', () => {
+jest.mock('../models/user-model');
 
+describe('POST /auth/register', () => {
   it('should register a new user', async () => {
-    const response = await request(app).post('/auth/register').send({
+    const userData = {
       username: 'testuser',
       email: 'mapperhubbers@gmail.com',
       password: 'test!P1assword',
-      passwordVerify:'test!P1assword'
-    });
-    expect(response.status).toBe(200);
+      passwordVerify: 'test!P1assword',
+    };
+
+    const mockId = new mongoose.Types.ObjectId();
+
+    const savedUser = {
+      _id: mockId.toString(),
+      username: userData.username,
+      email: userData.email,
+    };
+    userModel.prototype.save = jest.fn().mockResolvedValue(savedUser);
+
+    const response = await supertest(app).post('/auth/register').send(userData);
+
+    expect(response.statusCode).toBe(200);
+
+    expect(response.body).toHaveProperty('user');
+    console.log(response.body.user);
+    expect(response.body.user).toEqual(savedUser);
   });
+  it('no body provided', async () => {
+    const userData = {};
+
+    userModel.prototype.save = jest.fn().mockResolvedValue(null);
+
+    const response = await supertest(app).post('/auth/register').send(userData);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.errorMessage).toEqual(
+      'Please enter all required fields.',
+    );
+  });
+
+  // it('password less than 8 characters', async () => {
+  //   const userData = {
+  //     username: 'testuser',
+  //     email: 'mapperhubbers@gmail.com',
+  //     password: 'test!P1',
+  //     passwordVerify: 'test!P1',
+  //   };
+
+  //   userModel.prototype.save = jest.fn().mockResolvedValue(null);
+
+  //   const response = await supertest(app).post('/auth/register').send(userData);
+
+  //   expect(response.statusCode).toBe(400);
+  //   expect(response.body.errorMessage).toEqual(
+  //     'Please enter a password of at least 8 characters.',
+  //   );
+  // });
+  // it('password doesnt match', async () => {
+  //   const userData = {
+  //     username: 'testuser',
+  //     email: 'mapperhubbers@gmail.com',
+  //     password: 'test!P1assword',
+  //     passwordVerify: 'test!Passwords',
+  //   };
+
+  //   userModel.prototype.save = jest.fn().mockResolvedValue(null);
+
+  //   const response = await supertest(app).post('/auth/register').send(userData);
+
+  //   expect(response.statusCode).toBe(400);
+  //   expect(response.body.errorMessage).toEqual(
+  //     'Please enter the same password twice.',
+  //   );
+  // });
 });
 
 describe('User Retrieval API', () => {
   it('should retrieve all registered users', async () => {
-    const response = await request(app).get('/auth/users').send({
-    });
+    // Mock response for userModel.find
+    (userModel.find as jest.Mock).mockResolvedValue([]);
+
+    const response = await supertest(app).get('/auth/users');
 
     expect(response.status).toBe(200);
+    expect(userModel.find).toHaveBeenCalled();
   });
 });
-
+afterEach(() => {
+  // Reset mock after the test
+  jest.restoreAllMocks();
+});

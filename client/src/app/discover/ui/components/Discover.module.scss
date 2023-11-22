@@ -5,73 +5,70 @@
 // map cards 
 
 .map-card-container {
-    height: 280px;
-    background-color: colors.$primary-container;
-    border-radius: 12px;
+  height: 280px;
+  background-color: colors.$primary-container;
+  border-radius: 12px;
 }
 
 .map-preview {
-    height: 192px;
-    width: 100%;
-    border-radius: 12px;
-    background-color: colors.$primary;
+  height: 192px;
+  width: 100%;
+  border-radius: 12px;
+  background-color: colors.$primary;
 }
 
 .map-details {
-    display: flex;
-    flex-direction: column;
-    padding: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
 }
 
 
 // discover
 .search-container {
-    width: 60%;
-    padding: 10px 20px;
-    height: 36px;
-    border-radius: 36px;
-    margin: 10px auto;
-    background-color: colors.$surface-dim;
+  width: 60%;
+  padding: 10px 20px;
+  height: 36px;
+  border-radius: 36px;
+  margin: 10px auto;
+  background-color: colors.$surface-container;
 
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
-    position: relative;
-    top: 0px;
-    left: 0px;
+  position: relative;
+  top: 0;
+  left: 0;
 
-    // height: '1000px',
+  // height: '1000px',
 
-    @include elevation.elevation-3
+  @include elevation.elevation-3
 }
 
 .search-input {
-    width: 100%;
-    background-color: rgba(0,0,0,0);
-    border: none;
-    outline: none;
-    font-family: var(--fira);
-    font-weight: 400;
-    font-size: 16px;
-    letter-spacing: 0.5px;
-    line-height: 24px;
+  width: 100%;
+  background-color: rgba(0, 0, 0, 0);
+  border: none;
+  outline: none;
+  font-family: var(--fira);
+  font-weight: 400;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  line-height: 24px;
 }
 
 .search-suggestions {
-    width: calc(100% - 40px);
-    // padding: 10px 20px;
-    padding-left: 20px;
-    padding-right: 20px;
-    padding-top: 56px;
-    padding-bottom: 12px;
-    background-color: colors.$surface-dim;
-    border-radius: 36px;
+  width: calc(100% - 40px);
+  // padding: 10px 20px;
+  padding: 56px 20px 12px;
+  background-color: colors.$surface-container;
+  border-radius: 36px;
 
-    position: absolute;
-    top: 0px;
-    left: 0px;
-    z-index: 1;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
 
-    @include elevation.elevation-3
+  @include elevation.elevation-3
 }
