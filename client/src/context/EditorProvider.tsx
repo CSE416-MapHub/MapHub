@@ -17,7 +17,7 @@ export enum ToolbarButtons {
 export interface IEditorState {
   propertiesPanel: Array<IPropertyPanelSectionProps>;
   map: MHJSON | null;
-  selectedTool: ToolbarButtons  | null
+  selectedTool: ToolbarButtons | null;
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
@@ -41,7 +41,8 @@ let initialState: IEditorState = {
 export enum EditorActions {
   SET_PANEL,
   SET_MAP,
-  SET_TOOL
+  SET_TOOL,
+  SET_TITLE,
 }
 
 // the reducer
@@ -85,10 +86,18 @@ function reducer(
       break;
     }
     case EditorActions.SET_TOOL: {
-      if (action.payload.selectedTool !== undefined ) {
+      if (action.payload.selectedTool !== undefined) {
         newState.selectedTool = action.payload.selectedTool;
       } else {
         throw new Error('SET_TOOL must have a tool in its payload');
+      }
+      break;
+    }
+    case EditorActions.SET_TITLE: {
+      if (action.payload.map !== undefined) {
+        newState.map = action.payload.map;
+      } else {
+        throw new Error('SET_NAME must have a map in its payload');
       }
       break;
     }
@@ -98,21 +107,41 @@ function reducer(
   return newState;
 }
 
-export const EditorContext = createContext<{
+class helpers {
+  public changeTitle(ctx: IEditorContext, newTitle: string) {
+    let newMap = structuredClone(ctx.state.map);
+    if (newMap === null) {
+      throw new Error('Cannot change title if there is no map');
+    }
+    newMap.title = newTitle;
+    ctx.dispatch({
+      type: EditorActions.SET_TITLE,
+      payload: {
+        map: newMap,
+      },
+    });
+  }
+}
+
+export interface IEditorContext {
   state: IEditorState;
   dispatch: Dispatch<{
     type: EditorActions;
     payload: Partial<IEditorState>;
   }>;
-}>({
+  helpers: helpers;
+}
+
+export const EditorContext = createContext<IEditorContext>({
   state: initialState,
   dispatch: () => null,
+  helpers: new helpers(),
 });
 
 export const EditorProvider = ({ children }: React.PropsWithChildren) => {
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <EditorContext.Provider value={{ state, dispatch }}>
+    <EditorContext.Provider value={{ state, dispatch, helpers: new helpers() }}>
       {children}
     </EditorContext.Provider>
   );

@@ -38,34 +38,55 @@ export default function () {
   const menus = {
     File: {
       Import: {
-        'Import File From Local Desktop': () => {
-          fileUpload.current?.click();
+        'Import File From Local Desktop': {
+          onclick: () => {
+            fileUpload.current?.click();
+          },
         },
-        'Import User Owned Maps': () => {
-          setOpenRecentMapModal(true);
+        'Import User Owned Maps': {
+          onclick: () => {
+            setOpenRecentMapModal(true);
+          },
         },
       },
       Export: {
-        'Export As PNG': () => {
-          exportMap(editorContext.state.map, 'png');
+        'Export As PNG': {
+          onclick: () => {
+            exportMap(editorContext.state.map, 'png');
+          },
+          disabled: editorContext.state.map === null,
         },
-        'Export As SVG': () => {
-          exportMap(editorContext.state.map, 'svg');
+        'Export As SVG': {
+          onclick: () => {
+            exportMap(editorContext.state.map, 'svg');
+          },
+          disabled: editorContext.state.map === null,
         },
-        'Export As JSON': () => {
-          exportMap(editorContext.state.map, 'json');
+        'Export As JSON': {
+          onclick: () => {
+            exportMap(editorContext.state.map, 'json');
+          },
+          disabled: editorContext.state.map === null,
         },
       },
-      Publish: () => {
-        setOpenPublishMapModal(true);
+      Publish: {
+        onclick: () => {
+          setOpenPublishMapModal(true);
+        },
+        // TODO: user context
+        disabled: editorContext.state.map === null,
       },
     },
     View: {
-      'Map Label Multi Select': () => {
-        setOpenMapLabelModal(true);
+      'Map Label Multi Select': {
+        onclick: () => {
+          setOpenMapLabelModal(true);
+        },
       },
-      'Choropleth Label Select': () => {
-        setOpenChoropleth(true);
+      'Choropleth Label Select': {
+        onclick: () => {
+          setOpenChoropleth(true);
+        },
       },
     },
     Map: {},
@@ -113,10 +134,6 @@ export default function () {
   }
   function onRecentMapConfirm(mapId: string) {
     setOpenRecentMapModal(false);
-  }
-
-  function onPublishMapConfirm() {
-    alert('Published!');
   }
 
   return (
@@ -204,7 +221,6 @@ export default function () {
       <PublishMapModal
         open={openPublishMapModal}
         onClose={() => setOpenPublishMapModal(false)}
-        onConfirm={onPublishMapConfirm}
       />
       <input
         type="file"
