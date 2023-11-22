@@ -126,6 +126,62 @@ describe('GET /posts/all', () => {
 
     expect(response.body.posts[0].title).toEqual(returnMock[0].title);
   });
+});
 
-  // Additional test cases, e.g., empty search query, no posts found, etc.
+describe('GET /posts/user', () => {
+  it('gets all the user owned posts', async () => {
+    const mockPosts = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'aLL long in War ku dynasty',
+        description: 'Description for Post 1',
+        map: new mongoose.Types.ObjectId(),
+        owner: mockUserID,
+        comments: [new mongoose.Types.ObjectId()], // Array of comment ObjectIds
+        likes: [mockUserID], // Array of user ObjectIds who liked the post
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'han dynasty',
+        description: 'Description for Post 2',
+        map: new mongoose.Types.ObjectId(),
+        owner: mockUserID,
+        comments: [], // Assuming no comments
+        likes: [], // Assuming no likes
+      },
+    ];
+
+    const mapData = {
+      _id: new mongoose.Types.ObjectId(),
+    };
+
+    const queryMock: any = {
+      exec: jest.fn().mockResolvedValue(mockPosts),
+    };
+
+    jest.spyOn(postModel, 'find').mockImplementation(() => queryMock);
+
+    jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
+      const queryLikeObject = {
+        exec: jest.fn().mockResolvedValue(mapData),
+      };
+      return queryLikeObject as any;
+    });
+
+    // Make the GET request
+    const response = await supertest(app)
+      .get(`/posts/user`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    // Assertions
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('posts');
+    console.log(
+      'ALL THE MAPS OWNED BY USER',
+      JSON.stringify(response.body.posts),
+    );
+    expect(response.body.posts[0].title).toEqual('aLL long in War ku dynasty');
+    expect(response.body.posts[1].title).toEqual('han dynasty');
+  });
 });
