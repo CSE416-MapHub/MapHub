@@ -103,12 +103,16 @@ describe('POST /map/map', () => {
     };
     mapModel.prototype.save = jest.fn().mockResolvedValue(savedMap);
 
+    const mapDatas = {
+      map: mapData,
+    };
+
     jest.spyOn(fs.promises, 'mkdir').mockResolvedValue(undefined);
     jest.spyOn(fs.promises, 'writeFile').mockResolvedValue(undefined);
 
     const response = await supertest(app)
       .post('/map/create')
-      .send(mapData)
+      .send(mapDatas)
       .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
 
     expect(response.statusCode).toBe(200);
