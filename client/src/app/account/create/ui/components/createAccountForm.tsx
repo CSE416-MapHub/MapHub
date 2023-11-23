@@ -345,7 +345,13 @@ function CreateAccountForm() {
 
   const handleSnackbarClose = () => {
     setSuccessSnackbarOpen(false);
-    setErrorSnackbarOpen(false);  
+    setErrorSnackbarOpen(false);
+    authDispatch({
+        type: AuthActions.REGISTER_FAILURE,
+        payload: {
+          error: ''
+        }
+    });
   };
 
   useEffect(() => {

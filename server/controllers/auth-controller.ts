@@ -27,9 +27,9 @@ export const registerUser = async (req: Request, res: Response) => {
         .json({ errorMessage: 'Please enter all required fields.' });
     }
     console.log('all fields provided');
-    if (password.length < 8) {
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password)) {
       return res.status(400).json({
-        errorMessage: 'Please enter a password of at least 8 characters.',
+        errorMessage: 'Password does not meet requirements.',
       });
     }
     console.log('password long enough');
