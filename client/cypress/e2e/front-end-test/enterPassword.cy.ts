@@ -13,6 +13,16 @@ describe('enter in password details', () => {
 
       cy.get('input#password')
         .clear()
+        .type('aaaaaaaa')
+        .blur()
+
+      cy.wait(500)
+      cy.get('label#password-label').should('have.class', 'Mui-error');
+      cy.get('p#password-helper-text').should('contain', 'Please enter a password with at least eight ' +
+      'characters with one uppercase, one lowercase, and one digit');
+
+      cy.get('input#password')
+        .clear()
         .type('Abc12345')
         .blur()
 
