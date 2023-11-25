@@ -240,7 +240,7 @@ function LoginForm() {
   return (
     <div className={styles.container}>
       <Typography className={styles.title} variant="h2">
-        Login
+        Sign In
       </Typography>
       <ValidatedTextField
         id="username"
@@ -277,7 +277,7 @@ function LoginForm() {
         </Link>
       </Container>
       <Button variant="filled" onClick={handleLoginClick}>
-        Login
+        Sign In
       </Button>
 
       <Snackbar
