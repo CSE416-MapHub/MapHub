@@ -243,7 +243,7 @@ function LoginForm() {
         Sign In
       </Typography>
       <Typography className={styles.body} variant='body1' align='left'>
-        Access millions of maps with the click of a button.
+        Access, create, and share your own maps.
       </Typography>
       <ValidatedTextField
         id="username"
@@ -270,6 +270,7 @@ function LoginForm() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
+          marginBottom: '15px'
         }}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
