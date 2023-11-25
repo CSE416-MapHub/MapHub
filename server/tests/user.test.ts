@@ -2,6 +2,11 @@ import supertest from 'supertest';
 import app from '../app';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
+import fs from 'fs';
+
+beforeEach(() => {
+  jest.setTimeout(6000);
+});
 
 beforeEach(() => {
   jest.setTimeout(6000);
@@ -98,4 +103,54 @@ describe('User Retrieval API', () => {
 afterEach(() => {
   // Reset mock after the test
   jest.restoreAllMocks();
+});
+
+describe('GET /auth/profile-picture ', () => {
+  const mockId = new mongoose.Types.ObjectId();
+  const mockUser = {
+    _id: mockId.toString(),
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+  });
+
+  it('should return a base-64 encoded string.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app)
+      .get('/auth/profile-picture')
+      .send({ id: mockId });
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('profilePic');
+    expect(response.body.profilePic).toBe(
+      Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')).toString(
+        'base64',
+      ),
+    );
+  });
+
+  it('should return a bad request if there is no ID.', async () => {
+    const response = await supertest(app).get('/auth/profile-picture').send({});
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('should return a bad request if there is no user in the database.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/profile-picture').send({
+      id: new mongoose.Types.ObjectId(),
+    });
+
+    expect(response.statusCode).toBe(400);
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
 });

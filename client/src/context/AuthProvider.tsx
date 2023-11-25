@@ -3,16 +3,18 @@ import React, { Dispatch, createContext, useReducer } from 'react';
 import AccountAPI from '../api/AccountAPI';
 
 export interface IAuthState {
-  isLoggedIn: boolean;
-  user: {
-    id: string;
-    username: string;
-  } | null;
+    isLoggedIn: boolean;
+    user: {
+        id: string;
+        username: string;
+    } | null;
+    error: string;
 }
 
 const initialState: IAuthState = {
-  isLoggedIn: false,
-  user: null,
+    isLoggedIn: false,
+    user: null,
+    error: ''
 };
 
 export enum AuthActions {
@@ -36,44 +38,41 @@ type AuthAction =
 
 // Define the reducer
 function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
-  console.log('reducing');
-  switch (action.type) {
-    case AuthActions.LOGIN:
-      console.log('MAKING NEW STATE');
-      return {
-        ...prev,
-        isLoggedIn: true,
-        user: action.payload.user,
-      };
-    case AuthActions.LOGOUT:
-      return {
-        ...prev,
-        isLoggedIn: false,
-        user: null,
-      };
-    case AuthActions.REGISTER_SUCCESS:
-      return {
-        ...prev,
-        isLoggedIn: true,
-        user: action.payload.user,
-      };
-    case AuthActions.REGISTER_FAILURE:
-      return {
-        ...prev,
-        isLoggedIn: false,
-        user: null,
-      };
-    default:
-      return prev;
-  }
+    switch (action.type) {
+      case AuthActions.LOGIN:
+        return {
+          ...prev,
+          isLoggedIn: true,
+          user: action.payload.user,
+        };
+      case AuthActions.LOGOUT:
+        return {
+          ...prev,
+          isLoggedIn: false,
+          user: null,
+        };
+      case AuthActions.REGISTER_SUCCESS:
+            return {
+              ...prev,
+              isLoggedIn: true,
+              user: action.payload.user,
+            };
+      case AuthActions.REGISTER_FAILURE:
+        return {
+            ...prev,
+            isLoggedIn: false,
+            user: null,
+            error: action.payload.error,
+        };
+      default:
+        return prev;
+    }
 }
 
 // Define helpers for authentication
 class AuthHelpers {
   public login(ctx: IAuthContext, user: { id: string; username: string }) {
     // Perform login logic, e.g., send a request to your server
-    console.log('logging in helper');
-    console.log(ctx);
     ctx.dispatch({
       type: AuthActions.LOGIN,
       payload: { user },

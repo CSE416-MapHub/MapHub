@@ -8,7 +8,6 @@ export const registerUser = async (req: Request, res: Response) => {
   try {
     const { username, email, password, passwordVerify } = req.body;
 
-    const defaultProfilePic = Buffer.alloc(0);
     const emptyMapList: mongoose.Types.ObjectId[] = [];
 
     console.log(
@@ -27,9 +26,9 @@ export const registerUser = async (req: Request, res: Response) => {
         .json({ errorMessage: 'Please enter all required fields.' });
     }
     console.log('all fields provided');
-    if (password.length < 8) {
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password)) {
       return res.status(400).json({
-        errorMessage: 'Please enter a password of at least 8 characters.',
+        errorMessage: 'Password does not meet requirements.',
       });
     }
     console.log('password long enough');
@@ -59,9 +58,27 @@ export const registerUser = async (req: Request, res: Response) => {
         success: true,
         user: savedUser,
       })
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, errorMessage: 'Server error' });
+  } catch (err: any) {
+    if (err.code === 11000) {
+      console.log(err);
+      // Duplicate key error - usualyl in the form of "dupKey": dupValue
+      const duplicateField = Object.keys(err.keyValue)[0];
+      // To make it look pretty :#
+      const capitalizedField =
+        duplicateField.charAt(0).toUpperCase() + duplicateField.slice(1);
+      console.log(`${capitalizedField} already in use.`);
+      return res.status(400).json({
+        success: false,
+        errorMessage: `${capitalizedField} already in use.`,
+      });
+    } else {
+      // Handle other errors - idk for now, we can expand on this
+      console.error('Error while saving the user:', err.message);
+      return res.status(500).json({
+        success: false,
+        errorMessage: 'An internal server error occurred.',
+      });
+    }
   }
 };
 
@@ -110,6 +127,36 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+export const getProfilePic = async (request: Request, response: Response) => {
+  try {
+    const { id } = request.body;
+
+    if (!id) {
+      return response.status(400).json({
+        errorMessage: 'Please request a profile picture with a valid user ID.',
+      });
+    }
+
+    // Try to find user.
+    const user = await User.findById(id);
+    if (!user) {
+      return response.status(400).json({
+        errorMessage: 'Please request a profile picture with a valid user ID.',
+      });
+    }
+
+    // Converts and sends the profile picture as a base64-encoded string.
+    const profilePic = user.profilePic;
+    const b64ProfilePic = Buffer.from(profilePic).toString('base64');
+    return response.status(200).json({ profilePic: b64ProfilePic });
+  } catch (error) {
+    return response.status(500).json({
+      errorMessage:
+        'There has been an internal server error. Please try again. ',
+    });
+  }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     // Clear the token cookie on the client side
@@ -141,5 +188,3 @@ export const getAllUsers = async (req: Request, res: Response) => {
     res.status(500).json({ error: 'Server error' });
   }
 };
-
-export default registerUser;
