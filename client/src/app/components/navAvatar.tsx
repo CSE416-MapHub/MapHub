@@ -43,6 +43,7 @@ function NavAvatar() {
     } catch (error) {
       console.log('Logout Failed: ', error);
     } finally {
+      authContext.helpers.logout(authContext);
       router.replace('/');
     }
   };
