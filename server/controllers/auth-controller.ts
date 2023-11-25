@@ -26,9 +26,9 @@ export const registerUser = async (req: Request, res: Response) => {
         .json({ errorMessage: 'Please enter all required fields.' });
     }
     console.log('all fields provided');
-    if (password.length < 8) {
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password)) {
       return res.status(400).json({
-        errorMessage: 'Please enter a password of at least 8 characters.',
+        errorMessage: 'Password does not meet requirements.',
       });
     }
     console.log('password long enough');
@@ -52,13 +52,33 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     const savedUser = await newUser.save();
     console.log('New user saved: ' + savedUser._id);
-    res.status(200).json({
-      success: true,
-      user: savedUser,
-    });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ success: false, errorMessage: 'Server error' });
+    res
+      .status(200)
+      .json({
+        success: true,
+        user: savedUser,
+      })
+  } catch (err: any) {
+    if (err.code === 11000) {
+      console.log(err);
+      // Duplicate key error - usualyl in the form of "dupKey": dupValue
+      const duplicateField = Object.keys(err.keyValue)[0];
+      // To make it look pretty :#
+      const capitalizedField =
+        duplicateField.charAt(0).toUpperCase() + duplicateField.slice(1);
+      console.log(`${capitalizedField} already in use.`);
+      return res.status(400).json({
+        success: false,
+        errorMessage: `${capitalizedField} already in use.`,
+      });
+    } else {
+      // Handle other errors - idk for now, we can expand on this
+      console.error('Error while saving the user:', err.message);
+      return res.status(500).json({
+        success: false,
+        errorMessage: 'An internal server error occurred.',
+      });
+    }
   }
 };
 

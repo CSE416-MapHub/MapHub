@@ -156,7 +156,7 @@ function LoginForm() {
     alertOpen: false,
   });
   const router = useRouter();
-  const authContext = useContext(AuthContext); // Access the auth context
+  const { dispatch: authDispatch, helpers: authHelpers } = useContext(AuthContext); // Access the auth context
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -192,19 +192,19 @@ function LoginForm() {
       AccountAPI.loginUser(username.value, password.value)
         .then(response => {
           console.log('Login successful:', response);
-          authContext.helpers.login(authContext, {
-            id: response.data.user.id,
-            username: response.data.user.username,
-          });
-          // authDispatch({
-          //   type: AuthActions.LOGIN,
-          //   payload: {
-          //     user: {
-          //       id: response.data.user.id,
-          //       username: response.data.user.username,
-          //     },
-          //   },
+          // authContext.helpers.login(authContext, {
+          //   id: response.data.user.id,
+          //   username: response.data.user.username,
           // });
+          authDispatch({
+            type: AuthActions.LOGIN,
+            payload: {
+              user: {
+                id: response.data.user.id,
+                username: response.data.user.username,
+              },
+            },
+          });
           //Redirect to dashboard
           router.replace('/account/dashboard');
         })

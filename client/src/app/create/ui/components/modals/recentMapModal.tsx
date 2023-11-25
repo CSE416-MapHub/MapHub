@@ -28,7 +28,6 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({ open, onClose }) => {
   const authContext = useContext(AuthContext);
   const editorContext = useContext(EditorContext);
   const [firstRender, setFirstRender] = useState(true);
-  // this is the id
   const [selectedMap, setSelectedMap] = useState<string>('');
   const [svgItems, setSvgItems] = useState<
     Array<{
