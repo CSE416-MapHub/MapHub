@@ -31,6 +31,7 @@ interface DeltaPayload {
       y: number;
     },
   ];
+  propertyValue?: string;
 }
 
 export enum DeltaType {
@@ -49,6 +50,7 @@ export enum TargetType {
   SYMBOL,
   DOT,
   ARROW,
+  GEOJSONDATA,
 }
 
 export interface Delta {
