@@ -242,6 +242,9 @@ function LoginForm() {
       <Typography className={styles.title} variant="h2">
         Sign In
       </Typography>
+      <Typography className={styles.body} variant='body1' align='left'>
+        Access millions of maps with the click of a button.
+      </Typography>
       <ValidatedTextField
         id="username"
         type="text"
