@@ -219,7 +219,7 @@ export default function () {
             />
         ) : (
           <Typography variant="title">
-            {editorContext.state.map?.title ?? 'My Map'}
+            {editorContext.state.map?.title ?? ''}
           </Typography>
         )}
       </div>
