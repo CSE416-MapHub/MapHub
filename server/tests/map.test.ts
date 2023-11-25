@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 import app from '../app';
 import mapModel from '../models/map-model';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import fs from 'fs';
@@ -91,6 +92,7 @@ const userId = mapData.owner;
 
 beforeEach(() => {
   jest.setTimeout(6000);
+  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: userId });
 });
 
 jest.mock('../models/map-model');

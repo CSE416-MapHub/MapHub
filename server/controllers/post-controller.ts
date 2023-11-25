@@ -12,6 +12,7 @@ const PostController = {
   createPost: async (req: Request, res: Response) => {
     const { mapID, title, description } = req.body;
     const userId = (req as any).userId;
+
     console.log(
       'Starting the publish of',
       title,
@@ -24,7 +25,6 @@ const PostController = {
     );
     let savedPost;
     let newPost;
-
 
     const map = await Map.findById(mapID).exec();
 
@@ -59,9 +59,9 @@ const PostController = {
   },
   getUserPosts: async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).userId;
+      // const userId = (req as any).userId;
 
-      const posts = await Post.find({ owner: userId }).exec();
+      const posts = await Post.find({ username: req.query.username }).exec();
 
       console.log('These are the posts', JSON.stringify(posts), posts.length);
       if (posts && posts.length > 0) {

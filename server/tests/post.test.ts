@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 import app from '../app';
 import postModel from '../models/post-model';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import mapModel from '../models/map-model';
@@ -8,6 +9,7 @@ const mockUserID = new mongoose.Types.ObjectId();
 
 beforeEach(() => {
   jest.setTimeout(6000);
+  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
 });
 afterEach(() => {
   jest.restoreAllMocks();
@@ -126,7 +128,6 @@ describe('GET /posts/all', () => {
 
     expect(response.body.posts[0].title).toEqual(returnMock[0].title);
   });
-
 });
 
 describe('GET /posts/user', () => {
@@ -159,9 +160,9 @@ describe('GET /posts/user', () => {
     const queryMock: any = {
       exec: jest.fn().mockResolvedValue(mockPosts),
     };
+    const username = 'randUsername';
 
     jest.spyOn(postModel, 'find').mockImplementation(() => queryMock);
-
     jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
       const queryLikeObject = {
         exec: jest.fn().mockResolvedValue(mapData),
@@ -171,7 +172,7 @@ describe('GET /posts/user', () => {
 
     // Make the GET request
     const response = await supertest(app)
-      .get(`/posts/user`)
+      .get(`/posts/user?username=${username}`)
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
 
     // Assertions
