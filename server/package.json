@@ -9,11 +9,11 @@
     "test:watch": "jest --watchAll",
     "test:async": "jest --detectOpenHandles"
   },
-
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@mapbox/geojsonhint": "^3.3.0",
     "bcrypt": "^5.1.1",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",

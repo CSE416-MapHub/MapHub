@@ -121,6 +121,53 @@ describe('POST /map/map', () => {
 
     expect(response.body).toHaveProperty('map');
   });
+  it('fails to create a map with invalid GeoJSON data', async () => {
+    const mapDataWithInvalidGeoJSON = {
+      title: 'Invalid GeoJSON Map',
+      mapType: 'choropleth',
+      geoJSON: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+          },
+        ],
+      },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapDataWithInvalidGeoJSON })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+  it('fails to create a map with missing fields', async () => {
+    const incompleteData = {
+      map: { title: 'no mappa' },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send(incompleteData)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+  });
+  it('handles file system errors gracefully', async () => {
+    jest
+      .spyOn(fs.promises, 'writeFile')
+      .mockRejectedValue(new Error('File system error'));
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapData })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(500);
+  });
 });
 
 describe('GET /map/:mapID', () => {

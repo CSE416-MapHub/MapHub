@@ -6,6 +6,7 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import { hint } from '@mapbox/geojsonhint';
 
 const readFile = util.promisify(fs.readFile); // Promisify readFile for use with async/await
 
@@ -43,6 +44,20 @@ const MapController = {
     } = req.body.map;
     console.log('REQ BODY IS');
     console.log(req.body);
+
+    if (!title || !mapType || !geoJSON) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const errors = hint(geoJSON);
+    console.log('ERRORS WITH GEOJSON', errors);
+
+    if (errors.length > 0) {
+      return res.status(400).json({
+        error: 'Invalid GeoJSON data',
+        details: errors,
+      });
+    }
+
     let newMap;
     let savedMap;
     try {
