@@ -3,6 +3,9 @@ import { Dispatch, createContext, useReducer } from 'react';
 import { MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
+import { ActionStack } from './editorHelpers/Actions';
+import { Delta } from 'types/delta';
+import { applyDelta } from './editorHelpers/DeltaUtil';
 
 export enum ToolbarButtons {
   select = 'select',
@@ -24,6 +27,7 @@ export interface IEditorState {
     bbox: [x: number, y: number, w: number, h: number];
     originalRegions: Array<G.Feature>;
   };
+  actionStack: ActionStack;
 }
 
 // initial global state
@@ -37,6 +41,7 @@ let initialState: IEditorState = {
     bbox: [0, 0, 0, 0],
     originalRegions: [],
   },
+  actionStack: new ActionStack(),
 };
 
 // actions the reducer can take
@@ -45,6 +50,7 @@ export enum EditorActions {
   SET_MAP,
   SET_TOOL,
   SET_TITLE,
+  SET_ACTION,
 }
 
 // the reducer
@@ -55,7 +61,9 @@ function reducer(
     payload: Partial<IEditorState>;
   },
 ): IEditorState {
-  let newState: IEditorState = structuredClone(prev);
+  let newState: IEditorState = {
+    ...prev,
+  };
   switch (action.type) {
     case EditorActions.SET_PANEL: {
       if (action.payload.propertiesPanel) {
@@ -104,6 +112,20 @@ function reducer(
       }
       break;
     }
+    case EditorActions.SET_ACTION: {
+      if (
+        action.payload.map !== undefined &&
+        action.payload.actionStack !== undefined
+      ) {
+        newState.map = action.payload.map;
+        newState.actionStack = action.payload.actionStack;
+      } else {
+        throw new Error(
+          'SET_ACTION must have a map and an actionstack in its payload',
+        );
+      }
+      break;
+    }
     default:
       throw new Error('UNHANDLED ACTION');
   }
@@ -133,6 +155,79 @@ class helpers {
         map: map,
       },
     });
+  }
+
+  public addDelta(ctx: IEditorContext, d: Delta, dInv: Delta) {
+    let x = ctx.state.map;
+    if (x !== null) {
+      let map = x;
+
+      let nStack = ctx.state.actionStack.clone();
+      nStack.counterStack = [];
+      nStack.stack.push({
+        do: d,
+        undo: dInv,
+      });
+      let nMap = { ...map };
+      applyDelta(nMap, d);
+      ctx.dispatch({
+        type: EditorActions.SET_ACTION,
+        payload: {
+          actionStack: nStack,
+          map: nMap,
+        },
+      });
+    } else {
+      throw new Error('Cannot add diff when there is no map');
+    }
+  }
+
+  public undo(ctx: IEditorContext) {
+    let map = ctx.state.map;
+    if (ctx.state.actionStack.canUndo() && map !== null) {
+      // get most recent action
+      let a = ctx.state.actionStack.peekStack();
+      // apply it to a copy of the map
+      let nMap = { ...map };
+      applyDelta(nMap, a.undo);
+      // create a copy of the stack with the change
+      let nStack = ctx.state.actionStack.clone();
+      nStack.counterStack.push(nStack.stack.pop()!);
+      //dispatch it
+      ctx.dispatch({
+        type: EditorActions.SET_ACTION,
+        payload: {
+          map: nMap,
+          actionStack: nStack,
+        },
+      });
+    } else {
+      throw new Error('Cannot undo if there is nothing left');
+    }
+  }
+
+  public redo(ctx: IEditorContext) {
+    let map = ctx.state.map;
+    if (ctx.state.actionStack.canRedo() && map !== null) {
+      // get most recent action
+      let a = ctx.state.actionStack.peekCounterstack();
+      // apply it to a copy of the map
+      let nMap = { ...map };
+      applyDelta(nMap, a.do);
+      // create a copy of the stack with the change
+      let nStack = ctx.state.actionStack.clone();
+      nStack.stack.push(nStack.counterStack.pop()!);
+      //dispatch it
+      ctx.dispatch({
+        type: EditorActions.SET_ACTION,
+        payload: {
+          map: nMap,
+          actionStack: nStack,
+        },
+      });
+    } else {
+      throw new Error('Cannot redo if there is nothing left');
+    }
   }
 }
 
