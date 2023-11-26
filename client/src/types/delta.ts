@@ -15,7 +15,7 @@ interface DeltaPayload {
   y?: number;
   scale?: number;
   symbol?: string;
-  color?: String;
+  color?: string;
   svg?: string;
   name?: string;
   opacity?: number;

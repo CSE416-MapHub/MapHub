@@ -12,6 +12,7 @@ export function applyDelta(map: MHJSON, d: Delta) {
       deltaDot(map, d);
       break;
     case TargetType.GLOBAL_DOT:
+      deltaGlobalDot(map, d);
       break;
     default:
       throw new Error('uninmplemented');
@@ -76,6 +77,65 @@ function deltaDot(map: MHJSON, d: Delta) {
         y: p.y,
         scale: p.scale,
         dot: p.dot,
+      });
+      break;
+    }
+  }
+}
+
+/**
+ * Applies a Delta to the map in place
+ * @param map
+ * @param d
+ */
+function deltaGlobalDot(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      break;
+    }
+
+    case DeltaType.DELETE: {
+      if (map.dotsData.length <= d.target[1] || d.target[1] < 0) {
+        throw new Error('Target index out of bounds');
+      }
+      // TODO: is this the smartest thing to do?
+      map.dotsData.splice(d.target[1], 1);
+
+      break;
+    }
+
+    case DeltaType.CREATE: {
+      // must have an name, opacity, size, color
+      let p = d.payload;
+      if (
+        p.name === undefined ||
+        p.opacity === undefined ||
+        p.size === undefined ||
+        p.color === undefined
+      ) {
+        console.log(p);
+        throw new Error('Malformed dot in CREATE');
+      }
+      // verify that the dot we are trying to create has a unique name
+      // TODO: unique color?
+      let taken = false;
+      for (let dotMeta of map.globalDotDensityData) {
+        if (dotMeta.name === p.name) {
+          taken = true;
+          break;
+        }
+      }
+      if (taken) {
+        console.log(p);
+        throw new Error(
+          'Tried to create a dot with a name that already exists',
+        );
+      }
+      map.globalDotDensityData.push({
+        name: p.name,
+        opacity: p.opacity,
+        size: p.size,
+        color: p.color,
       });
       break;
     }
