@@ -11,9 +11,9 @@ export enum ToolbarButtons {
   select = 'select',
   pan = 'pan',
   erase = 'erase',
-  point = 'point',
-  icon = 'icon',
-  path = 'path',
+  dot = 'dot',
+  symbol = 'symbol',
+  arrow = 'arrow',
 }
 
 // the global state interface
@@ -177,6 +177,10 @@ class helpers {
           map: nMap,
         },
       });
+      setTimeout(() => {
+        console.log('STATE AFTER A WHILE');
+        console.log(ctx);
+      }, 1000);
     } else {
       throw new Error('Cannot add diff when there is no map');
     }

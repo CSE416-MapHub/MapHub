@@ -56,6 +56,6 @@ export enum TargetType {
 export interface Delta {
   type: DeltaType;
   targetType: TargetType;
-  target: [mapId: number, objectId: number, subobjectId: number];
+  target: [mapId: string, objectId: number, subobjectId: number];
   payload: DeltaPayload;
 }

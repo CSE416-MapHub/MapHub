@@ -7,7 +7,12 @@ import { SketchPicker, ColorResult } from 'react-color';
 interface NewDotModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (
+    name: string,
+    opacity: number,
+    size: number,
+    color: string,
+  ) => void;
 }
 
 const NewDotModal: React.FC<NewDotModalProps> = ({
@@ -24,7 +29,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
     setColor(c.hex);
   }
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(name, opacity, size, color);
     onClose();
   };
 
@@ -127,7 +132,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           >
             Color
           </Typography>
-          <SketchPicker onChange={handleColorChange} color={color} />
+          {/* <SketchPicker onChange={handleColorChange} color={color} /> */}
         </Box>
       </Box>
     </GeneralizedDialog>

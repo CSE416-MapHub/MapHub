@@ -43,8 +43,8 @@ function deltaDot(map: MHJSON, d: Delta) {
         throw new Error('Target index out of bounds');
       }
       // TODO: is this the smartest thing to do?
-      map.dotsData.splice(d.target[1], 1);
-
+      // map.dotsData.splice(d.target[1], 1);
+      map.dotsData[d.target[1]].dot = DELETED_NAME;
       break;
     }
 
@@ -107,8 +107,8 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
         throw new Error('Target index out of bounds');
       }
       // TODO: is this the smartest thing to do?
-      map.globalDotDensityData.splice(d.target[1], 1);
-
+      // map.globalDotDensityData.splice(d.target[1], 1);
+      map.globalDotDensityData[d.target[1]].name = DELETED_NAME;
       break;
     }
 
@@ -149,3 +149,5 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
     }
   }
 }
+
+export const DELETED_NAME = '_#DEL';

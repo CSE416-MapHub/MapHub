@@ -1,11 +1,16 @@
 /// <reference types="cypress" />
 import '../support/component';
+import { EditorProvider } from '../../src/context/EditorProvider';
 import Toolbar from '../../src/app/create/ui/components/toolbar';
 import React from 'react';
 
 describe('Tool bar renders.', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').as('toolbar');
   });
   it('Is visible.', () => {
@@ -19,7 +24,11 @@ describe('Tool bar renders.', () => {
 
 describe('The Toolbar "Select" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-select').as('select');
   });
   it('renders visibly.', () => {
