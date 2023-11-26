@@ -91,15 +91,23 @@ function deltaDot(map: MHJSON, d: Delta) {
 function deltaGlobalDot(map: MHJSON, d: Delta) {
   switch (d.type) {
     case DeltaType.UPDATE: {
+      if (map.globalDotDensityData.length <= d.target[1] || d.target[1] < 0) {
+        throw new Error('Target index out of bounds');
+      }
+      let targ = map.globalDotDensityData[d.target[1]];
+      targ.name = d.payload.name ?? targ.name;
+      targ.size = d.payload.size ?? targ.size;
+      targ.color = d.payload.color ?? targ.color;
+      targ.opacity = d.payload.opacity ?? targ.opacity;
       break;
     }
 
     case DeltaType.DELETE: {
-      if (map.dotsData.length <= d.target[1] || d.target[1] < 0) {
+      if (map.globalDotDensityData.length <= d.target[1] || d.target[1] < 0) {
         throw new Error('Target index out of bounds');
       }
       // TODO: is this the smartest thing to do?
-      map.dotsData.splice(d.target[1], 1);
+      map.globalDotDensityData.splice(d.target[1], 1);
 
       break;
     }
