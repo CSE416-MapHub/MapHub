@@ -39,14 +39,7 @@ export default function () {
       <NewDotModal
         open={openDotModal}
         onClose={() => {
-          if (createdDot) {
-            editorContext.dispatch({
-              type: EditorActions.SET_TOOL,
-              payload: {
-                selectedTool: ToolbarButtons.dot,
-              },
-            });
-          } else {
+          if (!createdDot) {
             editorContext.dispatch({
               type: EditorActions.SET_TOOL,
               payload: {

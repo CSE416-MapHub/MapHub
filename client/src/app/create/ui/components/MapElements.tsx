@@ -14,6 +14,7 @@ import { IInputProps } from './PropertyInput';
 import { Dispatch } from 'react';
 import { DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps } from 'types/MHJSON';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -79,7 +80,7 @@ export default function () {
       if (dotData === null) {
         throw new Error('Youve never made a dot before');
       }
-      let targetID = map.globalDotDensityData.length;
+      let targetID = map.dotsData.length;
       editorContextRef.current.helpers.addDelta(
         editorContextRef.current,
         {
@@ -185,12 +186,13 @@ export default function () {
         onEachFeature={perFeatureHandler}
       />
       {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
-        console.log(dotNames);
-        console.log(dotInstance.dot);
+        if (dotInstance.dot === DELETED_NAME) {
+          return;
+        }
         let dotClass = dotNames.get(dotInstance.dot)!;
         return (
           <CircleMarker
-            key={i}
+            key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}`}
             center={L.latLng(dotInstance.y, dotInstance.x)}
             color="#000000"
             weight={1}

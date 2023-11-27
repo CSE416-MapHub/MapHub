@@ -37,8 +37,8 @@ export class ActionStack {
 
   public clone(): ActionStack {
     let nStack = new ActionStack();
-    nStack.counterStack = this.counterStack;
-    nStack.stack = this.stack;
+    nStack.counterStack = structuredClone(this.counterStack);
+    nStack.stack = structuredClone(this.stack);
     return nStack;
   }
 
