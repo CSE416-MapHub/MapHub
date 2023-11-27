@@ -3,7 +3,10 @@ import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../PropertyColorInput';
 import style from './LabelSelector.module.scss';
-import { SketchPicker, ColorResult } from 'react-color';
+// import { SketchPicker, ColorResult } from 'react-color';
+import { ColorPicker, Hue, Saturation, useColor } from 'react-color-palette';
+import 'react-color-palette/css';
+
 interface NewDotModalProps {
   open: boolean;
   onClose: () => void;
@@ -23,13 +26,10 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
   const [name, setName] = useState('');
   const [opacity, setOpacity] = useState(1);
   const [size, setSize] = useState(1);
-  const [color, setColor] = useState<string>('#FFFFF');
+  const [color, setColor] = useColor('#0000FF');
 
-  function handleColorChange(c: ColorResult) {
-    setColor(c.hex);
-  }
   const handleConfirm = () => {
-    onConfirm(name, opacity, size, color);
+    onConfirm(name, opacity, size, color.hex);
     onClose();
   };
 
@@ -138,7 +138,19 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           >
             Color
           </Typography>
-          <SketchPicker onChange={handleColorChange} color={color} />
+          {/* TODO: style this better */}
+          <ColorPicker
+            height={100}
+            color={color}
+            onChange={setColor}
+            hideAlpha={true}
+            hideInput={['rgb', 'hsv']}
+          />
+          ;{/* <SketchPicker onChange={handleColorChange} color={color} /> */}
+          {/* <div className="custom-layout">
+            <Saturation height={100}  color={color} onChange={setColor} />
+            <Hue color={color} onChange={setColor} />
+          </div> */}
         </Box>
       </Box>
     </GeneralizedDialog>

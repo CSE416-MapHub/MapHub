@@ -3,6 +3,7 @@ import '../support/component';
 import { EditorProvider } from '../../src/context/EditorProvider';
 import Toolbar from '../../src/app/create/ui/components/toolbar';
 import React from 'react';
+// TODO: mock the editor provider
 
 describe('Tool bar renders.', () => {
   beforeEach(() => {
@@ -45,7 +46,11 @@ describe('The Toolbar "Select" Icon Button', () => {
 
 describe('The Toolbar "Pan" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-pan').as('pan');
   });
   it('renders visibly.', () => {
@@ -62,7 +67,11 @@ describe('The Toolbar "Pan" Icon Button', () => {
 
 describe('The Toolbar "Erase" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-erase').as('erase');
   });
   it('renders visibly.', () => {
@@ -79,7 +88,11 @@ describe('The Toolbar "Erase" Icon Button', () => {
 
 describe('The Toolbar "Point" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-point').as('point');
   });
   it('renders visibly.', () => {
@@ -96,7 +109,11 @@ describe('The Toolbar "Point" Icon Button', () => {
 
 describe('The Toolbar "Icon" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-icon').as('icon');
   });
   it('renders visibly.', () => {
@@ -113,7 +130,11 @@ describe('The Toolbar "Icon" Icon Button', () => {
 
 describe('The Toolbar "Path" Icon Button', () => {
   beforeEach(() => {
-    cy.mount(<Toolbar />);
+    cy.mount(
+      <EditorProvider>
+        <Toolbar />
+      </EditorProvider>,
+    );
     cy.get('#toolbar').find('#toolbar-path').as('path');
   });
   it('renders visibly.', () => {
