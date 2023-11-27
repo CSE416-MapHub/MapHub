@@ -3,11 +3,19 @@ import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../PropertyColorInput';
 import style from './LabelSelector.module.scss';
-import { SketchPicker, ColorResult } from 'react-color';
+// import { SketchPicker, ColorResult } from 'react-color';
+import { ColorPicker, Hue, Saturation, useColor } from 'react-color-palette';
+import 'react-color-palette/css';
+
 interface NewDotModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (
+    name: string,
+    opacity: number,
+    size: number,
+    color: string,
+  ) => void;
 }
 
 const NewDotModal: React.FC<NewDotModalProps> = ({
@@ -18,13 +26,10 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
   const [name, setName] = useState('');
   const [opacity, setOpacity] = useState(1);
   const [size, setSize] = useState(1);
-  const [color, setColor] = useState<string>('#FFFFF');
+  const [color, setColor] = useColor('#0000FF');
 
-  function handleColorChange(c: ColorResult) {
-    setColor(c.hex);
-  }
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(name, opacity, size, color.hex);
     onClose();
   };
 
@@ -76,9 +81,12 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           <TextField
             value={opacity}
             type="number"
+            inputProps={{
+              step: 0.01,
+            }}
             className={style.textField}
             onChange={e => {
-              const newOpacity = parseInt(e.target.value);
+              const newOpacity = parseFloat(e.target.value);
               setOpacity(isNaN(newOpacity) ? opacity : newOpacity);
             }}
             margin="normal"
@@ -103,8 +111,11 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           <TextField
             value={size}
             type="number"
+            inputProps={{
+              step: 0.01,
+            }}
             onChange={e => {
-              const newSize = parseInt(e.target.value);
+              const newSize = parseFloat(e.target.value);
               setSize(isNaN(newSize) ? size : newSize);
             }}
             className={style.textField}
@@ -127,7 +138,19 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           >
             Color
           </Typography>
-          <SketchPicker onChange={handleColorChange} color={color} />
+          {/* TODO: style this better */}
+          <ColorPicker
+            height={100}
+            color={color}
+            onChange={setColor}
+            hideAlpha={true}
+            hideInput={['rgb', 'hsv']}
+          />
+          ;{/* <SketchPicker onChange={handleColorChange} color={color} /> */}
+          {/* <div className="custom-layout">
+            <Saturation height={100}  color={color} onChange={setColor} />
+            <Hue color={color} onChange={setColor} />
+          </div> */}
         </Box>
       </Box>
     </GeneralizedDialog>

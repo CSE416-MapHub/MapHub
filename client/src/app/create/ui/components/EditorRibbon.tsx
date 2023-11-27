@@ -24,6 +24,7 @@ import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
 import { createNewMap } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
+import IconButton from 'components/iconButton';
 
 // A list of all accepted file types.
 const accept: string =
@@ -130,8 +131,6 @@ export default function () {
     mh.title = mapName;
     mh.labels = optionsProps;
     mh.mapType = mapType;
-    console.log('SAVING');
-    console.log(mh);
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {
       createMapProm = createNewMap(mh);
@@ -200,8 +199,22 @@ export default function () {
         </Typography>
       </div>
       <div className={styles['undo-redo']}>
-        <Undo fontSize="medium" />
-        <Redo fontSize="medium" />
+        <IconButton
+          iconName={'Undo'}
+          onClick={() => {
+            editorContext.helpers.undo(editorContext);
+          }}
+        >
+          <Undo fontSize="medium" />
+        </IconButton>
+        <IconButton
+          iconName={'Redo'}
+          onClick={() => {
+            editorContext.helpers.redo(editorContext);
+          }}
+        >
+          <Redo fontSize="medium" />
+        </IconButton>
       </div>
       {openMenu ? <EditorMenu {...openMenu} /> : <></>}
       <ImportModal

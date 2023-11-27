@@ -85,6 +85,7 @@ const ImportModal: React.FC<ImportModalProps> = ({
             style={{
               padding: 0,
             }}
+            id="map-type-dropdown"
           >
             <MenuItem value={MapType.CHOROPLETH}>Choropleth</MenuItem>
             <MenuItem value={MapType.CATEGORICAL}>Categorical</MenuItem>
