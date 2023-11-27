@@ -14,6 +14,7 @@ export default function () {
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openDotModal, setOpenDotModal] = useState(false);
 
+  let createdDot = false;
   useEffect(() => {
     console.log('CHECKING IF WE CAN OPEN');
     if (
@@ -38,12 +39,22 @@ export default function () {
       <NewDotModal
         open={openDotModal}
         onClose={() => {
-          editorContext.dispatch({
-            type: EditorActions.SET_TOOL,
-            payload: {
-              selectedTool: null,
-            },
-          });
+          if (createdDot) {
+            editorContext.dispatch({
+              type: EditorActions.SET_TOOL,
+              payload: {
+                selectedTool: ToolbarButtons.dot,
+              },
+            });
+          } else {
+            editorContext.dispatch({
+              type: EditorActions.SET_TOOL,
+              payload: {
+                selectedTool: null,
+              },
+            });
+          }
+
           setOpenDotModal(false);
         }}
         onConfirm={function (
@@ -78,6 +89,7 @@ export default function () {
               payload: {},
             },
           );
+          createdDot = true;
         }}
       />
     </>

@@ -1,11 +1,11 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
-import { MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
-import { Delta } from 'types/delta';
-import { applyDelta } from './editorHelpers/DeltaUtil';
+import { Delta, DeltaType } from 'types/delta';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 
 export enum ToolbarButtons {
   select = 'select',
@@ -28,6 +28,7 @@ export interface IEditorState {
     originalRegions: Array<G.Feature>;
   };
   actionStack: ActionStack;
+  lastInstantiated: string; // name of the last instantiated item
 }
 
 // initial global state
@@ -42,6 +43,7 @@ let initialState: IEditorState = {
     originalRegions: [],
   },
   actionStack: new ActionStack(),
+  lastInstantiated: DELETED_NAME,
 };
 
 // actions the reducer can take
@@ -115,13 +117,15 @@ function reducer(
     case EditorActions.SET_ACTION: {
       if (
         action.payload.map !== undefined &&
-        action.payload.actionStack !== undefined
+        action.payload.actionStack !== undefined &&
+        action.payload.lastInstantiated !== undefined
       ) {
         newState.map = action.payload.map;
         newState.actionStack = action.payload.actionStack;
+        newState.lastInstantiated = action.payload.lastInstantiated;
       } else {
         throw new Error(
-          'SET_ACTION must have a map and an actionstack in its payload',
+          'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
         );
       }
       break;
@@ -170,11 +174,16 @@ class helpers {
       });
       let nMap = { ...map };
       applyDelta(nMap, d);
+      let li = ctx.state.lastInstantiated;
+      if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
+        li = d.payload.name;
+      }
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           actionStack: nStack,
           map: nMap,
+          lastInstantiated: li,
         },
       });
       setTimeout(() => {
@@ -232,6 +241,17 @@ class helpers {
     } else {
       throw new Error('Cannot redo if there is nothing left');
     }
+  }
+
+  public getLastInstantiatedDot(ctx: IEditorContext): IDotDensityProps | null {
+    let name = ctx.state.lastInstantiated;
+    if (name === DELETED_NAME || !ctx.state.map) return null;
+    for (let d of ctx.state.map.globalDotDensityData) {
+      if (d.name === name) {
+        return d;
+      }
+    }
+    return null;
   }
 }
 
