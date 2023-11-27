@@ -63,9 +63,7 @@ function reducer(
     payload: Partial<IEditorState>;
   },
 ): IEditorState {
-  let newState: IEditorState = {
-    ...prev,
-  };
+  let newState: IEditorState = { ...prev };
   switch (action.type) {
     case EditorActions.SET_PANEL: {
       if (action.payload.propertiesPanel) {
@@ -81,18 +79,20 @@ function reducer(
         newState.map_id = action.payload.map_id;
         let v = new GeoJSONVisitor(action.payload.map.geoJSON);
         v.visitRoot();
-        newState.mapDetails.availableProps = Array.from(
-          v.getFeatureResults().aggregate.globallyAvailableKeys,
-        );
-        newState.mapDetails.bbox = v
-          .getFeatureResults()
-          .perFeature.reduce(
-            (prev, curr) => mergeBBox(prev, curr.box),
-            v.getFeatureResults().perFeature[0].box,
-          );
-        newState.mapDetails.originalRegions = v
-          .getFeatureResults()
-          .perFeature.map(x => x.originalFeature);
+        newState.mapDetails = {
+          availableProps: Array.from(
+            v.getFeatureResults().aggregate.globallyAvailableKeys,
+          ),
+          bbox: v
+            .getFeatureResults()
+            .perFeature.reduce(
+              (prev, curr) => mergeBBox(prev, curr.box),
+              v.getFeatureResults().perFeature[0].box,
+            ),
+          originalRegions: v
+            .getFeatureResults()
+            .perFeature.map(x => x.originalFeature),
+        };
       } else {
         throw new Error('SET_MAP must have a map and a map_id in its payload');
       }
@@ -164,6 +164,7 @@ class helpers {
   public addDelta(ctx: IEditorContext, d: Delta, dInv: Delta) {
     let x = ctx.state.map;
     if (x !== null) {
+      console.log('adding to stack');
       let map = x;
 
       let nStack = ctx.state.actionStack.clone();
@@ -178,6 +179,8 @@ class helpers {
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
       }
+      console.log('dispatching!');
+      console.log(nStack);
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
@@ -186,10 +189,6 @@ class helpers {
           lastInstantiated: li,
         },
       });
-      setTimeout(() => {
-        console.log('STATE AFTER A WHILE');
-        console.log(ctx);
-      }, 1000);
     } else {
       throw new Error('Cannot add diff when there is no map');
     }
@@ -206,12 +205,17 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
+      console.log('PREV STACK');
+      console.log(ctx.state.actionStack);
+      console.log('NEW STACK');
+      console.log(nStack);
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           map: nMap,
           actionStack: nStack,
+          lastInstantiated: ctx.state.lastInstantiated,
         },
       });
     } else {
@@ -236,6 +240,7 @@ class helpers {
         payload: {
           map: nMap,
           actionStack: nStack,
+          lastInstantiated: ctx.state.lastInstantiated,
         },
       });
     } else {
