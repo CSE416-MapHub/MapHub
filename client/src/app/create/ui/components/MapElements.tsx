@@ -199,6 +199,7 @@ export default function () {
             fillOpacity={dotClass.opacity}
             fillColor={dotClass.color}
             radius={dotClass.size * dotInstance.scale}
+            className="map-dot"
           />
         );
       })}

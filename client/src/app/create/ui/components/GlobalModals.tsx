@@ -39,14 +39,14 @@ export default function () {
       <NewDotModal
         open={openDotModal}
         onClose={() => {
-          if (!createdDot) {
-            editorContext.dispatch({
-              type: EditorActions.SET_TOOL,
-              payload: {
-                selectedTool: null,
-              },
-            });
-          }
+          // if (!createdDot) {
+          //   editorContext.dispatch({
+          //     type: EditorActions.SET_TOOL,
+          //     payload: {
+          //       selectedTool: null,
+          //     },
+          //   });
+          // }
 
           setOpenDotModal(false);
         }}
