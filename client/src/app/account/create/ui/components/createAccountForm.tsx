@@ -1,7 +1,12 @@
 'use client';
 
-import React, { useReducer, MouseEventHandler, useEffect, useContext } from 'react';
-import { Stack, Typography } from '@mui/material';
+import React, {
+  useReducer,
+  MouseEventHandler,
+  useEffect,
+  useContext,
+} from 'react';
+import { Typography } from '@mui/material';
 
 import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
@@ -23,17 +28,17 @@ import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
  *     * errorText - an error message indicating why the value is not valid.
  */
 interface CreateAccountFieldState {
-  value: string,
-  error: boolean,
-  errorText: string,
+  value: string;
+  error: boolean;
+  errorText: string;
 }
 
 export interface CreateAccountState {
-  username: CreateAccountFieldState,
-  email: CreateAccountFieldState,
-  password: CreateAccountFieldState,
-  passwordConfirm: CreateAccountFieldState,
-};
+  username: CreateAccountFieldState;
+  email: CreateAccountFieldState;
+  password: CreateAccountFieldState;
+  passwordConfirm: CreateAccountFieldState;
+}
 
 /**
  * CreateAccountActionType represents the type of action the reducer must
@@ -50,13 +55,12 @@ enum CreateAccountActionType {
   updatePasswordConfirm = 'updatePasswordConfirm',
   validatePasswordConfirm = 'validatePasswordConfirm',
   validate = 'validate',
-};
+}
 interface CreateAccountAction {
-  type: CreateAccountActionType,
-  value?: any,
+  type: CreateAccountActionType;
+  value?: any;
   error?: string | null;
 }
-
 
 /**
  * The createAccountReducer function takes the current state along with an
@@ -88,7 +92,8 @@ export function createAccountReducer(
       const { username } = state;
       if (!/^[\w.]{2,15}[\w]$/.test(username.value)) {
         username.error = true;
-        username.errorText = 'Please enter a valid username between 3-16 ' +
+        username.errorText =
+          'Please enter a valid username between 3-16 ' +
           'alphanumeric, underscore, or dot characters.';
       } else {
         username.error = false;
@@ -166,7 +171,7 @@ export function createAccountReducer(
       };
     }
     case CreateAccountActionType.validatePasswordConfirm: {
-      // Checks if the password confirmation is well-formed and matches the 
+      // Checks if the password confirmation is well-formed and matches the
       // first password input value. Only checks whether the passwords
       // match, which means that the password is also well-formed.
       const { password, passwordConfirm } = state;
@@ -200,18 +205,14 @@ export function createAccountReducer(
       });
       return newState;
     }
-
-
   }
 }
 
-
-const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
-  props,
-  ref,
-) {
-  return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
-});
+const Alert = React.forwardRef<HTMLDivElement, AlertProps>(
+  function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  },
+);
 
 /**
  * The CreateAccountForm renders a frontend form with the following text fields:
@@ -221,11 +222,11 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
  */
 function CreateAccountForm() {
   const router = useRouter();
-  const { state: authState, dispatch: authDispatch, helpers: authHelpers } = useContext(AuthContext);
+  const { state: authState, dispatch: authDispatch } = useContext(AuthContext);
   const [successSnackbarOpen, setSuccessSnackbarOpen] = React.useState(false);
-  const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);  
+  const [errorSnackbarOpen, setErrorSnackbarOpen] = React.useState(false);
   // const [showSuccessSnackbar, setShowSuccessSnackbar] = React.useState(false); // Add this state
-  const [ createAccountState, createAccountDispatch ] = useReducer(
+  const [createAccountState, createAccountDispatch] = useReducer(
     createAccountReducer,
     {
       username: {
@@ -303,7 +304,7 @@ function CreateAccountForm() {
     });
   };
 
-  const handleCreateAccountClick : MouseEventHandler = async (event) => {
+  const handleCreateAccountClick: MouseEventHandler = async () => {
     // createAccountDispatch({
     //   type: CreateAccountActionType.createAccount,
     // });
@@ -312,9 +313,9 @@ function CreateAccountForm() {
         createAccountState.username.value,
         createAccountState.email.value,
         createAccountState.password.value,
-        createAccountState.passwordConfirm.value
+        createAccountState.passwordConfirm.value,
       );
-  
+
       // Handle the result accordingly, dispatch actions, etc.
       if (result.data.success) {
         authDispatch({
@@ -326,7 +327,7 @@ function CreateAccountForm() {
             },
           },
         });
-        console.log("successfully registered")
+        console.log('successfully registered');
         setSuccessSnackbarOpen(true);
         console.log(authState);
       }
@@ -340,17 +341,16 @@ function CreateAccountForm() {
       });
       console.log(authState);
     }
-  }
-
+  };
 
   const handleSnackbarClose = () => {
     setSuccessSnackbarOpen(false);
     setErrorSnackbarOpen(false);
     authDispatch({
-        type: AuthActions.REGISTER_FAILURE,
-        payload: {
-          error: ''
-        }
+      type: AuthActions.REGISTER_FAILURE,
+      payload: {
+        error: '',
+      },
     });
   };
 
@@ -360,7 +360,7 @@ function CreateAccountForm() {
     if (successSnackbarOpen) {
       // If either snackbar is open, initiate the redirect after a delay
       const timer = setTimeout(() => {
-        router.replace('/account/login');
+        router.replace('/account/sign-in');
       }, 1000); // Adjust the delay as needed
 
       // Cleanup function to clear the timer if the component unmounts
@@ -373,33 +373,32 @@ function CreateAccountForm() {
     if (authState.error !== '') {
       setErrorSnackbarOpen(true);
     }
-    console.log(authState.error)
+    console.log(authState.error);
   }, [authState.error]);
 
   return (
-    
     <div className={styles.container}>
       <Snackbar
         open={errorSnackbarOpen}
         autoHideDuration={6000} // Adjust as needed
         onClose={handleSnackbarClose}
-        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
       >
-          <Alert onClose={handleSnackbarClose} severity="error">
-            {authState.error || 'Account creation failed!'}
-          </Alert>
+        <Alert onClose={handleSnackbarClose} severity="error">
+          {authState.error || 'Account creation failed!'}
+        </Alert>
       </Snackbar>
       <Typography className={styles.title} variant="h2" align="left">
         Create an account
       </Typography>
-      <Typography className={styles.body} variant='body1' align='left'>
+      <Typography className={styles.body} variant="body1" align="left">
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography>
       <ValidatedTextField
-        id='username'
-        type='text'
-        label='Username'
+        id="username"
+        type="text"
+        label="Username"
         value={createAccountState.username.value}
         setValue={setUsername}
         maxLength={16}
@@ -408,9 +407,9 @@ function CreateAccountForm() {
         helperText={createAccountState.username.errorText}
       />
       <ValidatedTextField
-        id='email'
-        type='email'
-        label='Email Address'
+        id="email"
+        type="email"
+        label="Email Address"
         value={createAccountState.email.value}
         setValue={setEmail}
         error={createAccountState.email.error}
@@ -418,9 +417,9 @@ function CreateAccountForm() {
         helperText={createAccountState.email.errorText}
       />
       <ValidatedTextField
-        id='password'
-        type='password'
-        label='Password'
+        id="password"
+        type="password"
+        label="Password"
         value={createAccountState.password.value}
         setValue={setPassword}
         error={createAccountState.password.error}
@@ -428,19 +427,16 @@ function CreateAccountForm() {
         helperText={createAccountState.password.errorText}
       />
       <ValidatedTextField
-        id='password-confirm'
-        type='password'
-        label='Confirm Password'
+        id="password-confirm"
+        type="password"
+        label="Confirm Password"
         value={createAccountState.passwordConfirm.value}
         setValue={setPasswordConfirm}
         error={createAccountState.passwordConfirm.error}
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button
-        variant='filled'
-        onClick={handleCreateAccountClick}
-      >
+      <Button variant="filled" onClick={handleCreateAccountClick}>
         Create Account
       </Button>
       <Snackbar
@@ -448,7 +444,11 @@ function CreateAccountForm() {
         autoHideDuration={6000} // Adjust as needed
         onClose={handleSnackbarClose}
       >
-        <Alert id='success-alert' onClose={handleSnackbarClose} severity="success">
+        <Alert
+          id="success-alert"
+          onClose={handleSnackbarClose}
+          severity="success"
+        >
           Account created successfully! Redirecting to login...
         </Alert>
       </Snackbar>

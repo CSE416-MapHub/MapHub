@@ -14,7 +14,7 @@ function Page() {
   const usernameOrPassword = searchParams.get('query');
 
   const handleReturnToLogin = () => {
-    router.replace('/account/login');
+    router.replace('/account/sign-in');
   };
 
   return (
@@ -24,16 +24,13 @@ function Page() {
             liking, commenting, and sharing others' maps.
         </Typography> */}
       <div className={containerstyles.container}>
-        <Typography className={containerstyles.title} variant='h2'>
+        <Typography className={containerstyles.title} variant="h2">
           Reset {usernameOrPassword}
         </Typography>
-        <Typography className={containerstyles.title} variant='body1'>
+        <Typography className={containerstyles.title} variant="body1">
           Password has been reset successfully.
         </Typography>
-        <Button
-          variant='filled'
-          onClick={handleReturnToLogin}
-        >
+        <Button variant="filled" onClick={handleReturnToLogin}>
           Return to Login
         </Button>
       </div>

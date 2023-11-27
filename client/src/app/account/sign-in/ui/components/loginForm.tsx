@@ -156,7 +156,7 @@ function LoginForm() {
     alertOpen: false,
   });
   const router = useRouter();
-  const { dispatch: authDispatch, helpers: authHelpers } = useContext(AuthContext); // Access the auth context
+  const { dispatch: authDispatch } = useContext(AuthContext); // Access the auth context
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -242,7 +242,7 @@ function LoginForm() {
       <Typography className={styles.title} variant="h2">
         Sign In
       </Typography>
-      <Typography className={styles.body} variant='body1' align='left'>
+      <Typography className={styles.body} variant="body1" align="left">
         Access, create, and share your own maps.
       </Typography>
       <ValidatedTextField
@@ -270,7 +270,7 @@ function LoginForm() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
-          marginBottom: '15px'
+          marginBottom: '15px',
         }}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
@@ -280,7 +280,7 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-      <Button variant="filled" onClick={handleLoginClick}>
+      <Button id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
         Sign In
       </Button>
 
