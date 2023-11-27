@@ -7,7 +7,12 @@ import { SketchPicker, ColorResult } from 'react-color';
 interface NewDotModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (
+    name: string,
+    opacity: number,
+    size: number,
+    color: string,
+  ) => void;
 }
 
 const NewDotModal: React.FC<NewDotModalProps> = ({
@@ -24,7 +29,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
     setColor(c.hex);
   }
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(name, opacity, size, color);
     onClose();
   };
 
@@ -76,9 +81,12 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           <TextField
             value={opacity}
             type="number"
+            inputProps={{
+              step: 0.01,
+            }}
             className={style.textField}
             onChange={e => {
-              const newOpacity = parseInt(e.target.value);
+              const newOpacity = parseFloat(e.target.value);
               setOpacity(isNaN(newOpacity) ? opacity : newOpacity);
             }}
             margin="normal"
@@ -103,8 +111,11 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
           <TextField
             value={size}
             type="number"
+            inputProps={{
+              step: 0.01,
+            }}
             onChange={e => {
-              const newSize = parseInt(e.target.value);
+              const newSize = parseFloat(e.target.value);
               setSize(isNaN(newSize) ? size : newSize);
             }}
             className={style.textField}

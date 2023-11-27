@@ -53,6 +53,7 @@ export default function (props: IInputProps) {
         value={value}
         disabled={props.disabled}
         onChange={e => setValue(e.target.value)}
+        step="any"
         className={clsx(
           style['default-input'],
           style['prop-input'],
