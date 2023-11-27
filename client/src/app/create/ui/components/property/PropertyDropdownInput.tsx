@@ -1,7 +1,7 @@
 'use client';
 import { MenuItem, Select, makeStyles } from '@mui/material';
 import { useState } from 'react';
-import NewCategoryModal from './modals/newCategoryModal';
+import NewCategoryModal from '../modals/newCategoryModal';
 
 export interface PropertyDropdownInputProps {
   options: Array<string>;

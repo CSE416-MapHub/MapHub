@@ -12,7 +12,7 @@ import { useState } from 'react';
 import CircleIcon from '@mui/icons-material/Circle';
 import styles from './Property.module.scss';
 import Button from 'components/button';
-import NewDotModal from './modals/newDotModal';
+import NewDotModal from '../modals/newDotModal';
 
 export interface PropertyDotInputProps {
   items: Array<string>;

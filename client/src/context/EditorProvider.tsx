@@ -1,4 +1,4 @@
-import { IPropertyPanelSectionProps } from 'app/create/ui/components/PropertyPanel';
+import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
 import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
@@ -133,6 +133,8 @@ function reducer(
     default:
       throw new Error('UNHANDLED ACTION');
   }
+  console.log('exiting with this state');
+  console.log(newState);
   return newState;
 }
 

@@ -9,17 +9,21 @@ import * as G from 'geojson';
 import * as L from 'leaflet';
 import { useContext, useState, useEffect, useRef } from 'react';
 import { CircleMarker, GeoJSON, TileLayer, useMap } from 'react-leaflet';
-import { IInputProps } from './PropertyInput';
+import { IInputProps, PropertyPanelInputType } from './property/PropertyInput';
 
 import { Dispatch } from 'react';
 import { DeltaType, TargetType } from 'types/delta';
-import { IDotDensityProps } from 'types/MHJSON';
+import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
+let numType: PropertyPanelInputType = 'number';
+let dotType: PropertyPanelInputType = 'dot';
+let textType: PropertyPanelInputType = 'text';
+let colorType: PropertyPanelInputType = 'color';
 
 export default function () {
   const editorContextStaleable = useContext(EditorContext);
@@ -66,6 +70,113 @@ export default function () {
       map.setMinZoom(MIN_ZOOM);
     }
   });
+
+  function handleDotClick(ev: L.LeafletMouseEvent, id: number) {
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
+      let loadedMap: MHJSON;
+      if (editorContextRef.current.state.map) {
+        loadedMap = editorContextRef.current.state.map;
+      } else {
+        return;
+      }
+      let dotInstance = loadedMap.dotsData[id];
+      let dotClass = dotNames.get(dotInstance.dot)!;
+
+      let action = {
+        type: EditorActions.SET_PANEL,
+        payload: {
+          propertiesPanel: [
+            {
+              name: 'Local Dot',
+              items: [
+                {
+                  name: 'X',
+                  input: {
+                    type: numType,
+                    short: true,
+                    disabled: false,
+                    value: dotInstance.x.toString(),
+                  },
+                },
+                {
+                  name: 'Y',
+                  input: {
+                    type: numType,
+                    short: true,
+                    disabled: false,
+                    value: dotInstance.y.toString(),
+                  },
+                },
+                {
+                  name: 'Dot',
+                  input: {
+                    type: dotType,
+                    short: true,
+                    disabled: false,
+                    value: loadedMap.globalDotDensityData.map(el => el.name),
+                  },
+                },
+                {
+                  name: 'Scale',
+                  input: {
+                    type: numType,
+                    short: true,
+                    disabled: false,
+                    value: dotInstance.scale.toString(),
+                  },
+                },
+              ],
+            },
+            {
+              name: 'Global Dot',
+              items: [
+                {
+                  name: 'Dot Name',
+                  input: {
+                    type: textType,
+                    short: false,
+                    disabled: false,
+                    value: dotClass.name,
+                  },
+                },
+                {
+                  name: 'Dot Color',
+                  input: {
+                    type: colorType,
+                    short: false,
+                    disabled: false,
+                    value: dotClass.color,
+                  },
+                },
+                {
+                  name: 'Dot Opacity',
+                  input: {
+                    type: numType,
+                    short: false,
+                    disabled: false,
+                    value: dotClass.opacity.toString(),
+                  },
+                },
+                {
+                  name: 'Dot Size',
+                  input: {
+                    type: numType,
+                    short: false,
+                    disabled: false,
+                    value: dotClass.size.toString(),
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      };
+      console.log('DISPATCHING FROM DOT');
+      editorContextRef.current.dispatch(action);
+      return;
+    }
+    handleMapClick(ev);
+  }
 
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
@@ -200,6 +311,12 @@ export default function () {
             fillColor={dotClass.color}
             radius={dotClass.size * dotInstance.scale}
             className="map-dot"
+            eventHandlers={{
+              click: ev => {
+                handleDotClick(ev, i);
+                L.DomEvent.stopPropagation(ev);
+              },
+            }}
           />
         );
       })}

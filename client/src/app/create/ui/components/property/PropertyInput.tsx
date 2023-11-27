@@ -85,7 +85,10 @@ export default function (props: IInputProps) {
     );
   } else if (props.type === 'color') {
     inputField = (
-      <PropertyColorInput color="#00FF00" colorChangeHandler={() => {}} />
+      <PropertyColorInput
+        color={props.value as string}
+        colorChangeHandler={() => {}}
+      />
     );
   } else if (props.type === 'svg') {
     inputField = <PropertySVGInput />;
