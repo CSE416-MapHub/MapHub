@@ -19,6 +19,7 @@ import { useRouter } from 'next/navigation';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
+import { base64StringToBlob } from 'blob-util';
 
 /**
  * The CreateAccountState is an object filled with states of text field
@@ -324,6 +325,9 @@ function CreateAccountForm() {
             user: {
               id: result.data._id,
               username: createAccountState.username.value,
+              profilePic: URL.createObjectURL(
+                base64StringToBlob(result.data.profilePic),
+              ),
             },
           },
         });

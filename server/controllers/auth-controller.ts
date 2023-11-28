@@ -20,12 +20,28 @@ export const registerUser = async (req: Request, res: Response) => {
         ' ' +
         passwordVerify,
     );
+
     if (!username || !email || !password || !passwordVerify) {
       return res
         .status(400)
         .json({ errorMessage: 'Please enter all required fields.' });
     }
     console.log('all fields provided');
+
+    if (!/^[\w.]{2,15}\w$/.test(username)) {
+      return res
+        .status(400)
+        .json({ errorMessage: 'Username does not meet requirements.' });
+    }
+    console.log('Username is valid.');
+
+    if (!/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(email)) {
+      return res
+        .status(400)
+        .json({ errorMessage: 'Email address does not meet requirements.' });
+    }
+    console.log('Email address is valid.');
+
     if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(password)) {
       return res.status(400).json({
         errorMessage: 'Password does not meet requirements.',
@@ -52,12 +68,14 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     const savedUser = await newUser.save();
     console.log('New user saved: ' + savedUser._id);
-    res
-      .status(200)
-      .json({
-        success: true,
-        user: savedUser,
-      })
+    res.status(200).json({
+      success: true,
+      user: {
+        id: savedUser._id,
+        username: savedUser.username,
+        profilePic: savedUser.profilePic.toString('base64'),
+      },
+    });
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
@@ -119,11 +137,40 @@ export const loginUser = async (req: Request, res: Response) => {
         user: {
           id: user._id,
           username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
         },
       });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, errorMessage: 'Server error' });
+  }
+};
+
+export const getExists = async (request: Request, response: Response) => {
+  try {
+    const { username } = request.body;
+    if (!username) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'Please include the username to check if it exists.',
+      });
+    }
+
+    const user = await User.exists({ username });
+    if (user) {
+      return response
+        .status(200)
+        .json({ success: true, username, exists: true });
+    } else {
+      return response
+        .status(200)
+        .json({ success: true, username, exists: false });
+    }
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorMessage: 'There is an internal error. Please try again.',
+    });
   }
 };
 

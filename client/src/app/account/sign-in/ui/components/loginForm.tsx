@@ -23,6 +23,7 @@ import styles from '../../../components/form.module.css';
 import AccountAPI from '../../../../../api/AccountAPI';
 import { useRouter } from 'next/navigation';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
+import { base64StringToBlob } from 'blob-util';
 
 interface LoginFieldState {
   value: string;
@@ -202,6 +203,9 @@ function LoginForm() {
               user: {
                 id: response.data.user.id,
                 username: response.data.user.username,
+                profilePic: URL.createObjectURL(
+                  base64StringToBlob(response.data.user.profilePic),
+                ),
               },
             },
           });

@@ -29,6 +29,7 @@ describe('POST /auth/register', () => {
       _id: mockId.toString(),
       username: userData.username,
       email: userData.email,
+      profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
     };
     userModel.prototype.save = jest.fn().mockResolvedValue(savedUser);
 
@@ -38,7 +39,13 @@ describe('POST /auth/register', () => {
 
     expect(response.body).toHaveProperty('user');
     console.log(response.body.user);
-    expect(response.body.user).toEqual(savedUser);
+    expect(response.body.user).toEqual({
+      id: mockId.toString(),
+      username: userData.username,
+      profilePic: Buffer.from(
+        fs.readFileSync('./tests/fixtures/avatar.jpg'),
+      ).toString('base64'),
+    });
   });
   it('no body provided', async () => {
     const userData = {};
@@ -152,5 +159,63 @@ describe('GET /auth/profile-picture ', () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+});
+
+describe('GET /auth/exists', () => {
+  const mockId = new mongoose.Types.ObjectId();
+  const mockUsername = 'someUser';
+  const mockUser = {
+    _id: mockId.toString(),
+    username: mockUsername,
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+  });
+
+  it('should return a true message if the user exists in the database.', async () => {
+    (userModel.exists as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app).get('/auth/exists').send({
+      username: mockUsername,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      username: mockUsername,
+      exists: true,
+    });
+  });
+
+  it('should return a false message if the user does not exist in the database.', async () => {
+    (userModel.exists as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/exists').send({
+      username: mockUsername,
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      username: mockUsername,
+      exists: false,
+    });
+  });
+
+  it('should send a bad request when the request has an empty body.', async () => {
+    const response = await supertest(app).get('/auth/exists').send({});
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(false);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 });
