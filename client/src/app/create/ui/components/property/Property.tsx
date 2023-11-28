@@ -12,14 +12,12 @@ let ctr = 0;
 
 export default function () {
   const editorContext = useContext(EditorContext);
-
+  const [panels, setPanels] = useState<Array<IPropertyPanelSectionProps>>([]);
   useEffect(() => {
     ctr++;
+    setPanels(editorContext.state.propertiesPanel);
   });
 
-  let panels = editorContext.state.propertiesPanel;
-  console.log('rendering proeprtypanel');
-  console.log(panels);
   if (panels.length === 0) {
     // hidden state? lol
     return <></>;

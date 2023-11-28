@@ -5,7 +5,7 @@ import { useState } from 'react';
 import InterestsIcon from '@mui/icons-material/Interests';
 import styles from './Property.module.scss';
 import Button from 'components/button';
-import NewSymbolModal from './modals/newSymbolModal';
+import NewSymbolModal from '../modals/newSymbolModal';
 
 export default function () {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);

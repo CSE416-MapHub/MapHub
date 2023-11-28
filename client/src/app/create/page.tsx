@@ -1,6 +1,6 @@
 'use client';
 import EditorRibbon from './ui/components/EditorRibbon';
-import Properties from './ui/components/Property';
+import Properties from './ui/components/property/Property';
 import dynamic from 'next/dynamic';
 
 import DeleteModal from './ui/components/modals/deleteInstance';
