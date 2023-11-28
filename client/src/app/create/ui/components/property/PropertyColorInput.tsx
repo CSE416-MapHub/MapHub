@@ -16,11 +16,6 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
   const [currColor, setColor] = useColor(color);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
-  function handleChange(c: IColor) {
-    setColor(c);
-    colorChangeHandler(c.hex);
-  }
-
   return (
     <>
       <IconButton
@@ -43,12 +38,13 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
         }}
         onClose={() => {
           setAnchorEl(null);
+          colorChangeHandler(currColor.hex);
         }}
       >
         <ColorPicker
           height={100}
           color={currColor}
-          onChange={handleChange}
+          onChange={setColor}
           hideAlpha={true}
           hideInput={['rgb', 'hsv']}
         />

@@ -62,6 +62,17 @@ export function makeDotPanel(
   payload: Partial<IEditorState>;
 } {
   let loadedMap = ctx.current.state.map!;
+  // find the classid
+  let classId = 0;
+  let globalDotsData = ctx.current.state.map!.globalDotDensityData;
+  for (let dc = 0; dc < globalDotsData.length; dc++) {
+    if (
+      ctx.current.state.map!.globalDotDensityData[dc].name === dotInstance.dot
+    ) {
+      classId = dc;
+      break;
+    }
+  }
   let action = {
     type: EditorActions.SET_PANEL,
     payload: {
@@ -160,7 +171,7 @@ export function makeDotPanel(
                 onChange(val: string) {
                   updateField(
                     ctx,
-                    id,
+                    classId,
                     TargetType.GLOBAL_DOT,
                     'name',
                     dotClass.name,
@@ -179,7 +190,7 @@ export function makeDotPanel(
                 onChange(val: string) {
                   updateField(
                     ctx,
-                    id,
+                    classId,
                     TargetType.GLOBAL_DOT,
                     'color',
                     dotClass.color,
@@ -198,7 +209,7 @@ export function makeDotPanel(
                 onChange(val: string) {
                   updateField(
                     ctx,
-                    id,
+                    classId,
                     TargetType.GLOBAL_DOT,
                     'opacity',
                     dotClass.opacity.toString(),
@@ -217,7 +228,7 @@ export function makeDotPanel(
                 onChange(val: string) {
                   updateField(
                     ctx,
-                    id,
+                    classId,
                     TargetType.GLOBAL_DOT,
                     'size',
                     dotClass.size.toString(),

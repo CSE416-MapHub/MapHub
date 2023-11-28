@@ -148,7 +148,19 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
         throw new Error('Target index out of bounds');
       }
       let targ = map.globalDotDensityData[d.target[1]];
+
       targ.name = d.payload.name ?? targ.name;
+      // if the name changed, we have to change the name of each dot
+      if (d.payload.name) {
+        let oldName = targ.name;
+        map.dotsData = map.dotsData.map(di => {
+          if (di.dot === oldName) {
+            di.dot = d.payload.name!;
+          }
+          return di;
+        });
+      }
+
       targ.size = d.payload.size ?? targ.size;
       targ.color = d.payload.color ?? targ.color;
       targ.opacity = d.payload.opacity ?? targ.opacity;
@@ -161,7 +173,14 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
       }
       // TODO: is this the smartest thing to do?
       // map.globalDotDensityData.splice(d.target[1], 1);
+      let targName = map.globalDotDensityData[d.target[1]].name;
       map.globalDotDensityData[d.target[1]].name = DELETED_NAME;
+      map.dotsData = map.dotsData.map(d => {
+        if (d.dot === targName) {
+          d.dot = DELETED_NAME;
+        }
+        return d;
+      });
       break;
     }
 

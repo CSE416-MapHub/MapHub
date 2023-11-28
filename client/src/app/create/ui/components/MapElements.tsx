@@ -214,7 +214,7 @@ export default function () {
         let dotClass = dotNames.get(dotInstance.dot)!;
         return (
           <CircleMarker
-            key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}`}
+            key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}_${dotClass.opacity}_${dotClass.name}_${dotClass.color}_${dotClass.opacity}`}
             center={L.latLng(dotInstance.y, dotInstance.x)}
             color="#000000"
             weight={1}

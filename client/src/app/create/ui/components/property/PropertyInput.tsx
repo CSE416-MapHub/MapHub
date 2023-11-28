@@ -43,7 +43,7 @@ function getFunctionOfOption(o: string | [string, () => void]): () => void {
 }
 
 export default function (props: IInputProps) {
-  // const [value, setValue] = useState<string>(props.value.toString());
+  const [value, setValue] = useState<string>(props.value.toString());
 
   let inputField = <input />;
   if (props.type === 'number' || props.type === 'text') {
@@ -51,12 +51,13 @@ export default function (props: IInputProps) {
     inputField = (
       <input
         type={props.type}
-        value={props.value.toString()}
+        value={value}
         disabled={props.disabled}
         onChange={e => {
-          //
+          setValue(e.currentTarget.value);
+        }}
+        onBlur={e => {
           props.onChange(e.currentTarget.value);
-          // setValue(e.currentTarget.value);
         }}
         step="any"
         className={clsx(
