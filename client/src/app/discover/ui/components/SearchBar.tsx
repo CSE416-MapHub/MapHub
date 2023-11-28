@@ -13,6 +13,7 @@ import {
   Typography,
 } from '@mui/material';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import PostAPI from 'api/PostAPI';
 
 export default function () {
   const [searchBar, setSearchBar] = useState<string>('');
@@ -23,6 +24,17 @@ export default function () {
     ['114435342', 'Jumping Bug Populations in Brazil'],
     ['112345674', 'Jeromes Born in India'],
   ]);
+
+  const handleUpdateSearch = (e : any) => {
+    setSearchBar(e.target.value);
+    PostAPI.queryPosts(e.target.value)
+      .then(response => {
+        console.log(response);
+      })
+      .catch(error => {
+        console.log('Searching failed', error);
+      })
+  }
 
   const [people, setPeople] = useState<[string, string][]>([
     ['1', 'Juma'],
@@ -45,7 +57,7 @@ export default function () {
             type="text"
             className={style['search-input']}
             value={searchBar}
-            onChange={e => setSearchBar(e.target.value)}
+            onChange={handleUpdateSearch}
             placeholder="Search for map inspiration"
           />
         </div>

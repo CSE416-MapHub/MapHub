@@ -1,68 +1,41 @@
+'use client'
+import { useEffect, useState } from 'react';
 import style from './page.module.scss';
-import MapCard from './ui/components/MapCard';
+import MapCard, { MapCardProps } from './ui/components/MapCard';
 import SearchBar from './ui/components/SearchBar';
+import PostAPI from 'api/PostAPI';
+
 
 export default function () {
+  const [mapCardData, setMapCardData] = useState<MapCardProps[]>([]);
+  
+  useEffect(() => {
+    PostAPI.queryPosts('')
+      .then((response) => {
+        if(response.data.success) {
+          setMapCardData(response.data.posts);
+        }
+      })
+      .catch(error => {
+        console.error('Error while querying posts:', error);
+      })
+  }, []);
+
   return (
     <>
       <SearchBar />
       <div className={style['card-grid']}>
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={12}
-          userLiked={false}
-          title={'GDP of the US'}
-          author={'AntoninScallia'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={10023}
-          userLiked={false}
-          title={'FREE ROBUX!! '}
-          author={'user57'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={7}
-          userLiked={false}
-          title={'Global Views on Russia'}
-          author={'Kompromat'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={12}
-          userLiked={false}
-          title={'Anglicans Down Under'}
-          author={'HolyAussie93'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={12}
-          userLiked={false}
-          title={'Africa Template'}
-          author={'MvembaANzinga'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={12332}
-          userLiked={false}
-          title={'Fatal Lightning Strikes in the US'}
-          author={'Alaaaaaaaan'}
-        />
-        <MapCard
-          id={'1'}
-          userId={'1'}
-          numLikes={Infinity}
-          userLiked={false}
-          title={'some title'}
-          author={'some user'}
-        />
+        {mapCardData.map(map => (
+          <MapCard
+            key={map.id}
+            id={map.id}
+            userId={map.userId}
+            numLikes={map.numLikes}
+            userLiked={map.userLiked}
+            title={map.title}
+            author={map.author}
+          />
+        ))}
       </div>
     </>
   );
