@@ -155,6 +155,7 @@ const MapController = {
           .json({ success: false, message: 'Map ID is required' });
       }
 
+      //user
       const userId = (req as any).userId;
       map = await Map.findById(mapId);
 
