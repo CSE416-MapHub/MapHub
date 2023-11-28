@@ -19,6 +19,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.GEOJSONDATA:
       deltaGeoJson(map, d);
       break;
+    case TargetType.REGION:
+      deltaRegion(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
@@ -48,6 +51,8 @@ const labelToDPKey = (name: string): keyof DeltaPayload => {
       return 'size';
     case 'Dot Name':
       return 'name';
+    case 'Feature Color':
+      return 'color';
   }
   return name as keyof DeltaPayload;
 };
@@ -243,8 +248,6 @@ function deltaGeoJson(map: MHJSON, d: Delta) {
         orig.properties = {};
       }
       orig.properties[propName] = d.payload.propertyValue;
-      console.log('ADDING TO PROPERTIES');
-      console.log(orig);
       break;
     }
     case DeltaType.DELETE: {
@@ -258,4 +261,34 @@ function deltaGeoJson(map: MHJSON, d: Delta) {
   }
 }
 
+function deltaRegion(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE:
+    case DeltaType.CREATE: {
+      map.regionsData = [...map.regionsData];
+      if (d.payload.color) {
+        map.regionsData[d.target[1]].color = d.payload.color;
+      }
+      if (d.payload.intensity) {
+        map.regionsData[d.target[1]].intensity = d.payload.intensity;
+      }
+      if (d.payload.category) {
+        map.regionsData[d.target[1]].category = d.payload.category;
+      }
+      break;
+    }
+    case DeltaType.DELETE: {
+      if (d.payload.color) {
+        delete map.regionsData[d.target[1]].color;
+      }
+      if (d.payload.intensity) {
+        delete map.regionsData[d.target[1]].intensity;
+      }
+      if (d.payload.category) {
+        delete map.regionsData[d.target[1]].category;
+      }
+      break;
+    }
+  }
+}
 export const DELETED_NAME = '_#DEL';

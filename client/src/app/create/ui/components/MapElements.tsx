@@ -14,7 +14,7 @@ import { IInputProps, PropertyPanelInputType } from './property/PropertyInput';
 
 import { Dispatch } from 'react';
 import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, IRegionProperties, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import { makeDotPanel, makeRegionPanel } from './property/createPanels';
 
@@ -28,6 +28,9 @@ export default function () {
   const map = useMap();
   const [eBBox, setEBBox] = useState<[number, number]>([0, 0]);
   const [rerender, setRerender] = useState(0);
+  const [currentRegionProps, setCurrentRegionProps] = useState<
+    Array<IRegionProperties>
+  >([]);
   const editorContextRef = useRef(editorContextStaleable);
 
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
@@ -66,6 +69,14 @@ export default function () {
       map.setMaxBounds(OPEN_BOUNDS);
       map.setMaxZoom(MAX_ZOOM);
       map.setMinZoom(MIN_ZOOM);
+    }
+
+    // if theres a map, make sure the loaded regions and the displayed regions
+    // are synced
+    if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
+      console.log('RENREDER  :  region prop change');
+      setCurrentRegionProps(loadedMap.regionsData);
+      setRerender(rerender + 1);
     }
   });
 
@@ -159,7 +170,7 @@ export default function () {
     let p = layer as L.Path;
     p.setStyle({
       color: '#000000',
-      fillColor: 'white',
+      fillColor: currentRegionProps[myId]?.color ?? 'white',
       fillOpacity: 1,
       opacity: 1,
       stroke: true,

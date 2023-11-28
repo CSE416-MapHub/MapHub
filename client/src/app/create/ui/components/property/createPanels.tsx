@@ -256,7 +256,8 @@ export function makeRegionPanel(
   type: EditorActions;
   payload: Partial<IEditorState>;
 } {
-  let v = new GeoJSONVisitor(ctx.current.state.map!.geoJSON, true);
+  let m = ctx.current.state.map!;
+  let v = new GeoJSONVisitor(m.geoJSON, true);
   v.visitRoot();
   let feature = v.getFeatureResults().perFeature[id].originalFeature;
   let action = {
@@ -302,6 +303,30 @@ export function makeRegionPanel(
               };
             },
           ),
+        },
+        {
+          name: 'Colors',
+          items: [
+            {
+              name: 'Feature Color',
+              input: {
+                type: colorType,
+                short: true,
+                disabled: false,
+                value: m.regionsData[id]?.color ?? '#FFFFFF',
+                onChange(val: string) {
+                  updateField(
+                    ctx,
+                    id,
+                    TargetType.REGION,
+                    'color',
+                    m.regionsData[id]?.color ?? '#FFFFFF',
+                    val,
+                  );
+                },
+              },
+            },
+          ],
         },
       ],
     },

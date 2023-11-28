@@ -21,7 +21,7 @@ export interface DeltaPayload {
   opacity?: number;
   size?: number;
   intensity?: number;
-  category?: number;
+  category?: string;
   dot?: string;
   label?: string;
   capacity?: number;
