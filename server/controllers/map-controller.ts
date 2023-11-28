@@ -6,8 +6,18 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
+import { hint } from '@mapbox/geojsonhint';
+import mapHelper from './helperFunctions/mapHelper';
 
 const readFile = util.promisify(fs.readFile); // Promisify readFile for use with async/await
+
+type MapDocument = typeof Map.prototype;
+
+enum DeltaType {
+  UPDATE,
+  CREATE,
+  DELETE,
+}
 
 enum MapType {
   CHOROPLETH = 'choropleth',
@@ -20,6 +30,9 @@ enum MapType {
 export async function convertJsonToPng(map: mongoose.Document) {
   return Buffer.alloc(0);
 }
+
+//idk if we should actually validate the user to see if the user matchees
+async function validUserForMap(req: Request, res: Response) {}
 
 const MapController = {
   createMap: async (req: Request, res: Response) => {
@@ -43,6 +56,20 @@ const MapController = {
     } = req.body.map;
     console.log('REQ BODY IS');
     console.log(req.body);
+
+    if (!title || !mapType || !geoJSON) {
+      return res.status(400).json({ error: 'Missing required fields' });
+    }
+    const errors = hint(geoJSON);
+    console.log('ERRORS WITH GEOJSON', errors);
+
+    if (errors.length > 0) {
+      return res.status(400).json({
+        error: 'Invalid GeoJSON data',
+        details: errors,
+      });
+    }
+
     let newMap;
     let savedMap;
     try {
@@ -52,6 +79,7 @@ const MapController = {
         title,
         placeholderID,
         mapType,
+        published: false,
         labels,
         globalChoroplethData,
         globalCategoryData,
@@ -114,6 +142,61 @@ const MapController = {
 
   updateMap: async (req: Request, res: Response) => {
     // Implementation of updating a map
+    const delta = req.body.delta;
+    let map: MapDocument | null;
+    //validating the requests
+    try {
+      const mapId = delta.target[0];
+      console.log('THIS IS THE MAPID', JSON.stringify(req.params));
+
+      if (!mapId) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Map ID is required' });
+      }
+
+      //user
+      const userId = (req as any).userId;
+      map = await Map.findById(mapId);
+
+      if (!map) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Map not found' });
+      }
+      if (map.owner.toString() !== userId.toString()) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Unauthorized, not users map' });
+      }
+    } catch (err: any) {
+      console.error('Error in updateMap:', err);
+      res
+        .status(500)
+        .json({ success: false, message: 'Internal server error' });
+    }
+
+    try {
+      switch (delta.type) {
+        case DeltaType.CREATE:
+          map = mapHelper.handleCreate(delta, map);
+          break;
+        case DeltaType.UPDATE:
+          map = mapHelper.handleUpdate(delta, map);
+          break;
+        case DeltaType.DELETE:
+          map = mapHelper.handleDelete(delta, map);
+          break;
+        default:
+          return res
+            .status(400)
+            .json({ success: false, message: 'Map Delta Type Incorrect' });
+      }
+      const updatedMap = await map.save();
+      return res.status(200).json({ success: true });
+    } catch (err: any) {
+      return res.status(400).json({ success: false, message: err.message });
+    }
   },
 
   deleteMapById: async (req: Request, res: Response) => {

@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 import app from '../app';
 import mapModel from '../models/map-model';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import fs from 'fs';
@@ -12,6 +13,7 @@ let mapData = {
   title: 'mapNice',
   owner: new mongoose.Types.ObjectId(),
   mapType: 'categorical',
+  published: false,
   labels: [],
   globalChoroplethData: {
     minIntensity: 0,
@@ -91,6 +93,7 @@ const userId = mapData.owner;
 
 beforeEach(() => {
   jest.setTimeout(6000);
+  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: userId });
 });
 
 jest.mock('../models/map-model');
@@ -118,6 +121,53 @@ describe('POST /map/map', () => {
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('map');
+  });
+  it('fails to create a map with invalid GeoJSON data', async () => {
+    const mapDataWithInvalidGeoJSON = {
+      title: 'Invalid GeoJSON Map',
+      mapType: 'choropleth',
+      geoJSON: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+          },
+        ],
+      },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapDataWithInvalidGeoJSON })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+  it('fails to create a map with missing fields', async () => {
+    const incompleteData = {
+      map: { title: 'no mappa' },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send(incompleteData)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+  });
+  it('handles file system errors gracefully', async () => {
+    jest
+      .spyOn(fs.promises, 'writeFile')
+      .mockRejectedValue(new Error('File system error'));
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapData })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(500);
   });
 });
 

@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { MHJSON } from 'types/MHJSON';
+import { Delta } from 'types/delta';
 const SERVER_PORT = 3031;
 
 function getBaseUrl(): string {
@@ -36,9 +37,9 @@ class MapAPI {
     return this.api.post('/map/create', { map });
   }
 
-  // static async updateMap(mapID: string, delta: Delta){
-
-  // }
+  static async updateMap(delta: Delta) {
+    return this.api.put(`/map/map/`, { delta });
+  }
 
   static async getMapById(mapID: string) {
     return this.api.get(`/map/map/${mapID}`);
