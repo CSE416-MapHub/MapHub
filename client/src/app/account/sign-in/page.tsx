@@ -1,6 +1,3 @@
-import Link from 'next/link';
-import { Typography } from '@mui/material';
-
 import styles from './ui/loginPage.module.css';
 import LoginForm from './ui/components/loginForm';
 
