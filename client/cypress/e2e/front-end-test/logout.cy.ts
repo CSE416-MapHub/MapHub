@@ -12,6 +12,7 @@ describe('enter in fake account details', () => {
           user: {
             id: '6565034debc8f69e8b88c3c9',
             username: 'abc123',
+            profilePic: '',
           },
         },
       },
@@ -68,7 +69,7 @@ describe('enter in fake account details', () => {
     cy.get('input#username').type('abc123').blur();
     cy.get('input#password').type('Coolguy64').blur();
     cy.wait(500);
-    cy.get('.form_container__KPkz8 button:contains("Sign In")').click();
+    cy.get('#sign-in-confirm').click();
 
     // Wait for the login request to complete
     cy.wait('@login').then(interception => {
@@ -79,16 +80,14 @@ describe('enter in fake account details', () => {
     });
 
     cy.wait(500);
-    cy.get('#navAvatar_nav-avatar__button__grkGt').click();
+    cy.get('[id*="nav-avatar"]').click();
 
     cy.wait(200);
     cy.get('#account-sign-out').click();
 
     cy.wait(500);
-    cy.get('div.navBar_nav__box__O73XO')
-      .find('button#navAvatar_nav-avatar__button__grkGt')
-      .should('not.exist');
-    cy.get('div.navBar_nav__box__O73XO').find('a#signin').should('exist');
-    cy.get('div.navBar_nav__box__O73XO').find('a#join-now').should('exist');
+    cy.get('#nav-bar').find('[id*="nav-avatar"]').should('not.exist');
+    cy.get('#nav-bar').find('a#signin').should('exist');
+    cy.get('#nav-bar').find('a#join-now').should('exist');
   });
 });

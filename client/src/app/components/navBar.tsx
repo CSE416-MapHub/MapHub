@@ -15,6 +15,7 @@ function NavBar() {
   const auth = useContext(AuthContext);
   return (
     <nav
+      id="nav-bar"
       className={clsx({
         [styles['nav__bar']]: true,
         [styles['nav__bar--compact']]: usePathname() === '/create',
