@@ -25,7 +25,6 @@ const PostController = {
     let savedPost;
     let newPost;
 
-
     const map = await Map.findById(mapID).exec();
 
     if (!map) {
