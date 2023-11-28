@@ -25,6 +25,7 @@ describe('POST /auth/register', () => {
       _id: mockId.toString(),
       username: userData.username,
       email: userData.email,
+      profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
     };
     userModel.prototype.save = jest.fn().mockResolvedValue(savedUser);
 
@@ -34,7 +35,13 @@ describe('POST /auth/register', () => {
 
     expect(response.body).toHaveProperty('user');
     console.log(response.body.user);
-    expect(response.body.user).toEqual(savedUser);
+    expect(response.body.user).toEqual({
+      id: mockId.toString(),
+      username: userData.username,
+      profilePic: Buffer.from(
+        fs.readFileSync('./tests/fixtures/avatar.jpg'),
+      ).toString('base64'),
+    });
   });
   it('no body provided', async () => {
     const userData = {};
