@@ -1,5 +1,6 @@
+import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { MHJSON } from 'types/MHJSON';
-import { Delta, DeltaType, TargetType } from 'types/delta';
+import { Delta, DeltaPayload, DeltaType, TargetType } from 'types/delta';
 
 /**
  * Applies a Delta to a map in place
@@ -17,6 +18,58 @@ export function applyDelta(map: MHJSON, d: Delta) {
     default:
       throw new Error('uninmplemented');
   }
+}
+
+// HACK
+function m(a: any): a is string | Array<string | [string, () => void]> {
+  return true;
+}
+
+// TODO:
+const labelToDPKey = (name: string): keyof DeltaPayload => {
+  switch (name) {
+    case 'X':
+      return 'x';
+    case 'Y':
+      return 'y';
+    // case 'Dot':
+    //   return 'dot';
+    case 'Scale':
+      return 'scale';
+    case 'Dot Color':
+      return 'color';
+    case 'Dot Opacity':
+      return 'opacity';
+    case 'Dot Size':
+      return 'size';
+    case 'Dot Name':
+      return 'name';
+  }
+  return 'propertyValue';
+};
+
+export function updatePropertiesPanel(
+  p: Array<IPropertyPanelSectionProps>,
+  d: Delta,
+): Array<IPropertyPanelSectionProps> {
+  let pp = [...p];
+  for (let panel in pp) {
+    for (let inp in pp[panel].items) {
+      let valAtName = d.payload[labelToDPKey(pp[panel].items[inp].name)];
+      if (valAtName !== undefined) {
+        let k;
+        if (typeof valAtName === 'number') {
+          k = valAtName.toString();
+        } else {
+          k = valAtName;
+        }
+        if (m(k)) {
+          pp[panel].items[inp].input.value = k;
+        }
+      }
+    }
+  }
+  return pp;
 }
 
 /**

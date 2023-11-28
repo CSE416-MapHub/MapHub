@@ -16,17 +16,21 @@ import NewDotModal from '../modals/newDotModal';
 
 export interface PropertyDotInputProps {
   items: Array<string>;
+  onChange: (val: string) => void;
 }
 
-export default function ({ items }: PropertyDotInputProps) {
+export default function ({ items, onChange }: PropertyDotInputProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openDotModal, setOpenDotModal] = useState(false);
 
-  function handleClick(name: string) {}
+  function handleClick(name: string) {
+    onChange(name);
+  }
 
-  function handleAdd() {}
   function onConfirmDotModal() {}
 
+  console.log('ITEMSSS');
+  console.log(items);
   return (
     <>
       <IconButton
@@ -60,7 +64,7 @@ export default function ({ items }: PropertyDotInputProps) {
                 <ListItemText>{item}</ListItemText>
               </MenuItem>
             ))}
-            <MenuItem onClick={handleAdd}>
+            <MenuItem>
               <ListItemText onClick={() => setOpenDotModal(true)}>
                 + New Dot Type{' '}
               </ListItemText>

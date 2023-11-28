@@ -1,4 +1,4 @@
-interface DeltaPayload {
+export interface DeltaPayload {
   // this is what a diff payload could contain
   // note that at no point should all fields be active
 

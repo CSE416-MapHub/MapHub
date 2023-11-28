@@ -6,6 +6,7 @@ import NewCategoryModal from '../modals/newCategoryModal';
 export interface PropertyDropdownInputProps {
   options: Array<string>;
   selected: string;
+  onChange: (val: string) => void;
 }
 
 export default function (props: PropertyDropdownInputProps) {
@@ -15,6 +16,7 @@ export default function (props: PropertyDropdownInputProps) {
   function handleChange(v: string) {
     if (v !== '+ New Category') {
       setSelected(v);
+      props.onChange(v);
     } else {
       console.log('OPENING MODAL IN AHNDLE CHANGE');
       setOpenCategoryModal(true);

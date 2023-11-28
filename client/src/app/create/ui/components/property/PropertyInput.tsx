@@ -25,6 +25,7 @@ export interface IInputProps {
   short: boolean;
   disabled: boolean;
   value: string | Array<string | [string, () => void]>;
+  onChange: (val: string) => void;
   // contains either a string for the true selected dropdown option
   // or a modal
   auxiliaryComponent?: JSX.Element | string;
@@ -42,7 +43,7 @@ function getFunctionOfOption(o: string | [string, () => void]): () => void {
 }
 
 export default function (props: IInputProps) {
-  const [value, setValue] = useState<string>(props.value.toString());
+  // const [value, setValue] = useState<string>(props.value.toString());
 
   let inputField = <input />;
   if (props.type === 'number' || props.type === 'text') {
@@ -50,9 +51,13 @@ export default function (props: IInputProps) {
     inputField = (
       <input
         type={props.type}
-        value={value}
+        value={props.value.toString()}
         disabled={props.disabled}
-        onChange={e => setValue(e.target.value)}
+        onChange={e => {
+          //
+          props.onChange(e.currentTarget.value);
+          // setValue(e.currentTarget.value);
+        }}
         step="any"
         className={clsx(
           style['default-input'],
@@ -65,7 +70,8 @@ export default function (props: IInputProps) {
     inputField = (
       <PropertyDropdownInput
         options={props.value as Array<string>}
-        selected=""
+        selected={(props.auxiliaryComponent as string) ?? ''}
+        onChange={val => props.onChange(val)}
       />
     );
   } else if (props.type === 'delete') {
@@ -77,23 +83,29 @@ export default function (props: IInputProps) {
   } else if (props.type === 'gradient') {
     inputField = (
       <PropertyInputGradient
-        minValue={0}
-        maxValue={100}
-        minColor="#00FF00"
-        maxColor="#FFFF00"
+        minValue={parseFloat(props.value[0] as string)}
+        maxValue={parseFloat(props.value[1] as string)}
+        minColor={props.value[2] as string}
+        maxColor={props.value[3] as string}
+        onChange={val => props.onChange(val)}
       />
     );
   } else if (props.type === 'color') {
     inputField = (
       <PropertyColorInput
         color={props.value as string}
-        colorChangeHandler={() => {}}
+        colorChangeHandler={val => props.onChange(val)}
       />
     );
   } else if (props.type === 'svg') {
     inputField = <PropertySVGInput />;
   } else if (props.type === 'dot') {
-    inputField = <PropertyDotInput items={props.value as Array<string>} />;
+    inputField = (
+      <PropertyDotInput
+        items={props.value as Array<string>}
+        onChange={val => props.onChange(val)}
+      />
+    );
   } else {
     throw new Error('Bad input type ' + props.type);
   }

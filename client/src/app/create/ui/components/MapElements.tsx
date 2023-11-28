@@ -4,6 +4,7 @@ import {
   EditorContext,
   ToolbarButtons,
   IEditorState,
+  IEditorContext,
 } from 'context/EditorProvider';
 import * as G from 'geojson';
 import * as L from 'leaflet';
@@ -12,18 +13,15 @@ import { CircleMarker, GeoJSON, TileLayer, useMap } from 'react-leaflet';
 import { IInputProps, PropertyPanelInputType } from './property/PropertyInput';
 
 import { Dispatch } from 'react';
-import { DeltaType, TargetType } from 'types/delta';
+import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { makeDotPanel } from './property/createPanels';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
-let numType: PropertyPanelInputType = 'number';
-let dotType: PropertyPanelInputType = 'dot';
-let textType: PropertyPanelInputType = 'text';
-let colorType: PropertyPanelInputType = 'color';
 
 export default function () {
   const editorContextStaleable = useContext(EditorContext);
@@ -81,96 +79,8 @@ export default function () {
       }
       let dotInstance = loadedMap.dotsData[id];
       let dotClass = dotNames.get(dotInstance.dot)!;
+      let action = makeDotPanel(editorContextRef, dotClass, dotInstance, id);
 
-      let action = {
-        type: EditorActions.SET_PANEL,
-        payload: {
-          propertiesPanel: [
-            {
-              name: 'Local Dot',
-              items: [
-                {
-                  name: 'X',
-                  input: {
-                    type: numType,
-                    short: true,
-                    disabled: false,
-                    value: dotInstance.x.toString(),
-                  },
-                },
-                {
-                  name: 'Y',
-                  input: {
-                    type: numType,
-                    short: true,
-                    disabled: false,
-                    value: dotInstance.y.toString(),
-                  },
-                },
-                {
-                  name: 'Dot',
-                  input: {
-                    type: dotType,
-                    short: true,
-                    disabled: false,
-                    value: loadedMap.globalDotDensityData.map(el => el.name),
-                  },
-                },
-                {
-                  name: 'Scale',
-                  input: {
-                    type: numType,
-                    short: true,
-                    disabled: false,
-                    value: dotInstance.scale.toString(),
-                  },
-                },
-              ],
-            },
-            {
-              name: 'Global Dot',
-              items: [
-                {
-                  name: 'Dot Name',
-                  input: {
-                    type: textType,
-                    short: false,
-                    disabled: false,
-                    value: dotClass.name,
-                  },
-                },
-                {
-                  name: 'Dot Color',
-                  input: {
-                    type: colorType,
-                    short: false,
-                    disabled: false,
-                    value: dotClass.color,
-                  },
-                },
-                {
-                  name: 'Dot Opacity',
-                  input: {
-                    type: numType,
-                    short: false,
-                    disabled: false,
-                    value: dotClass.opacity.toString(),
-                  },
-                },
-                {
-                  name: 'Dot Size',
-                  input: {
-                    type: numType,
-                    short: false,
-                    disabled: false,
-                    value: dotClass.size.toString(),
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      };
       console.log('DISPATCHING FROM DOT');
       editorContextRef.current.dispatch(action);
       return;
@@ -263,6 +173,7 @@ export default function () {
                       value: feature.properties
                         ? feature.properties[lbl].toString()
                         : 'undefined',
+                      onChange(val) {},
                     },
                   };
                 },

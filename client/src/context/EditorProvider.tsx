@@ -5,7 +5,11 @@ import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType } from 'types/delta';
-import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
+import {
+  DELETED_NAME,
+  applyDelta,
+  updatePropertiesPanel,
+} from './editorHelpers/DeltaUtil';
 
 export enum ToolbarButtons {
   select = 'select',
@@ -133,8 +137,6 @@ function reducer(
     default:
       throw new Error('UNHANDLED ACTION');
   }
-  console.log('exiting with this state');
-  console.log(newState);
   return newState;
 }
 
@@ -166,7 +168,6 @@ class helpers {
   public addDelta(ctx: IEditorContext, d: Delta, dInv: Delta) {
     let x = ctx.state.map;
     if (x !== null) {
-      console.log('adding to stack');
       let map = x;
 
       let nStack = ctx.state.actionStack.clone();
@@ -181,14 +182,16 @@ class helpers {
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
       }
-      console.log('dispatching!');
-      console.log(nStack);
+      let newPropertiesPanel = [
+        ...updatePropertiesPanel(ctx.state.propertiesPanel, d),
+      ];
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           actionStack: nStack,
           map: nMap,
           lastInstantiated: li,
+          propertiesPanel: newPropertiesPanel,
         },
       });
     } else {
@@ -207,10 +210,10 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
-      console.log('PREV STACK');
-      console.log(ctx.state.actionStack);
-      console.log('NEW STACK');
-      console.log(nStack);
+      // build the properties panel
+      let newPropertiesPanel = [
+        ...updatePropertiesPanel(ctx.state.propertiesPanel, a.undo),
+      ];
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -218,6 +221,7 @@ class helpers {
           map: nMap,
           actionStack: nStack,
           lastInstantiated: ctx.state.lastInstantiated,
+          propertiesPanel: newPropertiesPanel,
         },
       });
     } else {
@@ -236,6 +240,10 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
+      // build the properties panel
+      let newPropertiesPanel = [
+        ...updatePropertiesPanel(ctx.state.propertiesPanel, a.do),
+      ];
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -243,6 +251,7 @@ class helpers {
           map: nMap,
           actionStack: nStack,
           lastInstantiated: ctx.state.lastInstantiated,
+          propertiesPanel: newPropertiesPanel,
         },
       });
     } else {
