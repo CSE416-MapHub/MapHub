@@ -29,7 +29,7 @@ app.use(
 );
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+app.use(express.json({ limit: '100mb' }));
 
 // SETUP OUR OWN ROUTERS AS MIDDLEWARE
 app.use('/auth', authRouter);
