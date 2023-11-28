@@ -15,7 +15,7 @@ describe('enter in fake account details', () => {
           },
         },
       },
-    );
+    ).as('login');
 
     cy.intercept(
       {
@@ -30,7 +30,7 @@ describe('enter in fake account details', () => {
           message: 'User logged out successfully.',
         },
       },
-    );
+    ).as('logout');
 
     cy.intercept(
       {
@@ -70,10 +70,10 @@ describe('enter in fake account details', () => {
     cy.get('input#username').type('abc123').blur();
     cy.get('input#password').type('Coolguy64').blur();
     cy.wait(500);
-    cy.get('.loginPage_container__rxdEU button:contains("Sign In")').click();
+    cy.get('.form_container__KPkz8 button:contains("Sign In")').click();
 
     // Wait for the login request to complete
-    cy.wait('@loginRequest').then((interception) => {
+    cy.wait('@login').then((interception) => {
       // You can assert on the request or response if needed
       if (interception.response) {
         expect(interception.response.statusCode).to.equal(200);
