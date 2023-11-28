@@ -5,7 +5,7 @@ import jwt, { Secret } from 'jsonwebtoken';
 const jwtSecret = process.env.JWT_SECRET ?? 'AOIHFAOUHFSHUSDFWEIUFHEIOWJ';
 
 function authManager() {
-  const verify = (req: Request, res: Response, next: NextFunction) => {
+  const verify = async (req: Request, res: Response, next: NextFunction) => {
     console.log('req: ' + req.cookies);
     try {
       const token = req.cookies.token;
@@ -28,9 +28,21 @@ function authManager() {
       }
       const verified = jwt.verify(token, secretOrPrivateKey) as jwt.JwtPayload;
       console.log('decrypted userId: ' + verified.userId);
-      // const userInQ = await verifyUser(verified);
-      (req as any).userId = verified.userId;
 
+      // Verify if user exists in the database
+      const user = await User.findById(verified.userId);
+      if (!user) {
+        return res.status(401).json({
+          loggedIn: false,
+          user: null,
+          errorMessage: 'User not found',
+        });
+      }
+
+      // Add user information to the request object
+      (req as any).user = user;
+      (req as any).userId = verified.userId;
+      console.log('USER FOUND');
       next();
     } catch (err) {
       console.error(err);
