@@ -60,6 +60,43 @@ describe('enter in fake account details', () => {
         },
       },
     );
+
+    cy.visit('/');
+  });
+
+  it('should login with proper credential and logout', () => {
+    
+    cy.get('button:contains("Sign In")').click();
+    cy.get('input#username').type('abc123').blur();
+    cy.get('input#password').type('Coolguy64').blur();
+    cy.wait(500);
+    cy.get('.loginPage_container__rxdEU button:contains("Sign In")').click();
+
+    // Wait for the login request to complete
+    cy.wait('@loginRequest').then((interception) => {
+      // You can assert on the request or response if needed
+      if (interception.response) {
+        expect(interception.response.statusCode).to.equal(200);
+      }    
+    });
+
+    cy.wait(500);
+    cy.get('#navAvatar_nav-avatar__button__grkGt').click()
+
+    cy.wait(200)
+    cy.get('#account-sign-out').click()
+
+    cy.wait(500)
+    cy.get('div.navBar_nav__box__O73XO')
+      .find('button#navAvatar_nav-avatar__button__grkGt')
+      .should('not.exist');
+    cy.get('div.navBar_nav__box__O73XO')
+      .find('a#signin')
+      .should('exist')
+    cy.get('div.navBar_nav__box__O73XO')
+      .find('a#join-now')
+      .should('exist')
+
   });
 
   it('should login with proper credential and logout', () => {
