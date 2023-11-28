@@ -70,7 +70,11 @@ export const registerUser = async (req: Request, res: Response) => {
     console.log('New user saved: ' + savedUser._id);
     res.status(200).json({
       success: true,
-      user: savedUser,
+      user: {
+        id: savedUser._id,
+        username: savedUser.username,
+        profilePic: savedUser.profilePic.toString('base64'),
+      },
     });
   } catch (err: any) {
     if (err.code === 11000) {
@@ -133,6 +137,7 @@ export const loginUser = async (req: Request, res: Response) => {
         user: {
           id: user._id,
           username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
         },
       });
   } catch (error) {
