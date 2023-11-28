@@ -5,8 +5,9 @@ import {
 } from 'context/EditorProvider';
 import { IDotDensityProps, IDotInstance } from 'types/MHJSON';
 import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
-import { PropertyPanelInputType } from './PropertyInput';
+import { IInputProps, PropertyPanelInputType } from './PropertyInput';
 import { MutableRefObject } from 'react';
+import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
@@ -22,23 +23,25 @@ function updateField(
   fieldName: keyof DeltaPayload,
   v0: any,
   vf: any,
+  subobjid?: string,
 ) {
   let pf: DeltaPayload = {};
   pf[fieldName] = vf;
   let p0: DeltaPayload = {};
   p0[fieldName] = v0;
+  let subid = subobjid ?? '-1';
   ctx.current.helpers.addDelta(
     ctx.current,
     {
       type: DeltaType.UPDATE,
       targetType: typ,
-      target: [ctx.current.state.map_id, id, -1],
+      target: [ctx.current.state.map_id, id, subid],
       payload: pf,
     },
     {
       type: DeltaType.UPDATE,
       targetType: typ,
-      target: [ctx.current.state.map_id, id, -1],
+      target: [ctx.current.state.map_id, id, subid],
       payload: p0,
     },
   );
@@ -243,5 +246,65 @@ export function makeDotPanel(
     },
   };
 
+  return action;
+}
+
+export function makeRegionPanel(
+  ctx: MutableRefObject<IEditorContext>,
+  id: number,
+): {
+  type: EditorActions;
+  payload: Partial<IEditorState>;
+} {
+  let v = new GeoJSONVisitor(ctx.current.state.map!.geoJSON, true);
+  v.visitRoot();
+  let feature = v.getFeatureResults().perFeature[id].originalFeature;
+  let action = {
+    type: EditorActions.SET_PANEL,
+    payload: {
+      propertiesPanel: [
+        {
+          name: 'Labels',
+          // TODO: force unundefined
+          items: ctx.current.state.map!.labels.map(
+            (
+              lbl,
+            ): {
+              name: string;
+              input: IInputProps;
+            } => {
+              let cv = 'undefined';
+              let t = feature.properties;
+              console.log(t);
+              console.log('label is ' + lbl);
+              if (t && t[lbl]) {
+                cv = t[lbl].toString();
+              }
+              return {
+                name: lbl,
+                input: {
+                  type: 'text',
+                  short: false,
+                  disabled: false,
+                  value: cv,
+                  onChange(val) {
+                    updateField(
+                      ctx,
+                      id,
+                      TargetType.GEOJSONDATA,
+                      'propertyValue',
+                      cv,
+                      val,
+                      lbl,
+                    );
+                  },
+                },
+              };
+            },
+          ),
+        },
+      ],
+    },
+  };
   return action;
 }

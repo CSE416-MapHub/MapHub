@@ -16,7 +16,7 @@ import { Dispatch } from 'react';
 import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
-import { makeDotPanel } from './property/createPanels';
+import { makeDotPanel, makeRegionPanel } from './property/createPanels';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -80,8 +80,6 @@ export default function () {
       let dotInstance = loadedMap.dotsData[id];
       let dotClass = dotNames.get(dotInstance.dot)!;
       let action = makeDotPanel(editorContextRef, dotClass, dotInstance, id);
-
-      console.log('DISPATCHING FROM DOT');
       editorContextRef.current.dispatch(action);
       return;
     }
@@ -107,7 +105,7 @@ export default function () {
         {
           type: DeltaType.CREATE,
           targetType: TargetType.DOT,
-          target: [editorContextRef.current.state.map_id, targetID, -1],
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
           payload: {
             y: latlng.lat,
             x: latlng.lng,
@@ -118,7 +116,7 @@ export default function () {
         {
           type: DeltaType.DELETE,
           targetType: TargetType.DOT,
-          target: [editorContextRef.current.state.map_id, targetID, -1],
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
           payload: {},
         },
       );
@@ -141,7 +139,11 @@ export default function () {
     handleMapClick(ev);
   });
 
+  let i = 0;
+
   function perFeatureHandler(feature: G.Feature, layer: L.Layer) {
+    let myId = i;
+    i += 1;
     layer.addEventListener('click', ev => {
       if (
         editorContextRef.current.state.selectedTool !== ToolbarButtons.select
@@ -150,38 +152,7 @@ export default function () {
         handleMapClick(ev);
         return;
       }
-      let action = {
-        type: EditorActions.SET_PANEL,
-        payload: {
-          propertiesPanel: [
-            {
-              name: 'Labels',
-              // TODO: force unundefined
-              items: editorContextRef.current.state.map!.labels.map(
-                (
-                  lbl,
-                ): {
-                  name: string;
-                  input: IInputProps;
-                } => {
-                  return {
-                    name: lbl,
-                    input: {
-                      type: 'text',
-                      short: false,
-                      disabled: false,
-                      value: feature.properties
-                        ? feature.properties[lbl].toString()
-                        : 'undefined',
-                      onChange(val) {},
-                    },
-                  };
-                },
-              ),
-            },
-          ],
-        },
-      };
+      let action = makeRegionPanel(editorContextRef, myId);
       editorContextRef.current.dispatch(action);
       L.DomEvent.stopPropagation(ev);
     });

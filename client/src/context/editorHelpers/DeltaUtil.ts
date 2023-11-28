@@ -1,6 +1,7 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { MHJSON } from 'types/MHJSON';
 import { Delta, DeltaPayload, DeltaType, TargetType } from 'types/delta';
+import { GeoJSONVisitor } from './GeoJSONVisitor';
 
 /**
  * Applies a Delta to a map in place
@@ -14,6 +15,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
       break;
     case TargetType.GLOBAL_DOT:
       deltaGlobalDot(map, d);
+      break;
+    case TargetType.GEOJSONDATA:
+      deltaGeoJson(map, d);
       break;
     default:
       throw new Error('uninmplemented');
@@ -45,7 +49,7 @@ const labelToDPKey = (name: string): keyof DeltaPayload => {
     case 'Dot Name':
       return 'name';
   }
-  return 'propertyValue';
+  return name as keyof DeltaPayload;
 };
 
 export function updatePropertiesPanel(
@@ -57,12 +61,7 @@ export function updatePropertiesPanel(
     for (let inp in pp[panel].items) {
       let valAtName = d.payload[labelToDPKey(pp[panel].items[inp].name)];
       if (valAtName !== undefined) {
-        let k;
-        if (typeof valAtName === 'number') {
-          k = valAtName.toString();
-        } else {
-          k = valAtName;
-        }
+        let k = valAtName;
         if (m(k)) {
           pp[panel].items[inp].input.value = k;
         }
@@ -218,6 +217,43 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
         color: p.color,
       });
       break;
+    }
+  }
+}
+
+/**
+ * Applies a Delta to the map in place
+ * @param map
+ * @param d
+ */
+function deltaGeoJson(map: MHJSON, d: Delta) {
+  let v = new GeoJSONVisitor(map.geoJSON, true);
+  v.visitRoot();
+  let targFeature = v.getFeatureResults().perFeature[d.target[1]];
+  if (targFeature === undefined) {
+    throw new Error('Region out of bounds');
+  }
+
+  switch (d.type) {
+    case DeltaType.CREATE:
+    case DeltaType.UPDATE: {
+      let propName = d.target[2];
+      let orig = targFeature.originalFeature;
+      if (!orig.properties) {
+        orig.properties = {};
+      }
+      orig.properties[propName] = d.payload.propertyValue;
+      console.log('ADDING TO PROPERTIES');
+      console.log(orig);
+      break;
+    }
+    case DeltaType.DELETE: {
+      let propName = d.target[2];
+      let orig = targFeature.originalFeature;
+      if (!orig.properties) {
+        orig.properties = {};
+      }
+      delete orig.properties[propName];
     }
   }
 }
