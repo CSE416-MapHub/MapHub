@@ -32,6 +32,7 @@ describe('POST /posts/publish', () => {
     const mockMap = {
       title: 'Blah blah',
       _id: new mongoose.Types.ObjectId(),
+      published: false,
       save: jest.fn(), // Add a mock save function here if needed
     };
 

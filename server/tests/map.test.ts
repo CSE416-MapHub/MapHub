@@ -13,6 +13,7 @@ let mapData = {
   title: 'mapNice',
   owner: new mongoose.Types.ObjectId(),
   mapType: 'categorical',
+  published: false,
   labels: [],
   globalChoroplethData: {
     minIntensity: 0,

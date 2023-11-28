@@ -43,6 +43,7 @@ const PostController = {
       });
 
       map.title = title;
+      map.published = true;
       savedPost = await newPost.save();
       await map.save();
 
