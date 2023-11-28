@@ -8,6 +8,7 @@ const mapSchema = new Schema(
     title: { type: String, required: true },
     owner: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     mapType: { type: String, required: true },
+    published: { type: Boolean, required: true },
     labels: { type: [String], require: true },
     globalChoroplethData: {
       type: {
