@@ -7,6 +7,7 @@ export interface IAuthState {
   user: {
     id: string;
     username: string;
+    profilePic: string;
   } | null;
   error: string;
 }
@@ -27,12 +28,12 @@ export enum AuthActions {
 type AuthAction =
   | {
       type: AuthActions.LOGIN;
-      payload: { user: { id: string; username: string } };
+      payload: { user: { id: string; username: string; profilePic: string } };
     }
   | { type: AuthActions.LOGOUT }
   | {
       type: AuthActions.REGISTER_SUCCESS;
-      payload: { user: { id: string; username: string } };
+      payload: { user: { id: string; username: string; profilePic: string } };
     }
   | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } };
 
@@ -71,7 +72,10 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
 
 // Define helpers for authentication
 export class AuthHelpers {
-  public login(ctx: IAuthContext, user: { id: string; username: string }) {
+  public login(
+    ctx: IAuthContext,
+    user: { id: string; username: string; profilePic: string },
+  ) {
     // Perform login logic, e.g., send a request to your server
     ctx.dispatch({
       type: AuthActions.LOGIN,
@@ -110,6 +114,7 @@ export class AuthHelpers {
             user: {
               id: result.data._id,
               username: user.username,
+              profilePic: result.data.profilePic,
             },
           },
         });
