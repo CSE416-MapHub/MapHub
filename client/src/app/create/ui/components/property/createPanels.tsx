@@ -129,14 +129,14 @@ export function makeDotPanel(
                 disabled: false,
                 value: loadedMap.globalDotDensityData.map(el => el.name),
                 onChange(val: string) {
-                  //   updateField(
-                  //     ctx,
-                  //     id,
-                  //     TargetType.DOT,
-                  //     'dot',
-                  //     loadedMap.globalDotDensityData.map(el => el.name),
-                  //     val,
-                  //   );
+                  updateField(
+                    ctx,
+                    id,
+                    TargetType.DOT,
+                    'dot',
+                    loadedMap.globalDotDensityData.map(el => el.name),
+                    val,
+                  );
                 },
               },
             },

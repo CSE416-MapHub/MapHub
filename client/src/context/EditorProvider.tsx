@@ -183,7 +183,7 @@ class helpers {
         li = d.payload.name;
       }
       let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx.state.propertiesPanel, d),
+        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, d),
       ];
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -212,7 +212,7 @@ class helpers {
       nStack.counterStack.push(nStack.stack.pop()!);
       // build the properties panel
       let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx.state.propertiesPanel, a.undo),
+        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, a.undo),
       ];
       //dispatch it
       ctx.dispatch({
@@ -242,7 +242,7 @@ class helpers {
       nStack.stack.push(nStack.counterStack.pop()!);
       // build the properties panel
       let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx.state.propertiesPanel, a.do),
+        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, a.do),
       ];
       //dispatch it
       ctx.dispatch({
