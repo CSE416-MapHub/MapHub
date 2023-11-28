@@ -1,4 +1,4 @@
-describe('successful registration', () => {
+describe('successful login', () => {
     it('should have valid input params', () => {
       cy.visit('/');
       cy.get('button:contains("Sign In")').click();
@@ -15,7 +15,7 @@ describe('successful registration', () => {
       cy.wait(500)
       cy.get('label#password-label').should('not.have.class', 'Mui-error');
 
-      cy.get('button:contains("Login")').click()
+      cy.get('#sign-in-confirm').click()
 
     }); 
   });
