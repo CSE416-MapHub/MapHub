@@ -26,6 +26,7 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
           width: '48px',
           height: '48px',
         }}
+        className="property-color-input"
       >
         <CircleIcon style={{ color: currColor.hex }} />
       </IconButton>
