@@ -36,7 +36,7 @@ describe('Navigation Bar', () => {
     cy.get('#signin').as('signin-button');
     cy.get('@signin-button').should('be.visible');
     cy.get('@signin-button').contains('Sign In');
-    cy.get('@signin-button').should('have.attr', 'href', '/account/login');
+    cy.get('@signin-button').should('have.attr', 'href', '/account/sign-in');
   });
 
   it('renders a join now filled button link.', () => {

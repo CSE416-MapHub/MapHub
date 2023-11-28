@@ -364,7 +364,7 @@ function CreateAccountForm() {
     if (successSnackbarOpen) {
       // If either snackbar is open, initiate the redirect after a delay
       const timer = setTimeout(() => {
-        router.replace('/account/login');
+        router.replace('/account/sign-in');
       }, 1000); // Adjust the delay as needed
 
       // Cleanup function to clear the timer if the component unmounts

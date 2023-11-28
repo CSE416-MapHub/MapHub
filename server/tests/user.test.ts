@@ -8,6 +8,10 @@ beforeEach(() => {
   jest.setTimeout(6000);
 });
 
+beforeEach(() => {
+  jest.setTimeout(6000);
+});
+
 jest.mock('../models/user-model');
 
 describe('POST /auth/register', () => {

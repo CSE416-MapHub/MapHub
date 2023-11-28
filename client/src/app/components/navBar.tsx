@@ -4,12 +4,15 @@ import clsx from 'clsx';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useContext } from 'react';
 
+import { AuthContext } from '../../context/AuthProvider';
 import NavAvatar from './navAvatar';
 import Button from '../../components/button';
 import styles from '../styles/navBar.module.scss';
 
 function NavBar() {
+  const auth = useContext(AuthContext);
   return (
     <nav
       className={clsx({
@@ -34,7 +37,18 @@ function NavBar() {
         <Link id="discover" href="/discover">
           <Button variant="text">Discover</Button>
         </Link>
-        <NavAvatar />
+        {!auth.state.isLoggedIn ? (
+          <>
+            <Link id="signin" href="/account/sign-in">
+              <Button variant="outlined">Sign In</Button>
+            </Link>
+            <Link id="join-now" href="/account/create">
+              <Button variant="filled">Join Now</Button>
+            </Link>
+          </>
+        ) : (
+          <NavAvatar />
+        )}
       </div>
     </nav>
   );

@@ -244,7 +244,10 @@ function LoginForm() {
   return (
     <div className={styles.container}>
       <Typography className={styles.title} variant="h2">
-        Login
+        Sign In
+      </Typography>
+      <Typography className={styles.body} variant="body1" align="left">
+        Access, create, and share your own maps.
       </Typography>
       <ValidatedTextField
         id="username"
@@ -271,6 +274,7 @@ function LoginForm() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
+          marginBottom: '15px',
         }}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
@@ -280,8 +284,8 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-      <Button variant="filled" onClick={handleLoginClick}>
-        Login
+      <Button id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
+        Sign In
       </Button>
 
       <Snackbar

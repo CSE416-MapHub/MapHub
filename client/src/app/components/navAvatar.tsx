@@ -11,7 +11,6 @@ import MenuItem from '../../components/menuItem';
 
 import styles from '../styles/navAvatar.module.scss';
 import { AuthContext } from 'context/AuthProvider';
-import Link from 'next/link';
 
 function NavAvatar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
@@ -43,22 +42,10 @@ function NavAvatar() {
     } catch (error) {
       console.log('Logout Failed: ', error);
     } finally {
+      authContext.helpers.logout(authContext);
       router.replace('/');
     }
   };
-
-  if (!authContext.state.isLoggedIn) {
-    return (
-      <>
-        <Link id="signin" href="/account/login">
-          <Button variant="outlined">Sign In</Button>
-        </Link>
-        <Link id="join-now" href="/account/create">
-          <Button variant="filled">Join Now</Button>
-        </Link>
-      </>
-    );
-  }
 
   return (
     <>
