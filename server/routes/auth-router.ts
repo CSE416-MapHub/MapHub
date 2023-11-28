@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post('/register', AuthController.registerUser);
 router.get('/users', AuthController.getAllUsers);
+router.get('/exists', AuthController.getExists);
 router.get('/profile-picture', AuthController.getProfilePic);
 router.post('/login', AuthController.loginUser);
 router.post('/logout', AuthController.logoutUser);

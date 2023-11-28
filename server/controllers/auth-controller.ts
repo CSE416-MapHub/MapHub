@@ -146,6 +146,34 @@ export const loginUser = async (req: Request, res: Response) => {
   }
 };
 
+export const getExists = async (request: Request, response: Response) => {
+  try {
+    const { username } = request.body;
+    if (!username) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'Please include the username to check if it exists.',
+      });
+    }
+
+    const user = await User.exists({ username });
+    if (user) {
+      return response
+        .status(200)
+        .json({ success: true, username, exists: true });
+    } else {
+      return response
+        .status(200)
+        .json({ success: true, username, exists: false });
+    }
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorMessage: 'There is an internal error. Please try again.',
+    });
+  }
+};
+
 export const getProfilePic = async (request: Request, response: Response) => {
   try {
     const { id } = request.body;
