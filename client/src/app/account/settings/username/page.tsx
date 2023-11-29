@@ -1,6 +1,6 @@
 'use client';
 
-import { MouseEventHandler, useContext, useState } from 'react';
+import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { AuthActions, AuthContext } from '../../../../context/AuthProvider';
@@ -21,6 +21,12 @@ function EditUsername() {
   const [newUsername, setNewUsername] = useState('');
   const [newUsernameError, setNewUsernameError] = useState(false);
   const [newUsernameHelperText, setNewUsernameHelperText] = useState('');
+
+  useEffect(() => {
+    if (auth.state.isLoggedIn === false) {
+      router.replace('/account/sign-in');
+    }
+  }, [auth.state.isLoggedIn]);
 
   const validate = async (value: string) => {
     if (!/^[\w.]{2,15}\w$/.test(value)) {
@@ -82,7 +88,7 @@ function EditUsername() {
           <SettingsReadTextField
             id="current-username"
             label="Current Username"
-            value={auth.state.user?.username}
+            value={auth.state.user?.username ? auth.state.user.username : ''}
           />
           <SettingsTextField
             id="new-username"
