@@ -1,8 +1,9 @@
 'use client';
 
 import { MouseEventHandler, useContext, useState } from 'react';
+import { useRouter } from 'next/navigation';
 
-import { AuthContext } from '../../../../context/AuthProvider';
+import { AuthActions, AuthContext } from '../../../../context/AuthProvider';
 import AccountAPI from '../../../../api/AccountAPI';
 import Button from '../../../../components/button';
 import SettingsMain from '../components/settingsMain';
@@ -12,9 +13,11 @@ import SettingsReadTextField from '../components/settingsReadTextField';
 import SettingsSection from '../components/settingsSection';
 import SettingsTextField from '../components/settingsTextField';
 import styles from './styles/editUsername.module.scss';
+import { base64StringToBlob } from 'blob-util';
 
 function EditUsername() {
   const auth = useContext(AuthContext);
+  const router = useRouter();
   const [newUsername, setNewUsername] = useState('');
   const [newUsernameError, setNewUsernameError] = useState(false);
   const [newUsernameHelperText, setNewUsernameHelperText] = useState('');
@@ -44,6 +47,27 @@ function EditUsername() {
     }
   };
 
+  const handleSaveClick: MouseEventHandler = async () => {
+    try {
+      const response = await AccountAPI.postUsername(newUsername);
+      auth.dispatch({
+        type: AuthActions.EDIT_USERNAME,
+        payload: {
+          user: {
+            id: response.data.user.id,
+            username: response.data.user.username,
+            profilePic: URL.createObjectURL(
+              base64StringToBlob(response.data.user.profilePic),
+            ),
+          },
+        },
+      });
+      router.push('/account/settings');
+    } catch (error) {
+      // TODO: Notify the user.
+    }
+  };
+
   return (
     <SettingsMain id="edit-username">
       <SettingsHead
@@ -69,7 +93,11 @@ function EditUsername() {
             validate={validate}
             helperText={newUsernameHelperText}
           />
-          <Button className={styles['edit-username__button']} variant="filled">
+          <Button
+            className={styles['edit-username__button']}
+            variant="filled"
+            onClick={handleSaveClick}
+          >
             Save
           </Button>
         </SettingsSection>

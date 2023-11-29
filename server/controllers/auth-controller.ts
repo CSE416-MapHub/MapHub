@@ -222,6 +222,7 @@ export const postUsername = async (request: Request, response: Response) => {
     if (name) {
       return response.status(400).json({
         success: false,
+        errorCode: 1,
         errorMessage:
           'Username already exists. Please choose another username.',
       });
