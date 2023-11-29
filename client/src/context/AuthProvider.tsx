@@ -5,7 +5,7 @@ import React, { Dispatch, createContext, useEffect, useReducer } from 'react';
 import AccountAPI from '../api/AccountAPI';
 
 export interface IAuthState {
-  isLoggedIn: boolean;
+  isLoggedIn?: boolean;
   user: {
     id: string;
     username: string;
@@ -15,7 +15,6 @@ export interface IAuthState {
 }
 
 const initialState: IAuthState = {
-  isLoggedIn: false,
   user: null,
   error: '',
 };
@@ -148,9 +147,9 @@ export class AuthHelpers {
           type: AuthActions.REGISTER_SUCCESS,
           payload: {
             user: {
-              id: result.data._id,
+              id: result.data.user.id,
               username: user.username,
-              profilePic: result.data.profilePic,
+              profilePic: result.data.user.profilePic,
             },
           },
         });
