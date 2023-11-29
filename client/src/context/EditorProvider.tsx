@@ -5,7 +5,11 @@ import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
+import {
+  DELETED_NAME,
+  applyDelta,
+  updatePropertiesPanel,
+} from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -193,8 +197,9 @@ class helpers {
       });
       let nMap = { ...map };
       applyDelta(nMap, d);
-
-      MapAPI.updateMapPayload(d);
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(d);
+      }
       let li = ctx.state.lastInstantiated;
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
@@ -222,7 +227,9 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
-      MapAPI.updateMapPayload(a.do);
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(a.do);
+      }
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
@@ -248,7 +255,10 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.do);
-      MapAPI.updateMapPayload(a.do);
+      if (ctx.state.map_id === GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(a.do);
+      }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
