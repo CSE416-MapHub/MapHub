@@ -144,6 +144,11 @@ export default function () {
     mh.title = mapName;
     mh.labels = optionsProps;
     mh.mapType = mapType;
+    let v = new GeoJSONVisitor(mh.geoJSON, true);
+    v.visitRoot();
+    mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
+      return {};
+    });
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {
       createMapProm = createNewMap(mh);

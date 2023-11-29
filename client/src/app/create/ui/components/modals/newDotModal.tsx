@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
-import PropertyColorInput from '../PropertyColorInput';
 import style from './LabelSelector.module.scss';
 // import { SketchPicker, ColorResult } from 'react-color';
-import { ColorPicker, Hue, Saturation, useColor } from 'react-color-palette';
+import { ColorPicker, useColor } from 'react-color-palette';
 import 'react-color-palette/css';
 
 interface NewDotModalProps {

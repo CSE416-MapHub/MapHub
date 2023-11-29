@@ -1,5 +1,8 @@
-import { MHJSON } from 'types/MHJSON';
-import { Delta, DeltaType, TargetType } from 'types/delta';
+import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
+import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { Delta, DeltaPayload, DeltaType, TargetType } from 'types/delta';
+import { GeoJSONVisitor } from './GeoJSONVisitor';
+import { IEditorContext } from 'context/EditorProvider';
 
 /**
  * Applies a Delta to a map in place
@@ -14,9 +17,100 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.GLOBAL_DOT:
       deltaGlobalDot(map, d);
       break;
+    case TargetType.GEOJSONDATA:
+      deltaGeoJson(map, d);
+      break;
+    case TargetType.REGION:
+      deltaRegion(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
+}
+
+// HACK
+function m(a: any): a is string | Array<string | [string, () => void]> {
+  return true;
+}
+
+// TODO:
+const labelToDPKey = (name: string): keyof DeltaPayload => {
+  switch (name) {
+    case 'X':
+      return 'x';
+    case 'Y':
+      return 'y';
+    case 'Dot':
+      return 'dot';
+    case 'Scale':
+      return 'scale';
+    case 'Dot Color':
+      return 'color';
+    case 'Dot Opacity':
+      return 'opacity';
+    case 'Dot Size':
+      return 'size';
+    case 'Dot Name':
+      return 'name';
+    case 'Feature Color':
+      return 'color';
+  }
+  return name as keyof DeltaPayload;
+};
+
+const updateBlacklist = new Set(['dot', 'svg']);
+
+export function updatePropertiesPanel(
+  ctx: IEditorContext,
+  p: Array<IPropertyPanelSectionProps>,
+  d: Delta,
+): Array<IPropertyPanelSectionProps> {
+  let pp = [...p];
+  let isDotDelta = d.payload.dot !== undefined;
+  let dotClass = {};
+  if (isDotDelta) {
+    dotClass = ctx.state.map!.globalDotDensityData.filter(dd => {
+      return dd.name === d.payload.dot;
+    })[0];
+  }
+
+  let dpayload = {
+    ...d.payload,
+    ...dotClass,
+  };
+
+  if (d.type === DeltaType.UPDATE) {
+    for (let panel in pp) {
+      for (let inp in pp[panel].items) {
+        let key = labelToDPKey(pp[panel].items[inp].name);
+        let valAtName = dpayload[key];
+        if (valAtName !== undefined && !updateBlacklist.has(key)) {
+          let k = valAtName;
+          if (m(k)) {
+            pp[panel].items[inp].input.value = k;
+          }
+        }
+      }
+    }
+  } else if (d.type === DeltaType.CREATE) {
+    console.log(d);
+    for (let panel in pp) {
+      for (let inp in pp[panel].items) {
+        let key = labelToDPKey(pp[panel].items[inp].name);
+        console.log(pp[panel].items[inp]);
+        console.log(key);
+        if (key === 'dot') {
+          let valAtName = d.payload['name'];
+          console.log('VAL ' + valAtName);
+          if (m(valAtName)) {
+            (pp[panel].items[inp].input.value as Array<string>).push(valAtName);
+          }
+        }
+      }
+    }
+  }
+
+  return pp;
 }
 
 /**
@@ -95,7 +189,19 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
         throw new Error('Target index out of bounds');
       }
       let targ = map.globalDotDensityData[d.target[1]];
+
       targ.name = d.payload.name ?? targ.name;
+      // if the name changed, we have to change the name of each dot
+      if (d.payload.name) {
+        let oldName = targ.name;
+        map.dotsData = map.dotsData.map(di => {
+          if (di.dot === oldName) {
+            di.dot = d.payload.name!;
+          }
+          return di;
+        });
+      }
+
       targ.size = d.payload.size ?? targ.size;
       targ.color = d.payload.color ?? targ.color;
       targ.opacity = d.payload.opacity ?? targ.opacity;
@@ -108,7 +214,14 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
       }
       // TODO: is this the smartest thing to do?
       // map.globalDotDensityData.splice(d.target[1], 1);
+      let targName = map.globalDotDensityData[d.target[1]].name;
       map.globalDotDensityData[d.target[1]].name = DELETED_NAME;
+      map.dotsData = map.dotsData.map(d => {
+        if (d.dot === targName) {
+          d.dot = DELETED_NAME;
+        }
+        return d;
+      });
       break;
     }
 
@@ -150,4 +263,69 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
   }
 }
 
+/**
+ * Applies a Delta to the map in place
+ * @param map
+ * @param d
+ */
+function deltaGeoJson(map: MHJSON, d: Delta) {
+  let v = new GeoJSONVisitor(map.geoJSON, true);
+  v.visitRoot();
+  let targFeature = v.getFeatureResults().perFeature[d.target[1]];
+  if (targFeature === undefined) {
+    throw new Error('Region out of bounds');
+  }
+
+  switch (d.type) {
+    case DeltaType.CREATE:
+    case DeltaType.UPDATE: {
+      let propName = d.target[2];
+      let orig = targFeature.originalFeature;
+      if (!orig.properties) {
+        orig.properties = {};
+      }
+      orig.properties[propName] = d.payload.propertyValue;
+      break;
+    }
+    case DeltaType.DELETE: {
+      let propName = d.target[2];
+      let orig = targFeature.originalFeature;
+      if (!orig.properties) {
+        orig.properties = {};
+      }
+      delete orig.properties[propName];
+    }
+  }
+}
+
+function deltaRegion(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE:
+    case DeltaType.CREATE: {
+      map.regionsData = [...map.regionsData];
+      if (d.payload.color) {
+        map.regionsData[d.target[1]].color = d.payload.color;
+      }
+      if (d.payload.intensity) {
+        map.regionsData[d.target[1]].intensity = d.payload.intensity;
+      }
+      if (d.payload.category) {
+        map.regionsData[d.target[1]].category = d.payload.category;
+      }
+      break;
+    }
+    case DeltaType.DELETE: {
+      if (d.payload.color) {
+        delete map.regionsData[d.target[1]].color;
+      }
+      if (d.payload.intensity) {
+        delete map.regionsData[d.target[1]].intensity;
+      }
+      if (d.payload.category) {
+        delete map.regionsData[d.target[1]].category;
+      }
+      break;
+    }
+  }
+}
 export const DELETED_NAME = '_#DEL';

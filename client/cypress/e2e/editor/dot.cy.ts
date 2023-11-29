@@ -27,5 +27,8 @@ describe('i can use the dot tool', () => {
     cy.get('.MuiBackdrop-invisible').last().click();
     cy.get('#toolbar-point').click();
     cy.get("h2:contains('New Dot')");
+    cy.get("button:contains('Confirm')").click();
+    cy.get('.Map_mapContainer__AmIRQ').first().click('center');
+    cy.get('.map-dot');
   });
 });

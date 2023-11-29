@@ -3,7 +3,8 @@
 import { IconButton, Popover } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
 import { useState } from 'react';
-import { ColorResult, SketchPicker } from 'react-color';
+import { ColorPicker, IColor, useColor } from 'react-color-palette';
+import 'react-color-palette/css';
 import style from './Property.module.scss';
 
 export interface ColorInputProps {
@@ -12,13 +13,8 @@ export interface ColorInputProps {
 }
 
 export default function ({ color, colorChangeHandler }: ColorInputProps) {
-  const [currColor, setColor] = useState<string>(color);
+  const [currColor, setColor] = useColor(color);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
-  function handleChange(c: ColorResult) {
-    setColor(c.hex);
-    colorChangeHandler(c.hex);
-  }
 
   return (
     <>
@@ -30,8 +26,9 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
           width: '48px',
           height: '48px',
         }}
+        className="property-color-input"
       >
-        <CircleIcon style={{ color: currColor }} />
+        <CircleIcon style={{ color: currColor.hex }} />
       </IconButton>
       <Popover
         open={anchorEl !== null}
@@ -42,9 +39,17 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
         }}
         onClose={() => {
           setAnchorEl(null);
+          colorChangeHandler(currColor.hex);
         }}
       >
-        <SketchPicker onChange={handleChange} color={currColor} />
+        <ColorPicker
+          height={100}
+          color={currColor}
+          onChange={setColor}
+          hideAlpha={true}
+          hideInput={['rgb', 'hsv']}
+        />
+        {/* <SketchPicker onChange={handleChange} color={currColor} /> */}
       </Popover>
     </>
   );
