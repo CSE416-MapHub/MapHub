@@ -8,7 +8,10 @@ function SettingsPane({
   ...props
 }: HTMLAttributes<HTMLElement>) {
   return (
-    <Box className={`${styles['settings__pane']} ${className}`} {...props}>
+    <Box
+      className={`${styles['settings__pane']} ${className ? className : ''}`}
+      {...props}
+    >
       {children}
     </Box>
   );

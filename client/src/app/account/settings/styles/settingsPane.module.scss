@@ -10,11 +10,9 @@
   flex-direction: column;
   gap: shape.$extra-large;
 
-  width: calc(100% - 48px);
-  height: 80%;
+  width: calc(100% - 56px);
+  min-height: 80%;
   padding: shape.$extra-large;
 
   background-color: colors.$surface-container;
-
-  overflow: scroll;
 }
