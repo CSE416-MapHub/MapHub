@@ -137,16 +137,51 @@ class GlobalSymbolHandler {
 class GlobalDotHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a global dot to the map
+    const payload = delta.payload;
+    if (!payload.name) throw new Error('Name is required');
+    if (!payload.opacity) throw new Error('Opacity is required');
+    if (!payload.size) throw new Error('Size is required');
+    if (!payload.color) throw new Error('Color is required');
+
+    map.globalDotDensityData.push({
+      name: payload.name,
+      opacity: payload.opacity,
+      size: payload.size,
+      color: payload.color,
+    });
     return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
-    // Logic for updating a global dot on the map
+    const payload = delta.payload;
+
+    if (payload.name !== undefined) {
+      const originalName = map.globalDotDensityData[delta.target[1]].name;
+
+      map.dotsData.forEach((dot: any) => {
+        if (dot.dot === originalName) {
+          dot.name = payload.name;
+        }
+      });
+
+      map.globalDotDensityData[delta.target[1]].name = payload.name;
+    }
+    if (payload.opacity !== undefined) {
+      map.globalDotDensityData[delta.target[1]].opacity = payload.opacity;
+    }
+    if (payload.size !== undefined) {
+      map.globalDotDensityData[delta.target[1]].size = payload.size;
+    }
+    if (payload.color !== undefined) {
+      map.globalDotDensityData[delta.target[1]].color = payload.color;
+    }
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global dot from the map
+
+    map.globalDotDensityData.splice(delta.target[1], 1);
     return map;
   }
 }

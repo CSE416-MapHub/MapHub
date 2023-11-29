@@ -75,6 +75,7 @@ function createMockMap(
 const userId = mapData.owner;
 
 beforeEach(() => {
+  jest.clearAllMocks();
   jest.setTimeout(6000);
   jest.spyOn(userModel, 'findById').mockResolvedValue({ id: userId });
 });
@@ -299,6 +300,7 @@ describe('/map/payload', () => {
         ],
         0.7,
       ),
+      geoJSON: 'somepath/path/now',
       dotsData: [
         {
           x: 10,
@@ -323,9 +325,9 @@ describe('/map/payload', () => {
 
     jest
       .spyOn(mapModel.prototype, 'save')
-      .mockImplementation(function (this: MapDocument) {
-        console.log('MOCKING THIS?', JSON.stringify(this));
-        return Promise.resolve(this);
+      .mockImplementation(async function (this: MapDocument) {
+        console.log('MOCKING THIS?', this.title);
+        return this.toObject();
       });
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
@@ -339,25 +341,25 @@ describe('/map/payload', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(true);
-    // expect(response.body).toHaveProperty('map');
-    // expect(response.body.map.dotsData).toBe([
-    //   {
-    //     x: 10,
-    //     y: 20,
-    //     scale: 1,
-    //     dot: 'IM DOT',
-    //   },
-    //   {
-    //     x: 2,
-    //     y: 2,
-    //     scale: 1,
-    //     dot: 'SOME DOT 2',
-    //   },
-    // ]);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        dot: 'IM DOT',
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'SOME DOT 2',
+      },
+    ]);
   });
 });
 
 afterEach(() => {
   // Reset mock after the test
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
 });

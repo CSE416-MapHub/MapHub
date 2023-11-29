@@ -9,11 +9,15 @@ const mockUserID = new mongoose.Types.ObjectId();
 
 beforeEach(() => {
   jest.setTimeout(6000);
+  jest.clearAllMocks();
+
   jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
 });
 afterEach(() => {
-  jest.restoreAllMocks();
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
+
 jest.mock('../models/post-model');
 
 describe('POST /posts/publish', () => {
