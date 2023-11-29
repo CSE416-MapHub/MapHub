@@ -65,9 +65,15 @@ const PostController = {
       // const userId = (req as any).userId;
       console.log(req.query.id);
 
-      const posts = await Post.find({ id: req.query.id }).exec();
 
-      console.log('These are the posts', JSON.stringify(posts), posts.length);
+      const posts = await Post.find({ owner: req.params.userId }).exec();
+
+      console.log(
+        'Getting posts by user',
+        req.params.userId,
+        JSON.stringify(posts),
+        posts.length,
+      );
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
@@ -120,7 +126,11 @@ const PostController = {
 
       const posts = await Post.find(queryCondition).exec();
 
-      console.log('These are the posts', JSON.stringify(posts), posts.length);
+      console.log(
+        'These are the posts by the search',
+        JSON.stringify(posts),
+        posts.length,
+      );
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {

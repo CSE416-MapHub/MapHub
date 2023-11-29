@@ -141,6 +141,15 @@ describe('GET /posts/user', () => {
       },
       {
         _id: new mongoose.Types.ObjectId(),
+        title: 'some map thats kinda cool',
+        description: 'Description for map',
+        map: new mongoose.Types.ObjectId(),
+        owner: new mongoose.Types.ObjectId(),
+        comments: [], // Assuming no comments
+        likes: [], // Assuming no likes
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
         title: 'han dynasty',
         description: 'Description for Post 2',
         map: new mongoose.Types.ObjectId(),
@@ -150,26 +159,43 @@ describe('GET /posts/user', () => {
       },
     ];
 
-    const mapData = {
-      _id: new mongoose.Types.ObjectId(),
-    };
+    const mockMaps = [
+      {
+        _id: mockPosts[0].map,
+      },
+      {
+        _id: mockPosts[2].map,
+      },
+      {
+        _id: mockPosts[1].map,
+      },
+    ];
 
-    const queryMock: any = {
-      exec: jest.fn().mockResolvedValue(mockPosts),
-    };
-    const username = 'randUsername';
+    jest.spyOn(postModel, 'find').mockImplementation(
+      () =>
+        ({
+          exec: jest.fn().mockImplementation(() => {
+            return Promise.resolve(
+              mockPosts.filter(
+                post => post.owner.toString() === mockUserID.toString(),
+              ),
+            );
+          }),
+        } as any),
+    );
 
-    jest.spyOn(postModel, 'find').mockImplementation(() => queryMock);
-    jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
-      const queryLikeObject = {
-        exec: jest.fn().mockResolvedValue(mapData),
-      };
-      return queryLikeObject as any;
-    });
+    jest
+      .spyOn(mapModel, 'findById')
+      .mockImplementation((id: mongoose.Types.ObjectId | string) => {
+        const result = mockMaps.find(
+          map => map._id.toString() === id.toString(),
+        );
+        return { exec: jest.fn().mockResolvedValue(result) } as any;
+      });
 
     // Make the GET request
     const response = await supertest(app)
-      .get(`/posts/user?username=${username}`)
+      .get(`/posts/user/${mockUserID}`)
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
 
     // Assertions
@@ -181,6 +207,12 @@ describe('GET /posts/user', () => {
       JSON.stringify(response.body.posts),
     );
     expect(response.body.posts[0].title).toEqual('aLL long in War ku dynasty');
+    expect(response.body.posts[0].mapID.toString()).toEqual(
+      mockMaps[0]._id.toString(),
+    );
     expect(response.body.posts[1].title).toEqual('han dynasty');
+    expect(response.body.posts[1].mapID.toString()).toEqual(
+      mockMaps[1]._id.toString(),
+    );
   });
 });
