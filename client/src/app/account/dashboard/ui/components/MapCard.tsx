@@ -2,6 +2,7 @@ import { Typography } from '@mui/material';
 import style from './mapcard.module.scss';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export interface MapCardProps {
   published: boolean;
@@ -29,13 +30,25 @@ export default function (props: MapCardProps) {
   let dataurl = props.preview
     ? `data:image/png;base64,${toBase64(props.preview)}`
     : placeholderImage;
+
+  const router = useRouter();
+  const handleMapCardClick = () => {
+    const published = props.published;
+
+    if(published) {
+      const route = '/discover/' + props.id;
+      router.push(route);
+    } else {
+      console.log('unpublished')
+      const queryId = props.id
+      const route = '/create?mapid=' + queryId;
+      router.push(route);
+    }
+  }
   return (
-    <Link
-      href={`/discover/${props.id}`}
-      style={{ textDecoration: 'none', color: 'inherit' }}
-    >
       <div
         className={style['map-card-container']}
+        onClick={handleMapCardClick}
         style={
           !props.published
             ? {
@@ -78,6 +91,5 @@ export default function (props: MapCardProps) {
           </div>
         </div>
       </div>
-    </Link>
   );
 }

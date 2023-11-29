@@ -3,7 +3,7 @@
 import { TextField, Typography } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
@@ -22,9 +22,10 @@ import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
-import { createNewMap } from './helpers/EditorAPICalls';
+import { createNewMap, loadMapById } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
+import { useRouter, useSearchParams } from 'next/navigation';
 
 // A list of all accepted file types.
 const accept: string =
@@ -134,6 +135,9 @@ export default function () {
     'Christians',
   ];
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   function onImportConfirm(
     mapName: string,
     mapType: MapType,
@@ -156,6 +160,8 @@ export default function () {
       createMapProm = Promise.resolve(GUEST_MAP_ID);
     }
     createMapProm.then(id => {
+      // router.push('?mapid=' + id);
+      console.log(mh);
       editorContext.helpers.setLoadedMap(editorContext, id, mh);
       setOpenImport(false);
     });
@@ -167,6 +173,21 @@ export default function () {
   function onMultiMapConfirm(optionsProps: string[]) {
     setOpenMapLabelModal(false);
   }
+
+  useEffect(() => {
+    const mapId = searchParams.get('mapid') as string;
+    console.log(mapId);
+    let getMap: Promise<MHJSON>
+    if (authContext.state.isLoggedIn) {
+
+      getMap = loadMapById(mapId);
+      getMap.then(map => {
+        console.log(map);
+        editorContext.helpers.setLoadedMap(editorContext, mapId, map);
+        setOpenImport(false);
+      })
+    }
+  }, [searchParams]);
 
   return (
     <div className={styles['ribbon-container']}>
