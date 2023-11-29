@@ -674,6 +674,19 @@ describe('/map/map update map by id', () => {
     expect(response.body).toHaveProperty('map');
     expect(response.body.map.title).toEqual(mapPayload.title);
   });
+  it('update title of map', async () => {
+    const mapPayload = { title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Map ID is required');
+  });
 });
 
 afterEach(() => {
