@@ -9,11 +9,6 @@
     "outDir": "./build",
     "moduleResolution": "Node"
   },
-  "include": [
-    "index.ts",
-    "tests/",
-    "serverControls/serverControl.ts",
-    "./geojsonhint.d.ts"
-  ],
+  "include": ["index.ts", "tests/", "serverControls/serverControl.ts"],
   "exclude": ["node_modules"]
 }

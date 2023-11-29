@@ -7,7 +7,10 @@ const router = express.Router();
 router.post('/create', auth.verify, MapController.createMap);
 
 // Handles updating an existing map request
-router.put('/map/', auth.verify, MapController.updateMap);
+router.put('/map/payload', auth.verify, MapController.updateMapPayload);
+
+// Handles updating an existing map
+router.put('/map/', auth.verify, MapController.updateMapById);
 
 // Handles a delete a map request
 router.delete('/map/:mapId', auth.verify, MapController.deleteMapById);

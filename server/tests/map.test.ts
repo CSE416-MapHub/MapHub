@@ -7,6 +7,15 @@ import auth from '../auth/index';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
+import {
+  DeltaType,
+  TargetType,
+  Delta,
+  DeltaPayload,
+} from '../controllers/helperFunctions/mapHelper';
+import { mock } from 'node:test';
+
+type MapDocument = typeof mapModel.prototype;
 
 let mapData = {
   _id: new mongoose.Types.ObjectId(),
@@ -62,32 +71,6 @@ function createMockMap(
     updatedAt: Math.floor(new Date().getTime() * timeOrder),
   };
 }
-//Map Three, Map two, map 1
-const mockMaps = [
-  createMockMap('Map One', 'Point', [-73.935242, 40.73061], 0.5),
-  createMockMap(
-    'Map Two',
-    'LineString',
-    [
-      [-73.935242, 40.73061],
-      [-74.935242, 41.73061],
-    ],
-    0.6,
-  ),
-  createMockMap(
-    'Map Three',
-    'Polygon',
-    [
-      [
-        [-73.935242, 40.73061],
-        [-74.935242, 41.73061],
-        [-74.935242, 39.73061],
-        [-73.935242, 40.73061],
-      ],
-    ],
-    0.7,
-  ),
-];
 
 const userId = mapData.owner;
 
@@ -205,6 +188,33 @@ describe('GET /map/:mapID', () => {
 });
 
 describe('GET /map/recents/', () => {
+  //Map Three, Map two, map 1
+  const mockMaps = [
+    createMockMap('Map One', 'Point', [-73.935242, 40.73061], 0.5),
+    createMockMap(
+      'Map Two',
+      'LineString',
+      [
+        [-73.935242, 40.73061],
+        [-74.935242, 41.73061],
+      ],
+      0.6,
+    ),
+    createMockMap(
+      'Map Three',
+      'Polygon',
+      [
+        [
+          [-73.935242, 40.73061],
+          [-74.935242, 41.73061],
+          [-74.935242, 39.73061],
+          [-73.935242, 40.73061],
+        ],
+      ],
+      0.7,
+    ),
+  ];
+
   beforeEach(() => {
     // Setup specific mock for this test
     let sortedAndLimitedData = [...mockMaps];
@@ -270,6 +280,80 @@ describe('GET /map/recents/', () => {
     expect(response.body.errorMessage).toBe(
       'Number of maps must be a positive number',
     );
+  });
+});
+
+describe('/map/payload', () => {
+  it('dot create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, -1, -1],
+      payload: {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'SOME DOT 2',
+      },
+    };
+
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: MapDocument) {
+        console.log('MOCKING THIS?', JSON.stringify(this));
+        return Promise.resolve(this);
+      });
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    // expect(response.body).toHaveProperty('map');
+    // expect(response.body.map.dotsData).toBe([
+    //   {
+    //     x: 10,
+    //     y: 20,
+    //     scale: 1,
+    //     dot: 'IM DOT',
+    //   },
+    //   {
+    //     x: 2,
+    //     y: 2,
+    //     scale: 1,
+    //     dot: 'SOME DOT 2',
+    //   },
+    // ]);
   });
 });
 

@@ -6,8 +6,9 @@ import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
-import { hint } from '@mapbox/geojsonhint';
+import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
+import { type } from 'os';
 
 const readFile = util.promisify(fs.readFile); // Promisify readFile for use with async/await
 
@@ -60,13 +61,12 @@ const MapController = {
     if (!title || !mapType || !geoJSON) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
-    const errors = hint(geoJSON);
-    console.log('ERRORS WITH GEOJSON', errors);
 
-    if (errors.length > 0) {
+    if (gjv.valid(geoJSON)) {
+      console.log('This is a valid GeoJSON object.');
+    } else {
       return res.status(400).json({
         error: 'Invalid GeoJSON data',
-        details: errors,
       });
     }
 
@@ -140,14 +140,39 @@ const MapController = {
     }
   },
 
-  updateMap: async (req: Request, res: Response) => {
+  updateMapPayload: async (req: Request, res: Response) => {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
     //validating the requests
+
+    if (!delta.type) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Delta Type not found' });
+    }
+
+    if (!delta.targetType) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Target Type not found' });
+    }
+
+    if (!delta.target || delta.target.length != 3) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Target not found/not equal to 3' });
+    }
+
+    if (!delta.payload) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Payload not found' });
+    }
+
     try {
       const mapId = delta.target[0];
-      console.log('THIS IS THE MAPID', JSON.stringify(req.params));
+      console.log('THIS IS THE MAPID', JSON.stringify(mapId));
 
       if (!mapId) {
         return res
@@ -164,6 +189,7 @@ const MapController = {
           .status(404)
           .json({ success: false, message: 'Map not found' });
       }
+
       if (map.owner.toString() !== userId.toString()) {
         return res
           .status(401)
@@ -192,11 +218,16 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      const updatedMap = await map.save();
-      return res.status(200).json({ success: true });
+      const updatedMap = await new Map(map).save();
+      console.log('UPDATED MAP', JSON.stringify(updatedMap));
+      return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });
     }
+  },
+
+  updateMapById: async (req: Request, res: Response) => {
+    // Implementation of deleting a map by ID
   },
 
   deleteMapById: async (req: Request, res: Response) => {
