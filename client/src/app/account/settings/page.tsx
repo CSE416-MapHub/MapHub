@@ -1,7 +1,8 @@
 'use client';
 
-import { useContext } from 'react';
 import { Box, Typography } from '@mui/material';
+import { useRouter } from 'next/navigation';
+import { useContext, useEffect } from 'react';
 
 import { AuthContext } from '../../../context/AuthProvider';
 import Avatar from 'components/avatar';
@@ -13,9 +14,14 @@ import TextField from '../../../components/textField';
 import styles from './styles/settings.module.scss';
 
 function Settings() {
-  const {
-    state: { user },
-  } = useContext(AuthContext);
+  const auth = useContext(AuthContext);
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!auth.state.isLoggedIn) {
+      router.replace('/account/sign-in');
+    }
+  }, []);
 
   return (
     <main id="settings" className={styles['settings__box']}>
@@ -52,7 +58,7 @@ function Settings() {
             className={styles['settings__text-field']}
             variant="outlined"
             label="Username"
-            value={user ? user.username : ''}
+            value={auth.state.user ? auth.state.user.username : ''}
             endAdornment={<Icon type="solid" name="pencil" />}
           />
         </Box>
