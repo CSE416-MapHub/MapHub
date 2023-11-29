@@ -148,7 +148,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const getExists = async (request: Request, response: Response) => {
   try {
-    const { username } = request.body;
+    const { username } = request.query;
     if (!username) {
       return response.status(400).json({
         success: false,
@@ -200,6 +200,56 @@ export const getProfilePic = async (request: Request, response: Response) => {
     return response.status(500).json({
       errorMessage:
         'There has been an internal server error. Please try again. ',
+    });
+  }
+};
+
+export const postUsername = async (request: Request, response: Response) => {
+  try {
+    const { username } = request.body;
+    const { userId } = request as any;
+
+    // Checks if the request is well-formed.
+    if (!username) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'Please include the new username to update the user.',
+      });
+    }
+
+    // Checks if the username already exists.
+    const name = await User.exists({ username });
+    if (name) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        errorMessage:
+          'Username already exists. Please choose another username.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'User does not exist.',
+      });
+    }
+
+    user.username = username;
+    user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorMessage: 'There has been an internal error. Please try again later.',
     });
   }
 };

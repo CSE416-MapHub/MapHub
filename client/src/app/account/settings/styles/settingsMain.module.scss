@@ -1,0 +1,14 @@
+@use 'colors';
+
+.settings__main {
+  display: grid;
+  grid-template-columns: 2fr 3fr 3fr 2fr;
+  grid-template-rows: 1fr;
+  grid-template-areas:
+    ". head pane .";
+  align-items: center;
+
+  height: calc(100% - 120px);
+
+  color: colors.$on-surface;
+}
