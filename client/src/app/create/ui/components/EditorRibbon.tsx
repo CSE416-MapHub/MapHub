@@ -1,6 +1,6 @@
 'use client';
 
-import { Typography } from '@mui/material';
+import { TextField, Typography } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
 import { useContext, useRef, useState } from 'react';
@@ -24,6 +24,7 @@ import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
 import { createNewMap } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
+import IconButton from 'components/iconButton';
 
 // A list of all accepted file types.
 const accept: string =
@@ -104,12 +105,25 @@ export default function () {
     setOpenMenu(null);
   }
 
+  const handleEditMapTitle = () => {
+    setEditingTitle(true);
+    setUpdatedTitle(editorContext.state.map?.title || '');
+  };
+
+  const handleBlur = () => {
+    // Update the map title and close editing mode
+    editorContext.helpers.changeTitle(editorContext, updatedTitle);
+    setEditingTitle(false);
+  };
+
   //--------- Modal States ---------
   const [openImport, setOpenImport] = useState(false);
   const [openChoropleth, setOpenChoropleth] = useState(false);
   const [openMapLabelModal, setOpenMapLabelModal] = useState(false);
   const [openRecentMapModal, setOpenRecentMapModal] = useState(false);
   const [openPublishMapModal, setOpenPublishMapModal] = useState(false);
+  const [editingTitle, setEditingTitle] = useState(false);
+  const [updatedTitle, setUpdatedTitle] = useState('');
   const selectedOptions = [
     'Country Name',
     'Languages',
@@ -130,8 +144,11 @@ export default function () {
     mh.title = mapName;
     mh.labels = optionsProps;
     mh.mapType = mapType;
-    console.log('SAVING');
-    console.log(mh);
+    let v = new GeoJSONVisitor(mh.geoJSON, true);
+    v.visitRoot();
+    mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
+      return {};
+    });
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {
       createMapProm = createNewMap(mh);
@@ -194,14 +211,39 @@ export default function () {
           Map
         </Button>
       </div>
-      <div className={styles['map-title']}>
-        <Typography variant="title">
-          {editorContext.state.map?.title ?? 'My Map'}
-        </Typography>
+      <div className={styles['map-title']} onDoubleClick={handleEditMapTitle}>
+        {editingTitle ? (
+            <TextField
+              id="outlined-basic" 
+              variant="outlined" 
+              value={updatedTitle}
+              onChange={(e) => setUpdatedTitle(e.target.value)}
+              onBlur={handleBlur}
+              size='small'
+            />
+        ) : (
+          <Typography variant="title">
+            {editorContext.state.map?.title ?? ''}
+          </Typography>
+        )}
       </div>
       <div className={styles['undo-redo']}>
-        <Undo fontSize="medium" />
-        <Redo fontSize="medium" />
+        <IconButton
+          iconName={'Undo'}
+          onClick={() => {
+            editorContext.helpers.undo(editorContext);
+          }}
+        >
+          <Undo fontSize="medium" />
+        </IconButton>
+        <IconButton
+          iconName={'Redo'}
+          onClick={() => {
+            editorContext.helpers.redo(editorContext);
+          }}
+        >
+          <Redo fontSize="medium" />
+        </IconButton>
       </div>
       {openMenu ? <EditorMenu {...openMenu} /> : <></>}
       <ImportModal

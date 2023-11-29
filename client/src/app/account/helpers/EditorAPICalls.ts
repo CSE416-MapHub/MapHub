@@ -6,7 +6,6 @@
 
 import MapAPI from 'api/MapAPI';
 import PostAPI from 'api/PostAPI';
-import { MHJSON } from 'types/MHJSON';
 
 /**
  * Validate that an object is a recents object
@@ -61,7 +60,7 @@ export function getRecentUnpublished(): Promise<
  *
  * @returns The 10 most recently published maps
  */
-export function getRecentPublished(): Promise<
+export function getRecentPublished(userId: string): Promise<
   Array<{
     title: string;
     description: string;
@@ -70,10 +69,10 @@ export function getRecentPublished(): Promise<
     png: Buffer;
   }>
 > {
-  return PostAPI.getAllUserPosts().then(res => {
+  return PostAPI.getAllUserPosts(userId).then(res => {
     if (res.status === 200) {
       let maps = res.data.posts;
-      console.log('GET AL USEWR POSTS');
+      console.log('GET AL USER POSTS');
       console.log(res.data);
       // if (typeof maps !== 'object') {
       //   throw new Error(`Unexpected maps type ` + typeof maps);

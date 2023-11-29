@@ -12,6 +12,7 @@ const PostController = {
   createPost: async (req: Request, res: Response) => {
     const { mapID, title, description } = req.body;
     const userId = (req as any).userId;
+
     console.log(
       'Starting the publish of',
       title,
@@ -26,6 +27,7 @@ const PostController = {
     let newPost;
 
     const map = await Map.findById(mapID).exec();
+
     if (!map) {
       return res.status(404).json({ success: false, message: 'Map not found' });
     }
@@ -41,7 +43,10 @@ const PostController = {
       });
 
       map.title = title;
+      map.published = true;
+
       savedPost = await newPost.save();
+      console.log(savedPost);
       await map.save();
 
       res.status(200).json({
@@ -57,11 +62,16 @@ const PostController = {
   },
   getUserPosts: async (req: Request, res: Response) => {
     try {
-      const userId = (req as any).userId;
+      // const userId = (req as any).userId;
 
-      const posts = await Post.find({ owner: userId }).exec();
+      const posts = await Post.find({ owner: req.params.userId }).exec();
 
-      console.log('These are the posts', JSON.stringify(posts), posts.length);
+      console.log(
+        'Getting posts by user',
+        req.params.userId,
+        JSON.stringify(posts),
+        posts.length,
+      );
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
@@ -114,12 +124,18 @@ const PostController = {
 
       const posts = await Post.find(queryCondition).exec();
 
-      console.log('These are the posts', JSON.stringify(posts), posts.length);
+      console.log(
+        'These are the posts by the search',
+        JSON.stringify(posts),
+        posts.length,
+      );
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
+
             const map = await Map.findById(post.map).exec();
+
             console.log(JSON.stringify(map));
             const png = map ? await convertJsonToPng(map) : null;
 

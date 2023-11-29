@@ -1,3 +1,5 @@
+'use client';
+
 import React, { Dispatch, createContext, useReducer } from 'react';
 
 import AccountAPI from '../api/AccountAPI';
@@ -7,12 +9,15 @@ export interface IAuthState {
   user: {
     id: string;
     username: string;
+    profilePic: string;
   } | null;
+  error: string;
 }
 
 const initialState: IAuthState = {
   isLoggedIn: false,
   user: null,
+  error: '',
 };
 
 export enum AuthActions {
@@ -20,26 +25,35 @@ export enum AuthActions {
   LOGOUT,
   REGISTER_SUCCESS,
   REGISTER_FAILURE,
+  EDIT_USERNAME,
 }
 
 type AuthAction =
   | {
       type: AuthActions.LOGIN;
-      payload: { user: { id: string; username: string } };
+      payload: { user: { id: string; username: string; profilePic: string } };
     }
   | { type: AuthActions.LOGOUT }
   | {
       type: AuthActions.REGISTER_SUCCESS;
-      payload: { user: { id: string; username: string } };
+      payload: { user: { id: string; username: string; profilePic: string } };
     }
-  | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } };
+  | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } }
+  | {
+      type: AuthActions.EDIT_USERNAME;
+      payload: {
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        };
+      };
+    };
 
 // Define the reducer
 function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
-  console.log('reducing');
   switch (action.type) {
     case AuthActions.LOGIN:
-      console.log('MAKING NEW STATE');
       return {
         ...prev,
         isLoggedIn: true,
@@ -62,6 +76,12 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
         ...prev,
         isLoggedIn: false,
         user: null,
+        error: action.payload.error,
+      };
+    case AuthActions.EDIT_USERNAME:
+      return {
+        ...prev,
+        user: action.payload.user,
       };
     default:
       return prev;
@@ -69,11 +89,12 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
 }
 
 // Define helpers for authentication
-class AuthHelpers {
-  public login(ctx: IAuthContext, user: { id: string; username: string }) {
+export class AuthHelpers {
+  public login(
+    ctx: IAuthContext,
+    user: { id: string; username: string; profilePic: string },
+  ) {
     // Perform login logic, e.g., send a request to your server
-    console.log('logging in helper');
-    console.log(ctx);
     ctx.dispatch({
       type: AuthActions.LOGIN,
       payload: { user },
@@ -111,6 +132,7 @@ class AuthHelpers {
             user: {
               id: result.data._id,
               username: user.username,
+              profilePic: result.data.profilePic,
             },
           },
         });

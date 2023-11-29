@@ -8,24 +8,60 @@ import {
   Paper,
   Popover,
 } from '@mui/material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import CircleIcon from '@mui/icons-material/Circle';
 import styles from './Property.module.scss';
 import Button from 'components/button';
-import NewDotModal from './modals/newDotModal';
+import NewDotModal from '../modals/newDotModal';
+import { EditorContext } from 'context/EditorProvider';
+import { DeltaType, TargetType } from 'types/delta';
 
 export interface PropertyDotInputProps {
   items: Array<string>;
+  onChange: (val: string) => void;
 }
 
-export default function ({ items }: PropertyDotInputProps) {
+export default function ({ items, onChange }: PropertyDotInputProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openDotModal, setOpenDotModal] = useState(false);
+  const editorContext = useContext(EditorContext);
+  function handleClick(name: string) {
+    onChange(name);
+  }
 
-  function handleClick(name: string) {}
-
-  function handleAdd() {}
-  function onConfirmDotModal() {}
+  function onConfirmDotModal(
+    name: string,
+    opacity: number,
+    size: number,
+    color: string,
+  ) {
+    let map = editorContext.state.map;
+    if (!map) {
+      throw new Error('Cannot make dot type without map');
+    }
+    let mapId = editorContext.state.map_id;
+    let targetId = map.globalDotDensityData.length;
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.CREATE,
+        targetType: TargetType.GLOBAL_DOT,
+        target: [mapId, targetId, '-1'],
+        payload: {
+          name,
+          opacity,
+          size,
+          color,
+        },
+      },
+      {
+        type: DeltaType.DELETE,
+        targetType: TargetType.GLOBAL_DOT,
+        target: [mapId, targetId, '-1'],
+        payload: {},
+      },
+    );
+  }
 
   return (
     <>
@@ -60,7 +96,7 @@ export default function ({ items }: PropertyDotInputProps) {
                 <ListItemText>{item}</ListItemText>
               </MenuItem>
             ))}
-            <MenuItem onClick={handleAdd}>
+            <MenuItem>
               <ListItemText onClick={() => setOpenDotModal(true)}>
                 + New Dot Type{' '}
               </ListItemText>

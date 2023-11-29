@@ -8,6 +8,7 @@ const mapSchema = new Schema(
     title: { type: String, required: true },
     owner: { type: Schema.Types.ObjectId, required: true, ref: 'User' },
     mapType: { type: String, required: true },
+    published: { type: Boolean, required: true },
     labels: { type: [String], require: true },
     globalChoroplethData: {
       type: {
@@ -52,14 +53,17 @@ const mapSchema = new Schema(
       required: false,
       default: [],
     },
-    regionsData: [
-      {
-        color: { type: String, required: true, default: '#FFFFFF' },
-        intensity: { type: Number, required: false },
-        category: { type: String, required: false },
-      },
-    ],
-
+    regionsData: {
+      type: [
+        {
+          color: { type: String, required: false, default: '#FFFFFF' },
+          intensity: { type: Number, required: false },
+          category: { type: String, required: false },
+        },
+      ],
+      required: false,
+      default: [],
+    },
     symbolsData: {
       type: [
         {

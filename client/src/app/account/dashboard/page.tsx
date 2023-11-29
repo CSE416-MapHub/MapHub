@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 // TODO: make this not use client?
 import CardCarousel from './ui/components/CardCarousel';
 import Greeting from './ui/components/Greeting';
@@ -7,9 +7,11 @@ import {
   getRecentPublished,
   getRecentUnpublished,
 } from '../helpers/EditorAPICalls';
+import { AuthContext } from 'context/AuthProvider';
 
 export default function () {
   const [firstRender, setFirstRender] = useState(0);
+  const authContext = useContext(AuthContext);
   const [pms, setPMS] = useState<
     Array<{
       _id: string;
@@ -27,7 +29,9 @@ export default function () {
 
   useEffect(() => {
     if (firstRender === 0) {
-      getRecentPublished().then(p => {
+      getRecentPublished(
+        authContext.state.user?.id ? authContext.state.user?.id : '',
+      ).then(p => {
         setPMS(
           p.map(i => {
             return {
@@ -48,8 +52,28 @@ export default function () {
   return (
     <main>
       <Greeting />
-      <CardCarousel title="My Published Maps" maps={pms} published={true} />
-      <CardCarousel title="My Unpublished Maps" maps={ums} published={false} />
+      <CardCarousel
+        title="My Published Maps"
+        maps={[
+          {
+            _id: '1',
+            title: 'map',
+            png: Buffer.alloc(0),
+          },
+        ]}
+        published={true}
+      />
+      <CardCarousel
+        title="My Unpublished Maps"
+        maps={[
+          {
+            _id: '1',
+            title: 'map',
+            png: Buffer.alloc(0),
+          },
+        ]}
+        published={false}
+      />
     </main>
   );
 }

@@ -23,6 +23,7 @@ import styles from '../../../components/form.module.css';
 import AccountAPI from '../../../../../api/AccountAPI';
 import { useRouter } from 'next/navigation';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
+import { base64StringToBlob } from 'blob-util';
 
 interface LoginFieldState {
   value: string;
@@ -156,7 +157,7 @@ function LoginForm() {
     alertOpen: false,
   });
   const router = useRouter();
-  const authContext = useContext(AuthContext); // Access the auth context
+  const { dispatch: authDispatch } = useContext(AuthContext); // Access the auth context
 
   const setUsername = (value: string) => {
     loginDispatch({
@@ -192,19 +193,22 @@ function LoginForm() {
       AccountAPI.loginUser(username.value, password.value)
         .then(response => {
           console.log('Login successful:', response);
-          authContext.helpers.login(authContext, {
-            id: response.data.user.id,
-            username: response.data.user.username,
-          });
-          // authDispatch({
-          //   type: AuthActions.LOGIN,
-          //   payload: {
-          //     user: {
-          //       id: response.data.user.id,
-          //       username: response.data.user.username,
-          //     },
-          //   },
+          // authContext.helpers.login(authContext, {
+          //   id: response.data.user.id,
+          //   username: response.data.user.username,
           // });
+          authDispatch({
+            type: AuthActions.LOGIN,
+            payload: {
+              user: {
+                id: response.data.user.id,
+                username: response.data.user.username,
+                profilePic: URL.createObjectURL(
+                  base64StringToBlob(response.data.user.profilePic),
+                ),
+              },
+            },
+          });
           //Redirect to dashboard
           router.replace('/account/dashboard');
         })
@@ -240,7 +244,10 @@ function LoginForm() {
   return (
     <div className={styles.container}>
       <Typography className={styles.title} variant="h2">
-        Login
+        Sign In
+      </Typography>
+      <Typography className={styles.body} variant="body1" align="left">
+        Access, create, and share your own maps.
       </Typography>
       <ValidatedTextField
         id="username"
@@ -267,6 +274,7 @@ function LoginForm() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
+          marginBottom: '15px',
         }}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
@@ -276,8 +284,8 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-      <Button variant="filled" onClick={handleLoginClick}>
-        Login
+      <Button id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
+        Sign In
       </Button>
 
       <Snackbar

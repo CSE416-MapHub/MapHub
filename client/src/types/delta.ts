@@ -1,4 +1,4 @@
-interface DeltaPayload {
+export interface DeltaPayload {
   // this is what a diff payload could contain
   // note that at no point should all fields be active
 
@@ -15,13 +15,13 @@ interface DeltaPayload {
   y?: number;
   scale?: number;
   symbol?: string;
-  color?: String;
+  color?: string;
   svg?: string;
   name?: string;
   opacity?: number;
   size?: number;
   intensity?: number;
-  category?: number;
+  category?: string;
   dot?: string;
   label?: string;
   capacity?: number;
@@ -31,11 +31,31 @@ interface DeltaPayload {
       y: number;
     },
   ];
+  propertyValue?: string;
 }
 
-// export interface Delta {
-//   type: DeltaType;
-//   targetType: TargetType;
-//   target: [mapId: number, objectId: number, subobjectId: number];
-//   payload: DeltaPayload;
-// }
+export enum DeltaType {
+  UPDATE,
+  CREATE,
+  DELETE,
+}
+
+export enum TargetType {
+  LABELS,
+  GLOBAL_CHOROPLETH,
+  GLOBAL_CATEGORY,
+  GLOBAL_SYMBOL,
+  GLOBAL_DOT,
+  REGION,
+  SYMBOL,
+  DOT,
+  ARROW,
+  GEOJSONDATA,
+}
+
+export interface Delta {
+  type: DeltaType;
+  targetType: TargetType;
+  target: [mapId: string, objectId: number, subobjectId: string];
+  payload: DeltaPayload;
+}

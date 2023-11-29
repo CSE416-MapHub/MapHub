@@ -1,6 +1,7 @@
 import supertest from 'supertest';
 import app from '../app';
 import postModel from '../models/post-model';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import mapModel from '../models/map-model';
@@ -8,32 +9,35 @@ const mockUserID = new mongoose.Types.ObjectId();
 
 beforeEach(() => {
   jest.setTimeout(6000);
+  jest.clearAllMocks();
+
+  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
 });
 afterEach(() => {
-  jest.restoreAllMocks();
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
-jest.mock('../models/post-model');
 
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
-    const mockId = new mongoose.Types.ObjectId();
-    const mapId = new mongoose.Types.ObjectId();
-    const savedPost = {
-      _id: mockId,
-      title: 'Ukranian War',
-      description: 'very sad times',
-      mapID: mapId,
-      owner: mockUserID,
-      comments: [],
-      likes: [],
-    };
     const mockMap = {
       title: 'Blah blah',
       _id: new mongoose.Types.ObjectId(),
-      save: jest.fn(), // Add a mock save function here if needed
+      published: false,
+      save: jest
+        .spyOn(mapModel.prototype, 'save')
+        .mockImplementation(function (this: any) {
+          console.log('POST: saving the edited map', this);
+          return Promise.resolve(this);
+        }),
     };
 
-    postModel.prototype.save = jest.fn().mockResolvedValue(savedPost);
+    jest
+      .spyOn(postModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
 
     jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
       const queryLikeObject = {
@@ -42,24 +46,19 @@ describe('POST /posts/publish', () => {
       return queryLikeObject as any;
     });
 
-    jest
-      .spyOn(mapModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        return Promise.resolve(this);
-      });
-
     const response = await supertest(app)
       .post(`/posts/publish/`)
       .send({
-        mapID: savedPost.mapID,
-        title: savedPost.title,
-        description: savedPost.description,
+        mapID: mockMap._id,
+        title: 'Ukranian War',
+        description: 'Grueling wars :(',
       })
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('post');
-    expect(response.body.post).toEqual({ postId: mockId.toString() });
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
   });
 });
 
@@ -77,6 +76,15 @@ describe('GET /posts/all', () => {
       },
       {
         _id: new mongoose.Types.ObjectId(),
+        title: 'some map thats kinda cool',
+        description: 'Description for map',
+        map: new mongoose.Types.ObjectId(),
+        owner: new mongoose.Types.ObjectId(),
+        comments: [], // Assuming no comments
+        likes: [], // Assuming no likes
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
         title: 'han dynasty',
         description: 'Description for Post 2',
         map: new mongoose.Types.ObjectId(),
@@ -86,35 +94,40 @@ describe('GET /posts/all', () => {
       },
     ];
 
-    const returnMock = [
+    const mockMaps = [
       {
-        title: mockPosts[0].title,
-        description: mockPosts[0].description,
-        postID: mockPosts[0]._id,
-        mapID: mockPosts[0].map,
-        png: { type: 'Buffer', data: [] },
+        _id: mockPosts[0].map,
+      },
+      {
+        _id: mockPosts[2].map,
+      },
+      {
+        _id: mockPosts[1].map,
       },
     ];
+    const searchQuery = 'dynasty';
 
-    const mapData = {
-      _id: new mongoose.Types.ObjectId(),
-    };
+    jest.spyOn(postModel, 'find').mockImplementation(
+      () =>
+        ({
+          exec: jest.fn().mockImplementation(() => {
+            return Promise.resolve(
+              mockPosts.filter(post => post.title.includes(searchQuery)),
+            );
+          }),
+        } as any),
+    );
 
-    const queryMock: any = {
-      exec: jest.fn().mockResolvedValue([mockPosts[0]]),
-    };
-
-    jest.spyOn(postModel, 'find').mockImplementation(() => queryMock);
-
-    jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
-      const queryLikeObject = {
-        exec: jest.fn().mockResolvedValue(mapData),
-      };
-      return queryLikeObject as any;
-    });
+    jest
+      .spyOn(mapModel, 'findById')
+      .mockImplementation((id: mongoose.Types.ObjectId | string) => {
+        const result = mockMaps.find(
+          map => map._id.toString() === id.toString(),
+        );
+        return { exec: jest.fn().mockResolvedValue(result) } as any;
+      });
 
     // Make the GET request
-    const searchQuery = 'dynasty';
     const response = await supertest(app)
       .get(`/posts/all?searchQuery=${searchQuery}`)
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
@@ -123,8 +136,9 @@ describe('GET /posts/all', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('success', true);
     expect(response.body).toHaveProperty('posts');
-
-    expect(response.body.posts[0].title).toEqual(returnMock[0].title);
+    expect(response.body.posts.length).toEqual(2);
+    expect(response.body.posts[0].title).toEqual(mockPosts[0].title);
+    expect(response.body.posts[1].title).toEqual(mockPosts[2].title);
   });
 });
 
@@ -142,6 +156,15 @@ describe('GET /posts/user', () => {
       },
       {
         _id: new mongoose.Types.ObjectId(),
+        title: 'some map thats kinda cool',
+        description: 'Description for map',
+        map: new mongoose.Types.ObjectId(),
+        owner: new mongoose.Types.ObjectId(),
+        comments: [], // Assuming no comments
+        likes: [], // Assuming no likes
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
         title: 'han dynasty',
         description: 'Description for Post 2',
         map: new mongoose.Types.ObjectId(),
@@ -151,26 +174,43 @@ describe('GET /posts/user', () => {
       },
     ];
 
-    const mapData = {
-      _id: new mongoose.Types.ObjectId(),
-    };
+    const mockMaps = [
+      {
+        _id: mockPosts[0].map,
+      },
+      {
+        _id: mockPosts[2].map,
+      },
+      {
+        _id: mockPosts[1].map,
+      },
+    ];
 
-    const queryMock: any = {
-      exec: jest.fn().mockResolvedValue(mockPosts),
-    };
+    jest.spyOn(postModel, 'find').mockImplementation(
+      () =>
+        ({
+          exec: jest.fn().mockImplementation(() => {
+            return Promise.resolve(
+              mockPosts.filter(
+                post => post.owner.toString() === mockUserID.toString(),
+              ),
+            );
+          }),
+        } as any),
+    );
 
-    jest.spyOn(postModel, 'find').mockImplementation(() => queryMock);
-
-    jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
-      const queryLikeObject = {
-        exec: jest.fn().mockResolvedValue(mapData),
-      };
-      return queryLikeObject as any;
-    });
+    jest
+      .spyOn(mapModel, 'findById')
+      .mockImplementation((id: mongoose.Types.ObjectId | string) => {
+        const result = mockMaps.find(
+          map => map._id.toString() === id.toString(),
+        );
+        return { exec: jest.fn().mockResolvedValue(result) } as any;
+      });
 
     // Make the GET request
     const response = await supertest(app)
-      .get(`/posts/user`)
+      .get(`/posts/user/${mockUserID}`)
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
 
     // Assertions
@@ -181,7 +221,15 @@ describe('GET /posts/user', () => {
       'ALL THE MAPS OWNED BY USER',
       JSON.stringify(response.body.posts),
     );
+    expect(response.body.posts.length).toEqual(2);
+
     expect(response.body.posts[0].title).toEqual('aLL long in War ku dynasty');
+    expect(response.body.posts[0].mapID.toString()).toEqual(
+      mockMaps[0]._id.toString(),
+    );
     expect(response.body.posts[1].title).toEqual('han dynasty');
+    expect(response.body.posts[1].mapID.toString()).toEqual(
+      mockMaps[1]._id.toString(),
+    );
   });
 });

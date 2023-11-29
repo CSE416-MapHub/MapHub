@@ -1,17 +1,27 @@
 import supertest from 'supertest';
 import app from '../app';
 import mapModel from '../models/map-model';
+import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
+import {
+  DeltaType,
+  TargetType,
+  Delta,
+  DeltaPayload,
+} from '../controllers/helperFunctions/mapHelper';
+
+type MapDocument = typeof mapModel.prototype;
 
 let mapData = {
   _id: new mongoose.Types.ObjectId(),
   title: 'mapNice',
   owner: new mongoose.Types.ObjectId(),
   mapType: 'categorical',
+  published: false,
   labels: [],
   globalChoroplethData: {
     minIntensity: 0,
@@ -39,6 +49,7 @@ let mapData = {
     },
   },
   updatedAt: Math.floor(new Date().getTime() * Math.random()),
+  createdAt: new Date().getTime(),
 };
 function createMockMap(
   title: string,
@@ -60,49 +71,23 @@ function createMockMap(
     updatedAt: Math.floor(new Date().getTime() * timeOrder),
   };
 }
-//Map Three, Map two, map 1
-const mockMaps = [
-  createMockMap('Map One', 'Point', [-73.935242, 40.73061], 0.5),
-  createMockMap(
-    'Map Two',
-    'LineString',
-    [
-      [-73.935242, 40.73061],
-      [-74.935242, 41.73061],
-    ],
-    0.6,
-  ),
-  createMockMap(
-    'Map Three',
-    'Polygon',
-    [
-      [
-        [-73.935242, 40.73061],
-        [-74.935242, 41.73061],
-        [-74.935242, 39.73061],
-        [-73.935242, 40.73061],
-      ],
-    ],
-    0.7,
-  ),
-];
 
 const userId = mapData.owner;
 
 beforeEach(() => {
+  jest.clearAllMocks();
   jest.setTimeout(6000);
+  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: userId });
 });
-
-jest.mock('../models/map-model');
 
 describe('POST /map/map', () => {
   it('create a new map', async () => {
     const mockId = new mongoose.Types.ObjectId();
-    const savedMap = {
-      _id: mockId,
-    };
-    mapModel.prototype.save = jest.fn().mockResolvedValue(savedMap);
-
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
     const mapDatas = {
       map: mapData,
     };
@@ -116,8 +101,54 @@ describe('POST /map/map', () => {
       .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
 
     expect(response.statusCode).toBe(200);
-
     expect(response.body).toHaveProperty('map');
+  });
+  it('fails to create a map with invalid GeoJSON data', async () => {
+    const mapDataWithInvalidGeoJSON = {
+      title: 'Invalid GeoJSON Map',
+      mapType: 'choropleth',
+      geoJSON: {
+        type: 'FeatureCollection',
+        features: [
+          {
+            type: 'Feature',
+            properties: {},
+          },
+        ],
+      },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapDataWithInvalidGeoJSON })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.error).toBeDefined();
+  });
+  it('fails to create a map with missing fields', async () => {
+    const incompleteData = {
+      map: { title: 'no mappa' },
+    };
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send(incompleteData)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+  });
+  it('handles file system errors gracefully', async () => {
+    jest
+      .spyOn(fs.promises, 'writeFile')
+      .mockRejectedValue(new Error('File system error'));
+
+    const response = await supertest(app)
+      .post('/map/create')
+      .send({ map: mapData })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(500);
   });
 });
 
@@ -155,6 +186,33 @@ describe('GET /map/:mapID', () => {
 });
 
 describe('GET /map/recents/', () => {
+  //Map Three, Map two, map 1
+  const mockMaps = [
+    createMockMap('Map One', 'Point', [-73.935242, 40.73061], 0.5),
+    createMockMap(
+      'Map Two',
+      'LineString',
+      [
+        [-73.935242, 40.73061],
+        [-74.935242, 41.73061],
+      ],
+      0.6,
+    ),
+    createMockMap(
+      'Map Three',
+      'Polygon',
+      [
+        [
+          [-73.935242, 40.73061],
+          [-74.935242, 41.73061],
+          [-74.935242, 39.73061],
+          [-73.935242, 40.73061],
+        ],
+      ],
+      0.7,
+    ),
+  ];
+
   beforeEach(() => {
     // Setup specific mock for this test
     let sortedAndLimitedData = [...mockMaps];
@@ -223,7 +281,415 @@ describe('GET /map/recents/', () => {
   });
 });
 
+describe('/map/payload/ dot payload', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('dot create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, -1, '-1'],
+      payload: {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'SOME DOT 2',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData.length).toEqual(2);
+  });
+  it('dot update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          dot: 'SOME DOT 2',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, 1, '-1'],
+      payload: {
+        x: 313131,
+        y: 212121,
+        scale: 100,
+        dot: 'UPDATED DOT',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData[1]).toEqual({
+      x: 313131,
+      y: 212121,
+      scale: 100,
+      dot: 'UPDATED DOT',
+      _id: response.body.map.dotsData[1]._id,
+    });
+  });
+
+  it('empty delta', async () => {
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: {} })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, -1, '-1'],
+      payload: {
+        x: 313131,
+        y: 212121,
+        scale: 100,
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual('Dot name is required');
+  });
+});
+
+describe('/map/payload/ global dot payload', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+  it('global dot create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalDotDensityData: [],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_DOT,
+      target: [mockMap._id, -1, '-1'],
+      payload: {
+        name: 'dot group global',
+        opacity: 1,
+        size: 10,
+        color: '#FFFFFF',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalDotDensityData.length).toEqual(1);
+    expect(response.body.map.globalDotDensityData).toEqual([
+      {
+        name: 'dot group global',
+        opacity: 1,
+        size: 10,
+        color: '#FFFFFF',
+        _id: response.body.map.globalDotDensityData[0]._id,
+      },
+    ]);
+  });
+  it('global dot update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'DOT GROUP 1',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          dot: 'DOT GROUP 1',
+        },
+      ],
+      globalDotDensityData: [
+        {
+          name: 'DOT GROUP 1',
+          opacity: 2,
+          size: 10,
+          color: '#FFFFFF',
+        },
+        {
+          name: 'DOT GROUP 2',
+          opacity: 2,
+          size: 10,
+          color: '#FFFFFF',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.GLOBAL_DOT,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'Updated Dot Group Global',
+        opacity: 0.2,
+        size: 100,
+        color: '#FF4D7A',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalDotDensityData[0]).toEqual({
+      name: 'Updated Dot Group Global',
+      opacity: 0.2,
+      size: 100,
+      color: '#FF4D7A',
+      _id: response.body.map.globalDotDensityData[0]._id,
+    });
+    expect(response.body.map.dotsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        dot: 'Updated Dot Group Global',
+        _id: response.body.map.dotsData[0]._id,
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'Updated Dot Group Global',
+        _id: response.body.map.dotsData[1]._id,
+      },
+    ]);
+  });
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_DOT,
+      target: [mockMap._id, -1, '-1'],
+      payload: {
+        name: 'd',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual('Opacity is required');
+  });
+});
+
+describe('/map/map update map by id', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('update title of map', async () => {
+    const mapPayload = { mapId: mapData._id, title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.title).toEqual(mapPayload.title);
+  });
+  it('update title of map', async () => {
+    const mapPayload = { title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Map ID is required');
+  });
+});
+
 afterEach(() => {
   // Reset mock after the test
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
 });
