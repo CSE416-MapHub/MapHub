@@ -21,7 +21,7 @@ function SettingsHead({
 }: SettingsHeadProps) {
   return (
     <Box className={`${styles['settings__head']} ${className}`} {...props}>
-      {back ? <Button variant="text">{`< ${back.name}`}</Button> : undefined}
+      {back ? <Button variant="text">{`← ${back.name}`}</Button> : undefined}
       <Typography id={headlineId} variant="headlineLarge">
         {children}
       </Typography>

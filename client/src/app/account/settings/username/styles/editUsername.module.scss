@@ -1,0 +1,10 @@
+@use 'shape';
+
+.edit-username__section {
+  margin-top: shape.$extra-large;
+}
+
+.edit-username__button {
+  margin-right: 10%;
+  align-self: flex-end;
+}

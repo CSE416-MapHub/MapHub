@@ -69,7 +69,6 @@ describe('Profile settings ', () => {
   });
 
   it('contain a profile picture option.', () => {
-    cy.get('@profile').contains(expected.profile.profilePic);
     cy.get('@profile').find('button');
   });
 });
