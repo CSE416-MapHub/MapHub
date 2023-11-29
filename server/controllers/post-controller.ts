@@ -70,7 +70,6 @@ const PostController = {
       // const userId = (req as any).userId;
       console.log(req.query.id);
 
-
       const posts = await Post.find({ owner: req.params.userId }).exec();
 
       console.log(

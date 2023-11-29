@@ -30,7 +30,13 @@ export default function () {
   useEffect(() => {
     if (firstRender === 0) {
       getRecentPublished(
+<<<<<<< HEAD
         authContext.state.user?.id ? authContext.state.user?.id : '',
+=======
+        authContext.state.user?.id
+          ? authContext.state.user?.id
+          : '',
+>>>>>>> 1836664 (Modify dashboard carousel)
       ).then(p => {
         setPMS(
           p.map(i => {
