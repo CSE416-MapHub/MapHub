@@ -43,22 +43,22 @@ export default function () {
         );
       });
       getRecentUnpublished().then(p => {
-        // let unpublishedMaps: {
-        //   _id: string;
-        //   title: string;
-        //   png: Buffer;
-        // }[] = [];
-        // p.forEach(map => {
-        //   if(!map.published) {
-        //     unpublishedMaps.push({
-        //       _id: map._id,
-        //       title: map.title,
-        //       png: map.png,
-        //     });
-        //   }
-        // });
-        // console.log(unpublishedMaps);
-        setUMS(p);
+        let unpublishedMaps: {
+          _id: string;
+          title: string;
+          png: Buffer;
+        }[] = [];
+        p.forEach(map => {
+          if(!map.published) {
+            unpublishedMaps.push({
+              _id: map._id,
+              title: map.title,
+              png: map.png,
+            });
+          }
+        });
+        console.log(unpublishedMaps);
+        setUMS(unpublishedMaps);
       });
       setFirstRender(firstRender + 1);
     }

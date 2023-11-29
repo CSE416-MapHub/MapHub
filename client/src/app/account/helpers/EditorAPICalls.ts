@@ -15,12 +15,14 @@ import PostAPI from 'api/PostAPI';
 function validateRecents(a: any): a is Array<{
   _id: string;
   title: string;
+  published: boolean;
   png: Buffer;
 }> {
   for (let entry of a) {
     if (
       typeof entry._id !== 'string' ||
       typeof entry.title !== 'string' ||
+      typeof entry.published !== 'boolean' ||
       !entry.png ||
       entry.png.type !== 'Buffer' ||
       typeof entry.png.data !== 'object'
@@ -39,13 +41,13 @@ export function getRecentUnpublished(): Promise<
   Array<{
     _id: string;
     title: string;
+    published: boolean;
     png: Buffer;
   }>
 > {
   return MapAPI.getRecentMapIds(6).then(res => {
     if (res.status === 200) {
       let maps = res.data.maps;
-      console.log(maps);
       if (typeof maps !== 'object') {
         throw new Error(`Unexpected maps type ` + typeof maps);
       }
