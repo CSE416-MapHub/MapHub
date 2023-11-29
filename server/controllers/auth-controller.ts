@@ -64,6 +64,7 @@ export const registerUser = async (req: Request, res: Response) => {
       username,
       email,
       password: passwordHash,
+      profilePic: Buffer.alloc(0),
       maps: emptyMapList,
     });
     const savedUser = await newUser.save();
@@ -73,7 +74,7 @@ export const registerUser = async (req: Request, res: Response) => {
       user: {
         id: savedUser._id,
         username: savedUser.username,
-        profilePic: savedUser.profilePic.toString('base64'),
+        profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
       },
     });
   } catch (err: any) {
