@@ -4,11 +4,10 @@ import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
-import { Delta, DeltaType } from 'types/delta';
+import { Delta, DeltaType, TargetType } from 'types/delta';
 import {
   DELETED_NAME,
   applyDelta,
-  updatePropertiesPanel,
 } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
