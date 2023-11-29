@@ -70,6 +70,7 @@ const PostController = {
       // const userId = (req as any).userId;
       console.log(req.query.id);
 
+
       const posts = await Post.find({ owner: req.params.userId }).exec();
 
       console.log(
@@ -78,7 +79,6 @@ const PostController = {
         JSON.stringify(posts),
         posts.length,
       );
-
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
