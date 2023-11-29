@@ -3,8 +3,8 @@ import { AuthContext, AuthHelpers } from '../../src/context/AuthProvider';
 
 function createMockAuth(props) {
   const mockAuthHelpers = new AuthHelpers();
-  cy.stub(mockAuthHelpers, 'login').as('help-login');
-  cy.stub(mockAuthHelpers, 'logout').as('help-logout');
+  cy.stub(mockAuthHelpers, 'login').as('auth-help-login');
+  cy.stub(mockAuthHelpers, 'logout').as('auth-help-logout');
 
   return {
     state: {
@@ -12,7 +12,7 @@ function createMockAuth(props) {
       user: null,
       error: '',
     },
-    dispatch: () => null,
+    dispatch: cy.stub().as('auth-dispatch'),
     helpers: mockAuthHelpers,
     ...props,
   };

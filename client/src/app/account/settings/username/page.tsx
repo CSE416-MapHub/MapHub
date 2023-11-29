@@ -13,7 +13,7 @@ import SettingsSection from '../components/settingsSection';
 import SettingsTextField from '../components/settingsTextField';
 import styles from './styles/editUsername.module.scss';
 
-function Username() {
+function EditUsername() {
   const auth = useContext(AuthContext);
   const [newUsername, setNewUsername] = useState('');
   const [newUsernameError, setNewUsernameError] = useState(false);
@@ -33,13 +33,18 @@ function Username() {
   };
 
   return (
-    <SettingsMain>
-      <SettingsHead back={{ name: 'Settings', href: '/account/settings' }}>
+    <SettingsMain id="edit-username">
+      <SettingsHead
+        id="edit-username-head"
+        headlineId="edit-username-headline"
+        back={{ name: 'Settings', href: '/account/settings' }}
+      >
         Edit Username
       </SettingsHead>
-      <SettingsPane>
+      <SettingsPane id="edit-username-pane">
         <SettingsSection className={styles['edit-username__section']}>
           <SettingsReadTextField
+            id="current-username"
             label="Current Username"
             value={auth.state.user?.username}
           />
@@ -61,4 +66,4 @@ function Username() {
   );
 }
 
-export default Username;
+export default EditUsername;
