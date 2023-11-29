@@ -175,6 +175,33 @@ export const getExists = async (request: Request, response: Response) => {
   }
 };
 
+export const getVerify = async (request: Request, response: Response) => {
+  const notLoggedInBody = {
+    isLoggedIn: false,
+    user: null,
+  };
+  try {
+    const tokenPayload = await auth.verifyUser(request);
+    if (!tokenPayload) {
+      return response.status(200).json(notLoggedInBody);
+    }
+    const user = await User.findById(tokenPayload.verifiedId);
+    if (!user) {
+      return response.status(200).json(notLoggedInBody);
+    }
+    return response.status(200).json({
+      isLoggedIn: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(200).json(notLoggedInBody);
+  }
+};
+
 export const getProfilePic = async (request: Request, response: Response) => {
   try {
     const { id } = request.body;
