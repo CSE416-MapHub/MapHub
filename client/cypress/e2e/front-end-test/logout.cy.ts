@@ -50,7 +50,7 @@ describe('enter in fake account details', () => {
     cy.intercept(
       {
         method: 'GET',
-        url: 'http://localhost:3031/posts/user?username=*',
+        url: 'http://localhost:3031/posts/user/*',
       },
       {
         statusCode: 200,

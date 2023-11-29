@@ -92,7 +92,7 @@ const MapController = {
         geoJSON: 'placeholder',
         owner: (req as any).userId,
       });
-      savedMap = await newMap.save();
+      console.log(newMap);
     } catch (err: any) {
       console.error(err.message);
       return res
@@ -100,7 +100,7 @@ const MapController = {
         .json({ error: `map saving error: ${err.message}` });
     }
 
-    const mapID = savedMap._id.toString();
+    const mapID = newMap._id.toString();
     console.log('MAP ID HERE:', mapID);
 
     const saveFilePath = path.join(
@@ -109,6 +109,7 @@ const MapController = {
       'jsonStore',
       `${mapID}.geojson`,
     );
+
     const dir = path.dirname(saveFilePath);
     if (!fs.existsSync(dir)) {
       await fs.promises.mkdir(dir, { recursive: true });
@@ -127,6 +128,7 @@ const MapController = {
     try {
       newMap.geoJSON = saveFilePath;
       savedMap = await newMap.save();
+      console.log('FINAL MAP CREATE id', savedMap._id);
       res.status(200).json({
         success: true,
         map: { mapID: savedMap._id },
@@ -145,14 +147,13 @@ const MapController = {
     const delta = req.body.delta;
     let map: MapDocument | null;
     //validating the requests
-
-    if (!delta.type) {
+    if (delta.type === null || delta.type === undefined) {
       return res
         .status(400)
         .json({ success: false, message: 'Delta Type not found' });
     }
 
-    if (!delta.targetType) {
+    if (delta.targetType === null || delta.targetType === undefined) {
       return res
         .status(400)
         .json({ success: false, message: 'Target Type not found' });
@@ -218,8 +219,11 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      const updatedMap = await new Map(map).save();
-      console.log('UPDATED MAP', JSON.stringify(updatedMap));
+      console.log('MAP bEFORE CAST', JSON.stringify(map));
+      map = new Map(map);
+      console.log('afndisofdj', map);
+      const updatedMap = await map.save();
+      console.log(updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });

@@ -10,6 +10,7 @@ import {
   applyDelta,
   updatePropertiesPanel,
 } from './editorHelpers/DeltaUtil';
+import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
   select = 'select',
@@ -178,6 +179,10 @@ class helpers {
       });
       let nMap = { ...map };
       applyDelta(nMap, d);
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(d);
+      }
+
       let li = ctx.state.lastInstantiated;
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
@@ -207,6 +212,10 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(a.do);
+      }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
@@ -237,6 +246,10 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.do);
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
+        MapAPI.updateMapPayload(a.do);
+      }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);

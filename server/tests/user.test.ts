@@ -9,6 +9,7 @@ jest.mock('../auth/index');
 jest.mock('../models/user-model');
 beforeAll(() => {
   jest.setTimeout(6000);
+  jest.clearAllMocks();
 });
 
 describe('POST /auth/register', () => {
@@ -35,7 +36,6 @@ describe('POST /auth/register', () => {
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('user');
-    console.log(response.body.user);
     expect(response.body.user).toEqual({
       id: mockId.toString(),
       username: userData.username,
@@ -299,8 +299,9 @@ describe('POST /auth/username', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });
+});
 
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+afterEach(() => {
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
