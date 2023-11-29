@@ -18,8 +18,6 @@ afterEach(() => {
   jest.clearAllMocks();
 });
 
-jest.mock('../models/post-model');
-
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
     const mockId = new mongoose.Types.ObjectId();
