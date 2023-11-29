@@ -69,14 +69,22 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     const savedUser = await newUser.save();
     console.log('New user saved: ' + savedUser._id);
-    res.status(200).json({
-      success: true,
-      user: {
-        id: savedUser._id,
-        username: savedUser.username,
-        profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
-      },
-    });
+    const token = auth.signToken(savedUser._id.toString());
+    res
+      .status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      })
+      .json({
+        success: true,
+        user: {
+          id: savedUser._id,
+          username: savedUser.username,
+          profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
+        },
+      });
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
