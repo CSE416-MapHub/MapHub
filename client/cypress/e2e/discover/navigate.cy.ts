@@ -6,9 +6,9 @@ describe('I can reach discover', () => {
   });
 
   // TODO: Fix map post test
-  // it('should be easy to see a map post', () => {
-  //   cy.visit('/discover');
-  //   cy.get('p:contains(Russia)').click();
-  //   cy.get('span:contains("Jungkook")');
-  // });
+  it('should be easy to see a map post', () => {
+    cy.visit('/discover');
+    cy.get('p:contains(korea)').click();
+    cy.get('span:contains("Jungkook")');
+  });
 });
