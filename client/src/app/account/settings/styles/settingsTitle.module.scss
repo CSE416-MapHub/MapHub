@@ -1,0 +1,9 @@
+@use 'colors';
+
+.settings__title {
+  align-self: flex-start;
+
+  &--red {
+    color: colors.$error;
+  }
+}

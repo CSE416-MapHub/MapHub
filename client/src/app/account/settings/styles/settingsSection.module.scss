@@ -1,0 +1,9 @@
+@use 'shape';
+
+.settings__section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: shape.$large;
+}

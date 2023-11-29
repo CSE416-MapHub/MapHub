@@ -7,9 +7,13 @@ import { useContext, useEffect } from 'react';
 import { AuthContext } from '../../../context/AuthProvider';
 import Avatar from 'components/avatar';
 import Button from 'components/button';
-import Icon from 'components/icon';
 import IconButton from 'components/iconButton';
-import TextField from '../../../components/textField';
+import SettingsMain from './components/settingsMain';
+import SettingsHead from './components/settingsHead';
+import SettingsPane from './components/settingsPane';
+import SettingsSection from './components/settingsSection';
+import SettingsTitle from './components/settingsTitle';
+import SettingsTextFieldLink from './components/settingsTextFieldLink';
 
 import styles from './styles/settings.module.scss';
 
@@ -24,27 +28,12 @@ function Settings() {
   }, []);
 
   return (
-    <main id="settings" className={styles['settings__box']}>
-      <Box className={styles['settings__head']}>
-        <Typography id="settings-headline" variant="headlineLarge">
-          Settings
-        </Typography>
-      </Box>
-      <Box className={styles['settings__pane']}>
-        <Box id="settings-profile" className={styles['settings__group']}>
-          <Typography
-            className={styles['settings__title']}
-            variant="titleLarge"
-          >
-            Profile
-          </Typography>
+    <SettingsMain id="settings" className={styles['settings__box']}>
+      <SettingsHead headlineId={'settings-headline'}>Settings</SettingsHead>
+      <SettingsPane>
+        <SettingsSection id="settings-profile">
+          <SettingsTitle>Profile</SettingsTitle>
           <Box className={styles['settings__option']}>
-            <Typography
-              className={styles['settings__label']}
-              variant="bodySmall"
-            >
-              Profile Picture
-            </Typography>
             <Avatar className={styles['settings__avatar']}>
               <IconButton
                 className={styles['settings__edit-icon-button']}
@@ -54,55 +43,38 @@ function Settings() {
               />
             </Avatar>
           </Box>
-          <TextField
-            className={styles['settings__text-field']}
-            variant="outlined"
+          <SettingsTextFieldLink
+            href="/account/settings/username"
             label="Username"
             value={auth.state.user ? auth.state.user.username : ''}
-            endAdornment={<Icon type="solid" name="pencil" />}
           />
-        </Box>
-        <Box id="settings-security" className={styles['settings__group']}>
-          <Typography
-            className={styles['settings__title']}
-            variant="titleLarge"
-          >
-            Security
-          </Typography>
-          <TextField
-            className={styles['settings__text-field']}
+        </SettingsSection>
+        <SettingsSection id="settings-security">
+          <SettingsTitle>Security</SettingsTitle>
+          <SettingsTextFieldLink
+            href="/account/settings/password"
             type="password"
             label="Password"
-            variant="outlined"
-            endAdornment={<Icon type="solid" name="pencil" />}
             value={'********'}
-            inputProps={{
-              readOnly: true,
-            }}
           />
-        </Box>
-        <Box id="settings-delete-account" className={styles['settings__group']}>
-          <Box className={styles['settings__type-group']}>
-            <Typography
-              className={`${styles['settings__title--warn']} ${styles['settings__title']}`}
-              variant="titleLarge"
-            >
-              Delete Account
-            </Typography>
-            <Typography variant="bodyMedium">
-              Once you delete your account, there's no turning back. It will be
-              gone forever.
-            </Typography>
-          </Box>
+        </SettingsSection>
+        <SettingsSection id="settings-delete-account">
+          <SettingsTitle className={styles['settings__title--red']}>
+            Delete Account
+          </SettingsTitle>
+          <Typography variant="bodyMedium">
+            Once you delete your account, there's no turning back. It will be
+            gone forever.
+          </Typography>
           <Button
             className={styles['settings__delete-button']}
             variant="errorOutlined"
           >
             Delete Account
           </Button>
-        </Box>
-      </Box>
-    </main>
+        </SettingsSection>
+      </SettingsPane>
+    </SettingsMain>
   );
 }
 
