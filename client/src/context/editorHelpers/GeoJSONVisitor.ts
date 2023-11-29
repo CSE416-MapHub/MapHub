@@ -54,12 +54,14 @@ export class GeoJSONVisitor {
   private mapData: G.GeoJSON;
   private featureResults: Array<IFeatureVisitResults>;
   private featureAgg: IFeatureAggregateResults;
-  constructor(geojson: G.GeoJSON) {
+  private featuresOnly: boolean;
+  constructor(geojson: G.GeoJSON, featuresOnly?: boolean) {
     this.mapData = geojson;
     this.featureResults = [];
     this.featureAgg = {
       globallyAvailableKeys: new Set<string>(),
     };
+    this.featuresOnly = featuresOnly ?? false;
   }
 
   public visitRoot() {
@@ -95,14 +97,18 @@ export class GeoJSONVisitor {
       originalFeature: feature,
       box: [0, 0, 0, 0],
     };
-    res = { ...res, ...this.visitGeometry(feature.geometry) };
-    this.featureResults.push(res);
     let props = feature.properties;
     if (props) {
       for (let p of Object.keys(props)) {
         this.featureAgg.globallyAvailableKeys.add(p);
       }
     }
+    if (this.featuresOnly) {
+      this.featureResults.push(res);
+      return;
+    }
+    res = { ...res, ...this.visitGeometry(feature.geometry) };
+    this.featureResults.push(res);
   }
 
   private isPosition(p: GeoJSON.Position): [number, number, number] {

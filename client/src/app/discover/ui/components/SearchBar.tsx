@@ -13,12 +13,17 @@ import {
   Typography,
 } from '@mui/material';
 import StarOutlineIcon from '@mui/icons-material/StarOutline';
+import PostAPI from 'api/PostAPI';
 
-export default function () {
+interface SearchBarProps {
+  onSearch: (searchValue: string) => void;
+  searchResponse: any;
+}
+
+const SearchBar: React.FC<SearchBarProps> = ({ onSearch, searchResponse }) => {
   const [searchBar, setSearchBar] = useState<string>('');
-  const [searchSuggestions, setSearchSuggestions] = useState<
-    [string, string][]
-  >([
+
+  const [searchSuggestions, setSearchSuggestions] = useState<[string, string][]>([
     ['113463640', 'January Arctic Fox Migrations in 2008'],
     ['114435342', 'Jumping Bug Populations in Brazil'],
     ['112345674', 'Jeromes Born in India'],
@@ -29,7 +34,18 @@ export default function () {
     ['2', 'Fatima'],
     ['3', 'Irenee'],
   ]);
+  const handleUpdateSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const searchValue = e.target.value;
+    // Call the onSearch function when the search input changes
+    setSearchBar(searchValue);
+    onSearch(searchValue);
+  };
+
+  // Use the searchResponse data as needed
+  console.log('Search Response:', searchResponse);
+
   return (
+    // Your SearchBar component JSX
     <>
       <div className={style['search-container']}>
         <div
@@ -45,7 +61,7 @@ export default function () {
             type="text"
             className={style['search-input']}
             value={searchBar}
-            onChange={e => setSearchBar(e.target.value)}
+            onChange={handleUpdateSearch}
             placeholder="Search for map inspiration"
           />
         </div>
@@ -99,4 +115,6 @@ export default function () {
       </div>
     </>
   );
-}
+};
+
+export default SearchBar;

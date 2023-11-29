@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
-import PropertyColorInput from '../PropertyColorInput';
+import PropertyColorInput from '../property/PropertyColorInput';
 import style from './LabelSelector.module.scss';
 import { SketchPicker, ColorResult } from 'react-color';
 

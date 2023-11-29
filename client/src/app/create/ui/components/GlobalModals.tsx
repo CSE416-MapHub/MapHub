@@ -39,14 +39,14 @@ export default function () {
       <NewDotModal
         open={openDotModal}
         onClose={() => {
-          if (!createdDot) {
-            editorContext.dispatch({
-              type: EditorActions.SET_TOOL,
-              payload: {
-                selectedTool: null,
-              },
-            });
-          }
+          // if (!createdDot) {
+          //   editorContext.dispatch({
+          //     type: EditorActions.SET_TOOL,
+          //     payload: {
+          //       selectedTool: null,
+          //     },
+          //   });
+          // }
 
           setOpenDotModal(false);
         }}
@@ -67,7 +67,7 @@ export default function () {
             {
               type: DeltaType.CREATE,
               targetType: TargetType.GLOBAL_DOT,
-              target: [mapId, targetId, -1],
+              target: [mapId, targetId, '-1'],
               payload: {
                 name,
                 opacity,
@@ -78,7 +78,7 @@ export default function () {
             {
               type: DeltaType.DELETE,
               targetType: TargetType.GLOBAL_DOT,
-              target: [mapId, targetId, -1],
+              target: [mapId, targetId, '-1'],
               payload: {},
             },
           );

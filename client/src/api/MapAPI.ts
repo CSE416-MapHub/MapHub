@@ -37,8 +37,12 @@ class MapAPI {
     return this.api.post('/map/create', { map });
   }
 
-  static async updateMap(delta: Delta) {
-    return this.api.put(`/map/map/`, { delta });
+  static async updateMapPayload(delta: Delta) {
+    return this.api.put(`/map/map/payload`, { delta: delta });
+  }
+
+  static async updateMap() {
+    return this.api.put(`/map/map/`);
   }
 
   static async getMapById(mapID: string) {

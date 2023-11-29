@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropertyColorInput from './PropertyColorInput';
 import style from './Property.module.scss';
 import clsx from 'clsx';
@@ -10,11 +10,18 @@ export interface GradientInputProps {
   maxValue: number;
   minColor: string;
   maxColor: string;
+  onChange: (val: string) => void;
 }
 
 export default function (props: GradientInputProps) {
   const [ranges, setRanges] = useState<GradientInputProps>(props);
 
+  function updateRanges(v: GradientInputProps) {
+    setRanges(v);
+    props.onChange(
+      `{minValue:${v.minValue},maxValue:${v.maxValue},minColor:${v.minColor},maxColor:${v.maxColor}}`,
+    );
+  }
   return (
     <div
       style={{
@@ -27,7 +34,7 @@ export default function (props: GradientInputProps) {
         <PropertyColorInput
           color={ranges.minColor}
           colorChangeHandler={c => {
-            setRanges({ ...ranges, minColor: c });
+            updateRanges({ ...ranges, minColor: c });
           }}
         />
         <input
@@ -36,7 +43,7 @@ export default function (props: GradientInputProps) {
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
-            setRanges({ ...ranges, minValue: parseFloat(e.target.value) });
+            updateRanges({ ...ranges, minValue: parseFloat(e.target.value) });
           }}
           className={clsx(
             style['default-input'],
@@ -59,7 +66,7 @@ export default function (props: GradientInputProps) {
         <PropertyColorInput
           color={ranges.maxColor}
           colorChangeHandler={c => {
-            setRanges({ ...ranges, maxColor: c });
+            updateRanges({ ...ranges, maxColor: c });
           }}
         />
         <input
@@ -68,7 +75,7 @@ export default function (props: GradientInputProps) {
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
-            setRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
+            updateRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
           }}
           className={clsx(
             style['default-input'],
