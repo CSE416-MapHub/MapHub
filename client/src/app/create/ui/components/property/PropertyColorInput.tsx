@@ -42,16 +42,13 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
           colorChangeHandler(currColor.hex);
         }}
       >
-        <div className="pp-color-select">
-          <ColorPicker
-            height={100}
-            color={currColor}
-            onChange={setColor}
-            hideAlpha={true}
-            hideInput={['rgb', 'hsv']}
-          />
-        </div>
-
+        <ColorPicker
+          height={100}
+          color={currColor}
+          onChange={setColor}
+          hideAlpha={true}
+          hideInput={['rgb', 'hsv']}
+        />
         {/* <SketchPicker onChange={handleChange} color={currColor} /> */}
       </Popover>
     </>
