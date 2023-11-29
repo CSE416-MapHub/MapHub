@@ -328,7 +328,7 @@ describe('GET /auth/verify ', () => {
 
   it('should send a login response if cookies are correct.', async () => {
     (auth.verifyUser as jest.Mock).mockResolvedValue({
-      verifiedId: mockUser._id,
+      userId: mockUser._id,
     });
     (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
 
@@ -347,7 +347,7 @@ describe('GET /auth/verify ', () => {
 
   it('should send a not logged in response if cookies include an invalid user ID.', async () => {
     (auth.verifyUser as jest.Mock).mockResolvedValue({
-      verifiedId: anotherMockUser._id,
+      userId: anotherMockUser._id,
     });
     (userModel.findById as jest.Mock).mockResolvedValue(null);
 
