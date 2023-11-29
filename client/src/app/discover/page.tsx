@@ -37,7 +37,7 @@ export default function () {
   return (
     <>
       <SearchBar onSearch={handleSearch} searchResponse={searchResponse} />
-      <div className={style['card-grid']}>
+      <div className={style['card-grid']} id="map-card-grid">
         {mapCardData.map(map => (
           <MapCard
             key={map.id}
