@@ -35,6 +35,7 @@ export interface IEditorState {
   };
   actionStack: ActionStack;
   lastInstantiated: string; // name of the last instantiated item
+  isDeleting: boolean;
 }
 
 // initial global state
@@ -51,6 +52,7 @@ let initialState: IEditorState = {
   actionStack: new ActionStack(),
   lastInstantiated: DELETED_NAME,
   selectedItem: null,
+  isDeleting: false,
 };
 
 // actions the reducer can take
@@ -60,6 +62,7 @@ export enum EditorActions {
   SET_TOOL,
   SET_TITLE,
   SET_ACTION,
+  SET_DELETING,
 }
 
 // the reducer
@@ -134,6 +137,14 @@ function reducer(
         throw new Error(
           'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
         );
+      }
+      break;
+    }
+    case EditorActions.SET_DELETING: {
+      if (action.payload.isDeleting !== undefined) {
+        newState.isDeleting = action.payload.isDeleting;
+      } else {
+        throw new Error('SET_DELETING must have a isDeleting');
       }
       break;
     }

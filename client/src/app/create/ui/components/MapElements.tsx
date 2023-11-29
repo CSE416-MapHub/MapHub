@@ -71,7 +71,6 @@ export default function () {
     // if theres a map, make sure the loaded regions and the displayed regions
     // are synced
     if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
-      console.log('RENREDER  :  region prop change');
       setCurrentRegionProps(loadedMap.regionsData);
       setRerender(rerender + 1);
     }
@@ -114,8 +113,6 @@ export default function () {
     }
   }
 
-  // TODO: erase tool and translate tool
-
   map.addEventListener('click', ev => {
     if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
       let action = {
@@ -128,6 +125,28 @@ export default function () {
       return;
     }
     handleMapClick(ev);
+  });
+
+  map.addEventListener('mousedown', ev => {
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.erase) {
+      editorContextRef.current.dispatch({
+        type: EditorActions.SET_DELETING,
+        payload: {
+          isDeleting: true,
+        },
+      });
+    }
+  });
+
+  map.addEventListener('mouseup', ev => {
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.erase) {
+      editorContextRef.current.dispatch({
+        type: EditorActions.SET_DELETING,
+        payload: {
+          isDeleting: false,
+        },
+      });
+    }
   });
 
   let i = 0;
@@ -178,7 +197,6 @@ export default function () {
         onEachFeature={perFeatureHandler}
       />
       {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
-        console.log('TRYING TO RENDER A DOT');
         if (dotInstance.dot === DELETED_NAME) {
           return;
         }

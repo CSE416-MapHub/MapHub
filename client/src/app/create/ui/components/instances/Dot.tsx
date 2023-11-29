@@ -77,13 +77,35 @@ export default function ({
     }
   }
 
+  function deleteSelf() {
+    editorContextRef.helpers.addDelta(
+      editorContextRef,
+      {
+        type: DeltaType.DELETE,
+        targetType: TargetType.DOT,
+        target: [editorContextRef.state.map_id, id, '-1'],
+        payload: {},
+      },
+      {
+        type: DeltaType.CREATE,
+        targetType: TargetType.DOT,
+        target: [editorContextRef.state.map_id, id, '-1'],
+        payload: structuredClone(dotInstance),
+      },
+    );
+  }
+
   function handleMouseDown(ev: L.LeafletMouseEvent) {
     const thisIsSelected =
       editorContextRef.state.selectedItem &&
       editorContextRef.state.selectedItem.id === id &&
-      editorContextRef.state.selectedItem.type == TargetType.DOT;
+      editorContextRef.state.selectedItem.type == TargetType.DOT &&
+      editorContextRef.state.selectedTool === ToolbarButtons.select;
     if (thisIsSelected) {
       setDragging(true);
+    }
+    if (editorContextRef.state.selectedTool === ToolbarButtons.erase) {
+      deleteSelf();
     }
   }
 
@@ -91,6 +113,9 @@ export default function ({
     if (dragging) {
       setX(ev.latlng.lng);
       setY(ev.latlng.lat);
+    }
+    if (!dragging && editorContextRef.state.isDeleting) {
+      deleteSelf();
     }
   }
 

@@ -17,7 +17,6 @@ export default function () {
   // const editorContextRef = useRef(editorContext);
   const [panels, setPanels] = useState<Array<IPropertyPanelSectionProps>>([]);
   useEffect(() => {
-    console.log('RUNNING USEEFFECT IN PP');
     ctr++;
     let currTarg = editorContext.state.selectedItem;
     if (currTarg === null) {
@@ -33,7 +32,6 @@ export default function () {
       case TargetType.GLOBAL_DOT:
       case TargetType.REGION:
         p = makeRegionPanel(editorContext, currTarg.id);
-        console.log(p);
         setPanels(p);
         break;
       case TargetType.SYMBOL:
