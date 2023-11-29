@@ -15,7 +15,7 @@ router.delete('/post/:id', auth.verify, PostController.deletePostById);
 router.get('/post/:id', auth.verify, PostController.getPostById);
 
 //Handles a get posts request
-router.get('/all', auth.verify, PostController.queryPosts);
+router.get('/all', PostController.queryPosts);
 
 //Handles a get posts request
 router.get('/user', PostController.getUserPosts);
