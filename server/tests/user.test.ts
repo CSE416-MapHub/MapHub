@@ -36,7 +36,6 @@ describe('POST /auth/register', () => {
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('user');
-    console.log(response.body.user);
     expect(response.body.user).toEqual({
       id: mockId.toString(),
       username: userData.username,
@@ -126,6 +125,8 @@ describe('GET /auth/profile-picture ', () => {
   });
 
   it('should return a base-64 encoded string.', async () => {
+    jest.mock('../models/user-model');
+
     (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await supertest(app)
