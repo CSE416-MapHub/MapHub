@@ -5,10 +5,8 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 
 beforeEach(() => {
-  jest.setTimeout(6000);
-});
+  jest.clearAllMocks();
 
-beforeEach(() => {
   jest.setTimeout(6000);
 });
 
@@ -214,8 +212,8 @@ describe('GET /auth/exists', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+});
+afterEach(() => {
+  // Reset mock after the test
+  jest.clearAllMocks();
 });

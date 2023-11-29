@@ -53,14 +53,17 @@ const mapSchema = new Schema(
       required: false,
       default: [],
     },
-    regionsData: [
-      {
-        color: { type: String, required: true, default: '#FFFFFF' },
-        intensity: { type: Number, required: false },
-        category: { type: String, required: false },
-      },
-    ],
-
+    regionsData: {
+      type: [
+        {
+          color: { type: String, required: false, default: '#FFFFFF' },
+          intensity: { type: Number, required: false },
+          category: { type: String, required: false },
+        },
+      ],
+      required: false,
+      default: [],
+    },
     symbolsData: {
       type: [
         {

@@ -218,9 +218,12 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      const updatedMap = await new Map(map).save();
-      console.log('UPDATED MAP', JSON.stringify(updatedMap));
-      return res.status(200).json({ success: true, map: updatedMap });
+      console.log('MAP bEFORE CAST', JSON.stringify(map));
+      map = new Map(map);
+
+      const updatedMap = await map.save();
+      console.log(updatedMap);
+      return res.status(200).json({ success: true, map: 'updatedMap' });
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });
     }
