@@ -178,9 +178,9 @@ describe('GET /auth/exists', () => {
   it('should return a true message if the user exists in the database.', async () => {
     (userModel.exists as jest.Mock).mockResolvedValue(mockUser);
 
-    const response = await supertest(app).get('/auth/exists').send({
-      username: mockUsername,
-    });
+    const response = await supertest(app).get(
+      `/auth/exists?username=${mockUsername}`,
+    );
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({
@@ -193,9 +193,9 @@ describe('GET /auth/exists', () => {
   it('should return a false message if the user does not exist in the database.', async () => {
     (userModel.exists as jest.Mock).mockResolvedValue(null);
 
-    const response = await supertest(app).get('/auth/exists').send({
-      username: mockUsername,
-    });
+    const response = await supertest(app).get(
+      `/auth/exists?username=${mockUsername}`,
+    );
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toStrictEqual({
@@ -205,8 +205,8 @@ describe('GET /auth/exists', () => {
     });
   });
 
-  it('should send a bad request when the request has an empty body.', async () => {
-    const response = await supertest(app).get('/auth/exists').send({});
+  it('should send a bad request when the request has empty query parameters.', async () => {
+    const response = await supertest(app).get('/auth/exists');
     expect(response.statusCode).toBe(400);
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);

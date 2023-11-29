@@ -148,7 +148,7 @@ export const loginUser = async (req: Request, res: Response) => {
 
 export const getExists = async (request: Request, response: Response) => {
   try {
-    const { username } = request.body;
+    const { username } = request.query;
     if (!username) {
       return response.status(400).json({
         success: false,
