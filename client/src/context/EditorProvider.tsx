@@ -10,7 +10,6 @@ import {
   applyDelta,
 } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
-import { ActionStack } from './editorHelpers/Actions';
 
 export enum ToolbarButtons {
   select = 'select',
