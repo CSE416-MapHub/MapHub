@@ -332,8 +332,9 @@ describe('/map/payload/ dot payload', () => {
 
     jest
       .spyOn(mapModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        return Promise.resolve(this);
+      .mockImplementation(async function (this: MapDocument) {
+        console.log('MOCKING THIS?', this.title);
+        return this.toObject();
       });
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
