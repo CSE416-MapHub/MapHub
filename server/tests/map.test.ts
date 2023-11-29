@@ -83,11 +83,11 @@ beforeEach(() => {
 describe('POST /map/map', () => {
   it('create a new map', async () => {
     const mockId = new mongoose.Types.ObjectId();
-    const savedMap = {
-      _id: mockId,
-    };
-    mapModel.prototype.save = jest.fn().mockResolvedValue(savedMap);
-
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
     const mapDatas = {
       map: mapData,
     };
@@ -101,7 +101,6 @@ describe('POST /map/map', () => {
       .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
 
     expect(response.statusCode).toBe(200);
-
     expect(response.body).toHaveProperty('map');
   });
   it('fails to create a map with invalid GeoJSON data', async () => {

@@ -44,7 +44,9 @@ const PostController = {
 
       map.title = title;
       map.published = true;
+
       savedPost = await newPost.save();
+      console.log(savedPost);
       await map.save();
 
       res.status(200).json({
