@@ -30,8 +30,8 @@ export default function () {
   useEffect(() => {
     if (firstRender === 0) {
       getRecentPublished(
-        authContext.state.user?.username
-          ? authContext.state.user?.username
+        authContext.state.user?.id
+          ? authContext.state.user?.id
           : '',
       ).then(p => {
         setPMS(
@@ -56,24 +56,12 @@ export default function () {
       <Greeting />
       <CardCarousel
         title="My Published Maps"
-        maps={[
-          {
-            _id: '1',
-            title: 'map',
-            png: Buffer.alloc(0),
-          },
-        ]}
+        maps={pms}
         published={true}
       />
       <CardCarousel
         title="My Unpublished Maps"
-        maps={[
-          {
-            _id: '1',
-            title: 'map',
-            png: Buffer.alloc(0),
-          },
-        ]}
+        maps={ums}
         published={false}
       />
     </main>

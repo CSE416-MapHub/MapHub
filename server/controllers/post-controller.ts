@@ -61,8 +61,9 @@ const PostController = {
   getUserPosts: async (req: Request, res: Response) => {
     try {
       // const userId = (req as any).userId;
+      console.log(req.query.id);
 
-      const posts = await Post.find({ username: req.query.username }).exec();
+      const posts = await Post.find({ id: req.query.id }).exec();
 
       console.log('These are the posts', JSON.stringify(posts), posts.length);
       if (posts && posts.length > 0) {
