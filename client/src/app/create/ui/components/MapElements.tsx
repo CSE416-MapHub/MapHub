@@ -88,10 +88,20 @@ export default function () {
       } else {
         return;
       }
-      let dotInstance = loadedMap.dotsData[id];
-      let dotClass = dotNames.get(dotInstance.dot)!;
-      let action = makeDotPanel(editorContextRef, dotClass, dotInstance, id);
-      editorContextRef.current.dispatch(action);
+      editorContextRef.current.dispatch({
+        type: EditorActions.SET_SELECTED,
+        payload: {
+          selectedItem: {
+            type: TargetType.DOT,
+            id: id,
+            subid: '-1',
+          },
+        },
+      });
+      // let dotInstance = loadedMap.dotsData[id];
+      // let dotClass = dotNames.get(dotInstance.dot)!;
+      // let action = makeDotPanel(editorContextRef, dotClass, dotInstance, id);
+      // editorContextRef.current.dispatch(action);
       return;
     }
     handleMapClick(ev);
@@ -139,9 +149,9 @@ export default function () {
   map.addEventListener('click', ev => {
     if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
       let action = {
-        type: EditorActions.SET_PANEL,
+        type: EditorActions.SET_SELECTED,
         payload: {
-          propertiesPanel: [],
+          selectedItem: null,
         },
       };
       editorContextRef.current.dispatch(action);
@@ -163,8 +173,16 @@ export default function () {
         handleMapClick(ev);
         return;
       }
-      let action = makeRegionPanel(editorContextRef, myId);
-      editorContextRef.current.dispatch(action);
+      editorContextRef.current.dispatch({
+        type: EditorActions.SET_SELECTED,
+        payload: {
+          selectedItem: {
+            type: TargetType.REGION,
+            id: myId,
+            subid: '-1',
+          },
+        },
+      });
       L.DomEvent.stopPropagation(ev);
     });
     let p = layer as L.Path;

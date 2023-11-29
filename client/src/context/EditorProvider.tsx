@@ -4,12 +4,8 @@ import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
-import { Delta, DeltaType } from 'types/delta';
-import {
-  DELETED_NAME,
-  applyDelta,
-  updatePropertiesPanel,
-} from './editorHelpers/DeltaUtil';
+import { Delta, DeltaType, TargetType } from 'types/delta';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 
 export enum ToolbarButtons {
   select = 'select',
@@ -22,10 +18,15 @@ export enum ToolbarButtons {
 
 // the global state interface
 export interface IEditorState {
-  propertiesPanel: Array<IPropertyPanelSectionProps>;
+  // propertiesPanel: Array<IPropertyPanelSectionProps>;
   map: MHJSON | null;
   map_id: string;
   selectedTool: ToolbarButtons | null;
+  selectedItem: null | {
+    type: TargetType;
+    id: number;
+    subid: string;
+  };
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
@@ -37,7 +38,7 @@ export interface IEditorState {
 
 // initial global state
 let initialState: IEditorState = {
-  propertiesPanel: [],
+  // propertiesPanel: [],
   map: null,
   map_id: '',
   selectedTool: null,
@@ -48,11 +49,12 @@ let initialState: IEditorState = {
   },
   actionStack: new ActionStack(),
   lastInstantiated: DELETED_NAME,
+  selectedItem: null,
 };
 
 // actions the reducer can take
 export enum EditorActions {
-  SET_PANEL,
+  SET_SELECTED,
   SET_MAP,
   SET_TOOL,
   SET_TITLE,
@@ -69,11 +71,11 @@ function reducer(
 ): IEditorState {
   let newState: IEditorState = { ...prev };
   switch (action.type) {
-    case EditorActions.SET_PANEL: {
-      if (action.payload.propertiesPanel) {
-        newState.propertiesPanel = action.payload.propertiesPanel;
+    case EditorActions.SET_SELECTED: {
+      if (action.payload.selectedItem || action.payload.selectedItem === null) {
+        newState.selectedItem = action.payload.selectedItem;
       } else {
-        throw new Error('SET_PANEL must have a propertiesPanel in its payload');
+        throw new Error('SET_SELECTED must have a selectedItem in its payload');
       }
       break;
     }
@@ -182,16 +184,14 @@ class helpers {
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
       }
-      let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, d),
-      ];
+
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           actionStack: nStack,
           map: nMap,
           lastInstantiated: li,
-          propertiesPanel: newPropertiesPanel,
+          // propertiesPanel: newPropertiesPanel,
         },
       });
     } else {
@@ -210,10 +210,6 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
-      // build the properties panel
-      let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, a.undo),
-      ];
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -221,7 +217,6 @@ class helpers {
           map: nMap,
           actionStack: nStack,
           lastInstantiated: ctx.state.lastInstantiated,
-          propertiesPanel: newPropertiesPanel,
         },
       });
     } else {
@@ -240,10 +235,6 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
-      // build the properties panel
-      let newPropertiesPanel = [
-        ...updatePropertiesPanel(ctx, ctx.state.propertiesPanel, a.do),
-      ];
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -251,7 +242,6 @@ class helpers {
           map: nMap,
           actionStack: nStack,
           lastInstantiated: ctx.state.lastInstantiated,
-          propertiesPanel: newPropertiesPanel,
         },
       });
     } else {

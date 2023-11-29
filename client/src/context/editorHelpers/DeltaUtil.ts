@@ -58,61 +58,6 @@ const labelToDPKey = (name: string): keyof DeltaPayload => {
   return name as keyof DeltaPayload;
 };
 
-const updateBlacklist = new Set(['dot', 'svg']);
-
-export function updatePropertiesPanel(
-  ctx: IEditorContext,
-  p: Array<IPropertyPanelSectionProps>,
-  d: Delta,
-): Array<IPropertyPanelSectionProps> {
-  let pp = [...p];
-  let isDotDelta = d.payload.dot !== undefined;
-  let dotClass = {};
-  if (isDotDelta) {
-    dotClass = ctx.state.map!.globalDotDensityData.filter(dd => {
-      return dd.name === d.payload.dot;
-    })[0];
-  }
-
-  let dpayload = {
-    ...d.payload,
-    ...dotClass,
-  };
-
-  if (d.type === DeltaType.UPDATE) {
-    for (let panel in pp) {
-      for (let inp in pp[panel].items) {
-        let key = labelToDPKey(pp[panel].items[inp].name);
-        let valAtName = dpayload[key];
-        if (valAtName !== undefined && !updateBlacklist.has(key)) {
-          let k = valAtName;
-          if (m(k)) {
-            pp[panel].items[inp].input.value = k;
-          }
-        }
-      }
-    }
-  } else if (d.type === DeltaType.CREATE) {
-    console.log(d);
-    for (let panel in pp) {
-      for (let inp in pp[panel].items) {
-        let key = labelToDPKey(pp[panel].items[inp].name);
-        console.log(pp[panel].items[inp]);
-        console.log(key);
-        if (key === 'dot') {
-          let valAtName = d.payload['name'];
-          console.log('VAL ' + valAtName);
-          if (m(valAtName)) {
-            (pp[panel].items[inp].input.value as Array<string>).push(valAtName);
-          }
-        }
-      }
-    }
-  }
-
-  return pp;
-}
-
 /**
  * Applies a Delta to the map in place
  * @param map
