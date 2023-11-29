@@ -60,7 +60,7 @@ export function getRecentUnpublished(): Promise<
  *
  * @returns The 10 most recently published maps
  */
-export function getRecentPublished(username: string): Promise<
+export function getRecentPublished(userId: string): Promise<
   Array<{
     title: string;
     description: string;
@@ -69,7 +69,7 @@ export function getRecentPublished(username: string): Promise<
     png: Buffer;
   }>
 > {
-  return PostAPI.getAllUserPosts(username).then(res => {
+  return PostAPI.getAllUserPosts(userId).then(res => {
     if (res.status === 200) {
       let maps = res.data.posts;
       console.log('GET AL USER POSTS');

@@ -5,10 +5,8 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 
 beforeEach(() => {
-  jest.setTimeout(6000);
-});
+  jest.clearAllMocks();
 
-beforeEach(() => {
   jest.setTimeout(6000);
 });
 
@@ -38,7 +36,6 @@ describe('POST /auth/register', () => {
     expect(response.statusCode).toBe(200);
 
     expect(response.body).toHaveProperty('user');
-    console.log(response.body.user);
     expect(response.body.user).toEqual({
       id: mockId.toString(),
       username: userData.username,
@@ -128,6 +125,8 @@ describe('GET /auth/profile-picture ', () => {
   });
 
   it('should return a base-64 encoded string.', async () => {
+    jest.mock('../models/user-model');
+
     (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await supertest(app)
@@ -214,8 +213,8 @@ describe('GET /auth/exists', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+});
+afterEach(() => {
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
