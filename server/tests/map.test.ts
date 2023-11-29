@@ -651,6 +651,31 @@ describe('/map/payload/ global dot payload', () => {
   });
 });
 
+describe('/map/map update map by id', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('update title of map', async () => {
+    const mapPayload = { mapId: mapData._id, title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.title).toEqual(mapPayload.title);
+  });
+});
+
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();

@@ -232,6 +232,42 @@ const MapController = {
 
   updateMapById: async (req: Request, res: Response) => {
     // Implementation of deleting a map by ID
+    const userId = (req as any).userId;
+    const { mapId, title } = req.body;
+
+    console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
+    if (!mapId) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Map ID is required' });
+    }
+
+    try {
+      let map = await Map.findById(mapId);
+
+      if (!map) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Map not found' });
+      }
+      if (map.owner.toString() !== userId.toString()) {
+        return res
+          .status(401)
+          .json({ success: false, message: 'Unauthorized, not users map' });
+      }
+      if (title !== null && title !== undefined) {
+        console.log('updating title now from', map.title, 'to', title);
+        map.title = title;
+      }
+
+      const savedMap = await new Map(map).save();
+
+      console.log('finished updating ', savedMap);
+      res.status(200).json({ success: true, map: savedMap });
+    } catch (err: any) {
+      console.log('error in update mapbyid', err);
+      res.status(400).json({ success: false, message: err });
+    }
   },
 
   deleteMapById: async (req: Request, res: Response) => {
