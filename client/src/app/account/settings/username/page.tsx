@@ -1,9 +1,9 @@
 'use client';
 
-import { useContext, useState } from 'react';
+import { MouseEventHandler, useContext, useState } from 'react';
 
 import { AuthContext } from '../../../../context/AuthProvider';
-//import AccountAPI from '../../../../api/AccountAPI';
+import AccountAPI from '../../../../api/AccountAPI';
 import Button from '../../../../components/button';
 import SettingsMain from '../components/settingsMain';
 import SettingsHead from '../components/settingsHead';
@@ -19,7 +19,7 @@ function EditUsername() {
   const [newUsernameError, setNewUsernameError] = useState(false);
   const [newUsernameHelperText, setNewUsernameHelperText] = useState('');
 
-  const validate = (value: string) => {
+  const validate = async (value: string) => {
     if (!/^[\w.]{2,15}\w$/.test(value)) {
       setNewUsernameError(true);
       setNewUsernameHelperText(
@@ -27,8 +27,20 @@ function EditUsername() {
           'alphanumeric, underscore, or dot characters.',
       );
     } else {
-      setNewUsernameError(false);
-      setNewUsernameHelperText('');
+      try {
+        const response = await AccountAPI.getExists(value);
+        if (response.data.exists) {
+          setNewUsernameError(true);
+          setNewUsernameHelperText(
+            'The username is already in use. Please choose another one.',
+          );
+        } else {
+          setNewUsernameError(false);
+          setNewUsernameHelperText('');
+        }
+      } catch (error) {
+        // TODO: Notify the user.
+      }
     }
   };
 

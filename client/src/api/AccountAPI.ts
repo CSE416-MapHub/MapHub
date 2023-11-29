@@ -95,6 +95,10 @@ class AccountAPI {
   static async getAllUsers() {
     return this.api.get('/auth/users');
   }
+
+  static async getExists(username: string) {
+    return this.api.get(`/auth/exists?username=${username}`);
+  }
 }
 
 export default AccountAPI;
