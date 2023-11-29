@@ -147,14 +147,13 @@ const MapController = {
     const delta = req.body.delta;
     let map: MapDocument | null;
     //validating the requests
-
-    if (!delta.type) {
+    if (delta.type === null || delta.type === undefined) {
       return res
         .status(400)
         .json({ success: false, message: 'Delta Type not found' });
     }
 
-    if (!delta.targetType) {
+    if (delta.targetType === null || delta.targetType === undefined) {
       return res
         .status(400)
         .json({ success: false, message: 'Target Type not found' });
