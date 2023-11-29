@@ -30,7 +30,9 @@ export default function () {
   useEffect(() => {
     if (firstRender === 0) {
       getRecentPublished(
-        authContext.state.user?.id ? authContext.state.user?.id : '',
+        authContext.state.user?.id
+          ? authContext.state.user?.id
+          : '',
       ).then(p => {
         setPMS(
           p.map(i => {
