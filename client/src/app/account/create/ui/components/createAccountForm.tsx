@@ -323,10 +323,10 @@ function CreateAccountForm() {
           type: AuthActions.REGISTER_SUCCESS,
           payload: {
             user: {
-              id: result.data._id,
-              username: createAccountState.username.value,
+              id: result.data.user._id,
+              username: result.data.user.username,
               profilePic: URL.createObjectURL(
-                base64StringToBlob(result.data.profilePic),
+                base64StringToBlob(result.data.user.profilePic),
               ),
             },
           },
