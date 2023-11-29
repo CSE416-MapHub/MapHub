@@ -301,6 +301,79 @@ describe('POST /auth/username', () => {
   });
 });
 
+describe('GET /auth/verify ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+  const anotherMockUser = {
+    _id: '656775b4ec8174179a7d9e82',
+    username: 'anotherUser',
+    email: 'anotherUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue({
+      verifiedId: mockUser._id,
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app).get('/auth/verify');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: true,
+      user: {
+        id: mockUser._id,
+        username: mockUser.username,
+        profilePic: mockUser.profilePic.toString('base64'),
+      },
+    });
+  });
+
+  it('should send a not logged in response if cookies include an invalid user ID.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue({
+      verifiedId: anotherMockUser._id,
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/verify');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: false,
+      user: null,
+    });
+  });
+
+  it('should send a not logged in response if cookies are unverifiable.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/verify');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: false,
+      user: null,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+});
+
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
