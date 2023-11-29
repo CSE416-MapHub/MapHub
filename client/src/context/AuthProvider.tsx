@@ -1,3 +1,5 @@
+'use client';
+
 import React, { Dispatch, createContext, useReducer } from 'react';
 
 import AccountAPI from '../api/AccountAPI';
