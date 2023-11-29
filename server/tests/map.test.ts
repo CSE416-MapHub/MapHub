@@ -330,12 +330,6 @@ describe('/map/payload/ dot payload', () => {
       },
     };
 
-    jest
-      .spyOn(mapModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        return Promise.resolve(this);
-      });
-
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
 
     const response = await supertest(app)
@@ -349,6 +343,70 @@ describe('/map/payload/ dot payload', () => {
     expect(response.body.success).toBe(true);
     expect(response.body).toHaveProperty('map');
     expect(response.body.map.dotsData.length).toEqual(2);
+  });
+  it('dot update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          dot: 'SOME DOT 2',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, 1, '-1'],
+      payload: {
+        x: 313131,
+        y: 212121,
+        scale: 100,
+        dot: 'UPDATED DOT',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData[1]).toEqual({
+      x: 313131,
+      y: 212121,
+      scale: 100,
+      dot: 'UPDATED DOT',
+      _id: response.body.map.dotsData[1]._id,
+    });
   });
 });
 
