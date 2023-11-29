@@ -5,7 +5,12 @@ import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import fs from 'fs';
 
-jest.mock('../auth/index');
+beforeEach(() => {
+  jest.clearAllMocks();
+
+  jest.setTimeout(6000);
+});
+
 jest.mock('../models/user-model');
 beforeAll(() => {
   jest.setTimeout(6000);
