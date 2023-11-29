@@ -157,10 +157,10 @@ class GlobalDotHandler {
 
     if (payload.name !== undefined) {
       const originalName = map.globalDotDensityData[delta.target[1]].name;
-
+      console.log('ORIIGNAL NAME', originalName, 'updating to', payload.name);
       map.dotsData.forEach((dot: any) => {
         if (dot.dot === originalName) {
-          dot.name = payload.name;
+          dot.dot = payload.name;
         }
       });
 
@@ -220,7 +220,7 @@ class SymbolHandler {
 class DotHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     const payload = delta.payload;
-    if (!payload.dot) throw new Error('Dot type is required');
+    if (!payload.dot) throw new Error('Dot name is required');
     if (!payload.x) throw new Error('X coordinate is required');
     if (!payload.y) throw new Error('Y coordinate is required');
     if (!payload.scale) throw new Error('Scale is required');
