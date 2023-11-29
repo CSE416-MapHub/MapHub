@@ -92,7 +92,7 @@ const MapController = {
         geoJSON: 'placeholder',
         owner: (req as any).userId,
       });
-      savedMap = await newMap.save();
+      console.log(newMap);
     } catch (err: any) {
       console.error(err.message);
       return res
@@ -100,7 +100,7 @@ const MapController = {
         .json({ error: `map saving error: ${err.message}` });
     }
 
-    const mapID = savedMap._id.toString();
+    const mapID = newMap._id.toString();
     console.log('MAP ID HERE:', mapID);
 
     const saveFilePath = path.join(
@@ -109,6 +109,7 @@ const MapController = {
       'jsonStore',
       `${mapID}.geojson`,
     );
+
     const dir = path.dirname(saveFilePath);
     if (!fs.existsSync(dir)) {
       await fs.promises.mkdir(dir, { recursive: true });
@@ -127,6 +128,7 @@ const MapController = {
     try {
       newMap.geoJSON = saveFilePath;
       savedMap = await newMap.save();
+      console.log('FINAL MAP CREATE id', savedMap._id);
       res.status(200).json({
         success: true,
         map: { mapID: savedMap._id },

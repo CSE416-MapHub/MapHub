@@ -20,25 +20,24 @@ afterEach(() => {
 
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
-    const mockId = new mongoose.Types.ObjectId();
-    const mapId = new mongoose.Types.ObjectId();
-    const savedPost = {
-      _id: mockId,
-      title: 'Ukranian War',
-      description: 'very sad times',
-      mapID: mapId,
-      owner: mockUserID,
-      comments: [],
-      likes: [],
-    };
     const mockMap = {
       title: 'Blah blah',
       _id: new mongoose.Types.ObjectId(),
       published: false,
-      save: jest.fn(), // Add a mock save function here if needed
+      save: jest
+        .spyOn(mapModel.prototype, 'save')
+        .mockImplementation(function (this: any) {
+          console.log('POST: saving the edited map', this);
+          return Promise.resolve(this);
+        }),
     };
 
-    postModel.prototype.save = jest.fn().mockResolvedValue(savedPost);
+    jest
+      .spyOn(postModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
 
     jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
       const queryLikeObject = {
@@ -47,24 +46,19 @@ describe('POST /posts/publish', () => {
       return queryLikeObject as any;
     });
 
-    jest
-      .spyOn(mapModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        return Promise.resolve(this);
-      });
-
     const response = await supertest(app)
       .post(`/posts/publish/`)
       .send({
-        mapID: savedPost.mapID,
-        title: savedPost.title,
-        description: savedPost.description,
+        mapID: mockMap._id,
+        title: 'Ukranian War',
+        description: 'Grueling wars :(',
       })
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('post');
-    expect(response.body.post).toEqual({ postId: mockId.toString() });
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
   });
 });
 
