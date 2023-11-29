@@ -179,7 +179,7 @@ class helpers {
       });
       let nMap = { ...map };
       applyDelta(nMap, d);
-      if (ctx.state.map_id === GUEST_MAP_ID) {
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
 
@@ -212,7 +212,7 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
-      if (ctx.state.map_id === GUEST_MAP_ID) {
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
 
@@ -246,7 +246,7 @@ class helpers {
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.do);
-      if (ctx.state.map_id === GUEST_MAP_ID) {
+      if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
 
