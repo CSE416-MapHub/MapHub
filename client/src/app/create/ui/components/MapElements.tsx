@@ -3,20 +3,16 @@ import {
   EditorActions,
   EditorContext,
   ToolbarButtons,
-  IEditorState,
-  IEditorContext,
 } from 'context/EditorProvider';
 import * as G from 'geojson';
 import * as L from 'leaflet';
 import { useContext, useState, useEffect, useRef } from 'react';
-import { CircleMarker, GeoJSON, TileLayer, useMap } from 'react-leaflet';
-import { IInputProps, PropertyPanelInputType } from './property/PropertyInput';
+import { CircleMarker, GeoJSON, useMap } from 'react-leaflet';
 
-import { Dispatch } from 'react';
-import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
+import { DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps, IRegionProperties, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
-import { makeDotPanel, makeRegionPanel } from './property/createPanels';
+import Dot from './instances/Dot';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -36,6 +32,7 @@ export default function () {
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
+  const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
 
   useEffect(() => {
@@ -79,33 +76,6 @@ export default function () {
       setRerender(rerender + 1);
     }
   });
-
-  function handleDotClick(ev: L.LeafletMouseEvent, id: number) {
-    if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
-      let loadedMap: MHJSON;
-      if (editorContextRef.current.state.map) {
-        loadedMap = editorContextRef.current.state.map;
-      } else {
-        return;
-      }
-      editorContextRef.current.dispatch({
-        type: EditorActions.SET_SELECTED,
-        payload: {
-          selectedItem: {
-            type: TargetType.DOT,
-            id: id,
-            subid: '-1',
-          },
-        },
-      });
-      // let dotInstance = loadedMap.dotsData[id];
-      // let dotClass = dotNames.get(dotInstance.dot)!;
-      // let action = makeDotPanel(editorContextRef, dotClass, dotInstance, id);
-      // editorContextRef.current.dispatch(action);
-      return;
-    }
-    handleMapClick(ev);
-  }
 
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
@@ -208,26 +178,18 @@ export default function () {
         onEachFeature={perFeatureHandler}
       />
       {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
+        console.log('TRYING TO RENDER A DOT');
         if (dotInstance.dot === DELETED_NAME) {
           return;
         }
         let dotClass = dotNames.get(dotInstance.dot)!;
         return (
-          <CircleMarker
+          <Dot
+            dotInstance={dotInstance}
+            dotClass={dotClass}
+            id={i}
+            mapClickHandler={handleMapClick}
             key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}_${dotClass.opacity}_${dotClass.name}_${dotClass.color}_${dotClass.opacity}`}
-            center={L.latLng(dotInstance.y, dotInstance.x)}
-            color="#000000"
-            weight={1}
-            fillOpacity={dotClass.opacity}
-            fillColor={dotClass.color}
-            radius={dotClass.size * dotInstance.scale}
-            className="map-dot"
-            eventHandlers={{
-              click: ev => {
-                handleDotClick(ev, i);
-                L.DomEvent.stopPropagation(ev);
-              },
-            }}
           />
         );
       })}

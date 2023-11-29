@@ -60,6 +60,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
             onChange={e => setName(e.target.value)}
             margin="normal"
             style={{ flex: 1 }}
+            id="dot-modal-dot-name-field"
           />
         </Box>
 
@@ -120,6 +121,7 @@ const NewDotModal: React.FC<NewDotModalProps> = ({
             className={style.textField}
             margin="normal"
             style={{ flex: 1 }}
+            id="dot-modal-dot-size-field"
           />
         </Box>
 
