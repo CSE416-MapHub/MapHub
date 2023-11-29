@@ -305,13 +305,14 @@ const MapController = {
 
       maps = maps.slice(0, numOfMaps);
 
-      // console.log('THIS IS WHAT INSIDE MAPS', maps);
+      console.log('THIS IS WHAT INSIDE MAPS', maps);
       const condensedMaps = await Promise.all(
         maps.map(async map => {
           const png = await convertJsonToPng(map); //#TODO placeholder function
           return {
             _id: map._id,
             title: map.title,
+            // published: map.published,
             png: png,
           };
         }),
