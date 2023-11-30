@@ -37,6 +37,12 @@ export default function (props: CardCarouselProps) {
     rightArrow = <></>;
   }
 
+  const getAuthor = async() => {
+    //Get owner from getMapById
+
+    //Get username from getUserById
+  }
+
   return (
     <div
       style={{
@@ -61,12 +67,12 @@ export default function (props: CardCarouselProps) {
             <MapCard
               key={i}
               published={props.published}
-              id={map.title}
-              userId={'123'}
+              id={map._id}
+              userId={'123'} //get userId
               numLikes={123}
               userLiked={false}
               title={map.title}
-              author={'some author'}
+              author={'some author'} //get author
             />
           ))}
         <div className={style['carousel-arrow-container']}>{rightArrow}</div>
