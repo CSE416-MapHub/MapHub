@@ -1,0 +1,20 @@
+@use 'colors';
+@use 'elevation';
+@use 'shape';
+
+.settings__pane {
+  @include elevation.elevation-1;
+  @include shape.extra-large;
+  grid-area: pane;
+  display: flex;
+  flex-direction: column;
+  gap: shape.$extra-large;
+
+  width: calc(100% - 48px);
+  height: 80%;
+  padding: shape.$extra-large;
+
+  background-color: colors.$surface-container;
+
+  overflow: scroll;
+}

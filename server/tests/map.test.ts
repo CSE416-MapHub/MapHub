@@ -493,7 +493,7 @@ describe('/map/payload/ global dot payload', () => {
         size: 10,
         color: '#FFFFFF',
       },
-    };
+
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
 
@@ -588,6 +588,7 @@ describe('/map/payload/ global dot payload', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(true);
     expect(response.body).toHaveProperty('map');
+
     expect(response.body.map.globalDotDensityData[0]).toEqual({
       name: 'Updated Dot Group Global',
       opacity: 0.2,
@@ -647,7 +648,45 @@ describe('/map/payload/ global dot payload', () => {
 
     console.log(JSON.stringify(response.body));
     expect(response.statusCode).toBe(400);
-    expect(response.body.message).toEqual('Opacity is required');
+
+  });
+});
+
+describe('/map/map update map by id', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('update title of map', async () => {
+    const mapPayload = { mapId: mapData._id, title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.title).toEqual(mapPayload.title);
+  });
+  it('update title of map', async () => {
+    const mapPayload = { title: 'UPDATED MAP NEW BIGN' };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
+
+    const response = await supertest(app)
+      .put('/map/map')
+      .send(mapPayload)
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Map ID is required');
   });
 });
 

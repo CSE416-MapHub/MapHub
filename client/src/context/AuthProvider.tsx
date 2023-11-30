@@ -1,3 +1,5 @@
+'use client';
+
 import React, { Dispatch, createContext, useReducer } from 'react';
 
 import AccountAPI from '../api/AccountAPI';
@@ -23,6 +25,7 @@ export enum AuthActions {
   LOGOUT,
   REGISTER_SUCCESS,
   REGISTER_FAILURE,
+  EDIT_USERNAME,
 }
 
 type AuthAction =
@@ -35,7 +38,17 @@ type AuthAction =
       type: AuthActions.REGISTER_SUCCESS;
       payload: { user: { id: string; username: string; profilePic: string } };
     }
-  | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } };
+  | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } }
+  | {
+      type: AuthActions.EDIT_USERNAME;
+      payload: {
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        };
+      };
+    };
 
 // Define the reducer
 function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
@@ -64,6 +77,11 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
         isLoggedIn: false,
         user: null,
         error: action.payload.error,
+      };
+    case AuthActions.EDIT_USERNAME:
+      return {
+        ...prev,
+        user: action.payload.user,
       };
     default:
       return prev;

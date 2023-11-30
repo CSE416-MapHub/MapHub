@@ -1,0 +1,17 @@
+.settings__text-field {
+  width: 80%;
+  &--read {
+    &:hover {
+      div, input {
+        cursor: default;
+      }
+    }
+  }
+  &--link {
+    &:hover {
+      div, input {
+        cursor: pointer;
+      }
+    }
+  }
+}
