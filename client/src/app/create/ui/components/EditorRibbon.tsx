@@ -26,6 +26,7 @@ import { createNewMap, loadMapById } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { readFile } from 'fs';
 
 // A list of all accepted file types.
 const accept: string =
@@ -144,6 +145,7 @@ export default function () {
     optionsProps: string[],
   ) {
     console.log(mapName, optionsProps);
+    console.log(userGeoJSON);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
@@ -177,15 +179,28 @@ export default function () {
   useEffect(() => {
     const mapId = searchParams.get('mapid') as string;
     console.log(mapId);
-    let getMap: Promise<MHJSON>
-    if (authContext.state.isLoggedIn) {
+    if (mapId && editorContext.state.map_id !== mapId) {
+      let getMap: Promise<MHJSON>
+      if (authContext.state.isLoggedIn) {
+        getMap = loadMapById(mapId);
+        getMap.then(map => {
+          let mh: MHJSON = buildMHJSON(map.geoJSON);
+          mh.title = map.title;
+          mh.labels = map.labels;
+          mh.mapType = map.mapType;
+          console.log(mh);
+          let v = new GeoJSONVisitor(mh.geoJSON, true);
+          v.visitRoot();
+          mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
+            return {};
+          });
 
-      getMap = loadMapById(mapId);
-      getMap.then(map => {
-        console.log(map);
-        editorContext.helpers.setLoadedMap(editorContext, mapId, map);
-        setOpenImport(false);
-      })
+          editorContext.helpers.setLoadedMap(editorContext, mapId, mh);
+          console.log('loaded map set');
+          // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
+          setOpenImport(false);
+        })
+      }
     }
   }, [searchParams]);
 
