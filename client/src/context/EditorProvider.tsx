@@ -82,7 +82,8 @@ function reducer(
       if (action.payload.map && action.payload.map_id) {
         newState.map = action.payload.map;
         newState.map_id = action.payload.map_id;
-        let v = new GeoJSONVisitor(action.payload.map.geoJSON);
+        let geoJSON = action.payload.map.geoJSON;
+        let v = new GeoJSONVisitor(geoJSON);
         v.visitRoot();
         newState.mapDetails = {
           availableProps: Array.from(
