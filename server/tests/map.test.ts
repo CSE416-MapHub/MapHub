@@ -493,7 +493,7 @@ describe('/map/payload/ global dot payload', () => {
         size: 10,
         color: '#FFFFFF',
       },
-
+    };
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
 
@@ -588,7 +588,6 @@ describe('/map/payload/ global dot payload', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(true);
     expect(response.body).toHaveProperty('map');
-
     expect(response.body.map.globalDotDensityData[0]).toEqual({
       name: 'Updated Dot Group Global',
       opacity: 0.2,
@@ -648,7 +647,7 @@ describe('/map/payload/ global dot payload', () => {
 
     console.log(JSON.stringify(response.body));
     expect(response.statusCode).toBe(400);
-
+    expect(response.body.message).toEqual('Opacity is required');
   });
 });
 
