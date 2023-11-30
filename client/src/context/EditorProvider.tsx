@@ -22,6 +22,7 @@ import {
 >>>>>>> 0148819 (Integrated with backend)
 >>>>>>> f64e97f (Integrated with backend)
 import MapAPI from 'api/MapAPI';
+import { ActionStack } from './editorHelpers/Actions';
 
 export enum ToolbarButtons {
   select = 'select',
