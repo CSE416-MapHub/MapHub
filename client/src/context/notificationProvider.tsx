@@ -1,14 +1,14 @@
 'use client';
 
 import { createContext, useState, PropsWithChildren } from 'react';
+import { SnackbarActions } from '../components/snackbar';
 
 interface Notification {
   message: string;
-  action?: {
-    name: string;
-    onClick: Function;
-  };
-  canClose?: boolean;
+  // The set of actions to render to the snackbar.
+  actions?: SnackbarActions;
+  // The number of ms to show the notification.
+  autoHideDuration?: number;
 }
 
 const NotificationContext = createContext({});
