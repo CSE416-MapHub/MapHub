@@ -1,5 +1,4 @@
 'use client';
-
 import { TextField, Typography } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
@@ -45,6 +44,7 @@ export default function () {
     type: 'Point',
     coordinates: [0, 0],
   });
+  var GeoJSON = require('geojson');
   const menus = {
     File: {
       Import: {
@@ -184,18 +184,13 @@ export default function () {
       if (authContext.state.isLoggedIn) {
         getMap = loadMapById(mapId);
         getMap.then(map => {
-          let mh: MHJSON = buildMHJSON(map.geoJSON);
-          mh.title = map.title;
-          mh.labels = map.labels;
-          mh.mapType = map.mapType;
-          console.log(mh);
-          let v = new GeoJSONVisitor(mh.geoJSON, true);
-          v.visitRoot();
-          mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
-            return {};
-          });
-
-          editorContext.helpers.setLoadedMap(editorContext, mapId, mh);
+          let geoJSON = map.geoJSON.toString();
+          console.log(geoJSON);
+          let parsedGeoJSON = JSON.parse(geoJSON);
+          console.log(parsedGeoJSON);
+          console.log(typeof parsedGeoJSON);
+          map.geoJSON = parsedGeoJSON;
+          editorContext.helpers.setLoadedMap(editorContext, mapId, map);
           console.log('loaded map set');
           // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
           setOpenImport(false);
