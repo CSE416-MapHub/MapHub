@@ -1,17 +1,18 @@
 /// <reference types="cypress" />
-import {
-  NotificationsContext,
-  NotificationsContextValue,
-} from '../../src/context/notificationsProvider';
+import { NotificationsContext } from '../../src/context/notificationsProvider';
 
-function createMockNotifications(
-  props: Partial<NotificationsContextValue>,
-): NotificationsContextValue {
-  return {
+function createMockNotifications(props) {
+  const mockNotifications = {
     state: [],
-    dispatch: cy.stub().as('notifications-dispatch'),
+    dispatch: () => {},
     ...props,
   };
+  cy.stub(mockNotifications, 'dispatch')
+    .as('notifications-dispatch')
+    .callsFake(() => {
+      mockNotifications.state.shift();
+    });
+  return mockNotifications;
 }
 
 function MockNotificationsProvider({ children, ...props }) {
