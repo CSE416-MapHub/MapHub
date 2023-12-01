@@ -8,6 +8,7 @@ router.post('/register', AuthController.registerUser);
 router.get('/users', AuthController.getAllUsers);
 router.get('/exists', AuthController.getExists);
 router.get('/profile-picture', AuthController.getProfilePic);
+router.get('/verify', AuthController.getVerify);
 router.post('/username', auth.verify, AuthController.postUsername);
 router.post('/login', AuthController.loginUser);
 router.post('/logout', AuthController.logoutUser);
