@@ -21,10 +21,15 @@ type NotificationsAction =
   | { type: NotificationsActionType.enqueue; value: Omit<Notification, 'key'> }
   | { type: NotificationsActionType.dequeue };
 
-const NotificationsContext = createContext<{
+interface NotificationsContextValue {
   state: Notification[];
   dispatch: Dispatch<NotificationsAction>;
-}>({ state: [], dispatch: () => {} });
+}
+
+const NotificationsContext = createContext<NotificationsContextValue>({
+  state: [],
+  dispatch: () => {},
+});
 
 function NotificationsProvider({ children }: PropsWithChildren) {
   const notificationsReducer = (
@@ -60,6 +65,6 @@ function NotificationsProvider({ children }: PropsWithChildren) {
   );
 }
 
-export type { Notification };
+export type { Notification, NotificationsContextValue };
 export { NotificationsContext, NotificationsActionType };
 export default NotificationsProvider;
