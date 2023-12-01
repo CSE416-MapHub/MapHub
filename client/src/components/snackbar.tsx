@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { MouseEventHandler } from 'react';
 import {
   Snackbar as MaterialSnackbar,
   SnackbarProps as MaterialSnackbarProps,
@@ -22,16 +22,13 @@ interface SnackbarProps extends Partial<MaterialSnackbarProps> {
   actions?: SnackbarActions;
 }
 
-function Snackbar({ children, actions, ...props }: SnackbarProps) {
-  const [open, setOpen] = useState(true);
-
-  const handleClose = () => {
-    setOpen(false);
+function Snackbar({ children, actions, onClose, ...props }: SnackbarProps) {
+  const handleIconClose: MouseEventHandler = event => {
+    onClose?.(event, 'clickaway');
   };
-
-  const handleActionClick = () => {
-    actions?.label?.onClick ? actions.label.onClick() : null;
-    setOpen(false);
+  const handleActionClose: MouseEventHandler = event => {
+    actions?.label?.onClick?.();
+    onClose?.(event, 'clickaway');
   };
 
   return (
@@ -42,7 +39,7 @@ function Snackbar({ children, actions, ...props }: SnackbarProps) {
             <Button
               className={styles['snackbar__label']}
               variant="text"
-              onClick={handleActionClick}
+              onClick={handleActionClose}
               TouchRippleProps={{
                 classes: {
                   rippleVisible: styles['snackbar__label--press'],
@@ -51,26 +48,21 @@ function Snackbar({ children, actions, ...props }: SnackbarProps) {
             >
               {actions.label.text}
             </Button>
-          ) : (
-            ''
-          )}
+          ) : undefined}
           {actions?.close ? (
             <IconButton
               className={styles['snackbar__icon']}
               iconType="regular"
               iconName="x"
-              onClick={handleClose}
+              onClick={handleIconClose}
               TouchRippleProps={{
                 classes: { rippleVisible: styles['snackbar__icon--press'] },
               }}
             />
-          ) : (
-            ''
-          )}
+          ) : undefined}
         </>
       }
-      open={open}
-      onClose={handleClose}
+      onClose={onClose}
       ContentProps={{
         classes: {
           root: styles['snackbar__container'],
