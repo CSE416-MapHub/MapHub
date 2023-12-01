@@ -37,6 +37,7 @@ function Snackbar({ children, actions, onClose, ...props }: SnackbarProps) {
         <>
           {actions?.label ? (
             <Button
+              id="snack-label"
               className={styles['snackbar__label']}
               variant="text"
               onClick={handleActionClose}
@@ -51,6 +52,7 @@ function Snackbar({ children, actions, onClose, ...props }: SnackbarProps) {
           ) : undefined}
           {actions?.close ? (
             <IconButton
+              id="snack-icon"
               className={styles['snackbar__icon']}
               iconType="regular"
               iconName="x"
