@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Post from '../models/post-model';
+import Comment from '../models/comment-model';
 import Map from '../models/map-model';
 import express from 'express';
 import fs from 'fs';
@@ -212,7 +213,44 @@ const PostController = {
       });
     }
   },
-  createComment: async (req: Request, res: Response) => {},
+  createComment: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    const { content } = req.body;
+    const postId = req.params.postId;
+
+    const post = await Post.findById(postId);
+
+    if (!post) {
+      return res
+        .status(404)
+        .json({ success: false, message: 'Post not found' });
+    }
+
+    const newComment = new Comment({
+      user: userId,
+      content: content,
+      replies: [],
+      likes: [],
+    });
+
+    try {
+      const savedComment = await newComment.save();
+      post.comments.push(savedComment._id);
+
+      await post.save();
+
+      res.status(200).json({
+        success: true,
+        comment: savedComment,
+      });
+    } catch (err: any) {
+      console.error('Error in comment creation:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
   getCommentById: async (req: Request, res: Response) => {},
   updateCommentById: async (req: Request, res: Response) => {},
   deleteCommentById: async (req: Request, res: Response) => {},
