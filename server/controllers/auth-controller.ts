@@ -69,14 +69,22 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     const savedUser = await newUser.save();
     console.log('New user saved: ' + savedUser._id);
-    res.status(200).json({
-      success: true,
-      user: {
-        id: savedUser._id,
-        username: savedUser.username,
-        profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
-      },
-    });
+    const token = auth.signToken(savedUser._id.toString());
+    res
+      .status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      })
+      .json({
+        success: true,
+        user: {
+          id: savedUser._id,
+          username: savedUser.username,
+          profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
+        },
+      });
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
@@ -172,6 +180,41 @@ export const getExists = async (request: Request, response: Response) => {
       success: false,
       errorMessage: 'There is an internal error. Please try again.',
     });
+  }
+};
+
+export const getVerify = async (request: Request, response: Response) => {
+  const headers = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+  };
+  const notLoggedInBody = {
+    isLoggedIn: false,
+    user: null,
+  };
+  try {
+    const tokenPayload = await auth.verifyUser(request);
+    if (!tokenPayload) {
+      return response.status(200).set(headers).json(notLoggedInBody);
+    }
+    const user = await User.findById(tokenPayload.userId);
+    if (!user) {
+      return response.status(200).set(headers).json(notLoggedInBody);
+    }
+    return response
+      .status(200)
+      .set(headers)
+      .json({
+        isLoggedIn: true,
+        user: {
+          id: user._id,
+          username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
+        },
+      });
+  } catch (error) {
+    return response.status(200).set(headers).json(notLoggedInBody);
   }
 };
 

@@ -103,6 +103,10 @@ class AccountAPI {
   static async postUsername(username: string) {
     return this.api.post('/auth/username', { username });
   }
+
+  static async getVerify() {
+    return this.api.get('/auth/verify');
+  }
 }
 
 export default AccountAPI;

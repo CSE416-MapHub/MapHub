@@ -22,10 +22,10 @@ function Settings() {
   const router = useRouter();
 
   useEffect(() => {
-    if (!auth.state.isLoggedIn) {
+    if (auth.state.isLoggedIn === false) {
       router.replace('/account/sign-in');
     }
-  }, []);
+  }, [auth.state.isLoggedIn]);
 
   return (
     <SettingsMain id="settings" className={styles['settings__box']}>
