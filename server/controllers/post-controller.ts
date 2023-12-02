@@ -74,6 +74,7 @@ const PostController = {
         JSON.stringify(posts),
         posts.length,
       );
+
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
@@ -112,7 +113,51 @@ const PostController = {
   },
   updatePostById: async (req: Request, res: Response) => {},
   deletePostById: async (req: Request, res: Response) => {},
-  getPostById: async (req: Request, res: Response) => {},
+  getPostById: async (req: Request, res: Response) => {
+    try {
+      const postId = req.params.postId;
+      const post = await Post.findById(postId).populate('comments').exec();
+
+      if (!post) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Post not found' });
+      }
+
+      console.log('Got post', JSON.stringify(post), 'with id', postId);
+
+      const map = await Map.findById(post.map).exec();
+      if (!map) {
+        return res.status(500).json({
+          success: false,
+          message: 'Database never had a map with correct ID reference',
+        });
+      }
+
+      const png = map ? await convertJsonToPng(map) : null;
+
+      const postFound = {
+        title: post.title,
+        description: post.description,
+        postID: post._id,
+        mapID: post.map,
+        png: png,
+        likes: post.likes,
+        comments: post.comments,
+      };
+
+      res.status(200).json({
+        success: true,
+        posts: postFound,
+      });
+    } catch (error) {
+      console.error('Error in queryPosts:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
   queryPosts: async (req: Request, res: Response) => {
     try {
       const searchQuery = req.query.searchQuery || '';
