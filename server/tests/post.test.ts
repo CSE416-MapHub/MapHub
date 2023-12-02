@@ -5,6 +5,7 @@ import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import mapModel from '../models/map-model';
+import commentModel from '../models/comment-model';
 const mockUserID = new mongoose.Types.ObjectId();
 
 beforeEach(() => {
@@ -313,5 +314,47 @@ describe('GET /posts/:postId', () => {
     expect(response.body.posts.comments[0].content).toEqual(
       'this is a comment',
     );
+  });
+
+  describe('POST /posts/comments/:postId', () => {
+    it('creating a comment in a post', async () => {
+      jest
+        .spyOn(commentModel.prototype, 'save')
+        .mockImplementation(function (this: any) {
+          console.log('post saving hte post', this);
+          return Promise.resolve(this);
+        });
+      const mockPostId = new mongoose.Types.ObjectId();
+      const mockMapId = new mongoose.Types.ObjectId();
+      const mockPost = {
+        _id: mockPostId,
+        title: 'Post1',
+        description: 'Some decscsiorion',
+        map: mockMapId,
+        owner: new mongoose.Types.ObjectId(),
+        comments: [],
+        likes: [new mongoose.Types.ObjectId()],
+        save: jest.fn().mockReturnValue({}),
+      };
+
+      jest.spyOn(postModel, 'findById').mockImplementation((id: any) => {
+        return mockPost as any;
+      });
+
+      const response = await supertest(app)
+        .post(`/posts/comments/${mockPostId}/`)
+        .send({
+          content: 'THIS NEW COMMENT BABYY',
+        })
+        .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+      expect(response.statusCode).toBe(200);
+      expect(response.body).toHaveProperty('success', true);
+      expect(response.body).toHaveProperty('comment');
+      expect(response.body.comment.content).toEqual('THIS NEW COMMENT BABYY');
+      expect(response.body.comment.user).toEqual(mockUserID.toString());
+      expect(response.body.comment.likes).toEqual([]);
+      expect(response.body.comment.replies).toEqual([]);
+    });
   });
 });

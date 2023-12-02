@@ -45,6 +45,10 @@ class PostAPI {
   static async getAllUserPosts(userId: String) {
     return this.api.get(`/posts/user/${userId}`);
   }
+
+  static async createComment(postID: string, content: string) {
+    return this.api.post(`/posts/comments/${postID} `, { content });
+  }
 }
 
 export default PostAPI;
