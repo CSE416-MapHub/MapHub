@@ -7,12 +7,13 @@ import {
 import * as G from 'geojson';
 import * as L from 'leaflet';
 import { useContext, useState, useEffect, useRef } from 'react';
-import { CircleMarker, GeoJSON, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, SVGOverlay, useMap } from 'react-leaflet';
 
 import { DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps, IRegionProperties, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import Dot from './instances/Dot';
+import Text from './instances/Text';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -32,7 +33,7 @@ export default function () {
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
-  const [draggingItem, setDraggingItem] = useState(null);
+  // const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
 
   useEffect(() => {
@@ -211,6 +212,23 @@ export default function () {
           />
         );
       })}
+      {(() => {
+        let details = editorContextRef.current.state.mapDetails.regionData;
+        let activeLabels = editorContextRef.current.state.map!.labels;
+        return details.map(d => (
+          <Text
+            value={activeLabels.map(l => {
+              if (d.originalFeature.properties !== null) {
+                return d.originalFeature.properties[l] ?? 'undefined';
+              }
+              return 'undefined';
+            })}
+            // box={[91.93, 31.8086, 30.67, 8.241]}
+            box={d.box}
+            mapClickHandler={handleMapClick}
+          ></Text>
+        ));
+      })()}
     </>
   );
 }

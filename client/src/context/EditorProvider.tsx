@@ -1,7 +1,11 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
 import { IDotDensityProps, MHJSON } from 'types/MHJSON';
-import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
+import {
+  GeoJSONVisitor,
+  IFeatureVisitResults,
+  mergeBBox,
+} from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
@@ -31,7 +35,7 @@ export interface IEditorState {
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
-    originalRegions: Array<G.Feature>;
+    regionData: Array<IFeatureVisitResults>;
   };
   actionStack: ActionStack;
   lastInstantiated: string; // name of the last instantiated item
@@ -47,7 +51,7 @@ let initialState: IEditorState = {
   mapDetails: {
     availableProps: [],
     bbox: [0, 0, 0, 0],
-    originalRegions: [],
+    regionData: [],
   },
   actionStack: new ActionStack(),
   lastInstantiated: DELETED_NAME,
@@ -99,9 +103,7 @@ function reducer(
               (prev, curr) => mergeBBox(prev, curr.box),
               v.getFeatureResults().perFeature[0].box,
             ),
-          originalRegions: v
-            .getFeatureResults()
-            .perFeature.map(x => x.originalFeature),
+          regionData: v.getFeatureResults().perFeature,
         };
       } else {
         throw new Error('SET_MAP must have a map and a map_id in its payload');
