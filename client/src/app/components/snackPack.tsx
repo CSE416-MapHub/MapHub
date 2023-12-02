@@ -17,7 +17,6 @@ function SnackPack() {
 
   useEffect(() => {
     if (notifications.state.length && !notification) {
-      console.log(notifications.state.length, notification);
       // If there is a notification but no snackbar on display, display the new
       // snackbar.
       setNotification(notifications.state[0]);

@@ -1,9 +1,15 @@
 'use client';
 
+import { isAxiosError } from 'axios';
+import { base64StringToBlob } from 'blob-util';
 import { MouseEventHandler, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { AuthActions, AuthContext } from '../../../../context/AuthProvider';
+import {
+  NotificationsActionType,
+  NotificationsContext,
+} from '../../../../context/notificationsProvider';
 import AccountAPI from '../../../../api/AccountAPI';
 import Button from '../../../../components/button';
 import SettingsMain from '../components/settingsMain';
@@ -13,11 +19,12 @@ import SettingsReadTextField from '../components/settingsReadTextField';
 import SettingsSection from '../components/settingsSection';
 import SettingsTextField from '../components/settingsTextField';
 import styles from './styles/editUsername.module.scss';
-import { base64StringToBlob } from 'blob-util';
 
 function EditUsername() {
   const auth = useContext(AuthContext);
+  const notifications = useContext(NotificationsContext);
   const router = useRouter();
+
   const [newUsername, setNewUsername] = useState('');
   const [newUsernameError, setNewUsernameError] = useState(false);
   const [newUsernameHelperText, setNewUsernameHelperText] = useState('');
@@ -42,7 +49,25 @@ function EditUsername() {
           setNewUsernameHelperText('');
         }
       } catch (error) {
-        // TODO: Notify the user.
+        setNewUsernameError(true);
+        setNewUsernameHelperText(
+          'The username availability cannot be checked right now.',
+        );
+        notifications.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: 'Cannot check username availability.',
+            actions: {
+              label: {
+                text: 'Retry',
+                onClick: () => {
+                  validate(value);
+                },
+              },
+            },
+            autoHideDuration: 3000,
+          },
+        });
       }
     }
   };
@@ -64,7 +89,54 @@ function EditUsername() {
       });
       router.push('/account/settings');
     } catch (error) {
-      // TODO: Notify the user.
+      if (isAxiosError(error) && error?.response) {
+        switch (error.response.data.errorCode) {
+          case 1:
+          case 2:
+          case 3: {
+            setNewUsernameError(true);
+            setNewUsernameHelperText(error.response.data.errorMessage);
+            notifications.dispatch({
+              type: NotificationsActionType.enqueue,
+              value: {
+                message: 'Cannot edit username.',
+                actions: {
+                  close: true,
+                },
+                autoHideDuration: 5000,
+              },
+            });
+            break;
+          }
+          case 0:
+          default:
+            notifications.dispatch({
+              type: NotificationsActionType.enqueue,
+              value: {
+                message: 'Network Error. Cannot edit username.',
+                actions: {
+                  label: {
+                    text: 'Retry',
+                    onClick: handleSaveClick,
+                  },
+                },
+                autoHideDuration: 5000,
+              },
+            });
+            break;
+        }
+      } else {
+        notifications.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: 'Internal Error. Cannot edit username.',
+            actions: {
+              close: true,
+            },
+            autoHideDuration: 5000,
+          },
+        });
+      }
     }
   };
 
