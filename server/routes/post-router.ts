@@ -6,13 +6,13 @@ const router = express.Router();
 // Handles publishing a map post
 router.post('/publish/', auth.verify, PostController.createPost);
 // Handles updating an existing post request
-router.put('/post/:id', auth.verify, PostController.updatePostById);
+router.put('/post/:postId', auth.verify, PostController.updatePostById);
 
 // Handles a delete a post request
-router.delete('/post/:id', auth.verify, PostController.deletePostById);
+router.delete('/post/:postId', auth.verify, PostController.deletePostById);
 
 // Handles a get a post request
-router.get('/post/:id', auth.verify, PostController.getPostById);
+router.get('/post/:postId', PostController.getPostById);
 
 //Handles a get posts request
 router.get('/all', PostController.queryPosts);

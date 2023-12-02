@@ -233,3 +233,83 @@ describe('GET /posts/user', () => {
     );
   });
 });
+
+describe('GET /posts/:postId', () => {
+  it('gets post by ID with populated comments and associated map', async () => {
+    // Set up some mock data
+    const mockPostId = new mongoose.Types.ObjectId();
+    const mockMapId = new mongoose.Types.ObjectId();
+    const mockComments = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        user: new mongoose.Types.ObjectId(),
+        content: 'this is a comment',
+        replies: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+        likes: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+      },
+    ];
+    const mockPosts = [
+      {
+        _id: mockPostId,
+        title: 'Post1',
+        description: 'Some decscsiorion',
+        map: mockMapId,
+        owner: new mongoose.Types.ObjectId(),
+        comments: [],
+        likes: [new mongoose.Types.ObjectId()],
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Post2',
+        description: 'POST 2',
+        map: new mongoose.Types.ObjectId(),
+      },
+    ];
+
+    const mockMaps = [
+      {
+        _id: mockMapId,
+        // other map properties
+      },
+      {
+        _id: mockPosts[1],
+        // other map properties
+      },
+    ];
+
+    jest
+      .spyOn(postModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          map: mockMapId,
+          comments: mockComments, // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    jest
+      .spyOn(mapModel, 'findById')
+      .mockImplementation((id: mongoose.Types.ObjectId | string) => {
+        const result = mockMaps.find(
+          map => map._id.toString() === id.toString(),
+        );
+        return { exec: jest.fn().mockResolvedValue(result) } as any;
+      });
+
+    const response = await supertest(app)
+      .get(`/posts/post/${mockMapId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('posts');
+    console.log(response.body.posts);
+    expect(response.body.posts.comments[0].content).toEqual(
+      'this is a comment',
+    );
+  });
+});

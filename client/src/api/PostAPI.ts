@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { post } from 'cypress/types/jquery';
 import { MHJSON } from 'types/MHJSON';
 const SERVER_PORT = 3031;
 
@@ -35,7 +36,9 @@ class PostAPI {
   static async publishMap(mapID: string, title: string, description: string) {
     return this.api.post('/posts/publish', { mapID, title, description });
   }
-
+  static async getPostById(postId: string) {
+    return this.api.get(`/posts/post/${postId}`);
+  }
   static async queryPosts(searchQuery: string) {
     return this.api.get('/posts/all', { params: { searchQuery } });
   }
