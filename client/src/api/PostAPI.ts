@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { post } from 'cypress/types/jquery';
 import { MHJSON } from 'types/MHJSON';
+import { PostPayload, LikePayload } from 'types/postPayload';
 const SERVER_PORT = 3031;
 
 function getBaseUrl(): string {
@@ -48,6 +49,13 @@ class PostAPI {
 
   static async createComment(postID: string, content: string) {
     return this.api.post(`/posts/comments/${postID} `, { content });
+  }
+  // static async updatePostInfo(postPayload: PostPayload) {
+  //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
+  // }
+
+  static async changeLikeToPost(likePayload: LikePayload) {
+    return this.api.patch(`/posts/post/changeLike`, { likePayload });
   }
 }
 
