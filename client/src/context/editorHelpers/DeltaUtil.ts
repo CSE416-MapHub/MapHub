@@ -284,6 +284,11 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
       if (map.globalCategoryData.length <= d.target[1] || d.target[1] < 0) {
         throw new Error('Target index out of bounds');
       }
+      // check if the category name is taken
+      let taken = map.globalCategoryData.filter(c => c.name === d.payload.name);
+      if (taken.length === 1 || d.payload.name === DELETED_NAME) {
+        throw new Error('Category name ' + d.payload.name + ' is already used');
+      }
       let targ = map.globalCategoryData[d.target[1]];
 
       // if the name changed, we have to change the name of each dot
