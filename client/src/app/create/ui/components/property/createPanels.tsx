@@ -9,11 +9,13 @@ import { IInputProps, PropertyPanelInputType } from './PropertyInput';
 import { MutableRefObject } from 'react';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import { IPropertyPanelSectionProps } from './PropertyPanel';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
 let textType: PropertyPanelInputType = 'text';
 let colorType: PropertyPanelInputType = 'color';
+let categoricalType: PropertyPanelInputType = 'dropdown';
 
 export type DotPanelData = IDotDensityProps | IDotInstance;
 
@@ -313,5 +315,47 @@ export function makeRegionPanel(
       ],
     },
   ];
+
+  if (m.mapType === 'categorical') {
+    panels = panels.concat(makeCategoricalPanel(ctx, id));
+  }
+  return panels;
+}
+
+export function makeCategoricalPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let allCategories = ctx.state.map!.globalCategoryData;
+  let panels = [
+    {
+      name: 'Region Category',
+      // TODO: force unundefined
+      items: [
+        {
+          name: 'Category',
+          input: {
+            type: categoricalType,
+            short: false,
+            disabled: false,
+            value: allCategories.map(c => c.name),
+            auxiliaryComponent:
+              ctx.state.map!.regionsData[id].category ?? DELETED_NAME,
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.REGION,
+                'category',
+                ctx.state.map!.regionsData[id].category ?? DELETED_NAME,
+                val,
+              );
+            },
+          },
+        },
+      ],
+    },
+  ];
+
   return panels;
 }

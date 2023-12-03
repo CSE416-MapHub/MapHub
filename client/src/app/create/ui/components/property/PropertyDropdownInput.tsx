@@ -1,7 +1,9 @@
 'use client';
 import { MenuItem, Select, makeStyles } from '@mui/material';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import NewCategoryModal from '../modals/newCategoryModal';
+import { EditorContext } from 'context/EditorProvider';
+import { DeltaType, TargetType } from 'types/delta';
 
 export interface PropertyDropdownInputProps {
   options: Array<string>;
@@ -12,6 +14,7 @@ export interface PropertyDropdownInputProps {
 export default function (props: PropertyDropdownInputProps) {
   const [selected, setSelected] = useState<string>(props.selected);
   const [openCategoryModal, setOpenCategoryModal] = useState(false);
+  const editorContext = useContext(EditorContext);
 
   function handleChange(v: string) {
     if (v !== '+ New Category') {
@@ -23,7 +26,37 @@ export default function (props: PropertyDropdownInputProps) {
     }
   }
 
-  function onCategoryConfirm() {}
+  function onCategoryConfirm(name: string, color: string) {
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.CREATE,
+        targetType: TargetType.GLOBAL_CATEGORY,
+        target: [
+          editorContext.state.map_id,
+          editorContext.state.map!.globalCategoryData.length,
+          '-1',
+        ],
+        payload: {
+          name,
+          color,
+        },
+      },
+      {
+        type: DeltaType.DELETE,
+        targetType: TargetType.GLOBAL_CATEGORY,
+        target: [
+          editorContext.state.map_id,
+          editorContext.state.map!.globalCategoryData.length,
+          '-1',
+        ],
+        payload: {
+          name,
+          color,
+        },
+      },
+    );
+  }
   return (
     <>
       <Select
