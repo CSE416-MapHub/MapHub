@@ -18,7 +18,7 @@ router.get('/post/:id', auth.verify, PostController.getPostById);
 router.get('/all', auth.verify, PostController.queryPosts);
 
 //Handles a get posts request
-router.get('/user', PostController.getUserPosts);
+router.get('/user/:id', PostController.getUserPosts);
 
 //Handles a create a comment request
 router.post('/comments/:postId', auth.verify, PostController.createComment);
