@@ -302,16 +302,51 @@ const PostController = {
     }
   },
 
-  deleteCommentById: async (req: Request, res: Response) => {
-    // TODO: do we nned?
-  },
-  getCommentsByPost: async (req: Request, res: Response) => {},
-  addLikeById: async (req: Request, res: Response) => {
+  deleteCommentById: async (req: Request, res: Response) => {},
+
+  likeChangeComment: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
+    const { commentId, likeChange } = req.body;
+
+    if (!commentId) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Like Payload Not provided' });
+    }
+
+    try {
+      const comment = await Comment.findById(commentId);
+      if (!comment) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Post not found' });
+      }
+      if (likeChange === LikeChange.ADD_LIKE) {
+        console.log('added like');
+        comment.likes.push(userId);
+      } else if (likeChange === LikeChange.REMOVE_LIKE) {
+        console.log('removed like');
+        comment.likes = comment.likes.filter(
+          like => like.toString() !== userId.toString(),
+        );
+      }
+      console.log(JSON.stringify(comment));
+      await comment.save();
+
+      //returns the new likes amount
+      res.status(200).json({
+        success: true,
+        likes: comment.likes.length,
+      });
+    } catch (err: any) {
+      console.error('Error in comment creation:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
   },
-  deleteLikeById: async (req: Request, res: Response) => {
-    // DISLIKE
-  },
+
   addReplyById: async (req: Request, res: Response) => {},
   getAllReplies: async (req: Request, res: Response) => {},
 };

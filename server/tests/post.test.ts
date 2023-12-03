@@ -377,7 +377,7 @@ describe('PATCH /posts/post/likeChange', () => {
       return mockPost as any;
     });
     const response = await supertest(app)
-      .patch(`/posts/post/changeLike`)
+      .patch(`/posts/post/likeChange`)
       .send({
         postId: mockPostId,
         likeChange: LikeChange.ADD_LIKE,
@@ -404,9 +404,64 @@ describe('PATCH /posts/post/likeChange', () => {
       return mockPost as any;
     });
     const response = await supertest(app)
-      .patch(`/posts/post/changeLike`)
+      .patch(`/posts/post/likeChange`)
       .send({
         postId: mockPostId,
+        likeChange: LikeChange.REMOVE_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 1);
+  });
+});
+
+describe('PATCH /posts/comments/likeChange', () => {
+  const mockCommentId = new mongoose.Types.ObjectId();
+
+  it('adding user like', async () => {
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some text bruh',
+      replies: [],
+      likes: [new mongoose.Types.ObjectId()],
+      save: jest.fn().mockReturnThis(),
+    };
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/comments/likeChange`)
+      .send({
+        commentId: mockCommentId,
+        likeChange: LikeChange.ADD_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 2);
+  });
+
+  it('removing user like', async () => {
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some text bruh',
+      replies: [],
+      likes: [new mongoose.Types.ObjectId(), mockUserID],
+      save: jest.fn().mockReturnThis(),
+    };
+
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/comments/likeChange`)
+      .send({
+        commentId: mockCommentId,
         likeChange: LikeChange.REMOVE_LIKE,
       })
       .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
