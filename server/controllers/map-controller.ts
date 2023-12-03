@@ -336,7 +336,7 @@ const MapController = {
       }
 
       // Retrieve the most recent maps for the user
-      let maps = await Map.find({ owner: userId })
+      let maps = await Map.find({ owner: userId, published: false })
         .sort({ updatedAt: -1 })
         .exec();
 
