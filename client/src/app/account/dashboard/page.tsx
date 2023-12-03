@@ -30,10 +30,12 @@ export default function () {
   >([]);
 
   useEffect(() => {
-    if (firstRender === 0) {
+    if (firstRender === 0 && authContext.state.isLoggedIn) {
+      console.log(authContext.state);
       getRecentPublished(
         authContext.state.user?.id ? authContext.state.user?.id : '',
       ).then(p => {
+        console.log(p);
         setPMS(
           p.map(i => {
             return {
@@ -68,7 +70,7 @@ export default function () {
       });
       setFirstRender(firstRender + 1);
     }
-  });
+  }, [authContext.state.isLoggedIn === true]);
 
   return (
     <main>
