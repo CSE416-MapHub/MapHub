@@ -17,21 +17,14 @@ router.get('/post/:postId', PostController.getPostById);
 //Handles a get posts request
 router.get('/all', PostController.queryPosts);
 
+//Add a like
+router.patch('/post/changeLike', auth.verify, PostController.changeLikeToPost);
+
 //Handles a get posts request
 router.get('/user/:userId', PostController.getUserPosts);
 
 //Handles a create a comment request
 router.post('/comments/:postId', auth.verify, PostController.createComment);
-
-//Handles a get a comment request
-router.get('/comments/:commentId/', auth.verify, PostController.getCommentById);
-
-//Handles an update comment request
-router.put(
-  '/comments/:commentId',
-  auth.verify,
-  PostController.updateCommentById,
-);
 
 //Handles a delete comment request
 router.delete(

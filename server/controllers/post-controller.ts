@@ -9,6 +9,10 @@ import fs from 'fs';
 import path from 'path';
 import { convertJsonToPng } from './map-controller';
 
+export enum LikeChange {
+  ADD_LIKE = 'like',
+  REMOVE_LIKE = 'dislike',
+}
 const PostController = {
   createPost: async (req: Request, res: Response) => {
     const { mapID, title, description } = req.body;
@@ -112,7 +116,9 @@ const PostController = {
       });
     }
   },
-  updatePostById: async (req: Request, res: Response) => {},
+  updatePostById: async (req: Request, res: Response) => {
+    const postPayload = req.body.postPayload;
+  },
   deletePostById: async (req: Request, res: Response) => {},
   getPostById: async (req: Request, res: Response) => {
     try {
@@ -253,12 +259,61 @@ const PostController = {
       });
     }
   },
-  getCommentById: async (req: Request, res: Response) => {},
-  updateCommentById: async (req: Request, res: Response) => {},
-  deleteCommentById: async (req: Request, res: Response) => {},
+
+  changeLikeToPost: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    console.log(req.body);
+    const { postId, likeChange } = req.body;
+
+    if (!postId) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Like Payload Not provided' });
+    }
+
+    try {
+      const post = await Post.findById(postId);
+      if (!post) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Post not found' });
+      }
+      if (likeChange === LikeChange.ADD_LIKE) {
+        console.log('added like');
+        post.likes.push(userId);
+      } else if (likeChange === LikeChange.REMOVE_LIKE) {
+        console.log('removed like');
+        post.likes = post.likes.filter(
+          like => like.toString() !== userId.toString(),
+        );
+      }
+      console.log(JSON.stringify(post));
+      await post.save();
+
+      //returns the new likes amount
+      res.status(200).json({
+        success: true,
+        likes: post.likes.length,
+      });
+    } catch (err: any) {
+      console.error('Error in comment creation:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
+
+  deleteCommentById: async (req: Request, res: Response) => {
+    // TODO: do we nned?
+  },
   getCommentsByPost: async (req: Request, res: Response) => {},
-  addLikeById: async (req: Request, res: Response) => {},
-  deleteLikeById: async (req: Request, res: Response) => {},
+  addLikeById: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+  },
+  deleteLikeById: async (req: Request, res: Response) => {
+    // DISLIKE
+  },
   addReplyById: async (req: Request, res: Response) => {},
   getAllReplies: async (req: Request, res: Response) => {},
 };
