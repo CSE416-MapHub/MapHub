@@ -65,6 +65,10 @@ class PostAPI {
   static async changeLikeToComment(likePayload: LikePayloadComment) {
     return this.api.patch(`/posts/comments/likeChange`, { likePayload });
   }
+
+  static async addReplyToComment(commentId: string, content: string) {
+    return this.api.post(`/posts/comments/${commentId}/replies`, { content });
+  }
 }
 
 export default PostAPI;
