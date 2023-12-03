@@ -73,7 +73,7 @@ export default function () {
     // are synced
     if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
       setCurrentRegionProps(loadedMap.regionsData);
-      setRerender(rerender + 1);
+      // setRerender(rerender + 1);
     }
   });
 
