@@ -16,6 +16,7 @@ export default function () {
     Array<{
       _id: string;
       title: string;
+      userId: string;
       png: Buffer;
     }>
   >([]);
@@ -23,6 +24,7 @@ export default function () {
     Array<{
       _id: string;
       title: string;
+      userId: string;
       png: Buffer;
     }>
   >([]);
@@ -37,8 +39,7 @@ export default function () {
             return {
               _id: i.postID,
               title: i.title,
-              description: i.description,
-              mapId: i.mapID,
+              userId: authContext.state.user?.id ? authContext.state.user?.id : '',
               png: i.png,
             };
           }),

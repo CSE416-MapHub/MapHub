@@ -12,6 +12,7 @@ export interface CardCarouselProps {
   maps: Array<{
     _id: string;
     title: string;
+    userId: string;
     png: Buffer;
   }>;
   published: boolean;
@@ -37,9 +38,7 @@ export default function (props: CardCarouselProps) {
     rightArrow = <></>;
   }
 
-  const getAuthor = async() => {
-    //Get owner from getMapById
-
+  const getAuthorById = async() => {
     //Get username from getUserById
   }
 
@@ -68,8 +67,8 @@ export default function (props: CardCarouselProps) {
               key={i}
               published={props.published}
               id={map._id}
-              userId={'123'} //get userId
-              numLikes={123}
+              userId={map.userId} //get userId
+              numLikes={123} //get numlikes
               userLiked={false}
               title={map.title}
               author={'some author'} //get author
