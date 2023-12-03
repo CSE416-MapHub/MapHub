@@ -53,11 +53,12 @@ export default function () {
           png: Buffer;
         }[] = [];
         p.forEach(map => {
+          console.log(map);
           if(!map.published) {
             unpublishedMaps.push({
               _id: map._id,
               title: map.title,
-              userId: map.userId,
+              userId: map.owner,
               png: map.png,
             });
           }

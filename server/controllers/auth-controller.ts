@@ -183,6 +183,42 @@ export const getExists = async (request: Request, response: Response) => {
   }
 };
 
+export const getUserById = async (request: Request, response: Response) => {
+  try {
+    const { id } = request.query;
+    if (!id) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'Please include the id to check if it exists.',
+      });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return response
+        .status(400).json({
+          success: false,
+          errorMessage: 'User not found.'
+        });
+    } else {
+      return response
+        .status(200)
+        .json({
+          user: {
+            id: user._id,
+            username: user.username,
+            profilePic: Buffer.from(user.profilePic).toString('base64'),
+          }
+        })
+    }
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorMessage: 'There is an internal error. Please try again.',
+    });
+  }
+}
+
 export const getVerify = async (request: Request, response: Response) => {
   const headers = {
     'Cache-Control': 'no-cache, no-store, must-revalidate',
