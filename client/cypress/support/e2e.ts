@@ -32,6 +32,8 @@ Cypress.Commands.add('loadVatican', () => {
       force: true,
     },
   );
+  cy.get('#map-type-dropdown').click();
+  cy.get("li:contains('Flow')").click();
   cy.get('span:contains("NAME_ISO")').click();
   cy.get('p:contains("Confirm")').click();
   // TODO: less hackish way
