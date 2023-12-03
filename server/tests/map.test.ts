@@ -246,12 +246,14 @@ describe('GET /map/recents/', () => {
       {
         _id: mockMaps[2]._id.toString(),
         title: mockMaps[2].title,
+        owner: mockMaps[2].owner,
         png: { type: 'Buffer', data: [] },
         published: false,
       },
       {
         _id: mockMaps[1]._id.toString(),
         title: mockMaps[1].title,
+        owner: mockMaps[1].owner,
         png: { type: 'Buffer', data: [] },
         published: false,
       },
