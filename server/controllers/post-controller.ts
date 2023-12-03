@@ -123,7 +123,16 @@ const PostController = {
   getPostById: async (req: Request, res: Response) => {
     try {
       const postId = req.params.postId;
-      const post = await Post.findById(postId).populate('comments').exec();
+      const post = await Post.findById(postId)
+        .populate({
+          path: 'comments', // Path to the field in the Post model
+          model: 'Comment', // Model to use for population
+          populate: {
+            path: 'replies', // Path to the field in the Comment model
+            model: 'Comment', // Model to use for population of replies
+          },
+        })
+        .exec();
 
       if (!post) {
         return res
@@ -348,8 +357,9 @@ const PostController = {
       });
     }
   },
-
-  addReplyById: async (req: Request, res: Response) => {},
+  addReplyById: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+  },
   getAllReplies: async (req: Request, res: Response) => {},
 };
 
