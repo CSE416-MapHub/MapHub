@@ -357,6 +357,44 @@ const PostController = {
   },
   addReplyById: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
+    const { content } = req.body;
+    const commentId = req.params.commentId;
+
+    const comment = await Comment.findById(commentId);
+
+    if (!comment) {
+      return res
+        .status(400)
+        .json({ success: false, message: 'Comment not found' });
+    }
+
+    const newReply = new Comment({
+      user: userId,
+      content: content,
+      replies: [],
+      likes: [],
+    });
+
+    try {
+      const savedReply = await newReply.save();
+      comment.replies.push(savedReply._id);
+
+      console.log('THIS IS A REPLY', savedReply);
+      console.log('THIS IS A COMMENT', comment);
+
+      await comment.save();
+
+      res.status(200).json({
+        success: true,
+        reply: savedReply,
+      });
+    } catch (err: any) {
+      console.error('Error in comment creation:', err);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
   },
   getAllReplies: async (req: Request, res: Response) => {},
 };

@@ -471,3 +471,42 @@ describe('PATCH /posts/comments/likeChange', () => {
     expect(response.body).toHaveProperty('likes', 1);
   });
 });
+
+describe('POST /posts/comments/:commentId/replies', () => {
+  it('add a reply to a comment', async () => {
+    jest
+      .spyOn(commentModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
+    const mockCommentId = new mongoose.Types.ObjectId();
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some comment stuff',
+      replies: [],
+      likes: [],
+      save: jest.fn().mockReturnThis(),
+    };
+
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+
+    const response = await supertest(app)
+      .post(`/posts/comments/${mockCommentId}/replies`)
+      .send({
+        content: 'THIS NEW REPLY',
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('reply');
+    expect(response.body.reply.content).toEqual('THIS NEW REPLY');
+    expect(response.body.reply.user).toEqual(mockUserID.toString());
+    expect(response.body.reply.likes).toEqual([]);
+    expect(response.body.reply.replies).toEqual([]);
+  });
+});
