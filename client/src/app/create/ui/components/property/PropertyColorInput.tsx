@@ -20,8 +20,6 @@ export default function ({
 }: ColorInputProps) {
   const [currColor, setColor] = useColor(color);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
-
-  console.log('IS THIS DISABLED?  ' + disabled);
   return (
     <>
       <IconButton

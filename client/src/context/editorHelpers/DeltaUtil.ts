@@ -280,13 +280,33 @@ function deltaRegion(map: MHJSON, d: Delta) {
 function deltaGlobalCategory(map: MHJSON, d: Delta) {
   switch (d.type) {
     case DeltaType.UPDATE: {
+      map.regionsData = [...map.regionsData];
+      if (map.globalCategoryData.length <= d.target[1] || d.target[1] < 0) {
+        throw new Error('Target index out of bounds');
+      }
+      let targ = map.globalCategoryData[d.target[1]];
+
+      // if the name changed, we have to change the name of each dot
+      if (d.payload.name && d.payload.name !== targ.name) {
+        let oldName = targ.name;
+        map.regionsData = map.regionsData.map(r => {
+          if (r.category === oldName) {
+            r.category = d.payload.name!;
+          }
+          return r;
+        });
+      }
+      targ.name = d.payload.name ?? targ.name;
+      targ.color = d.payload.color ?? targ.color;
+      break;
     }
     case DeltaType.CREATE: {
       // must have an name, opacity, size, color
+      map.regionsData = [...map.regionsData];
       let p = d.payload;
       if (p.name === undefined || p.color === undefined) {
         console.log(p);
-        throw new Error('Malformed dot in CREATE');
+        throw new Error('Malformed category in CREATE');
       }
 
       let taken = p.name === '+ New Category';
@@ -310,6 +330,7 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
       break;
     }
     case DeltaType.DELETE: {
+      map.regionsData = [...map.regionsData];
       if (map.globalCategoryData.length <= d.target[1] || d.target[1] < 0) {
         throw new Error('Target index out of bounds');
       }

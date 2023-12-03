@@ -3,7 +3,6 @@ import EditorRibbon from './ui/components/EditorRibbon';
 import Properties from './ui/components/property/Property';
 import dynamic from 'next/dynamic';
 
-import DeleteModal from './ui/components/modals/deleteInstance';
 import mapStyle from './ui/components/Map.module.scss';
 import Toolbar from './ui/components/toolbar';
 import { EditorProvider } from 'context/EditorProvider';
