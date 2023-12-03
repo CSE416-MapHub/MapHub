@@ -35,6 +35,7 @@ export default function () {
   const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
 
+
   useEffect(() => {
     let b = editorContextStaleable.state.mapDetails.bbox;
     let loadedMap = editorContextRef.current.state.map;
@@ -200,7 +201,12 @@ export default function () {
         if (dotInstance.dot === DELETED_NAME) {
           return;
         }
-        let dotClass = dotNames.get(dotInstance.dot)!;
+        let dotClass = dotNames.get(dotInstance.dot) ?? {
+          opacity: 0,
+          name: DELETED_NAME,
+          color: '#000000',
+          size: 0,
+        };
         return (
           <Dot
             dotInstance={dotInstance}
