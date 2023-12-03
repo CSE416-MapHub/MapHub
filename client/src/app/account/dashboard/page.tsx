@@ -37,6 +37,8 @@ export default function () {
             return {
               _id: i.postID,
               title: i.title,
+              description: i.description,
+              mapId: i.mapID,
               png: i.png,
             };
           }),
@@ -46,6 +48,7 @@ export default function () {
         let unpublishedMaps: {
           _id: string;
           title: string;
+          userId: string;
           png: Buffer;
         }[] = [];
         p.forEach(map => {
@@ -53,6 +56,7 @@ export default function () {
             unpublishedMaps.push({
               _id: map._id,
               title: map.title,
+              userId: map.userId,
               png: map.png,
             });
           }

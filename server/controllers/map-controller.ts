@@ -349,6 +349,7 @@ const MapController = {
           return {
             _id: map._id,
             title: map.title,
+            owner: map.owner.toString(),
             published: map.published,
             png: png,
           };

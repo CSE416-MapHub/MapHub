@@ -15,6 +15,7 @@ import PostAPI from 'api/PostAPI';
 function validateRecents(a: any): a is Array<{
   _id: string;
   title: string;
+  userId: string;
   published: boolean;
   png: Buffer;
 }> {
@@ -41,6 +42,7 @@ export function getRecentUnpublished(): Promise<
   Array<{
     _id: string;
     title: string;
+    userId: string;
     published: boolean;
     png: Buffer;
   }>
