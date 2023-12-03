@@ -298,7 +298,7 @@ export function makeRegionPanel(
           input: {
             type: colorType,
             short: true,
-            disabled: false,
+            disabled: m.mapType === 'categorical',
             value: m.regionsData[id]?.color ?? '#FFFFFF',
             onChange(val: string) {
               updateField(

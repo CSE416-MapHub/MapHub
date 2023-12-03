@@ -175,9 +175,35 @@ export default function () {
       L.DomEvent.stopPropagation(ev);
     });
     let p = layer as L.Path;
+    let fillColor = 'white';
+    if (currentRegionProps[myId]) {
+      let c = currentRegionProps[myId].color;
+      if (c) {
+        fillColor = c;
+      }
+      c = currentRegionProps[myId].category;
+      if (c !== undefined && c !== DELETED_NAME) {
+        // find the category
+        let categoryId = -1;
+        editorContextRef.current.state.map?.globalCategoryData.forEach(
+          (v, i) => {
+            if (v.name === c) {
+              categoryId = i;
+            }
+          },
+        );
+        if (categoryId === -1) {
+          throw new Error('Failed to locate the category for name ' + c);
+        }
+        fillColor =
+          editorContextRef.current.state.map!.globalCategoryData[categoryId]
+            .color;
+      }
+    }
+
     p.setStyle({
       color: '#000000',
-      fillColor: currentRegionProps[myId]?.color ?? 'white',
+      fillColor: fillColor,
       fillOpacity: 1,
       opacity: 1,
       stroke: true,

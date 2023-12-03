@@ -10,12 +10,18 @@ import style from './Property.module.scss';
 export interface ColorInputProps {
   color: string;
   colorChangeHandler: (color: string) => void;
+  disabled: boolean;
 }
 
-export default function ({ color, colorChangeHandler }: ColorInputProps) {
+export default function ({
+  color,
+  colorChangeHandler,
+  disabled,
+}: ColorInputProps) {
   const [currColor, setColor] = useColor(color);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
+  console.log('IS THIS DISABLED?  ' + disabled);
   return (
     <>
       <IconButton
@@ -27,6 +33,7 @@ export default function ({ color, colorChangeHandler }: ColorInputProps) {
           height: '48px',
         }}
         className="property-color-input"
+        disabled={disabled}
       >
         <CircleIcon style={{ color: currColor.hex }} />
       </IconButton>
