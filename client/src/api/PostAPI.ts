@@ -1,7 +1,11 @@
 import axios from 'axios';
 import { post } from 'cypress/types/jquery';
 import { MHJSON } from 'types/MHJSON';
-import { PostPayload, LikePayload } from 'types/postPayload';
+import {
+  PostPayload,
+  LikePayloadPost,
+  LikePayloadComment,
+} from 'types/postPayload';
 const SERVER_PORT = 3031;
 
 function getBaseUrl(): string {
@@ -54,8 +58,12 @@ class PostAPI {
   //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
   // }
 
-  static async changeLikeToPost(likePayload: LikePayload) {
-    return this.api.patch(`/posts/post/changeLike`, { likePayload });
+  static async changeLikeToPost(likePayload: LikePayloadPost) {
+    return this.api.patch(`/posts/post/likeChange`, { likePayload });
+  }
+
+  static async changeLikeToComment(likePayload: LikePayloadComment) {
+    return this.api.patch(`/posts/comments/likeChange`, { likePayload });
   }
 }
 

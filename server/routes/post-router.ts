@@ -18,7 +18,7 @@ router.get('/post/:postId', PostController.getPostById);
 router.get('/all', PostController.queryPosts);
 
 //Add a like
-router.patch('/post/changeLike', auth.verify, PostController.changeLikeToPost);
+router.patch('/post/likeChange', auth.verify, PostController.changeLikeToPost);
 
 //Handles a get posts request
 router.get('/user/:userId', PostController.getUserPosts);
@@ -33,25 +33,11 @@ router.delete(
   PostController.deleteCommentById,
 );
 
-//Handles a get all comments request
-router.get(
-  '/comments/post/:postId',
-  auth.verify,
-  PostController.getCommentsByPost,
-);
-
 //Handles an add like request
-router.post(
-  '/comments/:commentId/likes',
+router.patch(
+  '/comments/likeChange',
   auth.verify,
-  PostController.addLikeById,
-);
-
-//Handles a remove like request
-router.delete(
-  '/comments/:commentId/likes/',
-  auth.verify,
-  PostController.deleteLikeById,
+  PostController.likeChangeComment,
 );
 
 //Handles an add reply request

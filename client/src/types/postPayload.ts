@@ -3,8 +3,12 @@ export enum LikeChange {
   REMOVE_LIKE = 'dislike',
 }
 
-export interface LikePayload {
+export interface LikePayloadPost {
   postId: string;
+  likeChange: LikeChange;
+}
+export interface LikePayloadComment {
+  commentId: string;
   likeChange: LikeChange;
 }
 
