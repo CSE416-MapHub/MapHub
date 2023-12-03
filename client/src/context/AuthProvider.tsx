@@ -1,11 +1,11 @@
 'use client';
 
-import React, { Dispatch, createContext, useReducer } from 'react';
+import React, { Dispatch, createContext, useEffect, useReducer } from 'react';
 
 import AccountAPI from '../api/AccountAPI';
 
 export interface IAuthState {
-  isLoggedIn: boolean;
+  isLoggedIn?: boolean;
   user: {
     id: string;
     username: string;
@@ -15,7 +15,6 @@ export interface IAuthState {
 }
 
 const initialState: IAuthState = {
-  isLoggedIn: false,
   user: null,
   error: '',
 };
@@ -26,6 +25,7 @@ export enum AuthActions {
   REGISTER_SUCCESS,
   REGISTER_FAILURE,
   EDIT_USERNAME,
+  VERIFY,
 }
 
 type AuthAction =
@@ -47,6 +47,17 @@ type AuthAction =
           username: string;
           profilePic: string;
         };
+      };
+    }
+  | {
+      type: AuthActions.VERIFY;
+      payload: {
+        isLoggedIn: boolean;
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        } | null;
       };
     };
 
@@ -81,6 +92,12 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
     case AuthActions.EDIT_USERNAME:
       return {
         ...prev,
+        user: action.payload.user,
+      };
+    case AuthActions.VERIFY:
+      return {
+        ...prev,
+        isLoggedIn: action.payload.isLoggedIn,
         user: action.payload.user,
       };
     default:
@@ -130,9 +147,9 @@ export class AuthHelpers {
           type: AuthActions.REGISTER_SUCCESS,
           payload: {
             user: {
-              id: result.data._id,
+              id: result.data.user.id,
               username: user.username,
-              profilePic: result.data.profilePic,
+              profilePic: result.data.user.profilePic,
             },
           },
         });
@@ -170,6 +187,29 @@ export const AuthContext = createContext<IAuthContext>({
 
 export const AuthProvider = ({ children }: React.PropsWithChildren<{}>) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const response = await AccountAPI.getVerify();
+        dispatch({
+          type: AuthActions.VERIFY,
+          payload: {
+            isLoggedIn: response.data.isLoggedIn,
+            user: response.data.user,
+          },
+        });
+      } catch (error) {
+        dispatch({
+          type: AuthActions.VERIFY,
+          payload: {
+            isLoggedIn: false,
+            user: null,
+          },
+        });
+      }
+    })();
+  }, []);
 
   return (
     <AuthContext.Provider
