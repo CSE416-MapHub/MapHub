@@ -70,10 +70,10 @@ export default function () {
     }
 
     // if theres a map, make sure the loaded regions and the displayed regions
-    // are synced
-    if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
+    // are synced and no dot names
+    if (loadedMap && !dotNames && loadedMap.regionsData !== currentRegionProps) {
       setCurrentRegionProps(loadedMap.regionsData);
-      // setRerender(rerender + 1);
+      setRerender(rerender + 1);
     }
   });
 
