@@ -12,6 +12,7 @@ beforeEach(() => {
 });
 
 jest.mock('../models/user-model');
+jest.mock('../auth/index')
 beforeAll(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
