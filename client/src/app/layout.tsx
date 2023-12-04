@@ -1,10 +1,13 @@
 import type { Metadata } from 'next';
 import { firaSans, sofiaSansCondensed, boxIcons } from './fonts/fonts';
+
+import { AuthProvider } from 'context/AuthProvider';
+import NotificationsProvider from 'context/notificationsProvider';
 import ThemeProvider from '../context/themeProvider';
 import NavBar from './components/navBar';
+import SnackPack from './components/snackPack';
 import './styles/globals.scss';
 import './styles/boxicons.css';
-import { AuthProvider } from 'context/AuthProvider';
 
 export const metadata: Metadata = {
   title: 'MapHub',
@@ -23,10 +26,13 @@ export default function RootLayout({
     >
       <body>
         <ThemeProvider>
-          <AuthProvider>
-            <NavBar />
-            {children}
-          </AuthProvider>
+          <NotificationsProvider>
+            <AuthProvider>
+              <NavBar />
+              {children}
+              <SnackPack />
+            </AuthProvider>
+          </NotificationsProvider>
         </ThemeProvider>
       </body>
     </html>

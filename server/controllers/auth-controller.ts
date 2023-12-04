@@ -257,7 +257,18 @@ export const postUsername = async (request: Request, response: Response) => {
     if (!username) {
       return response.status(400).json({
         success: false,
-        errorMessage: 'Please include the new username to update the user.',
+        errorCode: 1,
+        errorMessage: 'Please enter a new username.',
+      });
+    }
+
+    if (!/^[\w.]{2,15}\w$/.test(username)) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage:
+          'Please enter a valid username between 3-16 alphanumeric, ' +
+          'underscore, or dot characters.',
       });
     }
 
@@ -266,16 +277,17 @@ export const postUsername = async (request: Request, response: Response) => {
     if (name) {
       return response.status(400).json({
         success: false,
-        errorCode: 1,
+        errorCode: 3,
         errorMessage:
-          'Username already exists. Please choose another username.',
+          'The username is already in use. Please choose another one.',
       });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return response.status(400).json({
+      return response.status(404).json({
         success: false,
+        errorCode: 4,
         errorMessage: 'User does not exist.',
       });
     }
@@ -293,6 +305,7 @@ export const postUsername = async (request: Request, response: Response) => {
   } catch (error) {
     return response.status(500).json({
       success: false,
+      errorCode: 0,
       errorMessage: 'There has been an internal error. Please try again later.',
     });
   }

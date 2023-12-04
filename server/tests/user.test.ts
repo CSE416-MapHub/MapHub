@@ -1,10 +1,12 @@
 import supertest from 'supertest';
 import auth from '../auth/index';
 import app from '../app';
+import bcrypt from 'bcrypt';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import fs from 'fs';
 
+jest.mock('bcrypt');
 jest.mock('../auth/index');
 jest.mock('../models/user-model');
 beforeAll(() => {
@@ -107,6 +109,55 @@ describe('User Retrieval API', () => {
 afterEach(() => {
   // Reset mock after the test
   jest.restoreAllMocks();
+});
+
+describe('POST /auth/login', () => {
+  beforeEach(() => {
+    jest.mock('bcrypt');
+    jest.mock('../auth/index');
+    jest.mock('../models/user-model');
+  });
+
+  it('should return the user and a cookie on a successful login.', async () => {
+    const mockId = new mongoose.Types.ObjectId();
+    const mockUsername = 'someUser';
+    const mockProfilePic = Buffer.from(
+      fs.readFileSync('./tests/fixtures/avatar.jpg'),
+    );
+
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (auth.signToken as jest.Mock).mockReturnValue('someJWTEncryptedToken');
+    (userModel.findOne as jest.Mock).mockResolvedValue({
+      _id: mockId,
+      username: mockUsername,
+      email: 'someUser@gmail.com',
+      profilePic: mockProfilePic,
+      password: '********',
+      maps: [],
+    });
+
+    const response = await supertest(app).post('/auth/login').send({
+      username: 'someUser',
+      password: '********',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: mockId.toString(),
+        username: mockUsername,
+        profilePic: Buffer.from(mockProfilePic).toString('base64'),
+      },
+    });
+    expect(response.headers['set-cookie'][0]).toMatch(
+      `token=someJWTEncryptedToken`,
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
 });
 
 describe('GET /auth/profile-picture ', () => {
@@ -295,7 +346,7 @@ describe('POST /auth/username', () => {
       username: mockNewUsername,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(404);
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });

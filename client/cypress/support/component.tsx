@@ -34,9 +34,9 @@ declare global {
 
 Cypress.Commands.add('mount', (component, options = {}) => {
   return mount(
-    <body>
+    <div>
       <ThemeProvider>{component}</ThemeProvider>
-    </body>,
+    </div>,
     options,
   );
 });
