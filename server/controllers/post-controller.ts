@@ -83,6 +83,7 @@ const PostController = {
         JSON.stringify(posts),
         posts.length,
       );
+
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {

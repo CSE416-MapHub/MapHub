@@ -50,6 +50,25 @@ class PostAPI {
   static async getAllUserPosts(userId: string) {
     return this.api.get(`/posts/user/${userId}`);
   }
+
+  static async createComment(postID: string, content: string) {
+    return this.api.post(`/posts/comments/${postID} `, { content });
+  }
+  // static async updatePostInfo(postPayload: PostPayload) {
+  //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
+  // }
+
+  static async changeLikeToPost(likePayload: LikePayloadPost) {
+    return this.api.patch(`/posts/post/likeChange`, { likePayload });
+  }
+
+  static async changeLikeToComment(likePayload: LikePayloadComment) {
+    return this.api.patch(`/posts/comments/likeChange`, { likePayload });
+  }
+
+  static async addReplyToComment(commentId: string, content: string) {
+    return this.api.post(`/posts/comments/${commentId}/replies`, { content });
+  }
 }
 
 export default PostAPI;
