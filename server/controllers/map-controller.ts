@@ -146,6 +146,7 @@ const MapController = {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
+    console.log(map);
     //validating the requests
     if (delta.type === null || delta.type === undefined) {
       return res
@@ -224,7 +225,7 @@ const MapController = {
 
       const updatedMap = await map.save();
       console.log(updatedMap);
-      return res.status(200).json({ success: true, map: 'updatedMap' });
+      return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       return res.status(400).json({ success: false, message: err.message });
     }

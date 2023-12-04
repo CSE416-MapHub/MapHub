@@ -320,6 +320,8 @@ describe('/map/payload/ dot payload', () => {
       ],
     };
 
+    console.log(mockMap);
+
     const delta = {
       type: DeltaType.CREATE,
       targetType: TargetType.DOT,
@@ -346,7 +348,7 @@ describe('/map/payload/ dot payload', () => {
       .send({ delta: delta })
       .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
 
-    console.log(JSON.stringify(response.body));
+    console.log(JSON.stringify(response.body.map));
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(true);
