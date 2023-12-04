@@ -23,6 +23,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.REGION:
       deltaRegion(map, d);
       break;
+    case TargetType.GLOBAL_CATEGORY:
+      deltaGlobalCategory(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
@@ -184,7 +187,7 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
       }
       // verify that the dot we are trying to create has a unique name
       // TODO: unique color?
-      let taken = false;
+      let taken = p.name === '+ New Dot Type';
       for (let dotMeta of map.globalDotDensityData) {
         if (dotMeta.name === p.name) {
           taken = true;
@@ -273,4 +276,80 @@ function deltaRegion(map: MHJSON, d: Delta) {
     }
   }
 }
+
+function deltaGlobalCategory(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      map.regionsData = [...map.regionsData];
+      if (map.globalCategoryData.length <= d.target[1] || d.target[1] < 0) {
+        throw new Error('Target index out of bounds');
+      }
+      // check if the category name is taken
+      let taken = map.globalCategoryData.filter(c => c.name === d.payload.name);
+      if (taken.length === 1 || d.payload.name === DELETED_NAME) {
+        throw new Error('Category name ' + d.payload.name + ' is already used');
+      }
+      let targ = map.globalCategoryData[d.target[1]];
+
+      // if the name changed, we have to change the name of each dot
+      if (d.payload.name && d.payload.name !== targ.name) {
+        let oldName = targ.name;
+        map.regionsData = map.regionsData.map(r => {
+          if (r.category === oldName) {
+            r.category = d.payload.name!;
+          }
+          return r;
+        });
+      }
+      targ.name = d.payload.name ?? targ.name;
+      targ.color = d.payload.color ?? targ.color;
+      break;
+    }
+    case DeltaType.CREATE: {
+      // must have an name, opacity, size, color
+      map.regionsData = [...map.regionsData];
+      let p = d.payload;
+      if (p.name === undefined || p.color === undefined) {
+        console.log(p);
+        throw new Error('Malformed category in CREATE');
+      }
+
+      let taken = p.name === '+ New Category';
+      for (let categoryMeta of map.globalCategoryData) {
+        if (categoryMeta.name === p.name) {
+          taken = true;
+          break;
+        }
+      }
+      if (taken) {
+        console.log(p);
+        throw new Error(
+          'Tried to create a category with a name that already exists',
+        );
+      }
+      map.globalCategoryData.push({
+        name: p.name,
+        color: p.color,
+      });
+
+      break;
+    }
+    case DeltaType.DELETE: {
+      map.regionsData = [...map.regionsData];
+      if (map.globalCategoryData.length <= d.target[1] || d.target[1] < 0) {
+        throw new Error('Target index out of bounds');
+      }
+      let targName = map.globalCategoryData[d.target[1]].name;
+      map.globalCategoryData[d.target[1]].name = DELETED_NAME;
+      map.regionsData = map.regionsData.map(r => {
+        if (r.category === targName) {
+          r.category = undefined;
+        }
+        return r;
+      });
+      break;
+    }
+  }
+}
+
 export const DELETED_NAME = '_#DEL';

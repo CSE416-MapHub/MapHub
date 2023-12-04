@@ -36,6 +36,7 @@ export default function (props: GradientInputProps) {
           colorChangeHandler={c => {
             updateRanges({ ...ranges, minColor: c });
           }}
+          disabled={false}
         />
         <input
           type="number"
@@ -68,6 +69,7 @@ export default function (props: GradientInputProps) {
           colorChangeHandler={c => {
             updateRanges({ ...ranges, maxColor: c });
           }}
+          disabled={false}
         />
         <input
           type="number"

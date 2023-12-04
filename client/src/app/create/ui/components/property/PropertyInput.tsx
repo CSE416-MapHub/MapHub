@@ -96,6 +96,7 @@ export default function (props: IInputProps) {
       <PropertyColorInput
         color={props.value as string}
         colorChangeHandler={val => props.onChange(val)}
+        disabled={props.disabled}
       />
     );
   } else if (props.type === 'svg') {

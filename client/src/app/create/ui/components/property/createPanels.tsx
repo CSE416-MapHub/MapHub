@@ -3,17 +3,25 @@ import {
   IEditorContext,
   IEditorState,
 } from 'context/EditorProvider';
-import { IDotDensityProps, IDotInstance } from 'types/MHJSON';
+import {
+  ICategoryProps,
+  IChoroplethProps,
+  IDotDensityProps,
+  IDotInstance,
+} from 'types/MHJSON';
 import { DeltaPayload, DeltaType, TargetType } from 'types/delta';
 import { IInputProps, PropertyPanelInputType } from './PropertyInput';
 import { MutableRefObject } from 'react';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import { IPropertyPanelSectionProps } from './PropertyPanel';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
 let textType: PropertyPanelInputType = 'text';
 let colorType: PropertyPanelInputType = 'color';
+let categoricalType: PropertyPanelInputType = 'dropdown';
+let deleteType: PropertyPanelInputType = 'delete';
 
 export type DotPanelData = IDotDensityProps | IDotInstance;
 
@@ -244,6 +252,11 @@ export function makeDotPanel(
 export function makeRegionPanel(
   ctx: IEditorContext,
   id: number,
+  openCategoricalDeleteModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
 ): Array<IPropertyPanelSectionProps> {
   let m = ctx.state.map!;
   let v = new GeoJSONVisitor(m.geoJSON, true);
@@ -296,7 +309,7 @@ export function makeRegionPanel(
           input: {
             type: colorType,
             short: true,
-            disabled: false,
+            disabled: m.mapType === 'categorical',
             value: m.regionsData[id]?.color ?? '#FFFFFF',
             onChange(val: string) {
               updateField(
@@ -313,5 +326,138 @@ export function makeRegionPanel(
       ],
     },
   ];
+
+  if (m.mapType === 'categorical') {
+    panels = panels.concat(
+      makeCategoricalPanel(ctx, id, openCategoricalDeleteModal),
+    );
+  }
+  return panels;
+}
+
+export function makeCategoricalPanel(
+  ctx: IEditorContext,
+  id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
+): Array<IPropertyPanelSectionProps> {
+  let allCategories = ctx.state.map!.globalCategoryData;
+  // the categorydata of the current region
+  let ac = ctx.state.map!.regionsData[id].category;
+  let activeCategoryId = -1;
+  let activeCategory: ICategoryProps | null = null;
+  if (ac !== undefined && ac !== DELETED_NAME) {
+    activeCategory =
+      ctx.state.map!.globalCategoryData.filter((c, i) => {
+        if (c.name === ac) {
+          activeCategoryId = i;
+          return true;
+        }
+        return false;
+      })[0] ?? null;
+  }
+  let panels = [
+    {
+      name: 'Region Category',
+      // TODO: force unundefined
+      items: [
+        {
+          name: 'Category',
+          input: {
+            type: categoricalType,
+            short: false,
+            disabled: false,
+            value: allCategories
+              .filter(c => c.name !== DELETED_NAME)
+              .map(c => c.name),
+            auxiliaryComponent: ctx.state.map!.regionsData[id].category ?? '',
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.REGION,
+                'category',
+                ctx.state.map!.regionsData[id].category ?? DELETED_NAME,
+                val,
+              );
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'Global Category',
+      items: [
+        {
+          name: 'Category Name',
+          input: {
+            type: textType,
+            short: false,
+            disabled: activeCategory === null,
+            value: activeCategory?.name ?? '',
+            onChange(val: string) {
+              updateField(
+                ctx,
+                activeCategoryId,
+                TargetType.GLOBAL_CATEGORY,
+                'name',
+                activeCategory!.name,
+                val,
+              );
+            },
+          },
+        },
+        {
+          name: 'Category Color',
+          input: {
+            type: colorType,
+            short: false,
+            disabled: activeCategory === null,
+            value: activeCategory?.color ?? '#FFFFFF',
+            onChange(val: string) {
+              updateField(
+                ctx,
+                activeCategoryId,
+                TargetType.GLOBAL_CATEGORY,
+                'color',
+                activeCategory!.color,
+                val,
+              );
+            },
+          },
+        },
+        {
+          name: 'Delete Category',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: activeCategory === null,
+            value: [
+              [
+                'Delete Category',
+                () => {
+                  openModal('Category', activeCategory!.name, () => {
+                    updateField(
+                      ctx,
+                      activeCategoryId,
+                      TargetType.GLOBAL_CATEGORY,
+                      'name',
+                      activeCategory!.name,
+                      DELETED_NAME,
+                    );
+                  });
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
+          },
+        },
+      ],
+    },
+  ];
+
   return panels;
 }

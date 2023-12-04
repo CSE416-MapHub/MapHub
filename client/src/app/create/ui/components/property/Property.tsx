@@ -3,8 +3,9 @@ import { useContext, useEffect, useRef, useState } from 'react';
 import styles from './Property.module.scss';
 import PropertyPanel, { IPropertyPanelSectionProps } from './PropertyPanel';
 import { EditorContext } from 'context/EditorProvider';
-import { TargetType } from 'types/delta';
+import { DeltaType, TargetType } from 'types/delta';
 import { makeDotPanel, makeRegionPanel } from './createPanels';
+import DeleteModal from '../modals/deleteInstance';
 
 export interface IPropertiesProps {
   panels: Array<IPropertyPanelSectionProps>;
@@ -15,6 +16,7 @@ let ctr = 0;
 export default function () {
   let editorContext = useContext(EditorContext);
   // const editorContextRef = useRef(editorContext);
+  const [deleteModal, setDeleteModal] = useState<JSX.Element | null>(null);
   const [panels, setPanels] = useState<Array<IPropertyPanelSectionProps>>([]);
   useEffect(() => {
     ctr++;
@@ -31,7 +33,7 @@ export default function () {
       case TargetType.GLOBAL_SYMBOL:
       case TargetType.GLOBAL_DOT:
       case TargetType.REGION:
-        p = makeRegionPanel(editorContext, currTarg.id);
+        p = makeRegionPanel(editorContext, currTarg.id, openDeleteModal);
         setPanels(p);
         break;
       case TargetType.SYMBOL:
@@ -43,16 +45,39 @@ export default function () {
     }
   }, [editorContext.state]);
 
+  function openDeleteModal(
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) {
+    setDeleteModal(
+      <DeleteModal
+        open={true}
+        onClose={function (): void {
+          setDeleteModal(null);
+        }}
+        onConfirm={function (): void {
+          onConfirm();
+        }}
+        deleteType={deleteType}
+        instanceToBeDeleted={instanceToBeDeleted}
+      />,
+    );
+  }
+
   if (panels.length === 0) {
     // hidden state? lol
     return <></>;
   }
 
   return (
-    <div className={styles['properties-container']}>
-      {panels.map((p, i) => (
-        <PropertyPanel {...p} key={'' + ctr + i} />
-      ))}
-    </div>
+    <>
+      <div className={styles['properties-container']}>
+        {panels.map((p, i) => (
+          <PropertyPanel {...p} key={'' + ctr + i} />
+        ))}
+      </div>
+      {deleteModal}
+    </>
   );
 }
