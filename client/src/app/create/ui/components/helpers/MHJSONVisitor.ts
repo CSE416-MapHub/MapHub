@@ -10,6 +10,7 @@ import {
 } from 'context/editorHelpers/utility';
 import L from 'leaflet';
 import { MHJSON } from 'types/MHJSON';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 // import { useRef } from "react";
 
 const STROKE_WIDTH = 0.1;
@@ -34,6 +35,7 @@ class SVGBuilder {
    * @returns A <svg></svg> populated with svg elements.
    */
   public createSVG(): string {
+    this.featureNumber = 0;
     let map: GeoJSON = this.mhjson.geoJSON;
     switch (map.type) {
       case 'Feature': {
@@ -81,7 +83,23 @@ class SVGBuilder {
    */
   private svgOfFeature(feature: GeoJSON.Feature): string {
     let els = this.svgOfGeometry(feature.geometry);
-    return els;
+    // determine the color of this feature
+    let fill = 'white';
+    let rColor = this.mhjson.regionsData[this.featureNumber].color;
+    if (rColor !== undefined) {
+      fill = rColor;
+    }
+    let category = this.mhjson.regionsData[this.featureNumber].category;
+    if (category !== undefined && category !== DELETED_NAME) {
+      let categoryObject = this.mhjson.globalCategoryData.filter(
+        x => x.name === category,
+      )[0];
+      if (categoryObject !== undefined) {
+        fill = categoryObject.color;
+      }
+    }
+    this.featureNumber++;
+    return `<g fill="${fill}">${els}</g>`;
   }
 
   /**
@@ -128,7 +146,6 @@ class SVGBuilder {
         cx="${p[0]}"
         cy="${p[1]}"
         r="${STROKE_WIDTH}%"
-        fill="${STROKE_COLOR}"
       />`;
   }
 
@@ -218,7 +235,6 @@ class SVGBuilder {
         fill-rule="evenodd"
         stroke="black"
         stroke-width="${STROKE_WIDTH}%"
-        fill="white"
       />`;
   }
 
