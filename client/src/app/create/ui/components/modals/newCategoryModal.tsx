@@ -4,11 +4,12 @@ import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import PropertyColorInput from '../property/PropertyColorInput';
 import style from './LabelSelector.module.scss';
 import { SketchPicker, ColorResult } from 'react-color';
+import { ColorPicker, IColor, useColor } from 'react-color-palette';
 
 interface NewCategoryModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: () => void;
+  onConfirm: (name: string, color: string) => void;
 }
 
 const NewCategoryModal: React.FC<NewCategoryModalProps> = ({
@@ -17,13 +18,10 @@ const NewCategoryModal: React.FC<NewCategoryModalProps> = ({
   onConfirm,
 }) => {
   const [name, setName] = useState('');
-  const [color, setColor] = useState<string>('#FFFFF');
+  const [color, setColor] = useColor('#FFFFFF');
 
-  function handleColorChange(c: ColorResult) {
-    setColor(c.hex);
-  }
   const handleConfirm = () => {
-    onConfirm();
+    onConfirm(name, color.hex);
     onClose();
   };
 
@@ -70,7 +68,14 @@ const NewCategoryModal: React.FC<NewCategoryModalProps> = ({
           >
             Color
           </Typography>
-          <SketchPicker onChange={handleColorChange} color={color} />
+          <ColorPicker
+            height={100}
+            color={color}
+            onChange={setColor}
+            hideAlpha={true}
+            hideInput={['rgb', 'hsv']}
+          />
+          {/* <SketchPicker onChange={handleColorChange} color={color} /> */}
         </Box>
       </Box>
     </GeneralizedDialog>
