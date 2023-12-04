@@ -9,7 +9,7 @@ import {
   isGeometryCollection,
 } from 'context/editorHelpers/utility';
 import L from 'leaflet';
-import { MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 // import { useRef } from "react";
 
@@ -37,25 +37,73 @@ class SVGBuilder {
   public createSVG(): string {
     this.featureNumber = 0;
     let map: GeoJSON = this.mhjson.geoJSON;
+    let els = '';
     switch (map.type) {
       case 'Feature': {
-        let els = this.svgOfFeature(map);
-        return els;
+        els = this.svgOfFeature(map);
+        break;
       }
 
       case 'FeatureCollection': {
-        let els = this.svgOfFeatureCollection(map);
-        return els;
+        els = this.svgOfFeatureCollection(map as GeoJSON.FeatureCollection);
+        break;
       }
       default: {
         if (isGeometry(map)) {
-          let els = this.svgOfGeometry(map);
-          return els;
+          els = this.svgOfGeometry(map);
         } else {
           throw new Error('Programmer did not catch a type: ' + map);
         }
       }
     }
+    if (this.mhjson.mapType === 'dot') {
+      els += this.svgOfDots();
+    }
+    return els;
+  }
+
+  private svgOfDots(): string {
+    // construct a map of names to objects
+    let dotMap = new Map<string, IDotDensityProps>(
+      this.mhjson.globalDotDensityData.map(x => [x.name, x]),
+    );
+
+    let dots = '';
+    for (let d of this.mhjson.dotsData) {
+      if (d.dot === DELETED_NAME) {
+        continue;
+      }
+      let dclass = dotMap.get(d.dot)!;
+      dots += this.svgOfDot(
+        d.x,
+        d.y,
+        d.scale * dclass.size,
+        dclass.color,
+        dclass.opacity,
+      );
+    }
+    return dots;
+  }
+
+  private svgOfDot(
+    x: number,
+    y: number,
+    radius: number,
+    color: string,
+    opacity: number,
+  ): string {
+    let p = this.isPosition([x, y]);
+    let lat2m = 10;
+
+    return `<circle
+      cx="${p[0]}"
+      cy="${p[1]}"
+      r="${radius / lat2m}"
+      fill="${color}"
+      opacity="${opacity}"
+      stroke="black"
+      stroke-width="${STROKE_WIDTH}%"
+      />`;
   }
 
   /**
