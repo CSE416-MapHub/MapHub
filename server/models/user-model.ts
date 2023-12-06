@@ -9,6 +9,8 @@ const userSchema = new Schema(
     password: { type: String, required: true },
     profilePic: { type: Buffer, default: Buffer.alloc(0) },
     maps: [{ type: Schema.Types.ObjectId, required: true, ref: 'Map' }],
+    resetPasswordToken: { type: String },
+    resetPasswordExpires: { type: Date },
   },
   { timestamps: true },
 );

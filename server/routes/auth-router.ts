@@ -15,4 +15,7 @@ router.post('/login', AuthController.loginUser);
 router.post('/logout', AuthController.logoutUser);
 // router.get('/loggedIn', AuthController.getLoggedIn)
 
+router.post('/request-reset-password', AuthController.getResetPasswordLink);
+router.post('/reset-password/:token', AuthController.handlePasswordResetting);
+
 export default router;

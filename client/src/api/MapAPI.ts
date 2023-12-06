@@ -46,7 +46,7 @@ class MapAPI {
     return this.api.put(`/map/map/`, { mapPayload });
   }
 
-  static async getMapById(mapID: string) {
+  static async getMapById(mapID: string, email: string) {
     return this.api.get(`/map/map/${mapID}`);
   }
 

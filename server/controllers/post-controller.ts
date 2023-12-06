@@ -314,7 +314,9 @@ const PostController = {
       }
       if (likeChange === LikeChange.ADD_LIKE) {
         console.log('added like');
-        post.likes.push(userId);
+        if (!post.likes.includes(userId)) {
+          post.likes.push(userId);
+        }
       } else if (likeChange === LikeChange.REMOVE_LIKE) {
         console.log('removed like');
         post.likes = post.likes.filter(
@@ -325,7 +327,7 @@ const PostController = {
       await post.save();
 
       //returns the new likes amount
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         likes: post.likes.length,
       });
