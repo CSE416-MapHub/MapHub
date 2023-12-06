@@ -157,6 +157,7 @@ export default function () {
     });
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {
+      mh.owner = authContext.state.user?.id ? authContext.state.user?.id : '';
       createMapProm = createNewMap(mh);
     } else {
       createMapProm = Promise.resolve(GUEST_MAP_ID);
