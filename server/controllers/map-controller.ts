@@ -2,15 +2,14 @@ import { Request, Response } from 'express';
 import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Map from '../models/map-model';
+import User from '../models/user-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
 import util from 'util';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
-import { type } from 'os';
-
-const readFile = util.promisify(fs.readFile); // Promisify readFile for use with async/await
+import { SVGBuilder } from './helperFunctions/MapVistors';
 
 type MapDocument = typeof Map.prototype;
 
@@ -28,8 +27,34 @@ enum MapType {
   FLOW = 'flow',
 }
 
-export async function convertJsonToPng(map: mongoose.Document) {
-  return Buffer.alloc(0);
+function minifySVG(svgString: string): string {
+  // Replace newlines and carriage returns with nothing
+  let minified = svgString.replace(/(\r\n|\n|\r)/gm, '');
+
+  // Replace multiple spaces with a single space
+  minified = minified.replace(/\s+/g, ' ');
+
+  // Trim leading and trailing whitespace
+  return minified.trim();
+}
+
+export async function convertJsonToSVG(map: MapDocument) {
+  console.log('JSON TO SVG', JSON.stringify(map));
+
+  const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
+  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+  map.geoJSON = JSON.parse(geoJSONData);
+
+  let builder = new SVGBuilder(map);
+  let svg = builder.createSVG();
+  let box = builder.getBBox();
+  let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
+    ' ',
+  )}">
+  <rect x="${box[0]}" y="${box[1]}" width="100%" height="100%" fill="#CCEFF1" />
+  ${svg}
+</svg>`;
+  return minifySVG(svgRepr);
 }
 
 //idk if we should actually validate the user to see if the user matchees
@@ -38,6 +63,7 @@ async function validUserForMap(req: Request, res: Response) {}
 const MapController = {
   createMap: async (req: Request, res: Response) => {
     // Implementation of creating a map
+    const verifiedUser = (req as any).userId;
 
     //TODO: NEED TO VALIDATE THE GEOJSON data to make sure its good.
     const {
@@ -58,6 +84,11 @@ const MapController = {
     console.log('REQ BODY IS');
     console.log(req.body);
 
+    if (verifiedUser !== owner) {
+      return res
+        .status(400)
+        .json({ error: 'Verified Cookie user not the same as the map owner' });
+    }
     if (!title || !mapType || !geoJSON) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -72,6 +103,12 @@ const MapController = {
 
     let newMap;
     let savedMap;
+    let userOwner = await User.findById(owner);
+    if (!userOwner) {
+      return res.status(400).json({
+        error: 'User Map Owner not found',
+      });
+    }
     try {
       const placeholderID = new mongoose.Types.ObjectId();
 
@@ -90,7 +127,7 @@ const MapController = {
         dotsData,
         arrowsData,
         geoJSON: 'placeholder',
-        owner: (req as any).userId,
+        owner,
       });
       console.log(newMap);
     } catch (err: any) {
@@ -129,6 +166,8 @@ const MapController = {
       newMap.geoJSON = saveFilePath;
       savedMap = await newMap.save();
       console.log('FINAL MAP CREATE id', savedMap._id);
+      userOwner.maps.push(savedMap._id);
+      await userOwner.save();
       res.status(200).json({
         success: true,
         map: { mapID: savedMap._id },
@@ -301,7 +340,7 @@ const MapController = {
 
       if (map.geoJSON && typeof map.geoJSON === 'string') {
         try {
-          const geoJSONData = await readFile(map.geoJSON, 'utf8');
+          const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
           map.geoJSON = JSON.parse(geoJSONData);
         } catch (fileReadError) {
           console.error('Error reading GeoJSON file:', fileReadError);
@@ -344,11 +383,11 @@ const MapController = {
       // console.log('THIS IS WHAT INSIDE MAPS', maps);
       const condensedMaps = await Promise.all(
         maps.map(async map => {
-          const png = await convertJsonToPng(map); //#TODO placeholder function
+          const svg = await convertJsonToSVG(map); //#TODO placeholder function
           return {
             _id: map._id,
             title: map.title,
-            png: png,
+            svg: svg,
           };
         }),
       );
