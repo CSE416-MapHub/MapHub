@@ -4,16 +4,42 @@ import style from './page.module.scss';
 import MapCard, { MapCardProps } from './ui/components/MapCard';
 import SearchBar from './ui/components/SearchBar';
 import PostAPI from 'api/PostAPI';
+import AccountAPI from 'api/AccountAPI';
 
 
 export default function () {
   const [mapCardData, setMapCardData] = useState<MapCardProps[]>([]);
   const [searchResponse, setSearchResponse] = useState<any>(null);
+  const [authors, setAuthors] = useState<string[]>([]);
 
   useEffect(() => {
     // Fetch initial set of maps when the component mounts
     fetchMapCardData('');
   }, []);
+
+  useEffect(() => {
+    const fetchAuthors = async () => {
+      const authorsArray: string[] = [];
+      for (const map of mapCardData) {
+        const username = await getAuthorById(map.userId);
+        authorsArray.push(username);
+      }
+      setAuthors(authorsArray);
+    };
+    fetchAuthors();
+  }, [mapCardData])
+
+  const getAuthorById = async (id: string) => {
+    try {
+      const res = await AccountAPI.getUserById(id);
+      const username = res.data.user.username;
+      console.log(res);
+      console.log(username);
+      return username;
+    } catch (error) {
+      console.error(`Error fetching author for map ${id}:`, error);
+    }
+  }
 
   const fetchMapCardData = (searchValue: string) => {
     // Fetch map card data based on search value
@@ -38,7 +64,7 @@ export default function () {
     <>
       <SearchBar onSearch={handleSearch} searchResponse={searchResponse} />
       <div className={style['card-grid']}>
-        {mapCardData.map(map => (
+        {mapCardData.map((map, i) => (
           <MapCard
             key={map.id}
             id={map.id}
@@ -46,7 +72,7 @@ export default function () {
             numLikes={map.numLikes}
             userLiked={map.userLiked}
             title={map.title}
-            author={map.author}
+            author={authors[i]}
           />
         ))}
       </div>

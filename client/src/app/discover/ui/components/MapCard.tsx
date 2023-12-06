@@ -40,7 +40,7 @@ export default function (props: MapCardProps) {
           alt={`${props.title} by ${props.author}`}
         ></img>
         <div className={style['map-details']}>
-          <Typography>{props.title}</Typography>
+          <Typography className={style['map-text']}>{props.title}</Typography>
           <div
             style={{
               display: 'flex',
@@ -48,7 +48,7 @@ export default function (props: MapCardProps) {
               justifyContent: 'space-between',
             }}
           >
-            <Typography variant="caption">By {props.author}</Typography>
+            <Typography className={style['map-text']} variant="caption">By {props.author}</Typography>
             <div
               style={{
                 display: 'flex',
@@ -56,8 +56,8 @@ export default function (props: MapCardProps) {
                 gap: '4px',
               }}
             >
-              <FavoriteIcon fontSize="small" />
-              <Typography variant="caption">{props.numLikes}</Typography>
+              <FavoriteIcon className={style['map-icon']} fontSize="small" />
+              <Typography className={style['map-text']} variant="caption">{props.numLikes}</Typography>
             </div>
           </div>
         </div>
