@@ -266,11 +266,15 @@ describe('GET /map/recents/', () => {
         _id: mockMaps[2]._id.toString(),
         title: mockMaps[2].title,
         svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+        owner: mockMaps[2].owner.toString(),
+        published: mockMaps[2].published,
       },
       {
         _id: mockMaps[1]._id.toString(),
         title: mockMaps[1].title,
         svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+        owner: mockMaps[1].owner.toString(),
+        published: mockMaps[1].published,
       },
     ];
 
@@ -619,14 +623,14 @@ describe('/map/payload/ global dot payload', () => {
         x: 10,
         y: 20,
         scale: 1,
-        dot: 'Updated Dot Group Global',
+        dot: 'DOT GROUP 1',
         _id: response.body.map.dotsData[0]._id,
       },
       {
         x: 2,
         y: 2,
         scale: 1,
-        dot: 'Updated Dot Group Global',
+        dot: 'DOT GROUP 1',
         _id: response.body.map.dotsData[1]._id,
       },
     ]);

@@ -65,6 +65,7 @@ export class GeoJSONVisitor {
   }
 
   public visitRoot() {
+    console.log(this.mapData);
     switch (this.mapData.type) {
       case 'Feature': {
         this.visitFeature(this.mapData);
@@ -80,7 +81,8 @@ export class GeoJSONVisitor {
           this.visitGeometry(this.mapData);
           break;
         } else {
-          throw new Error('Programmer did not catch a type: ' + this.mapData);
+          throw new Error(`Unsupported GeoJSON type: ${this.mapData}. Programmer did not catch a type.`,
+          );
         }
       }
     }

@@ -35,6 +35,7 @@ export default function () {
   const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
 
+
   useEffect(() => {
     let b = editorContextStaleable.state.mapDetails.bbox;
     let loadedMap = editorContextRef.current.state.map;
@@ -46,6 +47,12 @@ export default function () {
       setDotNames(nameMap);
     }
 
+    // if theres a map, make sure the loaded regions and the displayed regions
+    // are synced and no dot names
+    else if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
+      setCurrentRegionProps(loadedMap.regionsData);
+      setRerender(rerender + 1);
+    }
     if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
       let c: [number, number] = [b[1], b[0]];
       setEBBox(c);
@@ -68,12 +75,6 @@ export default function () {
       map.setMinZoom(MIN_ZOOM);
     }
 
-    // if theres a map, make sure the loaded regions and the displayed regions
-    // are synced
-    if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
-      setCurrentRegionProps(loadedMap.regionsData);
-      setRerender(rerender + 1);
-    }
   });
 
   // handles clicks, regardless of whether or not theyre on a
@@ -226,7 +227,12 @@ export default function () {
         if (dotInstance.dot === DELETED_NAME) {
           return;
         }
-        let dotClass = dotNames.get(dotInstance.dot)!;
+        let dotClass = dotNames.get(dotInstance.dot) ?? {
+          opacity: 0,
+          name: DELETED_NAME,
+          color: '#000000',
+          size: 0,
+        };
         return (
           <Dot
             dotInstance={dotInstance}

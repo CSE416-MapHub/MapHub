@@ -100,6 +100,10 @@ class AccountAPI {
     return this.api.get(`/auth/exists?username=${username}`);
   }
 
+  static async getUserById(id: string) {
+    return this.api.get(`/auth/id?id=${id}`);
+  }
+
   static async postUsername(username: string) {
     return this.api.post('/auth/username', { username });
   }

@@ -8,6 +8,17 @@
   height: 280px;
   background-color: colors.$primary-container;
   border-radius: 12px;
+
+  &:hover {
+    // Styles to apply on hover
+    background-color: colors.$on-primary-container; 
+    cursor: pointer; 
+
+    // Styles to apply on hover to child elements (text)
+    .map-text, .map-icon{
+      color: colors.$on-primary;
+    }
+  }
 }
 
 .map-preview {
