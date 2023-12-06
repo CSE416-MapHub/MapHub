@@ -44,6 +44,10 @@
     color: white;
     margin-bottom: 30px;
   }
+
+  .button {
+    margin-top: 12px;
+  }
   
   .confirmButton:hover {
     background-color: #138BAE;
