@@ -1,0 +1,23 @@
+@use 'colors';
+@use 'shape';
+
+.comments__foot {
+  margin: 0 shape.$large shape.$large;
+}
+
+.comments__icons {
+  display: flex;
+  gap: 16px;
+
+  margin: 12px 16px 8px 16px;
+}
+
+.comments__icon--liked {
+  i {
+    color: colors.$error;
+  }
+}
+
+.comments__text--like-count {
+  margin: 0 16px 12px;
+}

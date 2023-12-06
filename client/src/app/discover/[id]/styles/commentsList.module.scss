@@ -1,0 +1,5 @@
+@use 'shape';
+.comments__list {
+  flex: 1;
+  margin: 0 shape.$large;
+}
