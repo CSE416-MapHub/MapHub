@@ -343,8 +343,9 @@ const MapController = {
       // Check if the GeoJSON path is valid
       if (map.geoJSON && typeof map.geoJSON === 'string') {
         try {
+          // console.log(map.geoJSON)
           const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-          map.geoJSON = JSON.parse(geoJSONData);
+          map.geoJSON = geoJSONData;
         } catch (fileReadError) {
           console.error('Error reading GeoJSON file:', fileReadError);
         }

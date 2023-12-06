@@ -38,15 +38,13 @@ export function publishMap(
 function validateRecents(a: any): a is Array<{
   _id: string;
   title: string;
-  png: Buffer;
+  svg: string;
 }> {
   for (let entry of a) {
     if (
       typeof entry._id !== 'string' ||
       typeof entry.title !== 'string' ||
-      !entry.png ||
-      entry.png.type !== 'Buffer' ||
-      typeof entry.png.data !== 'object'
+      typeof entry.svg !== 'string'
     ) {
       return false;
     }
@@ -62,7 +60,7 @@ export function getRecents(): Promise<
   Array<{
     _id: string;
     title: string;
-    png: Buffer;
+    svg: string;
   }>
 > {
   return MapAPI.getRecentMapIds(6).then(res => {
