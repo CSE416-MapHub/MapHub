@@ -1,0 +1,32 @@
+@use 'colors';
+@use 'shape';
+
+.post {
+  &__main {
+    display: grid;
+    grid-template-columns: 1fr 5fr 3fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+    ". post comments .";
+    align-items: center;
+    gap: shape.$large;
+
+    min-height: calc(100% - 180px);
+
+    color: colors.$on-surface;
+  }
+
+  &__post {
+    background-color: black;
+    grid-area: post;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+
+  &__comments {
+    grid-area: comments;
+    background-color: #00AFB9;
+    height: 100%;
+    width: 100%;
+  }
+}
