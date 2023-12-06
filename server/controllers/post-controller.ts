@@ -91,6 +91,7 @@ const PostController = {
             const map = await Map.findById(post.map).exec();
             console.log(JSON.stringify(map));
             const svg = map ? await convertJsonToSVG(map) : null;
+            console.log(svg);
 
             return {
               title: post.title,
@@ -222,10 +223,12 @@ const PostController = {
 
             const map = await Map.findById(post.map).exec();
 
-            console.log(JSON.stringify(map));
+            console.log('MAP', map);
+
+            // console.log(JSON.stringify(map));
 
             const svg = map ? await convertJsonToSVG(map) : null;
-
+            
             return {
               title: post.title,
               description: post.description,
