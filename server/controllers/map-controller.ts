@@ -275,7 +275,7 @@ const MapController = {
   updateMapById: async (req: Request, res: Response) => {
     // Implementation of deleting a map by ID
     const userId = (req as any).userId;
-    const { mapId, title } = req.body;
+    const { mapId, title } = req.body.mapPayload;
 
     console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
     if (!mapId) {

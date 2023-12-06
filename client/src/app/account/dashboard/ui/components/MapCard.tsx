@@ -31,7 +31,6 @@ export default function (props: MapCardProps) {
     ? `data:image/svg+xml;utf8,${encodeURIComponent(props.preview)}`
     : placeholderImage;
 
-  console.log(dataurl);
   const router = useRouter();
   const handleMapCardClick = () => {
     const published = props.published;

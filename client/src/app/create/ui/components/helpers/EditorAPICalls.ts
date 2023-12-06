@@ -7,6 +7,7 @@
 import MapAPI from 'api/MapAPI';
 import PostAPI from 'api/PostAPI';
 import { MHJSON } from 'types/MHJSON';
+import { MapPayload } from 'types/mapPayload';
 
 /**
  * Send a request to publish a map
@@ -97,6 +98,16 @@ export function loadMapById(id: string): Promise<MHJSON> {
     if (res.status === 200) {
       let map = res.data.map as MHJSON;
       return map;
+    }
+    throw new Error(res.status.toString() + JSON.stringify(res.data));
+  });
+}
+
+export function updateMapById(payload: MapPayload): Promise<boolean> {
+  console.log(payload);
+  return MapAPI.updateMapById(payload).then(res => {
+    if(res.status === 200) {
+      return res.data.success as boolean;
     }
     throw new Error(res.status.toString() + JSON.stringify(res.data));
   });

@@ -21,11 +21,12 @@ import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
-import { createNewMap, loadMapById } from './helpers/EditorAPICalls';
+import { createNewMap, loadMapById, updateMapById } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { readFile } from 'fs';
+import { MapPayload } from 'types/mapPayload';
 
 // A list of all accepted file types.
 const accept: string =
@@ -112,10 +113,19 @@ export default function () {
     setUpdatedTitle(editorContext.state.map?.title || '');
   };
 
-  const handleBlur = () => {
+  const handleBlur = async() => {
     // Update the map title and close editing mode
-    editorContext.helpers.changeTitle(editorContext, updatedTitle);
-    setEditingTitle(false);
+    console.log(editorContext.state);
+    const payload : MapPayload = { 
+      mapId: editorContext.state.map_id,
+      title: updatedTitle,
+    }
+    await updateMapById(payload).then((success) => {
+      if(success) {
+        editorContext.helpers.changeTitle(editorContext, updatedTitle);
+        setEditingTitle(false);
+      }
+    })
   };
 
   //--------- Modal States ---------
