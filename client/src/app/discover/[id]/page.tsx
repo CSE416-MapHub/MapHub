@@ -3,9 +3,7 @@ import { notFound } from 'next/navigation';
 
 import CommentsHead from './components/commentsHead';
 import CommentsDivider from './components/commentsDivider';
-import CommentsList from './components/commentsList';
-import CommentsFoot from './components/commentsFoot';
-import CommentsField from './components/commentsField';
+import CommentsCoordinator from './components/commentsCoordinator';
 
 import styles from './styles/post.module.scss';
 
@@ -60,10 +58,7 @@ async function Post({ params }: { params: { id: string } }) {
           description={post.description}
         />
         <CommentsDivider />
-        <CommentsList />
-        <CommentsDivider />
-        <CommentsFoot likes={post.likes} postId={post.postID} />
-        <CommentsField postId={post.postID} />
+        <CommentsCoordinator post={post} />
       </div>
     </main>
   );

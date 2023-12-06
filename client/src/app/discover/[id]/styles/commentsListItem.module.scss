@@ -1,0 +1,13 @@
+@use 'colors';
+
+.comments__list-item {
+  display: flex;
+  flex-direction: row;
+  gap: 16px;
+
+  padding: 12px 16px;
+}
+
+.comments__support {
+  color: colors.$on-surface-variant;
+}

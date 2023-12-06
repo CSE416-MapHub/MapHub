@@ -21,9 +21,10 @@ import styles from '../styles/commentsField.module.scss';
 
 interface CommentsFieldProps {
   postId: string;
+  pushComment: Function;
 }
 
-function CommentsField({ postId }: CommentsFieldProps) {
+function CommentsField({ postId, pushComment }: CommentsFieldProps) {
   const auth = useContext(AuthContext);
   const notifications = useContext(NotificationsContext);
   const router = useRouter();
@@ -50,9 +51,22 @@ function CommentsField({ postId }: CommentsFieldProps) {
     } else {
       try {
         const response = await PostAPI.createComment(postId, comment);
-
+        response.data.comment.user = {
+          username: auth.state.user?.username,
+        };
+        pushComment(response.data.comment);
         setComment('');
-      } catch (error) {}
+      } catch (error) {
+        notifications.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: "There is a network error. Can't leave comment.",
+            actions: {
+              close: true,
+            },
+          },
+        });
+      }
     }
   };
 
