@@ -48,9 +48,9 @@ export async function convertJsonToSVG(map: MapDocument) {
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
-  console.log('svg created');
+  console.log("svg created");
   let box = builder.getBBox();
-  console.log('bbox gotten');
+  console.log("bbox gotten");
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">

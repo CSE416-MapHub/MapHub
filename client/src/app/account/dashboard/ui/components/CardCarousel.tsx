@@ -98,7 +98,7 @@ export default function (props: CardCarouselProps) {
                 numLikes={props.published ? map.numLikes : 0}
                 userLiked={false}
                 title={map.title}
-                author={authors[i]} 
+                author={authors[i]} //get author
                 preview={map.svg}
               />
             )
