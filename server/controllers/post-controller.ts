@@ -7,7 +7,7 @@ import Map from '../models/map-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { convertJsonToPng } from './map-controller';
+import { convertJsonToSVG } from './map-controller';
 
 export enum LikeChange {
   ADD_LIKE = 'like',
@@ -84,14 +84,14 @@ const PostController = {
             console.log('STARTING POST BY POST', JSON.stringify(post));
             const map = await Map.findById(post.map).exec();
             console.log(JSON.stringify(map));
-            const png = map ? await convertJsonToPng(map) : null;
+            const svg = map ? await convertJsonToSVG(map) : null;
 
             return {
               title: post.title,
               description: post.description,
               postID: post._id,
               mapID: post.map,
-              png: png,
+              svg: svg,
             };
           }),
         );
@@ -125,10 +125,27 @@ const PostController = {
         .populate({
           path: 'comments', // Path to the field in the Post model
           model: 'Comment', // Model to use for population
-          populate: {
-            path: 'replies', // Path to the field in the Comment model
-            model: 'Comment', // Model to use for population of replies
-          },
+          populate: [
+            {
+              path: 'owner', // Path to the user (owner) field in the Comment model
+              model: 'User', // Model to use for population of the comment's owner
+              select: 'username _id profilePic', // Only select specific fields for the comment's owner
+            },
+            {
+              path: 'replies', // Path to the field in the Comment model
+              model: 'Comment', // Model to use for population of replies
+              populate: {
+                path: 'user', // Path to the user field in the Comment model
+                model: 'User', // Model to use for population of user
+                select: 'username _id profilePic', // Only select specific fields
+              },
+            },
+          ],
+        })
+        .populate({
+          path: 'owner', // Path to the user field in the Post model
+          model: 'User', // Model to use for population of the post's user
+          select: 'username _id profilePic', // Only select specific fields for the user of the post
         })
         .exec();
 
@@ -148,21 +165,22 @@ const PostController = {
         });
       }
 
-      const png = map ? await convertJsonToPng(map) : null;
+      const svg = map ? await convertJsonToSVG(map) : null;
 
       const postFound = {
         title: post.title,
         description: post.description,
+        owner: post.owner,
         postID: post._id,
         mapID: post.map,
-        png: png,
+        svg: svg,
         likes: post.likes,
         comments: post.comments,
       };
 
       res.status(200).json({
         success: true,
-        posts: postFound,
+        post: postFound,
       });
     } catch (error) {
       console.error('Error in queryPosts:', error);
@@ -198,14 +216,15 @@ const PostController = {
             const map = await Map.findById(post.map).exec();
 
             console.log(JSON.stringify(map));
-            const png = map ? await convertJsonToPng(map) : null;
+
+            const svg = map ? await convertJsonToSVG(map) : null;
 
             return {
               title: post.title,
               description: post.description,
               postID: post._id,
               mapID: post.map,
-              png: png,
+              svg: svg,
             };
           }),
         );

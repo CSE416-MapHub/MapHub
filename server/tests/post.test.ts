@@ -7,12 +7,51 @@ import auth from '../auth/index';
 import mapModel from '../models/map-model';
 import { LikeChange } from '../controllers/post-controller';
 import commentModel from '../models/comment-model';
+import { createMockMap } from './map.test';
+import fs from 'fs';
+
 const mockUserID = new mongoose.Types.ObjectId();
+
+let mapData = {
+  _id: new mongoose.Types.ObjectId(),
+  title: 'mapNice',
+  owner: new mongoose.Types.ObjectId(),
+  mapType: 'categorical',
+  published: false,
+  labels: [],
+  globalChoroplethData: {
+    minIntensity: 0,
+    maxIntensity: 0,
+    minColor: '',
+    maxColor: '',
+    indexingKey: '',
+  },
+  globalCategoryData: [],
+  globalSymbolData: [],
+  globalDotDensityData: [],
+  regionsData: [],
+  symbolsData: [],
+  dotsData: [],
+  arrowsData: [],
+  geoJSON: 'some/path',
+  updatedAt: Math.floor(new Date().getTime() * Math.random()),
+  createdAt: new Date().getTime(),
+};
+
+const geoJSONTemp = {
+  type: 'Feature',
+  geometry: { type: 'Point', coordinates: [-73.935242, 40.73061] },
+  properties: { name: 'Point', description: 'description point' },
+};
 
 beforeEach(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
+  jest.mock('fs');
 
+  jest
+    .spyOn(fs.promises, 'readFile')
+    .mockResolvedValue(JSON.stringify(geoJSONTemp));
   jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
 });
 afterEach(() => {
@@ -98,13 +137,19 @@ describe('GET /posts/all', () => {
 
     const mockMaps = [
       {
+        ...mapData,
         _id: mockPosts[0].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
       {
+        ...mapData,
         _id: mockPosts[2].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
       {
+        ...mapData,
         _id: mockPosts[1].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
     ];
     const searchQuery = 'dynasty';
@@ -178,12 +223,15 @@ describe('GET /posts/user', () => {
 
     const mockMaps = [
       {
+        ...mapData,
         _id: mockPosts[0].map,
       },
       {
+        ...mapData,
         _id: mockPosts[2].map,
       },
       {
+        ...mapData,
         _id: mockPosts[1].map,
       },
     ];
@@ -270,11 +318,17 @@ describe('GET /posts/:postId', () => {
 
     const mockMaps = [
       {
+        ...mapData,
         _id: mockMapId,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
+
         // other map properties
       },
       {
+        ...mapData,
         _id: mockPosts[1],
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
+
         // other map properties
       },
     ];
@@ -308,11 +362,9 @@ describe('GET /posts/:postId', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('success', true);
-    expect(response.body).toHaveProperty('posts');
-    console.log(response.body.posts);
-    expect(response.body.posts.comments[0].content).toEqual(
-      'this is a comment',
-    );
+    expect(response.body).toHaveProperty('post');
+    console.log(response.body.post);
+    expect(response.body.post.comments[0].content).toEqual('this is a comment');
   });
 });
 

@@ -51,7 +51,7 @@ let mapData = {
   updatedAt: Math.floor(new Date().getTime() * Math.random()),
   createdAt: new Date().getTime(),
 };
-function createMockMap(
+export function createMockMap(
   title: string,
   geoJSONType: string,
   geoJSONCoordinates: number[] | number[][] | number[][][],
@@ -77,7 +77,11 @@ const userId = mapData.owner;
 beforeEach(() => {
   jest.clearAllMocks();
   jest.setTimeout(6000);
-  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: userId });
+  jest.spyOn(userModel, 'findById').mockResolvedValue({
+    id: userId,
+    maps: [],
+    save: jest.fn().mockReturnThis(),
+  });
 });
 
 describe('POST /map/map', () => {
@@ -88,6 +92,7 @@ describe('POST /map/map', () => {
       .mockImplementation(function (this: any) {
         return Promise.resolve(this);
       });
+
     const mapDatas = {
       map: mapData,
     };
@@ -213,9 +218,23 @@ describe('GET /map/recents/', () => {
     ),
   ];
 
+  const geoJSONTemp = {
+    type: 'Feature',
+    geometry: { type: 'Point', coordinates: [-73.935242, 40.73061] },
+    properties: { name: 'Point', description: 'description point' },
+  };
+
   beforeEach(() => {
     // Setup specific mock for this test
-    let sortedAndLimitedData = [...mockMaps];
+    jest
+      .spyOn(fs.promises, 'readFile')
+      .mockResolvedValue(JSON.stringify(geoJSONTemp));
+
+    let sortedAndLimitedData = [
+      { ...mockMaps[0], geoJSON: 'path/somewhere' },
+      { ...mockMaps[1], geoJSON: 'path/somewhere' },
+      { ...mockMaps[2], geoJSON: 'path/somewhere' },
+    ];
 
     const queryMock: any = {
       sort: jest.fn().mockImplementation(sortParam => {
@@ -246,12 +265,12 @@ describe('GET /map/recents/', () => {
       {
         _id: mockMaps[2]._id.toString(),
         title: mockMaps[2].title,
-        png: { type: 'Buffer', data: [] },
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
       },
       {
         _id: mockMaps[1]._id.toString(),
         title: mockMaps[1].title,
-        png: { type: 'Buffer', data: [] },
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
       },
     ];
 
