@@ -16,6 +16,7 @@ export default function () {
     Array<{
       _id: string;
       title: string;
+      userId: string;
       png: Buffer;
     }>
   >([]);
@@ -23,55 +24,65 @@ export default function () {
     Array<{
       _id: string;
       title: string;
+      userId: string;
       png: Buffer;
     }>
   >([]);
 
   useEffect(() => {
-    if (firstRender === 0) {
+    if (firstRender === 0 && authContext.state.isLoggedIn) {
+      console.log(authContext.state);
       getRecentPublished(
         authContext.state.user?.id ? authContext.state.user?.id : '',
       ).then(p => {
+        console.log(p);
         setPMS(
           p.map(i => {
             return {
               _id: i.postID,
               title: i.title,
+              userId: authContext.state.user?.id ? authContext.state.user?.id : '',
               png: i.png,
             };
           }),
         );
       });
       getRecentUnpublished().then(p => {
-        setUMS(p);
+        let unpublishedMaps: {
+          _id: string;
+          title: string;
+          userId: string;
+          png: Buffer;
+        }[] = [];
+        p.forEach(map => {
+          console.log(map);
+          if(!map.published) {
+            unpublishedMaps.push({
+              _id: map._id,
+              title: map.title,
+              userId: map.owner,
+              png: map.png,
+            });
+          }
+        });
+        console.log(unpublishedMaps);
+        setUMS(unpublishedMaps);
       });
       setFirstRender(firstRender + 1);
     }
-  });
+  }, [authContext.state.isLoggedIn === true]);
 
   return (
     <main>
       <Greeting />
       <CardCarousel
         title="My Published Maps"
-        maps={[
-          {
-            _id: '1',
-            title: 'map',
-            png: Buffer.alloc(0),
-          },
-        ]}
+        maps={pms}
         published={true}
       />
       <CardCarousel
         title="My Unpublished Maps"
-        maps={[
-          {
-            _id: '1',
-            title: 'map',
-            png: Buffer.alloc(0),
-          },
-        ]}
+        maps={ums}
         published={false}
       />
     </main>

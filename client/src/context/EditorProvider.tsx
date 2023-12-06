@@ -5,7 +5,10 @@ import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
+import {
+  DELETED_NAME,
+  applyDelta,
+} from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -87,7 +90,8 @@ function reducer(
       if (action.payload.map && action.payload.map_id) {
         newState.map = action.payload.map;
         newState.map_id = action.payload.map_id;
-        let v = new GeoJSONVisitor(action.payload.map.geoJSON);
+        let geoJSON = action.payload.map.geoJSON;
+        let v = new GeoJSONVisitor(geoJSON);
         v.visitRoot();
         newState.mapDetails = {
           availableProps: Array.from(
@@ -195,7 +199,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-
       let li = ctx.state.lastInstantiated;
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
@@ -226,7 +229,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
-
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
@@ -255,7 +257,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
-
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);

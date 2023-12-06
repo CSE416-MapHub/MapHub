@@ -67,10 +67,16 @@ const PostController = {
   },
   getUserPosts: async (req: Request, res: Response) => {
     try {
-      // const userId = (req as any).userId;
+      console.log('in get user posts');
+      const userId = req.params.userId;
+      console.log(userId);
+      console.log(req.query.id);
 
-      const posts = await Post.find({ owner: req.params.userId }).exec();
+      console.log('before finding posts');
 
+      const posts = await Post.find({ userId }).exec();
+
+      console.log('after finding posts');
       console.log(
         'Getting posts by user',
         req.params.userId,
@@ -222,7 +228,8 @@ const PostController = {
             return {
               title: post.title,
               description: post.description,
-              postID: post._id,
+              userId: post.owner,
+              postId: post._id,
               mapID: post.map,
               svg: svg,
             };

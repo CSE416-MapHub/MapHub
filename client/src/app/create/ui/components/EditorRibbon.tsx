@@ -1,9 +1,8 @@
 'use client';
-
 import { TextField, Typography } from '@mui/material';
 import { Undo, Redo } from '@mui/icons-material';
 import styles from './EditorRibbon.module.scss';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import EditorMenu, { MenuProps } from './EditorMenu';
 import ImportModal from './modals/importModal';
 import ChoroplethModal from './modals/choroplethModal';
@@ -22,9 +21,11 @@ import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
-import { createNewMap } from './helpers/EditorAPICalls';
+import { createNewMap, loadMapById } from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { readFile } from 'fs';
 
 // A list of all accepted file types.
 const accept: string =
@@ -43,6 +44,7 @@ export default function () {
     type: 'Point',
     coordinates: [0, 0],
   });
+  var GeoJSON = require('geojson');
   const menus = {
     File: {
       Import: {
@@ -134,12 +136,16 @@ export default function () {
     'Christians',
   ];
 
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   function onImportConfirm(
     mapName: string,
     mapType: MapType,
     optionsProps: string[],
   ) {
     console.log(mapName, optionsProps);
+    console.log(userGeoJSON);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
@@ -156,6 +162,8 @@ export default function () {
       createMapProm = Promise.resolve(GUEST_MAP_ID);
     }
     createMapProm.then(id => {
+      // router.push('?mapid=' + id);
+      console.log(mh);
       editorContext.helpers.setLoadedMap(editorContext, id, mh);
       setOpenImport(false);
     });
@@ -167,6 +175,29 @@ export default function () {
   function onMultiMapConfirm(optionsProps: string[]) {
     setOpenMapLabelModal(false);
   }
+
+  useEffect(() => {
+    const mapId = searchParams.get('mapid') as string;
+    console.log(mapId);
+    if (mapId && editorContext.state.map_id !== mapId) {
+      let getMap: Promise<MHJSON>
+      if (authContext.state.isLoggedIn) {
+        getMap = loadMapById(mapId);
+        getMap.then(map => {
+          let geoJSON = map.geoJSON.toString();
+          console.log(geoJSON);
+          let parsedGeoJSON = JSON.parse(geoJSON);
+          console.log(parsedGeoJSON);
+          console.log(typeof parsedGeoJSON);
+          map.geoJSON = parsedGeoJSON;
+          editorContext.helpers.setLoadedMap(editorContext, mapId, map);
+          console.log('loaded map set');
+          // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
+          setOpenImport(false);
+        })
+      }
+    }
+  }, [searchParams]);
 
   return (
     <div className={styles['ribbon-container']}>

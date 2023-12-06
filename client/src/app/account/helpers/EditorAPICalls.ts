@@ -15,12 +15,15 @@ import PostAPI from 'api/PostAPI';
 function validateRecents(a: any): a is Array<{
   _id: string;
   title: string;
+  owner: string;
+  published: boolean;
   png: Buffer;
 }> {
   for (let entry of a) {
     if (
       typeof entry._id !== 'string' ||
       typeof entry.title !== 'string' ||
+      typeof entry.published !== 'boolean' ||
       !entry.png ||
       entry.png.type !== 'Buffer' ||
       typeof entry.png.data !== 'object'
@@ -39,6 +42,8 @@ export function getRecentUnpublished(): Promise<
   Array<{
     _id: string;
     title: string;
+    owner: string;
+    published: boolean;
     png: Buffer;
   }>
 > {

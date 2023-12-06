@@ -7,8 +7,8 @@ import mongoose from 'mongoose';
 import fs from 'fs';
 
 jest.mock('bcrypt');
-jest.mock('../auth/index');
 jest.mock('../models/user-model');
+jest.mock('../auth/index')
 beforeAll(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
@@ -176,6 +176,8 @@ describe('GET /auth/profile-picture ', () => {
   });
 
   it('should return a base-64 encoded string.', async () => {
+    jest.mock('../models/user-model');
+
     (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await supertest(app)
@@ -262,10 +264,10 @@ describe('GET /auth/exists', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+});
+afterEach(() => {
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
 
 describe('POST /auth/username', () => {
