@@ -209,9 +209,11 @@ const PostController = {
             return {
               title: post.title,
               description: post.description,
-              postID: post._id,
+              userId: post.owner,
+              postId: post._id,
               mapID: post.map,
               png: png,
+              numLikes: post.likes.length,
             };
           }),
         );
