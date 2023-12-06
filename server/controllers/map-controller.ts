@@ -84,11 +84,12 @@ const MapController = {
     console.log('REQ BODY IS');
     console.log(req.body);
 
-    if (verifiedUser !== owner) {
-      return res
-        .status(400)
-        .json({ error: 'Verified Cookie user not the same as the map owner' });
-    }
+    // if (verifiedUser !== owner) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: 'Verified Cookie user not the same as the map owner' });
+    // }
+
     if (!title || !mapType || !geoJSON) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
