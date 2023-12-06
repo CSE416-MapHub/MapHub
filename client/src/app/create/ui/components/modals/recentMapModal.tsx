@@ -33,7 +33,7 @@ const RecentMapModal: React.FC<RecentMapModalProps> = ({ open, onClose }) => {
     Array<{
       _id: string;
       title: string;
-      png: Buffer;
+      svg: string;
     }>
   >([]);
   const handleSelectionChange = (selection: string) => {
