@@ -16,11 +16,21 @@
     color: colors.$on-surface;
   }
 
-  &__post {
-    background-color: black;
+  &__container {
+    @include shape.extra-large();
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #CCEFF1;
     grid-area: post;
     aspect-ratio: 1 / 1;
     width: 100%;
+  }
+
+  &__image {
+    height: 98%;
+    width: 98%;
   }
 
   &__comments {

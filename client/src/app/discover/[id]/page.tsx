@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
 import styles from './styles/post.module.scss';
@@ -34,7 +35,15 @@ async function Post({ params }: { params: { id: string } }) {
 
   return (
     <main className={styles['post__main']}>
-      <div className={styles['post__post']}></div>
+      <div className={styles['post__container']}>
+        <Image
+          className={styles['post__image']}
+          src={`data:image/svg+xml;utf8,${encodeURIComponent(post.svg)}`}
+          alt={`A Map titled ${post.title} with a description of ${post.description}`}
+          height={1000}
+          width={1000}
+        />
+      </div>
       <div className={styles['post__comments']}></div>
     </main>
   );
