@@ -42,7 +42,8 @@ export async function convertJsonToSVG(map: MapDocument) {
   console.log('JSON TO SVG', JSON.stringify(map));
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-  // console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+
+  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
   map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
@@ -86,11 +87,12 @@ const MapController = {
     console.log('REQ BODY IS');
     console.log(req.body);
 
-    if (verifiedUser !== owner) {
-      return res
-        .status(400)
-        .json({ error: 'Verified Cookie user not the same as the map owner' });
-    }
+    // if (verifiedUser !== owner) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: 'Verified Cookie user not the same as the map owner' });
+    // }
+
     if (!title || !mapType || !geoJSON) {
       return res.status(400).json({ error: 'Missing required fields' });
     }

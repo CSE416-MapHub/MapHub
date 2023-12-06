@@ -5,6 +5,7 @@ import {
   PostPayload,
   LikePayloadPost,
   LikePayloadComment,
+  LikeChange,
 } from 'types/postPayload';
 const SERVER_PORT = 3031;
 
@@ -58,8 +59,8 @@ class PostAPI {
   //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
   // }
 
-  static async changeLikeToPost(likePayload: LikePayloadPost) {
-    return this.api.patch(`/posts/post/likeChange`, { likePayload });
+  static async changeLikeToPost(postId: string, likeChange: LikeChange) {
+    return this.api.patch(`/posts/post/likeChange`, { postId, likeChange });
   }
 
   static async changeLikeToComment(likePayload: LikePayloadComment) {

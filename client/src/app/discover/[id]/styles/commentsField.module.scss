@@ -1,0 +1,19 @@
+@use 'shape';
+
+.comments-field {
+  &__container {
+    margin: 0 shape.$large shape.$large;
+  }
+
+  &__input {
+    width: 100%;
+
+    .trailing-icon {
+      align-self: flex-start;
+
+      &:hover {
+        cursor: pointer;
+      }
+    }
+  }
+}

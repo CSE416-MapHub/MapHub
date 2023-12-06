@@ -275,7 +275,7 @@ export function makeRegionPanel(
         } => {
           let cv = 'undefined';
           let t = feature.properties;
-          if (t && t[lbl]) {
+          if (t && t[lbl] !== undefined) {
             cv = t[lbl].toString();
           }
           return {

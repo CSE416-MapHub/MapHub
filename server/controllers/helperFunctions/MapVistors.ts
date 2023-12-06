@@ -30,7 +30,8 @@ class SVGBuilder {
    */
   public createSVG(): string {
     this.featureNumber = 0;
-    let map = JSON.parse(this.mhjson.geoJSON);
+
+    let map: GeoJSON = JSON.parse(this.mhjson.geoJSON);
     let els = '';
     console.log('GET MAP TYPE', map.type);
     switch (map.type) {
