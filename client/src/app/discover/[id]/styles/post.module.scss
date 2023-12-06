@@ -1,4 +1,5 @@
 @use 'colors';
+@use 'elevation';
 @use 'shape';
 
 .post {
@@ -18,6 +19,7 @@
 
   &__container {
     @include shape.extra-large();
+
     display: flex;
     align-items: center;
     justify-content: center;
@@ -34,9 +36,12 @@
   }
 
   &__comments {
+    @include shape.large();
     grid-area: comments;
-    background-color: #00AFB9;
+
     height: 100%;
     width: 100%;
+
+    background-color: colors.$surface-container;
   }
 }

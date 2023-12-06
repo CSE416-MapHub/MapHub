@@ -1,6 +1,9 @@
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 
+import CommentsHead from './components/commentsHead';
+import CommentsDivider from './components/commentsDivider';
+
 import styles from './styles/post.module.scss';
 
 import 'dotenv/config';
@@ -44,7 +47,17 @@ async function Post({ params }: { params: { id: string } }) {
           width={1000}
         />
       </div>
-      <div className={styles['post__comments']}></div>
+      <div className={styles['post__comments']}>
+        <CommentsHead
+          user={{
+            username: post.owner.username,
+            profilePic: post.owner.profilePic,
+          }}
+          title={post.title}
+          description={post.description}
+        />
+        <CommentsDivider />
+      </div>
     </main>
   );
 }
