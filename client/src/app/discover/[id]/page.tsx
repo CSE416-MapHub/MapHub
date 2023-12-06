@@ -5,6 +5,7 @@ import CommentsHead from './components/commentsHead';
 import CommentsDivider from './components/commentsDivider';
 import CommentsList from './components/commentsList';
 import CommentsFoot from './components/commentsFoot';
+import CommentsField from './components/commentsField';
 
 import styles from './styles/post.module.scss';
 
@@ -62,6 +63,7 @@ async function Post({ params }: { params: { id: string } }) {
         <CommentsList />
         <CommentsDivider />
         <CommentsFoot likes={post.likes} postId={post.postID} />
+        <CommentsField postId={post.postID} />
       </div>
     </main>
   );
