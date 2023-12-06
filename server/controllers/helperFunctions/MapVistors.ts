@@ -1,29 +1,23 @@
 import { GeoJSON } from 'geojson';
-import {
-  BBox,
-  addPointToLocalBBox,
-  mergeBBox,
-} from 'context/editorHelpers/GeoJSONVisitor';
-import {
-  isGeometry,
-  isGeometryCollection,
-} from 'context/editorHelpers/utility';
-import L from 'leaflet';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
-import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { BBox, addPointToLocalBBox, mergeBBox } from './GeoJSONVisitor';
+import { isGeometry, isGeometryCollection } from './utility';
+import MapModel from '../../models/map-model';
+import { IDotDensityProps, MHJSON, ICategoryProps } from './types/MHJSON';
 // import { useRef } from "react";
-
+type MapDocument = typeof MapModel.prototype;
 const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
+
+export const DELETED_NAME = '_#DEL';
 
 class SVGBuilder {
   private featureNumber = 0;
   private bboxInitialized: boolean;
   private bbox: BBox = [0, 0, 0, 0];
-  private mhjson: MHJSON;
+  private mhjson: MapDocument;
 
-  constructor(map: MHJSON) {
+  constructor(map: MapDocument) {
     this.mhjson = map;
     this.bboxInitialized = false;
   }
@@ -38,6 +32,7 @@ class SVGBuilder {
     this.featureNumber = 0;
     let map: GeoJSON = this.mhjson.geoJSON;
     let els = '';
+    console.log('GET MAP TYPE', JSON.stringify(map));
     switch (map.type) {
       case 'Feature': {
         els = this.svgOfFeature(map);
@@ -64,11 +59,18 @@ class SVGBuilder {
 
   private svgOfDots(): string {
     // construct a map of names to objects
-    let dotMap = new Map<string, IDotDensityProps>(
-      this.mhjson.globalDotDensityData.map(x => [x.name, x]),
-    );
 
+    let dotMap = new Map<string, IDotDensityProps>(
+      this.mhjson.globalDotDensityData.map((x: IDotDensityProps) => [
+        x.name,
+        x,
+      ]),
+    );
     let dots = '';
+    if (dotMap.size === 0) {
+      return dots;
+    }
+
     for (let d of this.mhjson.dotsData) {
       if (d.dot === DELETED_NAME) {
         continue;
@@ -133,6 +135,11 @@ class SVGBuilder {
     let els = this.svgOfGeometry(feature.geometry);
     // determine the color of this feature
     let fill = 'white';
+    console.log('WHAT IS THE MJSON', this.mhjson);
+    if (this.mhjson.regionsData.length === 0) {
+      return '';
+    }
+
     let rColor = this.mhjson.regionsData[this.featureNumber].color;
     if (rColor !== undefined) {
       fill = rColor;
@@ -140,7 +147,7 @@ class SVGBuilder {
     let category = this.mhjson.regionsData[this.featureNumber].category;
     if (category !== undefined && category !== DELETED_NAME) {
       let categoryObject = this.mhjson.globalCategoryData.filter(
-        x => x.name === category,
+        (x: ICategoryProps) => x.name === category,
       )[0];
       if (categoryObject !== undefined) {
         fill = categoryObject.color;
@@ -324,6 +331,7 @@ class SVGBuilder {
           .join('');
       }
     }
+    return elements;
   }
 
   /**
