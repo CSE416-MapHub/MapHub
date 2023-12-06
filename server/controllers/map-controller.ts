@@ -389,7 +389,7 @@ const MapController = {
             title: map.title,
             owner: map.owner.toString(),
             published: map.published,
-            png: png,
+            svg: svg,
           };
         }),
       );
