@@ -32,6 +32,7 @@ class SVGBuilder {
     this.featureNumber = 0;
     let map: GeoJSON = this.mhjson.geoJSON;
     let els = '';
+    console.log('GET MAP TYPE', JSON.stringify(map));
     switch (map.type) {
       case 'Feature': {
         els = this.svgOfFeature(map);

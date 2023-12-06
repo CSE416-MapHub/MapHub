@@ -43,7 +43,7 @@ export async function convertJsonToSVG(map: MapDocument) {
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
   console.log('GEOJSON DATA IN DO THE ', geoJSONData);
-  map.geoJSON = geoJSONData;
+  map.geoJSON = JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
