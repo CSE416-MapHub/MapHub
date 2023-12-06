@@ -54,12 +54,14 @@ function authManager() {
     }
   };
 
-  const verifyUser = async (tokenInQ: jwt.JwtPayload) => {
+  const verifyUser = async (request: Request) => {
     try {
-      console.log('RETURN seom decoded token');
-      // return decodedToken?.userId || null;
-      //TODO NENED TO MAKE THIS ACTUALL FIND A USER AND VERIFIY IT;
-    } catch (err) {
+      const token = request.cookies.token;
+      if (!token) {
+        return null;
+      }
+      return jwt.verify(token, jwtSecret) as jwt.JwtPayload;
+    } catch (error) {
       return null;
     }
   };

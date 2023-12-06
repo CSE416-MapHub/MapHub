@@ -1,11 +1,18 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
 import { IDotDensityProps, MHJSON } from 'types/MHJSON';
-import { GeoJSONVisitor, mergeBBox } from './editorHelpers/GeoJSONVisitor';
+import {
+  GeoJSONVisitor,
+  IFeatureVisitResults,
+  mergeBBox,
+} from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
+import {
+  DELETED_NAME,
+  applyDelta,
+} from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -31,7 +38,7 @@ export interface IEditorState {
   mapDetails: {
     availableProps: Array<string>;
     bbox: [x: number, y: number, w: number, h: number];
-    originalRegions: Array<G.Feature>;
+    regionData: Array<IFeatureVisitResults>;
   };
   actionStack: ActionStack;
   lastInstantiated: string; // name of the last instantiated item
@@ -47,7 +54,7 @@ let initialState: IEditorState = {
   mapDetails: {
     availableProps: [],
     bbox: [0, 0, 0, 0],
-    originalRegions: [],
+    regionData: [],
   },
   actionStack: new ActionStack(),
   lastInstantiated: DELETED_NAME,
@@ -87,7 +94,8 @@ function reducer(
       if (action.payload.map && action.payload.map_id) {
         newState.map = action.payload.map;
         newState.map_id = action.payload.map_id;
-        let v = new GeoJSONVisitor(action.payload.map.geoJSON);
+        let geoJSON = action.payload.map.geoJSON;
+        let v = new GeoJSONVisitor(geoJSON);
         v.visitRoot();
         newState.mapDetails = {
           availableProps: Array.from(
@@ -99,9 +107,7 @@ function reducer(
               (prev, curr) => mergeBBox(prev, curr.box),
               v.getFeatureResults().perFeature[0].box,
             ),
-          originalRegions: v
-            .getFeatureResults()
-            .perFeature.map(x => x.originalFeature),
+          regionData: v.getFeatureResults().perFeature,
         };
       } else {
         throw new Error('SET_MAP must have a map and a map_id in its payload');
@@ -195,7 +201,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-
       let li = ctx.state.lastInstantiated;
       if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
         li = d.payload.name;
@@ -226,7 +231,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
-
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
@@ -255,7 +259,6 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(a.do);
       }
-
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);

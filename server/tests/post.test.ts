@@ -5,18 +5,61 @@ import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import auth from '../auth/index';
 import mapModel from '../models/map-model';
+import { LikeChange } from '../controllers/post-controller';
+import commentModel from '../models/comment-model';
+import { createMockMap } from './map.test';
+import fs from 'fs';
+
 const mockUserID = new mongoose.Types.ObjectId();
+
+let mapData = {
+  _id: new mongoose.Types.ObjectId(),
+  title: 'mapNice',
+  owner: new mongoose.Types.ObjectId(),
+  mapType: 'categorical',
+  published: false,
+  labels: [],
+  globalChoroplethData: {
+    minIntensity: 0,
+    maxIntensity: 0,
+    minColor: '',
+    maxColor: '',
+    indexingKey: '',
+  },
+  globalCategoryData: [],
+  globalSymbolData: [],
+  globalDotDensityData: [],
+  regionsData: [],
+  symbolsData: [],
+  dotsData: [],
+  arrowsData: [],
+  geoJSON: 'some/path',
+  updatedAt: Math.floor(new Date().getTime() * Math.random()),
+  createdAt: new Date().getTime(),
+};
+
+const geoJSONTemp = {
+  type: 'Feature',
+  geometry: { type: 'Point', coordinates: [-73.935242, 40.73061] },
+  properties: { name: 'Point', description: 'description point' },
+};
 
 beforeEach(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
+  jest.mock('fs');
 
+  jest
+    .spyOn(fs.promises, 'readFile')
+    .mockResolvedValue(JSON.stringify(geoJSONTemp));
   jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
 });
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
 });
+
+jest.mock('../models/post-model');
 
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
@@ -96,13 +139,19 @@ describe('GET /posts/all', () => {
 
     const mockMaps = [
       {
+        ...mapData,
         _id: mockPosts[0].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
       {
+        ...mapData,
         _id: mockPosts[2].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
       {
+        ...mapData,
         _id: mockPosts[1].map,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
       },
     ];
     const searchQuery = 'dynasty';
@@ -176,12 +225,15 @@ describe('GET /posts/user', () => {
 
     const mockMaps = [
       {
+        ...mapData,
         _id: mockPosts[0].map,
       },
       {
+        ...mapData,
         _id: mockPosts[2].map,
       },
       {
+        ...mapData,
         _id: mockPosts[1].map,
       },
     ];
@@ -231,5 +283,284 @@ describe('GET /posts/user', () => {
     expect(response.body.posts[1].mapID.toString()).toEqual(
       mockMaps[1]._id.toString(),
     );
+  });
+});
+
+describe('GET /posts/:postId', () => {
+  it('gets post by ID with populated comments and associated map', async () => {
+    // Set up some mock data
+    const mockPostId = new mongoose.Types.ObjectId();
+    const mockMapId = new mongoose.Types.ObjectId();
+    const mockComments = [
+      {
+        _id: new mongoose.Types.ObjectId(),
+        user: new mongoose.Types.ObjectId(),
+        content: 'this is a comment',
+        replies: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+        likes: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+      },
+    ];
+    const mockPosts = [
+      {
+        _id: mockPostId,
+        title: 'Post1',
+        description: 'Some decscsiorion',
+        map: mockMapId,
+        owner: new mongoose.Types.ObjectId(),
+        comments: [],
+        likes: [new mongoose.Types.ObjectId()],
+      },
+      {
+        _id: new mongoose.Types.ObjectId(),
+        title: 'Post2',
+        description: 'POST 2',
+        map: new mongoose.Types.ObjectId(),
+      },
+    ];
+
+    const mockMaps = [
+      {
+        ...mapData,
+        _id: mockMapId,
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
+
+        // other map properties
+      },
+      {
+        ...mapData,
+        _id: mockPosts[1],
+        geoJSON: '../jsonStore/655d7d37b8c84d31ceeecf81.geojson',
+
+        // other map properties
+      },
+    ];
+
+    jest
+      .spyOn(postModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          map: mockMapId,
+          comments: mockComments, // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    jest
+      .spyOn(mapModel, 'findById')
+      .mockImplementation((id: mongoose.Types.ObjectId | string) => {
+        const result = mockMaps.find(
+          map => map._id.toString() === id.toString(),
+        );
+        return { exec: jest.fn().mockResolvedValue(result) } as any;
+      });
+
+    const response = await supertest(app)
+      .get(`/posts/post/${mockMapId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('post');
+    console.log(response.body.post);
+    expect(response.body.post.comments[0].content).toEqual('this is a comment');
+  });
+});
+
+describe('POST /posts/comments/:postId', () => {
+  it('creating a comment in a post', async () => {
+    jest
+      .spyOn(commentModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
+    const mockPostId = new mongoose.Types.ObjectId();
+    const mockMapId = new mongoose.Types.ObjectId();
+    const mockPost = {
+      _id: mockPostId,
+      title: 'Post1',
+      description: 'Some decscsiorion',
+      map: mockMapId,
+      owner: new mongoose.Types.ObjectId(),
+      comments: [],
+      likes: [new mongoose.Types.ObjectId()],
+      save: jest.fn().mockReturnValue({}),
+    };
+
+    jest.spyOn(postModel, 'findById').mockImplementation((id: any) => {
+      return mockPost as any;
+    });
+
+    const response = await supertest(app)
+      .post(`/posts/comments/${mockPostId}/`)
+      .send({
+        content: 'THIS NEW COMMENT BABYY',
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('comment');
+    expect(response.body.comment.content).toEqual('THIS NEW COMMENT BABYY');
+    expect(response.body.comment.user).toEqual(mockUserID.toString());
+    expect(response.body.comment.likes).toEqual([]);
+    expect(response.body.comment.replies).toEqual([]);
+  });
+});
+
+describe('PATCH /posts/post/likeChange', () => {
+  const mockPostId = new mongoose.Types.ObjectId();
+  const mockMapId = new mongoose.Types.ObjectId();
+
+  it('adding user like', async () => {
+    const mockPost = {
+      _id: mockPostId,
+      title: 'Post1',
+      description: 'Some decscsiorion',
+      map: mockMapId,
+      owner: new mongoose.Types.ObjectId(),
+      comments: [],
+      likes: [new mongoose.Types.ObjectId()],
+      save: jest.fn().mockReturnThis(),
+    };
+    jest.spyOn(postModel, 'findById').mockImplementation((id: any) => {
+      return mockPost as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/post/likeChange`)
+      .send({
+        postId: mockPostId,
+        likeChange: LikeChange.ADD_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 2);
+  });
+
+  it('removing user like', async () => {
+    const mockPost = {
+      _id: mockPostId,
+      title: 'Post1',
+      description: 'Some decscsiorion',
+      map: mockMapId,
+      owner: new mongoose.Types.ObjectId(),
+      comments: [],
+      likes: [new mongoose.Types.ObjectId(), mockUserID],
+      save: jest.fn().mockReturnThis(),
+    };
+    jest.spyOn(postModel, 'findById').mockImplementation((id: any) => {
+      return mockPost as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/post/likeChange`)
+      .send({
+        postId: mockPostId,
+        likeChange: LikeChange.REMOVE_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 1);
+  });
+});
+
+describe('PATCH /posts/comments/likeChange', () => {
+  const mockCommentId = new mongoose.Types.ObjectId();
+
+  it('adding user like', async () => {
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some text bruh',
+      replies: [],
+      likes: [new mongoose.Types.ObjectId()],
+      save: jest.fn().mockReturnThis(),
+    };
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/comments/likeChange`)
+      .send({
+        commentId: mockCommentId,
+        likeChange: LikeChange.ADD_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 2);
+  });
+
+  it('removing user like', async () => {
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some text bruh',
+      replies: [],
+      likes: [new mongoose.Types.ObjectId(), mockUserID],
+      save: jest.fn().mockReturnThis(),
+    };
+
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+    const response = await supertest(app)
+      .patch(`/posts/comments/likeChange`)
+      .send({
+        commentId: mockCommentId,
+        likeChange: LikeChange.REMOVE_LIKE,
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('likes', 1);
+  });
+});
+
+describe('POST /posts/comments/:commentId/replies', () => {
+  it('add a reply to a comment', async () => {
+    jest
+      .spyOn(commentModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
+    const mockCommentId = new mongoose.Types.ObjectId();
+    const mockComment = {
+      _id: mockCommentId,
+      user: mockUserID,
+      content: 'some comment stuff',
+      replies: [],
+      likes: [],
+      save: jest.fn().mockReturnThis(),
+    };
+
+    jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
+      return mockComment as any;
+    });
+
+    const response = await supertest(app)
+      .post(`/posts/comments/${mockCommentId}/replies`)
+      .send({
+        content: 'THIS NEW REPLY',
+      })
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('reply');
+    expect(response.body.reply.content).toEqual('THIS NEW REPLY');
+    expect(response.body.reply.user).toEqual(mockUserID.toString());
+    expect(response.body.reply.likes).toEqual([]);
+    expect(response.body.reply.replies).toEqual([]);
   });
 });

@@ -274,7 +274,6 @@ function LoginForm() {
           display: 'flex',
           flexDirection: 'row',
           justifyContent: 'space-between',
-          marginBottom: '15px',
         }}
       >
         <Link variant="body1" href="/account/forgot-account?query=username">
@@ -284,7 +283,7 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-      <Button id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
+      <Button className={styles.button} id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
         Sign In
       </Button>
 

@@ -1,4 +1,18 @@
+.form_control {
+  margin-top: 12px;
+}
+
 .textField {
   width: 100%;
   margin: 12px auto;
+}
+
+.input_label {
+  color: white;
+  font-size: large;
+  left: -14px;
+}
+
+.error_text {
+  margin: -10px 0 12px 0;
 }

@@ -4,10 +4,33 @@
 
 // map cards 
 
-.map-card-container {
+.published-map-card-container {
     height: 187px;
     background-color: colors.$primary-container;
     border-radius: 12px;
+
+    &:hover {
+        // Styles to apply on hover
+        background-color: colors.$on-primary-container; 
+        cursor: pointer; 
+        .map-text, .map-icon{
+            color: colors.$on-primary;
+        }
+    }
+}
+
+.unpublished-map-card-container {
+    height: 187px;
+    background-color: lightgrey;
+    border-radius: 12px;
+    &:hover {
+        // Styles to apply on hover
+        background-color: colors.$on-primary-container; 
+        cursor: pointer; 
+        .map-text, .map-icon{
+            color: colors.$on-primary;
+        }
+    }
 }
 
 .map-preview {
@@ -22,4 +45,3 @@
     flex-direction: column;
     padding: 6px;
 }
-

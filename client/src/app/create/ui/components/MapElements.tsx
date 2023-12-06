@@ -7,12 +7,13 @@ import {
 import * as G from 'geojson';
 import * as L from 'leaflet';
 import { useContext, useState, useEffect, useRef } from 'react';
-import { CircleMarker, GeoJSON, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, SVGOverlay, useMap } from 'react-leaflet';
 
 import { DeltaType, TargetType } from 'types/delta';
 import { IDotDensityProps, IRegionProperties, MHJSON } from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import Dot from './instances/Dot';
+import Text from './instances/Text';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -32,8 +33,9 @@ export default function () {
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
-  const [draggingItem, setDraggingItem] = useState(null);
+  // const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
+
 
   useEffect(() => {
     let b = editorContextStaleable.state.mapDetails.bbox;
@@ -46,6 +48,12 @@ export default function () {
       setDotNames(nameMap);
     }
 
+    // if theres a map, make sure the loaded regions and the displayed regions
+    // are synced and no dot names
+    else if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
+      setCurrentRegionProps(loadedMap.regionsData);
+      setRerender(rerender + 1);
+    }
     if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
       let c: [number, number] = [b[1], b[0]];
       setEBBox(c);
@@ -68,12 +76,6 @@ export default function () {
       map.setMinZoom(MIN_ZOOM);
     }
 
-    // if theres a map, make sure the loaded regions and the displayed regions
-    // are synced
-    if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
-      setCurrentRegionProps(loadedMap.regionsData);
-      setRerender(rerender + 1);
-    }
   });
 
   // handles clicks, regardless of whether or not theyre on a
@@ -175,9 +177,35 @@ export default function () {
       L.DomEvent.stopPropagation(ev);
     });
     let p = layer as L.Path;
+    let fillColor = 'white';
+    if (currentRegionProps[myId]) {
+      let c = currentRegionProps[myId].color;
+      if (c) {
+        fillColor = c;
+      }
+      c = currentRegionProps[myId].category;
+      if (c !== undefined && c !== DELETED_NAME) {
+        // find the category
+        let categoryId = -1;
+        editorContextRef.current.state.map?.globalCategoryData.forEach(
+          (v, i) => {
+            if (v.name === c) {
+              categoryId = i;
+            }
+          },
+        );
+        if (categoryId === -1) {
+          throw new Error('Failed to locate the category for name ' + c);
+        }
+        fillColor =
+          editorContextRef.current.state.map!.globalCategoryData[categoryId]
+            .color;
+      }
+    }
+
     p.setStyle({
       color: '#000000',
-      fillColor: currentRegionProps[myId]?.color ?? 'white',
+      fillColor: fillColor,
       fillOpacity: 1,
       opacity: 1,
       stroke: true,
@@ -200,7 +228,12 @@ export default function () {
         if (dotInstance.dot === DELETED_NAME) {
           return;
         }
-        let dotClass = dotNames.get(dotInstance.dot)!;
+        let dotClass = dotNames.get(dotInstance.dot) ?? {
+          opacity: 0,
+          name: DELETED_NAME,
+          color: '#000000',
+          size: 0,
+        };
         return (
           <Dot
             dotInstance={dotInstance}
@@ -211,6 +244,23 @@ export default function () {
           />
         );
       })}
+      {(() => {
+        let details = editorContextRef.current.state.mapDetails.regionData;
+        let activeLabels = editorContextRef.current.state.map!.labels;
+        return details.map(d => (
+          <Text
+            value={activeLabels.map(l => {
+              if (d.originalFeature.properties !== null) {
+                return d.originalFeature.properties[l] ?? 'undefined';
+              }
+              return 'undefined';
+            })}
+            // box={[91.93, 31.8086, 30.67, 8.241]}
+            box={d.box}
+            mapClickHandler={handleMapClick}
+          ></Text>
+        ));
+      })()}
     </>
   );
 }

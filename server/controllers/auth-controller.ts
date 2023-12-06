@@ -69,14 +69,22 @@ export const registerUser = async (req: Request, res: Response) => {
     });
     const savedUser = await newUser.save();
     console.log('New user saved: ' + savedUser._id);
-    res.status(200).json({
-      success: true,
-      user: {
-        id: savedUser._id,
-        username: savedUser.username,
-        profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
-      },
-    });
+    const token = auth.signToken(savedUser._id.toString());
+    res
+      .status(200)
+      .cookie('token', token, {
+        httpOnly: true,
+        secure: true,
+        sameSite: 'none',
+      })
+      .json({
+        success: true,
+        user: {
+          id: savedUser._id,
+          username: savedUser.username,
+          profilePic: Buffer.from(savedUser.profilePic).toString('base64'),
+        },
+      });
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
@@ -175,6 +183,77 @@ export const getExists = async (request: Request, response: Response) => {
   }
 };
 
+export const getUserById = async (request: Request, response: Response) => {
+  try {
+    const { id } = request.query;
+    if (!id) {
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'Please include the id to check if it exists.',
+      });
+    }
+
+    const user = await User.findById(id);
+    if (!user) {
+      return response
+        .status(400).json({
+          success: false,
+          errorMessage: 'User not found.'
+        });
+    } else {
+      return response
+        .status(200)
+        .json({
+          user: {
+            id: user._id,
+            username: user.username,
+            profilePic: Buffer.from(user.profilePic).toString('base64'),
+          }
+        })
+    }
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorMessage: 'There is an internal error. Please try again.',
+    });
+  }
+}
+
+export const getVerify = async (request: Request, response: Response) => {
+  const headers = {
+    'Cache-Control': 'no-cache, no-store, must-revalidate',
+    Pragma: 'no-cache',
+    Expires: '0',
+  };
+  const notLoggedInBody = {
+    isLoggedIn: false,
+    user: null,
+  };
+  try {
+    const tokenPayload = await auth.verifyUser(request);
+    if (!tokenPayload) {
+      return response.status(200).set(headers).json(notLoggedInBody);
+    }
+    const user = await User.findById(tokenPayload.userId);
+    if (!user) {
+      return response.status(200).set(headers).json(notLoggedInBody);
+    }
+    return response
+      .status(200)
+      .set(headers)
+      .json({
+        isLoggedIn: true,
+        user: {
+          id: user._id,
+          username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
+        },
+      });
+  } catch (error) {
+    return response.status(200).set(headers).json(notLoggedInBody);
+  }
+};
+
 export const getProfilePic = async (request: Request, response: Response) => {
   try {
     const { id } = request.body;
@@ -214,7 +293,18 @@ export const postUsername = async (request: Request, response: Response) => {
     if (!username) {
       return response.status(400).json({
         success: false,
-        errorMessage: 'Please include the new username to update the user.',
+        errorCode: 1,
+        errorMessage: 'Please enter a new username.',
+      });
+    }
+
+    if (!/^[\w.]{2,15}\w$/.test(username)) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage:
+          'Please enter a valid username between 3-16 alphanumeric, ' +
+          'underscore, or dot characters.',
       });
     }
 
@@ -223,16 +313,17 @@ export const postUsername = async (request: Request, response: Response) => {
     if (name) {
       return response.status(400).json({
         success: false,
-        errorCode: 1,
+        errorCode: 3,
         errorMessage:
-          'Username already exists. Please choose another username.',
+          'The username is already in use. Please choose another one.',
       });
     }
 
     const user = await User.findById(userId);
     if (!user) {
-      return response.status(400).json({
+      return response.status(404).json({
         success: false,
+        errorCode: 4,
         errorMessage: 'User does not exist.',
       });
     }
@@ -250,6 +341,7 @@ export const postUsername = async (request: Request, response: Response) => {
   } catch (error) {
     return response.status(500).json({
       success: false,
+      errorCode: 0,
       errorMessage: 'There has been an internal error. Please try again later.',
     });
   }

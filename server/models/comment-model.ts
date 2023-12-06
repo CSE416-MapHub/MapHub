@@ -1,50 +1,24 @@
-import mongoose from 'mongoose';
-
-const Schema = mongoose.Schema;
+import { Schema, model } from 'mongoose';
 
 const commentSchema = new Schema(
   {
-    name: { type: String, required: true },
-    ownerEmail: { type: String, required: true },
-    songs: {
-      type: [
-        {
-          title: String,
-          artist: String,
-          youTubeId: String,
-        },
-      ],
+    user: {
+      type: Schema.Types.ObjectId,
       required: true,
+      ref: 'User',
     },
-    comments: {
-      type: [
-        {
-          user: String,
-          comment: String,
-        },
-      ],
-      required: true,
-    },
-    likes: {
-      type: [
-        {
-          user: String,
-        },
-      ],
-      required: true,
-    },
-    dislikes: {
-      type: [
-        {
-          user: String,
-        },
-      ],
-      required: true,
-    },
-    publishDate: { type: Date },
-    listens: { type: Number, required: true },
+    content: { type: String, required: true },
+    replies: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: 'Comment',
+      },
+    ],
+    likes: [{ type: Schema.Types.ObjectId, ref: 'User' }],
   },
   { timestamps: true },
 );
 
-module.exports = mongoose.model('Comment', commentSchema);
+const Comment = model('Comment', commentSchema);
+
+export default Comment;

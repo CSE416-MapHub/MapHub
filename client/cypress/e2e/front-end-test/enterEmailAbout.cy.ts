@@ -11,8 +11,8 @@ describe('enter in fake account details', () => {
       .blur()
 
     cy.wait(500);
-    cy.get('label#email-label').should('have.class', 'Mui-error');
-    cy.get('p#email-helper-text').should('contain', 'Please enter a valid email address.');
+    cy.get('input#email').should('have.attr', 'aria-invalid', 'true');
+    cy.get('p.MuiFormHelperText-root').should('contain', 'Please enter a valid email address.');
 
     cy.get('input#email')
       .clear()
@@ -20,7 +20,7 @@ describe('enter in fake account details', () => {
       .blur()
 
     cy.wait(500);
-    cy.get('label#email-label').should('not.have.class', 'Mui-error');
+    cy.get('input#email').should('not.have.attr', 'aria-invalid', 'true');
 
   });
 });

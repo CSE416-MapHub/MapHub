@@ -9,7 +9,8 @@ import {
   isGeometryCollection,
 } from 'context/editorHelpers/utility';
 import L from 'leaflet';
-import { MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 // import { useRef } from "react";
 
 const STROKE_WIDTH = 0.1;
@@ -34,26 +35,75 @@ class SVGBuilder {
    * @returns A <svg></svg> populated with svg elements.
    */
   public createSVG(): string {
+    this.featureNumber = 0;
     let map: GeoJSON = this.mhjson.geoJSON;
+    let els = '';
     switch (map.type) {
       case 'Feature': {
-        let els = this.svgOfFeature(map);
-        return els;
+        els = this.svgOfFeature(map);
+        break;
       }
 
       case 'FeatureCollection': {
-        let els = this.svgOfFeatureCollection(map);
-        return els;
+        els = this.svgOfFeatureCollection(map as GeoJSON.FeatureCollection);
+        break;
       }
       default: {
         if (isGeometry(map)) {
-          let els = this.svgOfGeometry(map);
-          return els;
+          els = this.svgOfGeometry(map);
         } else {
           throw new Error('Programmer did not catch a type: ' + map);
         }
       }
     }
+    if (this.mhjson.mapType === 'dot') {
+      els += this.svgOfDots();
+    }
+    return els;
+  }
+
+  private svgOfDots(): string {
+    // construct a map of names to objects
+    let dotMap = new Map<string, IDotDensityProps>(
+      this.mhjson.globalDotDensityData.map(x => [x.name, x]),
+    );
+
+    let dots = '';
+    for (let d of this.mhjson.dotsData) {
+      if (d.dot === DELETED_NAME) {
+        continue;
+      }
+      let dclass = dotMap.get(d.dot)!;
+      dots += this.svgOfDot(
+        d.x,
+        d.y,
+        d.scale * dclass.size,
+        dclass.color,
+        dclass.opacity,
+      );
+    }
+    return dots;
+  }
+
+  private svgOfDot(
+    x: number,
+    y: number,
+    radius: number,
+    color: string,
+    opacity: number,
+  ): string {
+    let p = this.isPosition([x, y]);
+    let lat2m = 10;
+
+    return `<circle
+      cx="${p[0]}"
+      cy="${p[1]}"
+      r="${radius / lat2m}"
+      fill="${color}"
+      opacity="${opacity}"
+      stroke="black"
+      stroke-width="${STROKE_WIDTH}%"
+      />`;
   }
 
   /**
@@ -81,7 +131,23 @@ class SVGBuilder {
    */
   private svgOfFeature(feature: GeoJSON.Feature): string {
     let els = this.svgOfGeometry(feature.geometry);
-    return els;
+    // determine the color of this feature
+    let fill = 'white';
+    let rColor = this.mhjson.regionsData[this.featureNumber].color;
+    if (rColor !== undefined) {
+      fill = rColor;
+    }
+    let category = this.mhjson.regionsData[this.featureNumber].category;
+    if (category !== undefined && category !== DELETED_NAME) {
+      let categoryObject = this.mhjson.globalCategoryData.filter(
+        x => x.name === category,
+      )[0];
+      if (categoryObject !== undefined) {
+        fill = categoryObject.color;
+      }
+    }
+    this.featureNumber++;
+    return `<g fill="${fill}">${els}</g>`;
   }
 
   /**
@@ -128,7 +194,6 @@ class SVGBuilder {
         cx="${p[0]}"
         cy="${p[1]}"
         r="${STROKE_WIDTH}%"
-        fill="${STROKE_COLOR}"
       />`;
   }
 
@@ -218,7 +283,6 @@ class SVGBuilder {
         fill-rule="evenodd"
         stroke="black"
         stroke-width="${STROKE_WIDTH}%"
-        fill="white"
       />`;
   }
 

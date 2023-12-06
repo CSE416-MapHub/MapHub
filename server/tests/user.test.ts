@@ -1,12 +1,14 @@
 import supertest from 'supertest';
 import auth from '../auth/index';
 import app from '../app';
+import bcrypt from 'bcrypt';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import fs from 'fs';
 
-jest.mock('../auth/index');
+jest.mock('bcrypt');
 jest.mock('../models/user-model');
+jest.mock('../auth/index')
 beforeAll(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
@@ -109,6 +111,55 @@ afterEach(() => {
   jest.restoreAllMocks();
 });
 
+describe('POST /auth/login', () => {
+  beforeEach(() => {
+    jest.mock('bcrypt');
+    jest.mock('../auth/index');
+    jest.mock('../models/user-model');
+  });
+
+  it('should return the user and a cookie on a successful login.', async () => {
+    const mockId = new mongoose.Types.ObjectId();
+    const mockUsername = 'someUser';
+    const mockProfilePic = Buffer.from(
+      fs.readFileSync('./tests/fixtures/avatar.jpg'),
+    );
+
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (auth.signToken as jest.Mock).mockReturnValue('someJWTEncryptedToken');
+    (userModel.findOne as jest.Mock).mockResolvedValue({
+      _id: mockId,
+      username: mockUsername,
+      email: 'someUser@gmail.com',
+      profilePic: mockProfilePic,
+      password: '********',
+      maps: [],
+    });
+
+    const response = await supertest(app).post('/auth/login').send({
+      username: 'someUser',
+      password: '********',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: mockId.toString(),
+        username: mockUsername,
+        profilePic: Buffer.from(mockProfilePic).toString('base64'),
+      },
+    });
+    expect(response.headers['set-cookie'][0]).toMatch(
+      `token=someJWTEncryptedToken`,
+    );
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+});
+
 describe('GET /auth/profile-picture ', () => {
   const mockId = new mongoose.Types.ObjectId();
   const mockUser = {
@@ -125,6 +176,8 @@ describe('GET /auth/profile-picture ', () => {
   });
 
   it('should return a base-64 encoded string.', async () => {
+    jest.mock('../models/user-model');
+
     (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
 
     const response = await supertest(app)
@@ -211,10 +264,10 @@ describe('GET /auth/exists', () => {
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
   });
-
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
+});
+afterEach(() => {
+  // Reset mock after the test
+  jest.clearAllMocks();
 });
 
 describe('POST /auth/username', () => {
@@ -295,9 +348,82 @@ describe('POST /auth/username', () => {
       username: mockNewUsername,
     });
 
-    expect(response.statusCode).toBe(400);
+    expect(response.statusCode).toBe(404);
     expect(response.body).toHaveProperty('success');
     expect(response.body.success).toBe(false);
+  });
+});
+
+describe('GET /auth/verify ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+  const anotherMockUser = {
+    _id: '656775b4ec8174179a7d9e82',
+    username: 'anotherUser',
+    email: 'anotherUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue({
+      userId: mockUser._id,
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app).get('/auth/verify');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: true,
+      user: {
+        id: mockUser._id,
+        username: mockUser.username,
+        profilePic: mockUser.profilePic.toString('base64'),
+      },
+    });
+  });
+
+  it('should send a not logged in response if cookies include an invalid user ID.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue({
+      userId: anotherMockUser._id,
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/verify');
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: false,
+      user: null,
+    });
+  });
+
+  it('should send a not logged in response if cookies are unverifiable.', async () => {
+    (auth.verifyUser as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app).get('/auth/verify');
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      isLoggedIn: false,
+      user: null,
+    });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 });
 

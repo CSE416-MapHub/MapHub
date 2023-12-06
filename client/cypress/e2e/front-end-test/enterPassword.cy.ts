@@ -7,8 +7,8 @@ describe('enter in password details', () => {
         .blur()
   
       cy.wait(500);
-      cy.get('label#password-label').should('have.class', 'Mui-error');
-      cy.get('p#password-helper-text').should('contain', 'Please enter a password with at least eight ' +
+      cy.get('input#password').should('have.attr', 'aria-invalid', 'true');
+      cy.get('p.MuiFormHelperText-root').should('contain', 'Please enter a password with at least eight ' +
       'characters with one uppercase, one lowercase, and one digit');
 
       cy.get('input#password')
@@ -17,8 +17,8 @@ describe('enter in password details', () => {
         .blur()
 
       cy.wait(500)
-      cy.get('label#password-label').should('have.class', 'Mui-error');
-      cy.get('p#password-helper-text').should('contain', 'Please enter a password with at least eight ' +
+      cy.get('input#password').should('have.attr', 'aria-invalid', 'true');
+      cy.get('p.MuiFormHelperText-root').should('contain', 'Please enter a password with at least eight ' +
       'characters with one uppercase, one lowercase, and one digit');
 
       cy.get('input#password')
@@ -27,7 +27,7 @@ describe('enter in password details', () => {
         .blur()
 
       cy.wait(500)
-      cy.get('label#password-label').should('not.have.class', 'Mui-error');
+      cy.get('input#password').should('not.have.attr', 'aria-invalid', 'true');
   
     }); 
   });

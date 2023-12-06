@@ -323,7 +323,7 @@ function CreateAccountForm() {
           type: AuthActions.REGISTER_SUCCESS,
           payload: {
             user: {
-              id: result.data.user._id,
+              id: result.data.user.id,
               username: result.data.user.username,
               profilePic: URL.createObjectURL(
                 base64StringToBlob(result.data.user.profilePic),
@@ -364,7 +364,7 @@ function CreateAccountForm() {
     if (successSnackbarOpen) {
       // If either snackbar is open, initiate the redirect after a delay
       const timer = setTimeout(() => {
-        router.replace('/account/sign-in');
+        router.replace('/account/dashboard');
       }, 1000); // Adjust the delay as needed
 
       // Cleanup function to clear the timer if the component unmounts
@@ -440,7 +440,7 @@ function CreateAccountForm() {
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button variant="filled" onClick={handleCreateAccountClick}>
+      <Button className={styles.button} variant="filled" onClick={handleCreateAccountClick}>
         Create Account
       </Button>
       <Snackbar
@@ -453,7 +453,7 @@ function CreateAccountForm() {
           onClose={handleSnackbarClose}
           severity="success"
         >
-          Account created successfully! Redirecting to login...
+          Account created successfully! Redirecting to dashboard...
         </Alert>
       </Snackbar>
     </div>
