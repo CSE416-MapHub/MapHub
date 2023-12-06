@@ -15,6 +15,7 @@ export interface CardCarouselProps {
     _id: string;
     title: string;
     userId: string;
+    numLikes: number;
     svg: string;
   }>;
   published: boolean;
@@ -93,11 +94,11 @@ export default function (props: CardCarouselProps) {
                 key={i}
                 published={props.published}
                 id={map._id}
-                userId={map.userId} //get userId
-                numLikes={123} //get numlikes
+                userId={map.userId} 
+                numLikes={props.published ? map.numLikes : 0}
                 userLiked={false}
                 title={map.title}
-                author={authors[i]} //get author
+                author={authors[i]} 
                 preview={map.svg}
               />
             )

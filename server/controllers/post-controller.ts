@@ -97,6 +97,7 @@ const PostController = {
               description: post.description,
               postID: post._id,
               mapID: post.map,
+              numLikes: post.likes.length,
               svg: svg,
             };
           }),

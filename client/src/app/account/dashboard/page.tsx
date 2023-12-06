@@ -17,6 +17,7 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
+      numLikes: number;
       svg: string;
     }>
   >([]);
@@ -25,6 +26,7 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
+      numLikes: number;
       svg: string;
     }>
   >([]);
@@ -42,6 +44,7 @@ export default function () {
               _id: i.postID,
               title: i.title,
               userId: authContext.state.user?.id ? authContext.state.user?.id : '',
+              numLikes: i.numLikes,
               svg: i.svg,
             };
           }),
@@ -52,6 +55,7 @@ export default function () {
           _id: string;
           title: string;
           userId: string;
+          numLikes: number;
           svg: string;
         }[] = [];
         p.forEach(map => {
@@ -61,6 +65,7 @@ export default function () {
               _id: map._id,
               title: map.title,
               userId: map.owner,
+              numLikes: 0,
               svg: map.svg,
             });
           }

@@ -73,6 +73,7 @@ export function getRecentPublished(userId: string): Promise<
     description: string;
     postID: string;
     mapID: string;
+    numLikes: number;
     svg: string;
   }>
 > {
