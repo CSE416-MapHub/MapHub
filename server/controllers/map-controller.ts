@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 import Map from '../models/map-model';
 import express from 'express';
 import fs from 'fs';
-import path from 'path';
+import path, { parse } from 'path';
 import util from 'util';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
@@ -146,6 +146,7 @@ const MapController = {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
+    console.log(map);
     //validating the requests
     if (delta.type === null || delta.type === undefined) {
       return res
@@ -221,7 +222,7 @@ const MapController = {
       }
       console.log('MAP bEFORE CAST', JSON.stringify(map));
       map = new Map(map);
-      console.log('afndisofdj', map);
+
       const updatedMap = await map.save();
       console.log(updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
@@ -286,7 +287,7 @@ const MapController = {
       }
 
       const userId = (req as any).userId;
-      const map = await Map.findById(mapId);
+      let map = await Map.findById(mapId);
 
       if (!map) {
         return res
@@ -298,16 +299,17 @@ const MapController = {
           .status(401)
           .json({ success: false, message: 'Unauthorized, not users map' });
       }
-
+      // Check if the GeoJSON path is valid
       if (map.geoJSON && typeof map.geoJSON === 'string') {
         try {
+          // Read the contents of the file
           const geoJSONData = await readFile(map.geoJSON, 'utf8');
-          map.geoJSON = JSON.parse(geoJSONData);
+          console.log(typeof geoJSONData);
+          map.geoJSON = geoJSONData;
         } catch (fileReadError) {
           console.error('Error reading GeoJSON file:', fileReadError);
         }
       }
-      console.log(JSON.stringify(map.geoJSON));
       res.status(200).json({ success: true, map: map });
     } catch (error) {
       console.error('Error in getMapById:', error);
@@ -348,6 +350,8 @@ const MapController = {
           return {
             _id: map._id,
             title: map.title,
+            owner: map.owner.toString(),
+            published: map.published,
             png: png,
           };
         }),

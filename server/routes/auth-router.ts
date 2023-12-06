@@ -7,6 +7,7 @@ const router = express.Router();
 router.post('/register', AuthController.registerUser);
 router.get('/users', AuthController.getAllUsers);
 router.get('/exists', AuthController.getExists);
+router.get('/id', AuthController.getUserById);
 router.get('/profile-picture', AuthController.getProfilePic);
 router.get('/verify', AuthController.getVerify);
 router.post('/username', auth.verify, AuthController.postUsername);

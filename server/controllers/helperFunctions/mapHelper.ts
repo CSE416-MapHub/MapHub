@@ -157,10 +157,10 @@ class GlobalDotHandler {
 
     if (payload.name !== undefined) {
       const originalName = map.globalDotDensityData[delta.target[1]].name;
-      console.log('ORIIGNAL NAME', originalName, 'updating to', payload.name);
+
       map.dotsData.forEach((dot: any) => {
         if (dot.dot === originalName) {
-          dot.dot = payload.name;
+          dot.name = payload.name;
         }
       });
 

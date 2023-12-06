@@ -2,6 +2,7 @@ import { Typography } from '@mui/material';
 import style from './mapcard.module.scss';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 export interface MapCardProps {
   published: boolean;
@@ -29,20 +30,25 @@ export default function (props: MapCardProps) {
   let dataurl = props.preview
     ? `data:image/png;base64,${toBase64(props.preview)}`
     : placeholderImage;
+
+  const router = useRouter();
+  const handleMapCardClick = () => {
+    const published = props.published;
+
+    if(published) {
+      const route = '/discover/' + props.id;
+      router.push(route);
+    } else {
+      console.log('unpublished')
+      const queryId = props.id
+      const route = '/create?mapid=' + queryId;
+      router.push(route);
+    }
+  }
   return (
-    <Link
-      href={`/discover/${props.id}`}
-      style={{ textDecoration: 'none', color: 'inherit' }}
-    >
       <div
-        className={style['map-card-container']}
-        style={
-          !props.published
-            ? {
-                backgroundColor: 'lightgrey',
-              }
-            : {}
-        }
+        className={props.published ? style['published-map-card-container'] : style['unpublished-map-card-container']}
+        onClick={handleMapCardClick}
       >
         <img
           className={style['map-preview']}
@@ -50,7 +56,7 @@ export default function (props: MapCardProps) {
           alt={`${props.title} by ${props.author}`}
         ></img>
         <div className={style['map-details']}>
-          <Typography>{props.title}</Typography>
+          <Typography className={style['map-text']}>{props.title}</Typography>
           <div
             style={{
               display: 'flex',
@@ -58,7 +64,7 @@ export default function (props: MapCardProps) {
               justifyContent: 'space-between',
             }}
           >
-            <Typography variant="caption">By {props.author}</Typography>
+            <Typography className={style['map-text']} variant="caption">By {props.author}</Typography>
             <div
               style={{
                 display: 'flex',
@@ -68,8 +74,8 @@ export default function (props: MapCardProps) {
             >
               {props.published ? (
                 <>
-                  <FavoriteIcon fontSize="small" />
-                  <Typography variant="caption">{props.numLikes}</Typography>
+                  <FavoriteIcon className={style['map-icon']} fontSize="small" />
+                  <Typography className={style['map-text']} variant="caption">{props.numLikes}</Typography>
                 </>
               ) : (
                 <div />
@@ -78,6 +84,5 @@ export default function (props: MapCardProps) {
           </div>
         </div>
       </div>
-    </Link>
   );
 }
