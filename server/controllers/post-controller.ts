@@ -232,6 +232,7 @@ const PostController = {
               postId: post._id,
               mapID: post.map,
               svg: svg,
+              numLikes: post.likes.length,
             };
           }),
         );

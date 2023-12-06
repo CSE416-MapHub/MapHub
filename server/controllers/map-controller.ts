@@ -387,9 +387,9 @@ const MapController = {
           return {
             _id: map._id,
             title: map.title,
+            svg: svg,
             owner: map.owner.toString(),
             published: map.published,
-            svg: svg,
           };
         }),
       );
