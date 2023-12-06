@@ -17,7 +17,7 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
-      png: Buffer;
+      svg: string;
     }>
   >([]);
   const [ums, setUMS] = useState<
@@ -25,7 +25,7 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
-      png: Buffer;
+      svg: string;
     }>
   >([]);
 
@@ -42,7 +42,7 @@ export default function () {
               _id: i.postID,
               title: i.title,
               userId: authContext.state.user?.id ? authContext.state.user?.id : '',
-              png: i.png,
+              svg: i.svg,
             };
           }),
         );
@@ -52,7 +52,7 @@ export default function () {
           _id: string;
           title: string;
           userId: string;
-          png: Buffer;
+          svg: string;
         }[] = [];
         p.forEach(map => {
           console.log(map);
@@ -61,7 +61,7 @@ export default function () {
               _id: map._id,
               title: map.title,
               userId: map.owner,
-              png: map.png,
+              svg: map.svg,
             });
           }
         });

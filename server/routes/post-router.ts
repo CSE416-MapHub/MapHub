@@ -15,7 +15,7 @@ router.delete('/post/:postId', auth.verify, PostController.deletePostById);
 router.get('/post/:postId', PostController.getPostById);
 
 //Handles a get posts request
-router.get('/all', auth.verify, PostController.queryPosts);
+router.get('/all', PostController.queryPosts);
 
 //Add a like
 router.patch('/post/likeChange', auth.verify, PostController.changeLikeToPost);

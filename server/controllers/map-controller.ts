@@ -42,12 +42,14 @@ export async function convertJsonToSVG(map: MapDocument) {
   console.log('JSON TO SVG', JSON.stringify(map));
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
-  map.geoJSON = JSON.parse(geoJSONData);
+  // console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+  map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
+  console.log("svg created");
   let box = builder.getBBox();
+  console.log("bbox gotten");
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">

@@ -15,7 +15,7 @@ export interface CardCarouselProps {
     _id: string;
     title: string;
     userId: string;
-    png: Buffer;
+    svg: string;
   }>;
   published: boolean;
 }
@@ -98,6 +98,7 @@ export default function (props: CardCarouselProps) {
                 userLiked={false}
                 title={map.title}
                 author={authors[i]} //get author
+                preview={map.svg}
               />
             )
           }
