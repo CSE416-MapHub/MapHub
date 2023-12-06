@@ -246,11 +246,15 @@ describe('GET /map/recents/', () => {
       {
         _id: mockMaps[2]._id.toString(),
         title: mockMaps[2].title,
+        owner: mockMaps[2].owner.toString(),
+        published: mockMaps[2].published,
         png: { type: 'Buffer', data: [] },
       },
       {
         _id: mockMaps[1]._id.toString(),
         title: mockMaps[1].title,
+        owner: mockMaps[1].owner.toString(),
+        published: mockMaps[1].published,
         png: { type: 'Buffer', data: [] },
       },
     ];
@@ -600,14 +604,14 @@ describe('/map/payload/ global dot payload', () => {
         x: 10,
         y: 20,
         scale: 1,
-        dot: 'Updated Dot Group Global',
+        dot: 'DOT GROUP 1',
         _id: response.body.map.dotsData[0]._id,
       },
       {
         x: 2,
         y: 2,
         scale: 1,
-        dot: 'Updated Dot Group Global',
+        dot: 'DOT GROUP 1',
         _id: response.body.map.dotsData[1]._id,
       },
     ]);
