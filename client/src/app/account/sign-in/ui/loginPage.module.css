@@ -1,7 +1,6 @@
 .container {
     min-height: 100%;
-    background-color: #004D64;
-  
+    background: url('../../../wallpaper.png') center/cover no-repeat;
     margin: 0 auto;
     border: none;
     padding: 50px 0;

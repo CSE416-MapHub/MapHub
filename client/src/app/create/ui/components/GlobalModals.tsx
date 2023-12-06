@@ -16,7 +16,6 @@ export default function () {
 
   let createdDot = false;
   useEffect(() => {
-    console.log('CHECKING IF WE CAN OPEN');
     if (
       editorContext.state.selectedTool === ToolbarButtons.dot &&
       editorContext.state.map &&

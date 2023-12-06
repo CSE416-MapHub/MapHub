@@ -1,4 +1,4 @@
-import { TextField } from "@mui/material";
+import { TextField, InputLabel, FormControl, FormHelperText } from "@mui/material";
 import { useState, ChangeEventHandler, FocusEventHandler } from "react";
 
 import styles from './validatedTextField.module.css';
@@ -64,19 +64,26 @@ function ValidatedTextField({
   }
 
   return (
-    <TextField
-      className={styles.textField}
-      id={id}
-      type={type}
-      label={label}
-      value={value}
-      onChange={handleChange}
-      onBlur={handleBlur}
-      variant='outlined'
-      error={error}
-      helperText={helperText}
-      inputProps={{ sx: { backgroundColor: 'white', borderRadius: '4px'} }}
-    />
+    <FormControl className={styles.form_control} fullWidth variant="outlined">
+      <InputLabel className={styles.input_label} shrink htmlFor={id}>{label}</InputLabel>
+      <TextField
+        className={styles.textField}
+        id={id}
+        type={type}
+        value={value}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        variant='outlined'
+        error={error}
+        inputProps={{ sx: { backgroundColor: 'white', borderRadius: '4px' } }}
+      />
+      <FormHelperText
+        className={styles.error_text}  
+        error={error}
+      >
+        {helperText}
+      </FormHelperText>
+    </FormControl>
   );
 }
 

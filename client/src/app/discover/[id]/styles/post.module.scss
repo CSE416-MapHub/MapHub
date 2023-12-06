@@ -1,0 +1,49 @@
+@use 'colors';
+@use 'elevation';
+@use 'shape';
+
+.post {
+  &__main {
+    display: grid;
+    grid-template-columns: 1fr 5fr 3fr 1fr;
+    grid-template-rows: 1fr;
+    grid-template-areas:
+    ". post comments .";
+    align-items: center;
+    gap: shape.$large;
+
+    min-height: calc(100% - 180px);
+
+    color: colors.$on-surface;
+  }
+
+  &__container {
+    @include shape.extra-large();
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background-color: #CCEFF1;
+    grid-area: post;
+    aspect-ratio: 1 / 1;
+    width: 100%;
+  }
+
+  &__image {
+    height: 98%;
+    width: 98%;
+  }
+
+  &__comments {
+    @include shape.large();
+    grid-area: comments;
+    display: flex;
+    flex-direction: column;
+
+    height: 100%;
+    width: 100%;
+
+    background-color: colors.$surface-container;
+  }
+}

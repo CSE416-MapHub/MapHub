@@ -133,7 +133,7 @@ const PostController = {
           model: 'Comment', // Model to use for population
           populate: [
             {
-              path: 'owner', // Path to the user (owner) field in the Comment model
+              path: 'user', // Path to the user (owner) field in the Comment model
               model: 'User', // Model to use for population of the comment's owner
               select: 'username _id profilePic', // Only select specific fields for the comment's owner
             },

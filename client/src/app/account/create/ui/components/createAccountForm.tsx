@@ -440,7 +440,7 @@ function CreateAccountForm() {
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button variant="filled" onClick={handleCreateAccountClick}>
+      <Button className={styles.button} variant="filled" onClick={handleCreateAccountClick}>
         Create Account
       </Button>
       <Snackbar

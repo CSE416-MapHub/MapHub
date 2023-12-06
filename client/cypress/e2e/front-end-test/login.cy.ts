@@ -6,14 +6,14 @@ describe('successful login', () => {
         .type('mapHubber')
         .blur()
       
-      cy.get('label#username-label').should('not.have.class', 'Mui-error');
+      cy.get('input#username').should('not.have.attr', 'aria-invalid', 'true');
 
       cy.get('input#password')
         .type('mapHubber123')
         .blur()
       
       cy.wait(500)
-      cy.get('label#password-label').should('not.have.class', 'Mui-error');
+      cy.get('input#password').should('not.have.attr', 'aria-invalid', 'true');
 
       cy.get('#sign-in-confirm').click()
 

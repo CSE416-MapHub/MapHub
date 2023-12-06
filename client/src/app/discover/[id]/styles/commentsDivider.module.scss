@@ -1,0 +1,8 @@
+@use 'colors';
+
+.comments__divider {
+  border: none;
+  height: 1px;
+  background-color: colors.$outline;
+  margin: 0 16px;
+}

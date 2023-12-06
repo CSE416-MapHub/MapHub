@@ -43,7 +43,7 @@ export async function convertJsonToSVG(map: MapDocument) {
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
   console.log('GEOJSON DATA IN DO THE ', geoJSONData);
-  map.geoJSON = JSON.parse(geoJSONData);
+  map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
@@ -84,11 +84,12 @@ const MapController = {
     console.log('REQ BODY IS');
     console.log(req.body);
 
-    if (verifiedUser !== owner) {
-      return res
-        .status(400)
-        .json({ error: 'Verified Cookie user not the same as the map owner' });
-    }
+    // if (verifiedUser !== owner) {
+    //   return res
+    //     .status(400)
+    //     .json({ error: 'Verified Cookie user not the same as the map owner' });
+    // }
+
     if (!title || !mapType || !geoJSON) {
       return res.status(400).json({ error: 'Missing required fields' });
     }
@@ -103,12 +104,7 @@ const MapController = {
 
     let newMap;
     let savedMap;
-    let userOwner = await User.findById(owner);
-    if (!userOwner) {
-      return res.status(400).json({
-        error: 'User Map Owner not found',
-      });
-    }
+
     try {
       const placeholderID = new mongoose.Types.ObjectId();
 
@@ -127,7 +123,7 @@ const MapController = {
         dotsData,
         arrowsData,
         geoJSON: 'placeholder',
-        owner,
+        owner: verifiedUser,
       });
       console.log(newMap);
     } catch (err: any) {
@@ -166,8 +162,16 @@ const MapController = {
       newMap.geoJSON = saveFilePath;
       savedMap = await newMap.save();
       console.log('FINAL MAP CREATE id', savedMap._id);
+
+      let userOwner = await User.findById(verifiedUser);
+      if (!userOwner) {
+        return res.status(400).json({
+          error: 'User Map Owner not found',
+        });
+      }
       userOwner.maps.push(savedMap._id);
       await userOwner.save();
+
       res.status(200).json({
         success: true,
         map: { mapID: savedMap._id },
