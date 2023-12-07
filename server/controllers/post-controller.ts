@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 import Post from '../models/post-model';
 import Comment from '../models/comment-model';
 import Map from '../models/map-model';
+import User from '../models/user-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
@@ -228,7 +229,7 @@ const PostController = {
             // console.log(JSON.stringify(map));
 
             const svg = map ? await convertJsonToSVG(map) : null;
-            
+
             return {
               title: post.title,
               description: post.description,
@@ -282,12 +283,17 @@ const PostController = {
     try {
       const savedComment = await newComment.save();
       post.comments.push(savedComment._id);
-
+      const userCommented = await User.findById(userId);
       await post.save();
 
       res.status(200).json({
         success: true,
         comment: savedComment,
+        user: {
+          _id: userCommented?._id,
+          username: userCommented?.username,
+          profilePic: userCommented?.profilePic,
+        },
       });
     } catch (err: any) {
       console.error('Error in comment creation:', err);

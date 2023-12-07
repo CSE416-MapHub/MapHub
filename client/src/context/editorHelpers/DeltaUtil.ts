@@ -114,7 +114,7 @@ function deltaDot(map: MHJSON, d: Delta) {
         console.log(p);
         throw new Error('Tried to create nonexistent dot type');
       }
-      map.dotsData.push({
+      map.dotsData.splice(d.target[1], 0, {
         x: p.x,
         y: p.y,
         scale: p.scale,
@@ -200,7 +200,7 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
           'Tried to create a dot with a name that already exists',
         );
       }
-      map.globalDotDensityData.push({
+      map.globalDotDensityData.splice(d.target[1], 0, {
         name: p.name,
         opacity: p.opacity,
         size: p.size,
