@@ -30,9 +30,10 @@ class SVGBuilder {
    */
   public createSVG(): string {
     this.featureNumber = 0;
+
     let map: GeoJSON = JSON.parse(this.mhjson.geoJSON);
     let els = '';
-    console.log('GET MAP TYPE', JSON.stringify(map));
+    console.log('GET MAP TYPE', map.type);
     switch (map.type) {
       case 'Feature': {
         els = this.svgOfFeature(map);
@@ -135,7 +136,7 @@ class SVGBuilder {
     let els = this.svgOfGeometry(feature.geometry);
     // determine the color of this feature
     let fill = 'white';
-    console.log('WHAT IS THE MJSON', this.mhjson);
+    // console.log('WHAT IS THE MJSON', this.mhjson);
     if (this.mhjson.regionsData.length === 0) {
       return '';
     }

@@ -17,16 +17,16 @@ function validateRecents(a: any): a is Array<{
   title: string;
   owner: string;
   published: boolean;
-  png: Buffer;
+  svg: string;
 }> {
   for (let entry of a) {
     if (
       typeof entry._id !== 'string' ||
       typeof entry.title !== 'string' ||
       typeof entry.published !== 'boolean' ||
-      !entry.png ||
-      entry.png.type !== 'Buffer' ||
-      typeof entry.png.data !== 'object'
+      // !entry.svg ||
+      // entry.svg.type !== 'string' ||
+      typeof entry.svg !== 'string'
     ) {
       return false;
     }
@@ -44,7 +44,7 @@ export function getRecentUnpublished(): Promise<
     title: string;
     owner: string;
     published: boolean;
-    png: Buffer;
+    svg: string;
   }>
 > {
   return MapAPI.getRecentMapIds(6).then(res => {
@@ -71,7 +71,8 @@ export function getRecentPublished(userId: string): Promise<
     description: string;
     postID: string;
     mapID: string;
-    png: Buffer;
+    numLikes: number;
+    svg: string;
   }>
 > {
   return PostAPI.getAllUserPosts(userId).then(res => {
