@@ -111,6 +111,15 @@ class AccountAPI {
   static async getVerify() {
     return this.api.get('/auth/verify');
   }
+
+  static async getPasswordResetLink(email: string) {
+    return this.api.post('/auth/request-reset-password', { email: email });
+  }
+  static async resetUserPassword(token: string, newPassword: string) {
+    return this.api.post(`/auth/reset-password/${token}`, {
+      password: newPassword,
+    });
+  }
 }
 
 export default AccountAPI;

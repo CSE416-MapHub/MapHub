@@ -3,6 +3,14 @@ import auth from '../auth/index';
 import User from '../models/user-model';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+
+// Environment variables for email account
+// const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
+// const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const EMAIL_ADDRESS = 'maphubbers@gmail.com';
+const EMAIL_PASSWORD = 'mapHubbers1234';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -195,21 +203,18 @@ export const getUserById = async (request: Request, response: Response) => {
 
     const user = await User.findById(id);
     if (!user) {
-      return response
-        .status(400).json({
-          success: false,
-          errorMessage: 'User not found.'
-        });
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'User not found.',
+      });
     } else {
-      return response
-        .status(200)
-        .json({
-          user: {
-            id: user._id,
-            username: user.username,
-            profilePic: Buffer.from(user.profilePic).toString('base64'),
-          }
-        })
+      return response.status(200).json({
+        user: {
+          id: user._id,
+          username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
+        },
+      });
     }
   } catch (error) {
     return response.status(500).json({
@@ -217,7 +222,7 @@ export const getUserById = async (request: Request, response: Response) => {
       errorMessage: 'There is an internal error. Please try again.',
     });
   }
-}
+};
 
 export const getVerify = async (request: Request, response: Response) => {
   const headers = {
@@ -376,5 +381,76 @@ export const getAllUsers = async (req: Request, res: Response) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getResetPasswordLink = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(400).send('User not found.');
+    }
+
+    // Generate a token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+    await user.save();
+
+    // Setup email transport
+    let transporter = nodemailer.createTransport({
+      service: 'gmail', // Use your preferred service
+      auth: {
+        user: EMAIL_ADDRESS,
+        pass: EMAIL_PASSWORD,
+      },
+    });
+    console.log('THIS THE USER after sending request', user);
+
+    const resetUrl = `http://maphub.pro/reset-password/${resetToken}`; // Frontend URL
+
+    // Sending email
+    await transporter.sendMail({
+      to: user.email,
+      subject: 'Password Reset',
+      text: `Please go to this link to reset your password: ${resetUrl}. It expires in 1 hour`,
+    });
+
+    res.status(200).json({ success: true, resetURL: resetUrl });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'ERROR 500' });
+  }
+};
+
+export const handlePasswordResetting = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(400)
+        .send('Password reset token is invalid or has expired.');
+    }
+
+    // Set the new password
+
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+    const passwordHash = await bcrypt.hash(req.body.password, salt);
+
+    user.password = passwordHash;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+    res.status(200).json({ success: true, user: user });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error });
   }
 };
