@@ -15,8 +15,6 @@ import {
   MapPayload,
 } from '../controllers/helperFunctions/mapHelper';
 
-
-
 type MapDocument = typeof mapModel.prototype;
 
 let mapData = {
@@ -340,12 +338,20 @@ describe('/map/payload/ dot payload', () => {
           dot: 'IM DOT',
         },
       ],
+      globalDotDensityData: [
+        {
+          name: 'SOME DOT 2',
+          opacity: 1,
+          size: 2,
+          color: '#FFFFFF',
+        },
+      ],
     };
 
     const delta = {
       type: DeltaType.CREATE,
       targetType: TargetType.DOT,
-      target: [mockMap._id, -1, '-1'],
+      target: [mockMap._id, mockMap.dotsData.length, '-1'],
       payload: {
         x: 2,
         y: 2,
@@ -367,6 +373,58 @@ describe('/map/payload/ dot payload', () => {
     expect(response.body.success).toBe(true);
     expect(response.body).toHaveProperty('map');
     expect(response.body.map.dotsData.length).toEqual(2);
+  });
+
+  it('dot create fail because no global dot', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, mockMap.dotsData.length, '-1'],
+      payload: {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'SOME DOT 2',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe(
+      'GLOBAL Dot doesnt exist for this dot name SOME DOT 2',
+    );
   });
   it('dot update', async () => {
     const mockMap = {
@@ -461,7 +519,7 @@ describe('/map/payload/ dot payload', () => {
     const delta = {
       type: DeltaType.CREATE,
       targetType: TargetType.DOT,
-      target: [mockMap._id, -1, '-1'],
+      target: [mockMap._id, mockMap.dotsData.length, '-1'],
       payload: {
         x: 313131,
         y: 212121,
@@ -512,7 +570,7 @@ describe('/map/payload/ global dot payload', () => {
     const delta = {
       type: DeltaType.CREATE,
       targetType: TargetType.GLOBAL_DOT,
-      target: [mockMap._id, -1, '-1'],
+      target: [mockMap._id, mockMap.globalDotDensityData.length, '-1'],
       payload: {
         name: 'dot group global',
         opacity: 1,
@@ -653,12 +711,18 @@ describe('/map/payload/ global dot payload', () => {
         ],
         0.7,
       ),
+      globalDotDensityData: [
+        {
+          name: 'hi',
+          opacity: 'dak',
+        },
+      ],
     };
 
     const delta = {
       type: DeltaType.CREATE,
       targetType: TargetType.GLOBAL_DOT,
-      target: [mockMap._id, -1, '-1'],
+      target: [mockMap._id, mockMap.globalDotDensityData.length, '-1'],
       payload: {
         name: 'd',
       },
@@ -673,7 +737,7 @@ describe('/map/payload/ global dot payload', () => {
 
     console.log(JSON.stringify(response.body));
     expect(response.statusCode).toBe(400);
-    expect(response.body.message).toEqual('Opacity is required');
+    expect(response.body.message).toEqual('GlobalDot Opacity is required');
   });
 });
 
@@ -687,7 +751,12 @@ describe('/map/map update map by id', () => {
   });
 
   it('update title of map', async () => {
-    const mapPayload  = { mapPayload: { mapId: mapData._id.toString(), title: 'UPDATED MAP NEW BIGN' }};
+    const mapPayload = {
+      mapPayload: {
+        mapId: mapData._id.toString(),
+        title: 'UPDATED MAP NEW BIGN',
+      },
+    };
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
 
@@ -702,7 +771,7 @@ describe('/map/map update map by id', () => {
   });
 
   it('update title of map', async () => {
-    const mapPayload = { mapPayload: { title: 'UPDATED MAP NEW BIGN' }};
+    const mapPayload = { mapPayload: { title: 'UPDATED MAP NEW BIGN' } };
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
 

@@ -45,7 +45,6 @@ export interface MapPayload {
   title?: string;
 }
 
-
 export enum DeltaType {
   UPDATE,
   CREATE,
@@ -204,6 +203,7 @@ class GlobalDotHandler {
     }
 
     const payload = delta.payload;
+
     if (!payload.name) throw new Error('GlobalDot Name is required');
     if (!payload.opacity) throw new Error('GlobalDot Opacity is required');
     if (!payload.size) throw new Error('GlobalDot Size is required');

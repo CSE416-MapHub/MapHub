@@ -157,8 +157,8 @@ export const loginUser = async (req: Request, res: Response) => {
           profilePic: Buffer.from(user.profilePic).toString('base64'),
         },
       });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, errorMessage: 'Server error' });
   }
 };
@@ -365,8 +365,8 @@ export const logoutUser = async (req: Request, res: Response) => {
     res
       .status(200)
       .json({ success: true, message: 'User logged out successfully.' });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, errorMessage: 'Server error' });
   }
 };
@@ -378,8 +378,8 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
     // Send the user data as a JSON response
     res.status(200).json(users);
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ error: 'Server error' });
   }
 };
@@ -418,8 +418,8 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
     });
 
     res.status(200).json({ success: true, resetURL: resetUrl });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, message: 'ERROR 500' });
   }
 };
@@ -449,8 +449,8 @@ export const handlePasswordResetting = async (req: Request, res: Response) => {
 
     await user.save();
     res.status(200).json({ success: true, user: user });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, message: error });
   }
 };
