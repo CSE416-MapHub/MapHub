@@ -50,8 +50,6 @@ export function getRecentUnpublished(): Promise<
   return MapAPI.getRecentMapIds(6).then(res => {
     if (res.status === 200) {
       let maps = res.data.maps;
-      console.log(maps);
-      console.log(maps[0].svg);
       if (typeof maps !== 'object') {
         throw new Error(`Unexpected maps type ` + typeof maps);
       }
