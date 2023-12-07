@@ -39,6 +39,13 @@ export interface DeltaPayload {
   propertyValue?: string;
 }
 
+//FOR MAP UPDAING LIKE TITLE AND SHIT
+export interface MapPayload {
+  mapId: string;
+  title?: string;
+}
+
+
 export enum DeltaType {
   UPDATE,
   CREATE,

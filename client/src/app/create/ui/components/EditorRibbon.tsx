@@ -115,11 +115,11 @@ export default function () {
 
   const handleBlur = async() => {
     // Update the map title and close editing mode
-    console.log(editorContext.state);
     const payload : MapPayload = { 
       mapId: editorContext.state.map_id,
       title: updatedTitle,
     }
+    console.log(payload);
     await updateMapById(payload).then((success) => {
       if(success) {
         editorContext.helpers.changeTitle(editorContext, updatedTitle);
