@@ -46,7 +46,26 @@ export default function () {
     PostAPI.queryPosts(searchValue)
       .then((response) => {
         if (response.data.success) {
-          setMapCardData(response.data.posts);
+          setMapCardData(
+            response.data.posts.map((i: 
+              { 
+                mapID: string; 
+                userId: string; 
+                numLikes: number; 
+                title: string; 
+                author: string; 
+                svg: string; 
+              }) => {
+              return {
+                id: i.mapID,
+                userId: i.userId,
+                numLikes: i.numLikes,
+                title: i.title,
+                author: i.author,
+                preview: i.svg,
+              }
+            })
+          );
           setSearchResponse(response); // Set the response data to pass to SearchBar
         }
       })
@@ -73,6 +92,7 @@ export default function () {
             userLiked={map.userLiked}
             title={map.title}
             author={authors[i]}
+            preview={map.preview}
           />
         ))}
       </div>

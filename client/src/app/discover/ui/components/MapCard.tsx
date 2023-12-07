@@ -13,7 +13,7 @@ export interface MapCardProps {
   title: string;
   author: string;
 
-  preview?: Buffer;
+  preview?: string;
 }
 
 function toBase64(arr: Buffer) {
@@ -26,7 +26,7 @@ const placeholderImage =
 
 export default function (props: MapCardProps) {
   let dataurl = props.preview
-    ? `data:image/png;base64,${toBase64(props.preview)}`
+    ? `data:image/svg+xml;utf8,${encodeURIComponent(props.preview)}`
     : placeholderImage;
   return (
     <Link

@@ -42,12 +42,15 @@ export async function convertJsonToSVG(map: MapDocument) {
   console.log('JSON TO SVG', JSON.stringify(map));
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
+
   console.log('GEOJSON DATA IN DO THE ', geoJSONData);
   map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
+  console.log("svg created");
   let box = builder.getBBox();
+  console.log("bbox gotten");
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">
@@ -277,7 +280,8 @@ const MapController = {
   updateMapById: async (req: Request, res: Response) => {
     // Implementation of deleting a map by ID
     const userId = (req as any).userId;
-    const { mapId, title } = req.body;
+    console.log(req);
+    const { mapId, title } = req.body.mapPayload;
 
     console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
     if (!mapId) {
@@ -345,8 +349,9 @@ const MapController = {
       // Check if the GeoJSON path is valid
       if (map.geoJSON && typeof map.geoJSON === 'string') {
         try {
+          // console.log(map.geoJSON)
           const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-          map.geoJSON = JSON.parse(geoJSONData);
+          map.geoJSON = geoJSONData;
         } catch (fileReadError) {
           console.error('Error reading GeoJSON file:', fileReadError);
         }

@@ -7,6 +7,7 @@
 import MapAPI from 'api/MapAPI';
 import PostAPI from 'api/PostAPI';
 import { MHJSON } from 'types/MHJSON';
+import { MapPayload } from 'types/mapPayload';
 
 /**
  * Send a request to publish a map
@@ -38,15 +39,13 @@ export function publishMap(
 function validateRecents(a: any): a is Array<{
   _id: string;
   title: string;
-  png: Buffer;
+  svg: string;
 }> {
   for (let entry of a) {
     if (
       typeof entry._id !== 'string' ||
       typeof entry.title !== 'string' ||
-      !entry.png ||
-      entry.png.type !== 'Buffer' ||
-      typeof entry.png.data !== 'object'
+      typeof entry.svg !== 'string'
     ) {
       return false;
     }
@@ -62,7 +61,7 @@ export function getRecents(): Promise<
   Array<{
     _id: string;
     title: string;
-    png: Buffer;
+    svg: string;
   }>
 > {
   return MapAPI.getRecentMapIds(6).then(res => {
@@ -99,6 +98,16 @@ export function loadMapById(id: string): Promise<MHJSON> {
     if (res.status === 200) {
       let map = res.data.map as MHJSON;
       return map;
+    }
+    throw new Error(res.status.toString() + JSON.stringify(res.data));
+  });
+}
+
+export function updateMapById(payload: MapPayload): Promise<boolean> {
+  console.log(payload);
+  return MapAPI.updateMapById(payload).then(res => {
+    if(res.status === 200) {
+      return res.data.success as boolean;
     }
     throw new Error(res.status.toString() + JSON.stringify(res.data));
   });

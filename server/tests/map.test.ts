@@ -12,7 +12,10 @@ import {
   TargetType,
   Delta,
   DeltaPayload,
+  MapPayload,
 } from '../controllers/helperFunctions/mapHelper';
+
+
 
 type MapDocument = typeof mapModel.prototype;
 
@@ -684,7 +687,7 @@ describe('/map/map update map by id', () => {
   });
 
   it('update title of map', async () => {
-    const mapPayload = { mapId: mapData._id, title: 'UPDATED MAP NEW BIGN' };
+    const mapPayload  = { mapPayload: { mapId: mapData._id.toString(), title: 'UPDATED MAP NEW BIGN' }};
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
 
@@ -695,10 +698,11 @@ describe('/map/map update map by id', () => {
 
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('map');
-    expect(response.body.map.title).toEqual(mapPayload.title);
+    expect(response.body.map.title).toEqual(mapPayload.mapPayload.title);
   });
+
   it('update title of map', async () => {
-    const mapPayload = { title: 'UPDATED MAP NEW BIGN' };
+    const mapPayload = { mapPayload: { title: 'UPDATED MAP NEW BIGN' }};
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
 
