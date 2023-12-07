@@ -406,6 +406,7 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
         pass: EMAIL_PASSWORD,
       },
     });
+    console.log('THIS THE USER after sending request', user);
 
     const resetUrl = `http://maphub.pro/reset-password/${resetToken}`; // Frontend URL
 
@@ -413,10 +414,10 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
     await transporter.sendMail({
       to: user.email,
       subject: 'Password Reset',
-      text: `Please go to this link to reset your password: ${resetUrl}`,
+      text: `Please go to this link to reset your password: ${resetUrl}. It expires in 1 hour`,
     });
 
-    res.status(200).json({ success: true, message: 'Email sent correctly' });
+    res.status(200).json({ success: true, resetURL: resetUrl });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'ERROR 500' });
@@ -447,8 +448,9 @@ export const handlePasswordResetting = async (req: Request, res: Response) => {
     user.resetPasswordExpires = undefined;
 
     await user.save();
-    res.status(200).json({ success: true, message: 'Password Resetted' });
+    res.status(200).json({ success: true, user: user });
   } catch (error) {
+    console.error(error);
     res.status(500).json({ success: false, message: error });
   }
 };

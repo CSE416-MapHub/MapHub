@@ -5,10 +5,11 @@ import bcrypt from 'bcrypt';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import fs from 'fs';
+import nodemailer from 'nodemailer';
 
 jest.mock('bcrypt');
 jest.mock('../models/user-model');
-jest.mock('../auth/index')
+jest.mock('../auth/index');
 beforeAll(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
@@ -424,6 +425,78 @@ describe('GET /auth/verify ', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+});
+
+describe('POST /auth/request-reset-password ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+    resetPasswordToken: undefined,
+    resetPasswordExpires: undefined,
+    save: jest.fn().mockReturnThis(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (userModel.findOne as jest.Mock).mockResolvedValue(mockUser);
+    const mockedSendMail = jest.fn();
+
+    jest.spyOn(nodemailer, 'createTransport').mockReturnValue({
+      sendMail: mockedSendMail,
+    } as unknown as nodemailer.Transporter);
+
+    const response = await supertest(app)
+      .post('/auth/request-reset-password')
+      .send({
+        email: 'someUser@gmail.com',
+      });
+
+    const urlRegex = /^http:\/\/maphub\.pro\/reset-password\/[A-Za-z0-9-_]+$/;
+
+    expect(response.statusCode).toBe(200);
+    const resetURL = response.body.resetURL;
+    console.log('Tis is the reset url', resetURL);
+    expect(resetURL).toMatch(urlRegex);
+  });
+});
+
+describe('GET /auth/reset-password/:token ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    resetPasswordToken: 'd1124155c4555cbd5a2486cee58b089ac64b7651',
+    resetPasswordExpires: Date.now(),
+    maps: [],
+    save: jest.fn().mockReturnThis(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (userModel.findOne as jest.Mock).mockResolvedValue(mockUser);
+    const response = await supertest(app)
+      .post(`/auth/reset-password/${mockUser.resetPasswordToken}`)
+      .send({ password: 'iofoiad21314jiof' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('user');
+    console.log('Password resetted user', response.body.user);
+    expect(response.body.user.resetPasswordToken).toEqual(undefined);
+    expect(response.body.user.resetPasswordExpires).toEqual(undefined);
+    expect(response.body.user.password).not.toEqual('********');
   });
 });
 
