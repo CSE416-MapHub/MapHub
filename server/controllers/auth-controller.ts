@@ -352,6 +352,47 @@ export const postUsername = async (request: Request, response: Response) => {
   }
 };
 
+export const putProfilePic = async (request: Request, response: Response) => {
+  try {
+    const { profilePic } = request.body;
+    const { userId } = request as any;
+
+    if (!profilePic) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        errorMessage: 'Please upload a new profile picture.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage: 'The user does not exist.',
+      });
+    }
+
+    user.profilePic = Buffer.from(profilePic, 'base64');
+    await user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorCode: 0,
+      errorMessage: 'There has been an internal error. Please try again later.',
+    });
+  }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     // Clear the token cookie on the client side
@@ -441,9 +482,8 @@ export const handlePasswordResetting = async (req: Request, res: Response) => {
 
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    const passwordHash = await bcrypt.hash(req.body.password, salt);
 
-    user.password = passwordHash;
+    user.password = await bcrypt.hash(req.body.password, salt);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 
