@@ -21,7 +21,7 @@ router.get('/all', PostController.queryPosts);
 router.patch('/post/likeChange', auth.verify, PostController.changeLikeToPost);
 
 //Handles a get posts request
-router.get('/user/:id', PostController.getUserPosts);
+router.get('/user/:id', auth.verify, PostController.getUserPosts);
 
 //Handles a create a comment request
 router.post('/comments/:postId', auth.verify, PostController.createComment);
@@ -70,7 +70,6 @@ router.patch(
   auth.verify,
   PostController.likeChangeComment,
 );
-
 
 //Handles an add reply request
 router.post(
