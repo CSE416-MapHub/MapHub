@@ -13,6 +13,7 @@ router.get('/verify', AuthController.getVerify);
 router.post('/username', auth.verify, AuthController.postUsername);
 router.post('/login', AuthController.loginUser);
 router.post('/logout', AuthController.logoutUser);
+router.put('/profile-pic', auth.verify, AuthController.putProfilePic);
 // router.get('/loggedIn', AuthController.getLoggedIn)
 
 router.post('/request-reset-password', AuthController.getResetPasswordLink);
