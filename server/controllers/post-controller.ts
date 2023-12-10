@@ -442,10 +442,12 @@ const PostController = {
     const postId = req.params.postId;
 
     try {
-      const post = await Post.findById(postId).populate({
-        path: 'map',
-        model: 'Map',
-      });
+      const post = await Post.findById(postId)
+        .populate({
+          path: 'map',
+          model: 'Map',
+        })
+        .exec();
 
       if (!post) {
         return res
@@ -453,6 +455,7 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
+      console.log('POST MAP ORIGINAL', JSON.stringify(post.map));
       const forkedMap = new Map({
         ...post.map,
         owner: userId,
@@ -460,6 +463,7 @@ const PostController = {
         createdAt: Date.now(), // Reset creation date
         updatedAt: Date.now(), // Reset update date
       });
+      console.log('POST MAP FORKED', JSON.stringify(forkedMap));
 
       const user = await User.findById(userId);
       if (!user) {
@@ -471,15 +475,16 @@ const PostController = {
       }
 
       user.maps.push(forkedMap._id);
+
       await user.save();
       await forkedMap.save();
 
       res.status(200).json({
         success: true,
-        forkedMap: forkedMap._id,
+        forkedMap: forkedMap,
       });
     } catch (err: any) {
-      console.error('Error in comment creation:', err.message);
+      console.error('Error in forking:', err.message);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
