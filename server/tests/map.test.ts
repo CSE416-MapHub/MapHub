@@ -548,6 +548,7 @@ describe('/map/payload/ global dot payload', () => {
         return Promise.resolve(this);
       });
   });
+
   it('global dot create', async () => {
     const mockMap = {
       ...createMockMap(

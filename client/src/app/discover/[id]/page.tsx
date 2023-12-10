@@ -7,7 +7,9 @@ import CommentsCoordinator from './components/commentsCoordinator';
 
 import styles from './styles/post.module.scss';
 
-import 'dotenv/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
 const baseURL = process.env.API_URL
   ? process.env.API_URL
   : 'https://api.maphub.pro';
