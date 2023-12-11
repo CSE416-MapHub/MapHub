@@ -52,7 +52,13 @@ beforeEach(() => {
   jest
     .spyOn(fs.promises, 'readFile')
     .mockResolvedValue(JSON.stringify(geoJSONTemp));
-  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
+  jest
+    .spyOn(userModel, 'findById')
+    .mockResolvedValue({
+      id: mockUserID,
+      maps: [],
+      save: jest.fn().mockReturnThis(),
+    });
 });
 afterEach(() => {
   // Reset mock after the test
@@ -562,5 +568,43 @@ describe('POST /posts/comments/:commentId/replies', () => {
     expect(response.body.reply.user).toEqual(mockUserID.toString());
     expect(response.body.reply.likes).toEqual([]);
     expect(response.body.reply.replies).toEqual([]);
+  });
+});
+
+describe('POST /posts/fork/:postId', () => {
+  it('forks off a post', async () => {
+    const mockPostId = new mongoose.Types.ObjectId();
+    const mockMap = {
+      ...mapData,
+    };
+    jest
+      .spyOn(commentModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        console.log('post saving hte post', this);
+        return Promise.resolve(this);
+      });
+
+    jest
+      .spyOn(postModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          map: mockMap,
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    const response = await supertest(app)
+      .post(`/posts/fork/${mockPostId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('forkedMap');
+    expect(response.body.forkedMap.owner).toEqual(mockUserID.toString());
+    expect(response.body.forkedMap.geoJSON).toEqual('some/path');
   });
 });

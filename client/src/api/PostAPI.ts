@@ -70,6 +70,10 @@ class PostAPI {
   static async addReplyToComment(commentId: string, content: string) {
     return this.api.post(`/posts/comments/${commentId}/replies`, { content });
   }
+
+  static async forkMap(postId: string) {
+    return this.api.post(`/posts/fork/${postId}`);
+  }
 }
 
 export default PostAPI;

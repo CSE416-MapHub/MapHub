@@ -436,6 +436,61 @@ const PostController = {
     }
   },
   getAllReplies: async (req: Request, res: Response) => {},
+
+  forkMap: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    const postId = req.params.postId;
+
+    try {
+      const post = await Post.findById(postId)
+        .populate({
+          path: 'map',
+          model: 'Map',
+        })
+        .exec();
+
+      if (!post) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Post not found' });
+      }
+
+      console.log('POST MAP ORIGINAL', JSON.stringify(post.map));
+      const forkedMap = new Map({
+        ...post.map,
+        owner: userId,
+        _id: new mongoose.Types.ObjectId(), // Generate a new ID
+        createdAt: Date.now(), // Reset creation date
+        updatedAt: Date.now(), // Reset update date
+      });
+      console.log('POST MAP FORKED', JSON.stringify(forkedMap));
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'User not found, WHICH SHOULDNT HAPPEN CAUSE WE ALREAYD VALIDATED',
+        });
+      }
+
+      user.maps.push(forkedMap._id);
+
+      await user.save();
+      await forkedMap.save();
+
+      res.status(200).json({
+        success: true,
+        forkedMap: forkedMap,
+      });
+    } catch (err: any) {
+      console.error('Error in forking:', err.message);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
 };
 
 export default PostController;

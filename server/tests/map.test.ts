@@ -548,6 +548,7 @@ describe('/map/payload/ global dot payload', () => {
         return Promise.resolve(this);
       });
   });
+
   it('global dot create', async () => {
     const mockMap = {
       ...createMockMap(
@@ -738,6 +739,171 @@ describe('/map/payload/ global dot payload', () => {
     console.log(JSON.stringify(response.body));
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toEqual('GlobalDot Opacity is required');
+  });
+});
+
+describe('/map/payload/ global Category ', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('global category create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_CATEGORY,
+      target: [mockMap._id, mockMap.globalCategoryData.length, '-1'],
+      payload: {
+        name: 'new Category about russia',
+        color: '#FFFFFF',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalCategoryData.length).toEqual(1);
+    expect(response.body.map.globalCategoryData[0].name).toEqual(
+      'new Category about russia',
+    );
+    expect(response.body.map.globalCategoryData[0].color).toEqual('#FFFFFF');
+  });
+
+  it('global category update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalCategoryData: [
+        {
+          name: 'existing category 1',
+          color: '#FFFFFF',
+        },
+      ],
+      regionsData: [
+        {
+          color: '#FFFFFF',
+          intensity: 2,
+          category: 'existing category 1',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.GLOBAL_CATEGORY,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'Updated Category',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalCategoryData[0].name).toEqual(
+      'Updated Category',
+    );
+    expect(response.body.map.regionsData[0].category).toEqual(
+      'Updated Category',
+    );
+  });
+
+  it('empty delta', async () => {
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: {} })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+    expect(response.statusCode).toBe(400);
+  });
+
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, mockMap.dotsData.length, '-1'],
+      payload: {
+        x: 313131,
+        y: 212121,
+        scale: 100,
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual('Dot name is required');
   });
 });
 

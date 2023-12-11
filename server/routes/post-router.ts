@@ -26,6 +26,9 @@ router.get('/user/:id', PostController.getUserPosts);
 //Handles a create a comment request
 router.post('/comments/:postId', auth.verify, PostController.createComment);
 
+//forking a map
+router.post('/fork/:postId', auth.verify, PostController.forkMap);
+
 // //Handles a get a comment request
 // router.get('/comments/:commentId/', auth.verify, PostController.getCommentById);
 
@@ -70,7 +73,6 @@ router.patch(
   auth.verify,
   PostController.likeChangeComment,
 );
-
 
 //Handles an add reply request
 router.post(

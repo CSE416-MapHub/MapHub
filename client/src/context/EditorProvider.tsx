@@ -9,10 +9,7 @@ import {
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import {
-  DELETED_NAME,
-  applyDelta,
-} from './editorHelpers/DeltaUtil';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
