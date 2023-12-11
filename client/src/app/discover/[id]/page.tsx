@@ -21,6 +21,7 @@ async function fetchData(id: string) {
       cache: 'no-store',
     });
 
+    console.log('FETCHING POST NOW');
     if (!post.ok) {
       return undefined;
     }

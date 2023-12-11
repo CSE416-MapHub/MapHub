@@ -164,7 +164,16 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log('Got post', JSON.stringify(post), 'with id', postId);
+      console.log(
+        'Got post',
+        JSON.stringify({
+          title: post.title,
+          description: post.description,
+          owner: post.owner,
+        }),
+        'with id',
+        postId,
+      );
 
       const map = await Map.findById(post.map).exec();
       if (!map) {

@@ -459,7 +459,7 @@ describe('POST /auth/request-reset-password ', () => {
         email: 'someUser@gmail.com',
       });
 
-    const urlRegex = /^http:\/\/maphub\.pro\/reset-password\/[A-Za-z0-9-_]+$/;
+    const urlRegex = /\/account\/reset-password\/[a-zA-Z0-9]+/;
 
     expect(response.statusCode).toBe(200);
     const resetURL = response.body.resetURL;

@@ -3,10 +3,10 @@
 import { useReducer, MouseEventHandler } from 'react';
 import { Typography } from '@mui/material';
 import Link from 'next/link';
-
+import AccountAPI from 'api/AccountAPI';
 import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
-
+import { useRouter } from 'next/navigation';
 import styles from '../../../components/form.module.css';
 import { useSearchParams } from 'next/navigation';
 
@@ -66,25 +66,22 @@ function forgotAccountReducer(
       };
     }
 
-    case ForgotAccountActionType.sendEmail: {
-      // Creates a new account by validating all input text fields and sending
-      // the registration request to the backend.
-      const validatedState = forgotAccountReducer(state, {
-        type: ForgotAccountActionType.validateEmail,
-      });
-      const { email } = validatedState;
-      //Valid email
-      if (!email.error) {
-        console.log('IN SEND EMAIL');
-        //TODO: Authentication API
-        //If searchParams is username, send email with username
-
-        //If searchParams is password, send email with link to reset password
-      }
-      // TODO: Navigate to another page upon successfully creating an account
-      // or modify the form state.
-      return validatedState;
-    }
+    case ForgotAccountActionType.sendEmail:
+      async () => {
+        // Creates a new account by validating all input text fields and sending
+        // the registration request to the backend.
+        const validatedState = forgotAccountReducer(state, {
+          type: ForgotAccountActionType.validateEmail,
+        });
+        const { email } = validatedState;
+        //Valid email
+        if (!email.error) {
+        }
+        console.log('THERE IS EMAIL ERROR');
+        // TODO: Navigate to another page upon successfully creating an account
+        // or modify the form state.
+        return validatedState;
+      };
     default: {
       return state;
     }
@@ -100,6 +97,7 @@ function forgotAccountReducer(
 function ForgotAccountForm() {
   // const pathName = usePathname();
   // console.log(pathName);
+  const router = useRouter();
 
   const searchParams = useSearchParams();
   console.log(searchParams.get('query'));
@@ -129,10 +127,16 @@ function ForgotAccountForm() {
     });
   };
 
-  const handleSendEmailClick: MouseEventHandler = () => {
-    forgotAccountDispatch({
-      type: ForgotAccountActionType.sendEmail,
-    });
+  const handleSendEmailClick: MouseEventHandler = async () => {
+    console.log('IN SEND EMAIL');
+    const passwordResetLink = await AccountAPI.getPasswordResetLink(
+      forgotAccountState.email.value,
+    );
+    router.push(passwordResetLink.data.resetURL);
+
+    // forgotAccountDispatch({
+    //   type: ForgotAccountActionType.sendEmail,
+    // });
   };
 
   return (

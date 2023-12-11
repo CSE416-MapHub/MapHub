@@ -400,7 +400,10 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
 
     // Setup email transport
     let transporter = nodemailer.createTransport({
-      service: 'gmail', // Use your preferred service
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
       auth: {
         user: EMAIL_ADDRESS,
         pass: EMAIL_PASSWORD,
@@ -408,13 +411,13 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
     });
     console.log('THIS THE USER after sending request', user);
 
-    const resetUrl = `http://maphub.pro/reset-password/${resetToken}`; // Frontend URL
+    const resetUrl = `/account/reset-password/${resetToken}`; // Frontend URL
 
     // Sending email
     await transporter.sendMail({
       to: user.email,
       subject: 'Password Reset',
-      text: `Please go to this link to reset your password: ${resetUrl}. It expires in 1 hour`,
+      text: `Please go to this link to reset your password: https://maphub.pro${resetUrl}. It expires in 1 hour`,
     });
 
     res.status(200).json({ success: true, resetURL: resetUrl });
