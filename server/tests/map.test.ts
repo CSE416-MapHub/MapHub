@@ -951,6 +951,438 @@ describe('/map/map update map by id', () => {
   });
 });
 
+describe('/map/payload/ global symbol payload', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('global symbol create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalSymbolData: [],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_SYMBOL,
+      target: [mockMap._id, mockMap.globalSymbolData.length, '-1'],
+      payload: {
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+        name: 'polygonA',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalSymbolData.length).toEqual(1);
+    expect(response.body.map.globalSymbolData).toEqual([
+      {
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+        name: 'polygonA',
+        _id: response.body.map.globalSymbolData[0]._id,
+      },
+    ]);
+  });
+  it('global symbol update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      symbolsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+      ],
+      globalSymbolData: [
+        {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+          name: 'polygonA',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.GLOBAL_SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'Updated PolygonName',
+        svg: 'ddd',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalSymbolData[0]).toEqual({
+      name: 'Updated PolygonName',
+      svg: 'ddd',
+      _id: response.body.map.globalSymbolData[0]._id,
+    });
+    expect(response.body.map.symbolsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'Updated PolygonName',
+        _id: response.body.map.symbolsData[0]._id,
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        symbol: 'Updated PolygonName',
+        _id: response.body.map.symbolsData[1]._id,
+      },
+    ]);
+  });
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      globalSymbolData: [
+        {
+          name: 'hi',
+          svg: 'place holder',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_SYMBOL,
+      target: [mockMap._id, mockMap.globalSymbolData.length, '-1'],
+      payload: {
+        name: 'd',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual('Malformed global symbol in CREATE');
+  });
+});
+
+describe('/map/payload/ symbol payload', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it(' symbol create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalSymbolData: [
+        {
+          name: 'polygonA',
+          svg: 'svgholder',
+        },
+      ],
+      symbolsData: [],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, mockMap.symbolsData.length, '-1'],
+      payload: {
+        x: 10,
+        y: 20,
+        scale: 11,
+        symbol: 'polygonA',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.symbolsData.length).toEqual(1);
+    expect(response.body.map.symbolsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 11,
+        symbol: 'polygonA',
+        _id: response.body.map.symbolsData[0]._id,
+      },
+    ]);
+  });
+  it(' symbol create nonexisitend global ', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalSymbolData: [],
+      symbolsData: [],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, mockMap.symbolsData.length, '-1'],
+      payload: {
+        x: 10,
+        y: 20,
+        scale: 11,
+        symbol: 'polygonA',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+
+    expect(response.body.message).toBe(
+      'Tried to create nonexistent symbol type',
+    );
+  });
+
+  it(' symbol update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      symbolsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+      ],
+      globalSymbolData: [
+        {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+          name: 'polygonA',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'updated Polygon',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+
+    expect(response.body.map.symbolsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'updated Polygon',
+        _id: response.body.map.symbolsData[0]._id,
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        symbol: 'polygonA',
+        _id: response.body.map.symbolsData[1]._id,
+      },
+    ]);
+  });
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      symbolsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, mockMap.symbolsData.length, '-1'],
+      payload: {
+        symbol: '2903',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual('Malformed symbol in CREATE');
+  });
+});
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
