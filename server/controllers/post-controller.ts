@@ -10,6 +10,8 @@ import fs from 'fs';
 import path from 'path';
 import { convertJsonToSVG } from './map-controller';
 
+type MapDocument = typeof Map.prototype;
+
 export enum LikeChange {
   ADD_LIKE = 'like',
   REMOVE_LIKE = 'dislike',
@@ -52,7 +54,6 @@ const PostController = {
       map.published = true;
 
       savedPost = await newPost.save();
-      console.log(savedPost);
       await map.save();
 
       res.status(200).json({
@@ -89,9 +90,7 @@ const PostController = {
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
             const map = await Map.findById(post.map).exec();
-            console.log(JSON.stringify(map));
             const svg = map ? await convertJsonToSVG(map) : null;
-            console.log(svg);
 
             return {
               title: post.title,
@@ -233,8 +232,6 @@ const PostController = {
             const map = await Map.findById(post.map).exec();
 
             console.log('MAP', map);
-
-            // console.log(JSON.stringify(map));
 
             const svg = map ? await convertJsonToSVG(map) : null;
 
@@ -448,14 +445,9 @@ const PostController = {
   forkMap: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
     const postId = req.params.postId;
-
+    console.log('ENTERING FORK');
     try {
-      const post = await Post.findById(postId)
-        .populate({
-          path: 'map',
-          model: 'Map',
-        })
-        .exec();
+      const post = await Post.findById(postId);
 
       if (!post) {
         return res
@@ -463,7 +455,17 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log('POST MAP ORIGINAL', JSON.stringify(post.map));
+      console.log('Post in qu', post);
+      const mapPost = await Map.findById(post.map);
+
+      if (!mapPost || mapPost === undefined || !mapPost.geoJSON) {
+        return res
+          .status(500)
+          .json({ success: false, message: 'Map in Post not found' });
+      }
+
+      console.log('POST MAP ORIGINAL', JSON.stringify(mapPost));
+
       const forkedMap = new Map({
         ...post.map,
         owner: userId,
@@ -471,6 +473,7 @@ const PostController = {
         createdAt: Date.now(), // Reset creation date
         updatedAt: Date.now(), // Reset update date
       });
+
       console.log('POST MAP FORKED', JSON.stringify(forkedMap));
 
       const user = await User.findById(userId);
@@ -481,6 +484,29 @@ const PostController = {
             'User not found, WHICH SHOULDNT HAPPEN CAUSE WE ALREAYD VALIDATED',
         });
       }
+
+      const objectIdRegex = /[a-z0-9]+(?=\.geojson)/;
+
+      const newFilePath = mapPost.geoJSON.replace(
+        objectIdRegex,
+        forkedMap._id.toString(),
+      );
+
+      console.log(
+        'new file path',
+        newFilePath,
+        'old file path',
+        mapPost.geoJSON,
+      );
+
+      const data = await fs.promises.readFile(mapPost.geoJSON, 'utf8');
+
+      // Write to the new file
+      await fs.promises.writeFile(newFilePath, data, 'utf8');
+
+      console.log('Map duplicated successfully in directory');
+
+      forkedMap.geoJSON = newFilePath;
 
       user.maps.push(forkedMap._id);
 

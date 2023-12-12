@@ -8,7 +8,7 @@ import mapModel from '../models/map-model';
 import { LikeChange } from '../controllers/post-controller';
 import commentModel from '../models/comment-model';
 import { createMockMap } from './map.test';
-import fs from 'fs';
+import fs, { readFile } from 'fs';
 
 const mockUserID = new mongoose.Types.ObjectId();
 
@@ -33,7 +33,7 @@ let mapData = {
   symbolsData: [],
   dotsData: [],
   arrowsData: [],
-  geoJSON: 'some/path',
+  geoJSON: 'some/path/jijie38920rj83232.geojson',
   updatedAt: Math.floor(new Date().getTime() * Math.random()),
   createdAt: new Date().getTime(),
 };
@@ -52,20 +52,16 @@ beforeEach(() => {
   jest
     .spyOn(fs.promises, 'readFile')
     .mockResolvedValue(JSON.stringify(geoJSONTemp));
-  jest
-    .spyOn(userModel, 'findById')
-    .mockResolvedValue({
-      id: mockUserID,
-      maps: [],
-      save: jest.fn().mockReturnThis(),
-    });
+  jest.spyOn(userModel, 'findById').mockResolvedValue({
+    id: mockUserID,
+    maps: [],
+    save: jest.fn().mockReturnThis(),
+  });
 });
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
 });
-
-jest.mock('../models/post-model');
 
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
@@ -84,7 +80,6 @@ describe('POST /posts/publish', () => {
     jest
       .spyOn(postModel.prototype, 'save')
       .mockImplementation(function (this: any) {
-        console.log('post saving hte post', this);
         return Promise.resolve(this);
       });
 
@@ -577,25 +572,19 @@ describe('POST /posts/fork/:postId', () => {
     const mockMap = {
       ...mapData,
     };
-    jest
-      .spyOn(commentModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        console.log('post saving hte post', this);
-        return Promise.resolve(this);
-      });
+
+    jest.spyOn(postModel, 'findById').mockResolvedValue({
+      _id: new mongoose.Types.ObjectId(mockPostId),
+      map: mockMap._id,
+    } as any);
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData as any);
 
     jest
-      .spyOn(postModel, 'findById')
-      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
-        const execMock = jest.fn().mockResolvedValue({
-          _id: new mongoose.Types.ObjectId(postId),
-          map: mockMap,
-          populate: jest.fn().mockReturnThis(), // Chainable populate method
-          exec: jest.fn().mockResolvedValue({}),
-        });
+      .spyOn(fs.promises, 'readFile')
+      .mockResolvedValue(JSON.stringify(geoJSONTemp));
 
-        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
-      });
+    jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
 
     const response = await supertest(app)
       .post(`/posts/fork/${mockPostId}`)
@@ -604,7 +593,8 @@ describe('POST /posts/fork/:postId', () => {
     expect(response.statusCode).toBe(200);
     expect(response.body).toHaveProperty('success', true);
     expect(response.body).toHaveProperty('forkedMap');
+    expect(fs.promises.readFile).toHaveBeenCalled();
+    expect(fs.promises.writeFile).toHaveBeenCalled();
     expect(response.body.forkedMap.owner).toEqual(mockUserID.toString());
-    expect(response.body.forkedMap.geoJSON).toEqual('some/path');
   });
 });

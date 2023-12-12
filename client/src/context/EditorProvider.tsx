@@ -94,6 +94,12 @@ function reducer(
         let geoJSON = action.payload.map.geoJSON;
         let v = new GeoJSONVisitor(geoJSON);
         v.visitRoot();
+        console.log('AHHH HELOOO', v);
+        if (v.getFeatureResults().perFeature.length === 0) {
+          throw new Error(
+            'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
+          );
+        }
         newState.mapDetails = {
           availableProps: Array.from(
             v.getFeatureResults().aggregate.globallyAvailableKeys,
