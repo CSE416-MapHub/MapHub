@@ -4,7 +4,7 @@ import styles from './Property.module.scss';
 import PropertyPanel, { IPropertyPanelSectionProps } from './PropertyPanel';
 import { EditorContext } from 'context/EditorProvider';
 import { DeltaType, TargetType } from 'types/delta';
-import { makeDotPanel, makeRegionPanel } from './createPanels';
+import { makeDotPanel, makeRegionPanel, makeSymbolPanel } from './createPanels';
 import DeleteModal from '../modals/deleteInstance';
 
 export interface IPropertiesProps {
@@ -37,6 +37,8 @@ export default function () {
         setPanels(p);
         break;
       case TargetType.SYMBOL:
+        setPanels(makeSymbolPanel(editorContext, currTarg.id));
+        break;
       case TargetType.DOT:
         setPanels(makeDotPanel(editorContext, currTarg.id));
         break;

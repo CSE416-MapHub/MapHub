@@ -100,7 +100,12 @@ export default function (props: IInputProps) {
       />
     );
   } else if (props.type === 'svg') {
-    inputField = <PropertySVGInput />;
+    inputField = (
+      <PropertySVGInput
+        items={props.value as Array<string>}
+        onChange={val => props.onChange(val)}
+      />
+    );
   } else if (props.type === 'dot') {
     inputField = (
       <PropertyDotInput

@@ -7,7 +7,13 @@ import styles from './Property.module.scss';
 import Button from 'components/button';
 import NewSymbolModal from '../modals/newSymbolModal';
 
-export default function () {
+export default function ({
+  items,
+  onChange,
+}: {
+  items: Array<string>;
+  onChange: (val: string) => void;
+}) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openSymbolModal, setOpenSymbolModal] = useState(false);
 

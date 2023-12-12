@@ -5,7 +5,7 @@ import style from './LabelSelector.module.scss';
 interface NewSymbolModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (svgFile: File | null, preview: string | null) => void;
+  onConfirm: (svgFile: File, name: string, preview: string) => void;
 }
 
 const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
@@ -18,8 +18,10 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
-    onConfirm(svgFile, preview);
-    onClose();
+    if (svgFile && preview) {
+      onConfirm(svgFile, name, preview);
+      onClose();
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {

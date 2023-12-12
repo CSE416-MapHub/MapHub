@@ -1,6 +1,6 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, ISymbolProps, MHJSON } from 'types/MHJSON';
 import {
   GeoJSONVisitor,
   IFeatureVisitResults,
@@ -9,10 +9,7 @@ import {
 import * as G from 'geojson';
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import {
-  DELETED_NAME,
-  applyDelta,
-} from './editorHelpers/DeltaUtil';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -189,7 +186,6 @@ class helpers {
     let x = ctx.state.map;
     if (x !== null) {
       let map = x;
-
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack = [];
       nStack.stack.push({
@@ -280,6 +276,17 @@ class helpers {
     let name = ctx.state.lastInstantiated;
     if (name === DELETED_NAME || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalDotDensityData) {
+      if (d.name === name) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  public getLastInstantiatedSymbol(ctx: IEditorContext): ISymbolProps | null {
+    let name = ctx.state.lastInstantiated;
+    if (name === DELETED_NAME || !ctx.state.map) return null;
+    for (let d of ctx.state.map.globalSymbolData) {
       if (d.name === name) {
         return d;
       }
