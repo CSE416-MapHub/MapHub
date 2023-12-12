@@ -176,18 +176,71 @@ class GlobalCategoryHandler {
   }
 }
 class GlobalSymbolHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding a global symbol to the map
+    let p = d.payload;
+    if (p.name === undefined || p.svg === undefined) {
+      console.log(p);
+      throw new Error('Malformed global symbol in CREATE');
+    }
+
+    let taken = false;
+    for (let symMeta of map.globalSymbolData) {
+      if (symMeta.name === p.name) {
+        taken = true;
+        break;
+      }
+    }
+    if (taken) {
+      console.log(p);
+      throw new Error(
+        'Tried to create a symbol with a name that already exists',
+      );
+    }
+    map.globalSymbolData.splice(d.target[1], 0, {
+      name: p.name,
+      svg: p.svg,
+    });
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a global symbol on the map
+    if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Target index out of bounds');
+    }
+    let targ = map.globalSymbolData[d.target[1]];
+
+    targ.name = d.payload.name ?? targ.name;
+    // if the name changed, we have to change the name of each symbol
+    if (d.payload.name) {
+      let oldName = targ.name;
+      map.symbolsData = map.symbolsData.map((si: any) => {
+        if (si.symbol === oldName) {
+          si.symbol = d.payload.name!;
+        }
+        return si;
+      });
+    }
+
+    targ.svg = d.payload.svg ?? targ.svg;
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing a global symbol from the map
+    if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Target index out of bounds');
+    }
+
+    let targName = map.globalSymbolData[d.target[1]].name;
+    map.globalSymbolData[d.target[1]].name = DELETED_NAME;
+    map.symbolsData = map.symbolsData.map((s: any) => {
+      if (s.symbol === targName) {
+        s.symbol = DELETED_NAME;
+      }
+      return s;
+    });
     return map;
   }
 }
@@ -329,18 +382,68 @@ class RegionHandler {
   }
 }
 class SymbolHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding a symbol to the map
+    let p = d.payload;
+    if (
+      p.x === undefined ||
+      p.y === undefined ||
+      p.scale === undefined ||
+      p.symbol === undefined
+    ) {
+      console.log(p);
+      throw new Error('Malformed symbol in CREATE');
+    }
+
+    if (map.symbolsData.length < d.target[1] || d.target[1] < 0) {
+      throw new Error('global symbol index out of bounds');
+    }
+
+    // verify that the dot we are trying to create actually exists
+    let exists = false;
+    for (let symMeta of map.globalSymbolData) {
+      if (symMeta.name === p.symbol) {
+        exists = true;
+        break;
+      }
+    }
+
+    if (!exists) {
+      console.log(p);
+      throw new Error('Tried to create nonexistent symbol type');
+    }
+    map.symbolsData.splice(d.target[1], 0, {
+      x: p.x,
+      y: p.y,
+      scale: p.scale,
+      symbol: p.symbol,
+    });
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a symbol on the map
+
+    if (map.symbolsData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('global symbol index out of bounds');
+    }
+
+    let targ = map.symbolsData[d.target[1]];
+    targ.x = d.payload.x ?? targ.x;
+    targ.y = d.payload.y ?? targ.y;
+    targ.symbol = d.payload.symbol ?? targ.symbol;
+    targ.scale = d.payload.scale ?? targ.scale;
+
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing a symbol from the map
+    if (map.symbolsData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Delete symbol Target index out of bounds');
+    }
+
+    map.symbolsData[d.target[1]].symbol = DELETED_NAME;
     return map;
   }
 }
