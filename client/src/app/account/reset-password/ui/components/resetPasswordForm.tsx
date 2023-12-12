@@ -27,7 +27,6 @@ enum ResetPasswordActionType {
   resetPassword = 'resetPassword',
 }
 
-
 interface ResetPasswordAction {
   type: ResetPasswordActionType;
   value?: any;
@@ -112,6 +111,8 @@ function ResetPasswordForm() {
     },
   );
 
+  const handleResetPassword = (id: string) => {};
+
   const setPassword = (value: string) => {
     ResetPasswordDispatch({
       type: ResetPasswordActionType.updatePassword,
@@ -163,9 +164,11 @@ function ResetPasswordForm() {
         validate={validatePasswordConfirm}
         helperText={ResetPasswordState.passwordConfirm.errorText}
       />
-      <Link href="/account/reset-password/success">
-        <Button variant="filled">Reset Password</Button>
-      </Link>
+
+      {/* <Link href="/account/reset-password/success"> */}
+
+      <Button variant="filled">Reset Password</Button>
+      {/* </Link> */}
     </div>
   );
 }

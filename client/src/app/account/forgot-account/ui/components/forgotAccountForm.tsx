@@ -132,7 +132,6 @@ function ForgotAccountForm() {
     const passwordResetLink = await AccountAPI.getPasswordResetLink(
       forgotAccountState.email.value,
     );
-    router.push(passwordResetLink.data.resetURL);
 
     // forgotAccountDispatch({
     //   type: ForgotAccountActionType.sendEmail,

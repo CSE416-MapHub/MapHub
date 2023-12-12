@@ -10,7 +10,7 @@ import crypto from 'crypto';
 // const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
 // const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
 const EMAIL_ADDRESS = 'maphubbers@gmail.com';
-const EMAIL_PASSWORD = 'mapHubbers1234';
+const EMAIL_PASSWORD = 'rxcamkbeykxzoflr';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
