@@ -4,8 +4,8 @@ import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
 interface NewSymbolModalProps {
   open: boolean;
-  onClose: () => void;
-  onConfirm: (svgFile: File | null, preview: string | null) => void;
+  onClose: (created: boolean) => void;
+  onConfirm: (svgFile: File, name: string, preview: string) => void;
 }
 
 const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
@@ -18,8 +18,10 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
-    onConfirm(svgFile, preview);
-    onClose();
+    if (svgFile && preview) {
+      onConfirm(svgFile, name, preview);
+      onClose(true);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +41,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   return (
     <GeneralizedDialog
       open={open}
-      onClose={onClose}
+      onClose={() => onClose(false)}
       onConfirm={handleConfirm}
       title="Create New Symbol"
     >
@@ -65,6 +67,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
             onChange={e => setName(e.target.value)}
             className={style.textField}
             margin="normal"
+            id="symbol-modal-symbol-name-field"
           />
         </Box>
         <Box

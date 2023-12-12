@@ -18,6 +18,7 @@ import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
+let symType: PropertyPanelInputType = 'svg';
 let textType: PropertyPanelInputType = 'text';
 let colorType: PropertyPanelInputType = 'color';
 let categoricalType: PropertyPanelInputType = 'dropdown';
@@ -455,6 +456,155 @@ export function makeCategoricalPanel(
             onChange(val: string) {},
           },
         },
+      ],
+    },
+  ];
+
+  return panels;
+}
+
+export function makeSymbolPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let loadedMap = ctx.state.map!;
+  let symInstance = loadedMap.symbolsData[id];
+  let symClass = loadedMap.globalSymbolData[0];
+  // find the id of the dotclass
+  let classId = 0;
+  let gSymData = loadedMap.globalSymbolData;
+  for (let dc = 0; dc < gSymData.length; dc++) {
+    if (loadedMap.globalSymbolData[dc].name === symInstance.symbol) {
+      classId = dc;
+      symClass = loadedMap.globalSymbolData[dc];
+      break;
+    }
+  }
+  let panels = [
+    {
+      name: 'Local Symbol',
+      items: [
+        {
+          name: 'X',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.x.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'x',
+                symInstance.x,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Y',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.y.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'y',
+                symInstance.y,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Symbol',
+          input: {
+            type: symType,
+            short: true,
+            disabled: false,
+            value: loadedMap.globalSymbolData.map(
+              el => `${el.name}|${DELETED_NAME}|${el.svg}`,
+            ),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'symbol',
+                symInstance.symbol,
+                val,
+              );
+            },
+          },
+        },
+        {
+          name: 'Scale',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.scale.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'scale',
+                symInstance.scale,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'Global Symbol',
+      items: [
+        {
+          name: 'Symbol Name',
+          input: {
+            type: textType,
+            short: false,
+            disabled: false,
+            value: symClass.name,
+            onChange(val: string) {
+              updateField(
+                ctx,
+                classId,
+                TargetType.GLOBAL_SYMBOL,
+                'name',
+                symClass.name,
+                val,
+              );
+            },
+          },
+        },
+        // {
+        //   name: 'TODO SYMBOL SVG?',
+        //   input: {
+        //     type: numType,
+        //     short: false,
+        //     disabled: false,
+        //     value: dotClass.size.toString(),
+        //     onChange(val: string) {
+        //       updateField(
+        //         ctx,
+        //         classId,
+        //         TargetType.GLOBAL_DOT,
+        //         'size',
+        //         dotClass.size.toString(),
+        //         val,
+        //       );
+        //     },
+        //   },
+        // },
       ],
     },
   ];

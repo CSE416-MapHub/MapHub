@@ -1,6 +1,6 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
 import { Dispatch, createContext, useReducer } from 'react';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { IDotDensityProps, ISymbolProps, MHJSON } from 'types/MHJSON';
 import {
   GeoJSONVisitor,
   IFeatureVisitResults,
@@ -186,7 +186,6 @@ class helpers {
     let x = ctx.state.map;
     if (x !== null) {
       let map = x;
-
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack = [];
       nStack.stack.push({
@@ -198,9 +197,22 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-      let li = ctx.state.lastInstantiated;
-      if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
-        li = d.payload.name;
+      let li: string = ctx.state.lastInstantiated;
+      if (d.payload.name !== undefined) {
+        if (d.type === DeltaType.CREATE || d.type === DeltaType.UPDATE) {
+          li = d.payload.name;
+        } else {
+          if (d.targetType === TargetType.GLOBAL_DOT) {
+            li =
+              map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+          if (d.targetType === TargetType.GLOBAL_SYMBOL) {
+            li =
+              map.globalSymbolData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+        }
       }
 
       ctx.dispatch({
@@ -277,6 +289,17 @@ class helpers {
     let name = ctx.state.lastInstantiated;
     if (name === DELETED_NAME || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalDotDensityData) {
+      if (d.name === name) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  public getLastInstantiatedSymbol(ctx: IEditorContext): ISymbolProps | null {
+    let name = ctx.state.lastInstantiated;
+    if (name === DELETED_NAME || !ctx.state.map) return null;
+    for (let d of ctx.state.map.globalSymbolData) {
       if (d.name === name) {
         return d;
       }
