@@ -2,12 +2,7 @@
 
 import clsx from 'clsx';
 import { Typography } from '@mui/material';
-import {
-  useState,
-  DragEventHandler,
-  HTMLAttributes,
-  ChangeEventHandler,
-} from 'react';
+import { useState, DragEventHandler, HTMLAttributes } from 'react';
 
 import Button from 'components/button';
 import Icon from 'components/icon';
@@ -19,7 +14,6 @@ interface DropZoneProps extends HTMLAttributes<HTMLDivElement> {
   accept?: string;
   multiple?: boolean;
   onDrop?: DragEventHandler;
-  onChange?: ChangeEventHandler;
 }
 
 function DropZone({
@@ -73,9 +67,10 @@ function DropZone({
       <Typography variant="bodyMedium">{children}</Typography>
       <div className={styles['dropzone__buttons']}>
         <Button
-          htmlFor={inputId ? inputId : 'dropzone-input'}
           variant="text"
-          component="label"
+          component={props => (
+            <label htmlFor={inputId ? inputId : 'dropzone-input'} {...props} />
+          )}
         >
           Select Files
           <input
