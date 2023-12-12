@@ -1,7 +1,7 @@
 'use client';
 
-import styles from './ui/resetPassword.module.css';
-import ResetPasswordForm from './ui/components/resetPasswordForm';
+import styles from '../ui/resetPassword.module.css';
+import ResetPasswordForm from '../ui/components/resetPasswordForm';
 
 function Page() {
   return (
