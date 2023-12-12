@@ -49,7 +49,7 @@ export default function () {
           setMapCardData(
             response.data.posts.map((i: 
               { 
-                mapID: string; 
+                postId: string; 
                 userId: string; 
                 numLikes: number; 
                 title: string; 
@@ -57,7 +57,7 @@ export default function () {
                 svg: string; 
               }) => {
               return {
-                id: i.mapID,
+                id: i.postId,
                 userId: i.userId,
                 numLikes: i.numLikes,
                 title: i.title,
@@ -85,7 +85,7 @@ export default function () {
       <div className={style['card-grid']}>
         {mapCardData.map((map, i) => (
           <MapCard
-            key={map.id}
+            key={i}
             id={map.id}
             userId={map.userId}
             numLikes={map.numLikes}
