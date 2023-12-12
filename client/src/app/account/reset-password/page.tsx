@@ -1,7 +1,6 @@
 'use client';
 
-import styles from '../ui/resetPassword.module.css';
-import ResetPasswordForm from '../ui/components/resetPasswordForm';
+import styles from './ui/resetPassword.module.css';
 
 function Page() {
   return (
@@ -10,7 +9,6 @@ function Page() {
         Join MapHub to edit maps in any way you can imagine. Get access to
         liking, commenting, and sharing others' maps.
       </Typography> */}
-      <ResetPasswordForm />
     </div>
   );
 }

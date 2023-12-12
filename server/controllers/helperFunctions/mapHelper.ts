@@ -211,17 +211,22 @@ class GlobalSymbolHandler {
     }
     let targ = map.globalSymbolData[d.target[1]];
 
-    targ.name = d.payload.name ?? targ.name;
     // if the name changed, we have to change the name of each symbol
     if (d.payload.name) {
       let oldName = targ.name;
       map.symbolsData = map.symbolsData.map((si: any) => {
         if (si.symbol === oldName) {
-          si.symbol = d.payload.name!;
+          console.log(
+            'CHANGING SYMBOL NAME as well',
+            si.symbol,
+            d.payload.name,
+          );
+          si.symbol = d.payload.name;
         }
         return si;
       });
     }
+    targ.name = d.payload.name ?? targ.name;
 
     targ.svg = d.payload.svg ?? targ.svg;
     return map;

@@ -400,7 +400,6 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
       }
       let targ = map.globalSymbolData[d.target[1]];
 
-      targ.name = d.payload.name ?? targ.name;
       // if the name changed, we have to change the name of each dot
       if (d.payload.name) {
         let oldName = targ.name;
@@ -411,6 +410,7 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
           return si;
         });
       }
+      targ.name = d.payload.name ?? targ.name;
 
       targ.svg = d.payload.svg ?? targ.svg;
       break;
