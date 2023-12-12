@@ -43,7 +43,7 @@ export async function convertJsonToSVG(map: MapDocument) {
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
 
-  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+  // console.log('GEOJSON DATA IN DO THE ', geoJSONData);
   map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
@@ -266,11 +266,10 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      console.log('MAP bEFORE CAST', JSON.stringify(map));
+      // console.log('MAP bEFORE CAST', JSON.stringify(map));
       map = new Map(map);
 
       const updatedMap = await map.save();
-      console.log(updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       console.error(err.message);
@@ -310,7 +309,6 @@ const MapController = {
 
       const savedMap = await new Map(map).save();
 
-      console.log('finished updating ', savedMap);
       res.status(200).json({ success: true, map: savedMap });
     } catch (err: any) {
       console.log('error in update mapbyid', err);
@@ -403,7 +401,6 @@ const MapController = {
         }),
       );
 
-      console.log('Map Controller MAPS', JSON.stringify(condensedMaps));
       // Success response
       res.status(200).json({
         success: true,
