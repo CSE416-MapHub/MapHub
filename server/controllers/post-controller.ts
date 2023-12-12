@@ -71,11 +71,10 @@ const PostController = {
       console.log('in get user posts');
       const userId = req.params.userId;
       console.log(userId);
-      console.log(req.query.id);
 
       console.log('before finding posts');
 
-      const posts = await Post.find({ userId }).exec();
+      const posts = await Post.find({ owner: userId }).exec();
 
       console.log('after finding posts');
       console.log(
