@@ -43,7 +43,9 @@ export default function () {
             return {
               _id: i.postID,
               title: i.title,
-              userId: authContext.state.user?.id ? authContext.state.user?.id : '',
+              userId: authContext.state.user?.id
+                ? authContext.state.user?.id
+                : '',
               numLikes: i.numLikes,
               svg: i.svg,
             };
@@ -60,7 +62,7 @@ export default function () {
         }[] = [];
         p.forEach(map => {
           console.log(map);
-          if(!map.published) {
+          if (!map.published) {
             unpublishedMaps.push({
               _id: map._id,
               title: map.title,
@@ -80,16 +82,8 @@ export default function () {
   return (
     <main>
       <Greeting />
-      <CardCarousel
-        title="My Published Maps"
-        maps={pms}
-        published={true}
-      />
-      <CardCarousel
-        title="My Unpublished Maps"
-        maps={ums}
-        published={false}
-      />
+      <CardCarousel title="My Published Maps" maps={pms} published={true} />
+      <CardCarousel title="My Unpublished Maps" maps={ums} published={false} />
     </main>
   );
 }

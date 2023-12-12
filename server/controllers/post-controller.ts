@@ -71,11 +71,10 @@ const PostController = {
       console.log('in get user posts');
       const userId = req.params.userId;
       console.log(userId);
-      console.log(req.query.id);
 
       console.log('before finding posts');
 
-      const posts = await Post.find({ userId }).exec();
+      const posts = await Post.find({ owner: userId }).exec();
 
       console.log('after finding posts');
       console.log(
@@ -164,7 +163,16 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log('Got post', JSON.stringify(post), 'with id', postId);
+      console.log(
+        'Got post',
+        JSON.stringify({
+          title: post.title,
+          description: post.description,
+          owner: post.owner,
+        }),
+        'with id',
+        postId,
+      );
 
       const map = await Map.findById(post.map).exec();
       if (!map) {
