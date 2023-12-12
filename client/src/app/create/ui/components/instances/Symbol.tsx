@@ -198,7 +198,11 @@ export default function ({
           return (
             <svg viewBox={viewbox} width="100%" height="100%">
               {svgChildren.map((el, i) => (
-                <g key={'' + i} ref={ref => ref?.appendChild(el)}></g>
+                <g
+                  key={'' + i}
+                  ref={ref => ref?.appendChild(el)}
+                  fillOpacity={0}
+                ></g>
               ))}
             </svg>
           );
