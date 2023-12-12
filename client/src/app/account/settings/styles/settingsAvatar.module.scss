@@ -1,0 +1,30 @@
+@use 'layout';
+
+.settings__avatar {
+  margin: 0 auto;
+
+  @include layout.expanded {
+    height: 192px;
+    width: 192px;
+  }
+  @include layout.medium {
+    height: 128px;
+    width: 128px;
+  }
+  @include layout.compact {
+    height: 96px;
+    width: 96px;
+  }
+
+  & > i{
+    @include layout.expanded {
+      font-size: 96px;
+    }
+    @include layout.medium {
+      font-size: 64px;
+    }
+    @include layout.compact {
+      font-size: 48px;
+    }
+  }
+}

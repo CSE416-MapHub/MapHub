@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import { AuthContext } from '../../../context/AuthProvider';
-import Avatar from 'components/avatar';
 import Button from 'components/button';
 import IconButton from 'components/iconButton';
 import SettingsMain from './components/settingsMain';
@@ -14,6 +13,7 @@ import SettingsPane from './components/settingsPane';
 import SettingsSection from './components/settingsSection';
 import SettingsTitle from './components/settingsTitle';
 import SettingsTextFieldLink from './components/settingsTextFieldLink';
+import SettingsAvatar from './components/settingsAvatar';
 
 import styles from './styles/settings.module.scss';
 
@@ -34,14 +34,15 @@ function Settings() {
         <SettingsSection id="settings-profile">
           <SettingsTitle>Profile</SettingsTitle>
           <Box className={styles['settings__option']}>
-            <Avatar className={styles['settings__avatar']}>
+            <SettingsAvatar>
               <IconButton
                 className={styles['settings__edit-icon-button']}
                 variant="filled"
                 iconType="solid"
                 iconName="pencil"
+                onClick={() => router.push('/account/settings/profile-picture')}
               />
-            </Avatar>
+            </SettingsAvatar>
           </Box>
           <SettingsTextFieldLink
             href="/account/settings/username"
