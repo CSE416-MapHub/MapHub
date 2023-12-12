@@ -9,6 +9,7 @@ import {
 } from 'context/EditorProvider';
 import { DeltaType, TargetType } from 'types/delta';
 import NewSymbolModal from './modals/newSymbolModal';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 export default function () {
   const editorContext = useContext(EditorContext);
@@ -17,12 +18,11 @@ export default function () {
   const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
   let createdDot = false;
-  let createdSymbol = false;
   useEffect(() => {
     if (
       editorContext.state.selectedTool === ToolbarButtons.dot &&
       editorContext.state.map &&
-      editorContext.state.map.globalDotDensityData.length === 0 &&
+      editorContext.state.lastInstantiated === DELETED_NAME &&
       !openDotModal
     ) {
       setOpenDotModal(true);
@@ -30,7 +30,7 @@ export default function () {
     if (
       editorContext.state.selectedTool === ToolbarButtons.symbol &&
       editorContext.state.map &&
-      editorContext.state.map.globalSymbolData.length === 0 &&
+      editorContext.state.lastInstantiated === DELETED_NAME &&
       !openSymbolModal
     ) {
       setOpenSymbolModal(true);
@@ -98,8 +98,8 @@ export default function () {
 
       <NewSymbolModal
         open={openSymbolModal}
-        onClose={function (): void {
-          if (!createdSymbol) {
+        onClose={function (created): void {
+          if (!created) {
             editorContext.dispatch({
               type: EditorActions.SET_TOOL,
               payload: {
@@ -107,7 +107,6 @@ export default function () {
               },
             });
           }
-
           setOpenSymbolModal(false);
         }}
         onConfirm={function (
@@ -143,7 +142,7 @@ export default function () {
                 payload: {},
               },
             );
-            createdSymbol = true;
+            setOpenSymbolModal(false);
           };
           reader.readAsText(svgFile);
         }}

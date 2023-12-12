@@ -19,7 +19,6 @@ export default function ({ value, box, mapClickHandler }: DotProps) {
   const center = L.latLng(box[1] + box[3] / 2, box[0] + box[2] / 2);
   const c1: [number, number] = [box[1], box[0]];
   const c2: [number, number] = [box[1] + box[3], box[0] + box[2]];
-  let htmlContent = `<div>${value.map(x => `<p>${x}</p>`)}</div>`;
   const text = (
     <SVGOverlay bounds={[c1, c2]}>
       {/* // <g x={box[1]} y={box[0]} width={box[3]} height={box[2]}> */}
@@ -31,8 +30,8 @@ export default function ({ value, box, mapClickHandler }: DotProps) {
         textAnchor="middle"
         transform={`translate(0 -${box[3]})`}
       >
-        {value.map(x => (
-          <tspan dy={'1em'} x={'50%'}>
+        {value.map((x, i) => (
+          <tspan dy={'1em'} x={'50%'} key={`${i}${box}${value}tspanitem`}>
             {x}
           </tspan>
         ))}

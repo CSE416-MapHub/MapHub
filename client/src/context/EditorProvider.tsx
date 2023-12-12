@@ -197,9 +197,22 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-      let li = ctx.state.lastInstantiated;
-      if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
-        li = d.payload.name;
+      let li: string = ctx.state.lastInstantiated;
+      if (d.payload.name !== undefined) {
+        if (d.type === DeltaType.CREATE || d.type === DeltaType.UPDATE) {
+          li = d.payload.name;
+        } else {
+          if (d.targetType === TargetType.GLOBAL_DOT) {
+            li =
+              map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+          if (d.targetType === TargetType.GLOBAL_SYMBOL) {
+            li =
+              map.globalSymbolData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+        }
       }
 
       ctx.dispatch({

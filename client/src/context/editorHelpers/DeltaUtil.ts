@@ -348,7 +348,7 @@ function deltaSymbol(map: MHJSON, d: Delta) {
     }
 
     case DeltaType.DELETE: {
-      if (map.dotsData.length <= d.target[1] || d.target[1] < 0) {
+      if (map.symbolsData.length <= d.target[1] || d.target[1] < 0) {
         throw new Error('Target index out of bounds');
       }
       // TODO: is this the smartest thing to do?

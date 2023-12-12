@@ -4,7 +4,7 @@ import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
 interface NewSymbolModalProps {
   open: boolean;
-  onClose: () => void;
+  onClose: (created: boolean) => void;
   onConfirm: (svgFile: File, name: string, preview: string) => void;
 }
 
@@ -20,7 +20,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   const handleConfirm = () => {
     if (svgFile && preview) {
       onConfirm(svgFile, name, preview);
-      onClose();
+      onClose(true);
     }
   };
 
@@ -41,7 +41,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   return (
     <GeneralizedDialog
       open={open}
-      onClose={onClose}
+      onClose={() => onClose(false)}
       onConfirm={handleConfirm}
       title="Create New Symbol"
     >

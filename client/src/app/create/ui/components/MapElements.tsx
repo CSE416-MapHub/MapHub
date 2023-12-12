@@ -325,19 +325,24 @@ export default function () {
       {(() => {
         let details = editorContextRef.current.state.mapDetails.regionData;
         let activeLabels = editorContextRef.current.state.map!.labels;
-        return details.map(d => (
-          <Text
-            value={activeLabels.map(l => {
-              if (d.originalFeature.properties !== null) {
-                return d.originalFeature.properties[l] ?? 'undefined';
-              }
-              return 'undefined';
-            })}
-            // box={[91.93, 31.8086, 30.67, 8.241]}
-            box={d.box}
-            mapClickHandler={handleMapClick}
-          ></Text>
-        ));
+        return details.map((d, i) => {
+          let label = activeLabels.map(l => {
+            if (d.originalFeature.properties !== null) {
+              return d.originalFeature.properties[l] ?? 'undefined';
+            }
+            return 'undefined';
+          });
+
+          return (
+            <Text
+              value={label}
+              // box={[91.93, 31.8086, 30.67, 8.241]}
+              box={d.box}
+              mapClickHandler={handleMapClick}
+              key={`${i}${d.box}${label}`}
+            ></Text>
+          );
+        });
       })()}
     </>
   );

@@ -29,6 +29,7 @@ export default function ({
   const [dragging, setDragging] = useState(false);
   const [x, setX] = useState(symbolInstance.x);
   const [y, setY] = useState(symbolInstance.y);
+  const [rerender, setRerender] = useState(2);
   const map = useMap();
 
   function handleClick(ev: L.LeafletMouseEvent) {
@@ -104,7 +105,7 @@ export default function ({
     const thisIsSelected =
       editorContextRef.state.selectedItem &&
       editorContextRef.state.selectedItem.id === id &&
-      editorContextRef.state.selectedItem.type == TargetType.DOT &&
+      editorContextRef.state.selectedItem.type == TargetType.SYMBOL &&
       editorContextRef.state.selectedTool === ToolbarButtons.select;
     if (thisIsSelected) {
       setDragging(true);
@@ -118,6 +119,7 @@ export default function ({
     if (dragging) {
       setX(ev.latlng.lng);
       setY(ev.latlng.lat);
+      setRerender(rerender + 1);
     }
     if (!dragging && editorContextRef.state.isDeleting) {
       deleteSelf();
@@ -133,14 +135,15 @@ export default function ({
   return (
     <>
       <Rectangle
+        key={rerender + 'symbol' + id}
         bounds={[
           [
-            symbolInstance.y + (latPerPx * DEFAULT_SZ * scale) / 2,
-            symbolInstance.x - (lngPerPx * DEFAULT_SZ * scale) / 2,
+            y + (latPerPx * DEFAULT_SZ * scale) / 2,
+            x - (lngPerPx * DEFAULT_SZ * scale) / 2,
           ],
           [
-            symbolInstance.y - (latPerPx * DEFAULT_SZ * scale) / 2,
-            symbolInstance.x + (lngPerPx * DEFAULT_SZ * scale) / 2,
+            y - (latPerPx * DEFAULT_SZ * scale) / 2,
+            x + (lngPerPx * DEFAULT_SZ * scale) / 2,
           ],
         ]}
         fillOpacity={0}
@@ -165,36 +168,18 @@ export default function ({
         }}
       ></Rectangle>
       <SVGOverlay
+        key={rerender * -1 + 'symbol' + id}
         className="map-symbol"
         bounds={[
           [
-            symbolInstance.y + (latPerPx * DEFAULT_SZ * scale) / 2,
-            symbolInstance.x - (lngPerPx * DEFAULT_SZ * scale) / 2,
+            y + (latPerPx * DEFAULT_SZ * scale) / 2,
+            x - (lngPerPx * DEFAULT_SZ * scale) / 2,
           ],
           [
-            symbolInstance.y - (latPerPx * DEFAULT_SZ * scale) / 2,
-            symbolInstance.x + (lngPerPx * DEFAULT_SZ * scale) / 2,
+            y - (latPerPx * DEFAULT_SZ * scale) / 2,
+            x + (lngPerPx * DEFAULT_SZ * scale) / 2,
           ],
         ]}
-        eventHandlers={{
-          click: ev => {
-            console.log('CLICKING THE SVGOVERLAY');
-            handleClick(ev);
-            L.DomEvent.stopPropagation(ev);
-          },
-          mousedown: ev => {
-            handleMouseDown(ev);
-            L.DomEvent.stopPropagation(ev);
-          },
-          mouseup: ev => {
-            handleMouseUp(ev);
-            L.DomEvent.stopPropagation(ev);
-          },
-          mousemove: ev => {
-            handleMouseMove(ev);
-            L.DomEvent.stopPropagation(ev);
-          },
-        }}
       >
         {(() => {
           let parser = new DOMParser();
