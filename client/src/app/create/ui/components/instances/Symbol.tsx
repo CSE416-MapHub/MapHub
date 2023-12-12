@@ -135,6 +135,7 @@ export default function ({
   return (
     <>
       <Rectangle
+        className="map-symbol"
         key={rerender + 'symbol' + id}
         bounds={[
           [
@@ -169,7 +170,6 @@ export default function ({
       ></Rectangle>
       <SVGOverlay
         key={rerender * -1 + 'symbol' + id}
-        className="map-symbol"
         bounds={[
           [
             y + (latPerPx * DEFAULT_SZ * scale) / 2,

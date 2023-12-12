@@ -67,6 +67,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
             onChange={e => setName(e.target.value)}
             className={style.textField}
             margin="normal"
+            id="symbol-modal-symbol-name-field"
           />
         </Box>
         <Box

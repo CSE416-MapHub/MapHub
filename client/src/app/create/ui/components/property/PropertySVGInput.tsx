@@ -7,13 +7,12 @@ import styles from './Property.module.scss';
 import Button from 'components/button';
 import NewSymbolModal from '../modals/newSymbolModal';
 
-export default function ({
-  items,
-  onChange,
-}: {
+interface IPropertySVGInputProps {
   items: Array<string>;
   onChange: (val: string) => void;
-}) {
+}
+
+export default function ({ items, onChange }: IPropertySVGInputProps) {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
