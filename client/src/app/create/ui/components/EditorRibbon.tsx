@@ -31,6 +31,8 @@ import IconButton from 'components/iconButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { readFile } from 'fs';
 import { MapPayload } from 'types/mapPayload';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { DeltaType, TargetType } from 'types/delta';
 
 // A list of all accepted file types.
 const accept: string =
@@ -163,8 +165,6 @@ export default function () {
     mapType: MapType,
     optionsProps: string[],
   ) {
-    console.log(mapName, optionsProps);
-    console.log(userGeoJSON);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
@@ -191,6 +191,31 @@ export default function () {
   }
 
   function onChoroplethConfirm(optionsProps: string[]) {
+    let keyName = DELETED_NAME;
+    let oldName =
+      editorContext.state.map?.globalChoroplethData.indexingKey ?? DELETED_NAME;
+    if (optionsProps.length !== 0) {
+      keyName = optionsProps[0];
+    }
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.GLOBAL_CHOROPLETH,
+        target: [editorContext.state.map_id, 0, '-1'],
+        payload: {
+          indexingKey: keyName,
+        },
+      },
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.GLOBAL_CHOROPLETH,
+        target: [editorContext.state.map_id, 0, '-1'],
+        payload: {
+          indexingKey: oldName,
+        },
+      },
+    );
     setOpenChoropleth(false);
   }
   function onMultiMapConfirm(optionsProps: string[]) {

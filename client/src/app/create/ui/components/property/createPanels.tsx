@@ -477,6 +477,15 @@ export function makeChoroplethPanel(
   let map = ctx.state.map!;
   let cData = map.globalChoroplethData;
   let iKey = cData.indexingKey;
+  let iValue = map.regionsData[id].intensity?.toString() ?? 'NaN';
+  if (map.globalChoroplethData.indexingKey !== DELETED_NAME) {
+    let p = ctx.state.mapDetails.regionData[id].originalFeature.properties;
+    if (p) {
+      iValue = p[iKey] ?? 'NaN';
+    } else {
+      iValue = 'NaN';
+    }
+  }
   let panels: Array<IPropertyPanelSectionProps> = [
     {
       name: 'Region Choropleth',
@@ -487,14 +496,14 @@ export function makeChoroplethPanel(
             type: numType,
             short: false,
             disabled: iKey !== DELETED_NAME,
-            value: map.regionsData[id].intensity?.toString() ?? 'NaN',
+            value: iValue,
             onChange: val => {
               updateField(
                 ctx,
                 id,
                 TargetType.REGION,
                 'intensity',
-                map.regionsData[id].intensity ?? NaN,
+                iValue,
                 parseFloat(val),
               );
             },

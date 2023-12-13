@@ -21,10 +21,10 @@ export default function (props: GradientInputProps) {
       ...ranges,
       [key]: val,
     };
-    console.log('new range ');
-    console.log(newRange);
-    console.log(`${key}||${val}`);
     setRanges(newRange);
+  }
+
+  function onBlur(key: keyof GradientInputProps, val: any) {
     props.onChange(`${key}||${val}`);
   }
   return (
@@ -35,22 +35,22 @@ export default function (props: GradientInputProps) {
         gridTemplateColumns: '48px 1fr 48px',
       }}
     >
-      <div>
+      <div className={style['gradient-endpoint']}>
         <PropertyColorInput
           color={ranges.minColor}
           colorChangeHandler={c => {
             updateRanges('minColor', c);
+            onBlur('minColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
           value={ranges.minIntensity}
-          // className={style["prop-input"]}
-          onChange={e => {
-            // TODO: make this late validation
-            updateRanges('minIntensity', parseFloat(e.target.value));
-          }}
+          onChange={e =>
+            updateRanges('minIntensity', parseFloat(e.target.value))
+          }
+          onBlur={e => onBlur('minIntensity', parseFloat(e.target.value))}
           className={clsx(
             style['default-input'],
             style['prop-input'],
@@ -68,22 +68,22 @@ export default function (props: GradientInputProps) {
           background: `linear-gradient(to right, ${ranges.minColor}, ${ranges.maxColor})`,
         }}
       ></div>
-      <div>
+      <div className={style['gradient-endpoint']}>
         <PropertyColorInput
           color={ranges.maxColor}
           colorChangeHandler={c => {
             updateRanges('maxColor', c);
+            onBlur('maxColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
           value={ranges.maxIntensity}
-          // className={style["prop-input"]}
-          onChange={e => {
-            // TODO: make this late validation
-            updateRanges('maxIntensity', parseFloat(e.target.value));
-          }}
+          onBlur={e => onBlur('maxIntensity', parseFloat(e.target.value))}
+          onChange={e =>
+            updateRanges('maxIntensity', parseFloat(e.target.value))
+          }
           className={clsx(
             style['default-input'],
             style['prop-input'],

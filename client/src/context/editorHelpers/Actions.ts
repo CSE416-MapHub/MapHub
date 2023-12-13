@@ -42,11 +42,17 @@ export class ActionStack {
     return nStack;
   }
 
-  public peekStack(): Action {
+  public peekStack(): Action | null {
+    if (this.stack.length === 0) {
+      return null;
+    }
     return this.stack[this.stack.length - 1];
   }
 
-  public peekCounterstack(): Action {
+  public peekCounterstack(): Action | null {
+    if (this.counterStack.length === 0) {
+      return null;
+    }
     return this.counterStack[this.counterStack.length - 1];
   }
 }

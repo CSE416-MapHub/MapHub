@@ -72,6 +72,7 @@ export default function () {
   const [symbolNames, setSymbolNames] = useState<Map<string, ISymbolProps>>(
     new Map(),
   );
+  const [choroplethKey, setChoroplethKey] = useState<string>(DELETED_NAME);
 
   // const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
@@ -97,6 +98,20 @@ export default function () {
           nameMap.set(ip.name, ip);
         }
         setSymbolNames(nameMap);
+      }
+      if (loadedMap.globalChoroplethData.indexingKey !== choroplethKey) {
+        setChoroplethKey(loadedMap.globalChoroplethData.indexingKey);
+        setRerender(rerender + 1);
+      }
+      // if the top of either stack is a geojson delta, we will
+      // rerneder the map
+      let d1 = editorContextRef.current.state.actionStack.peekStack();
+      let d2 = editorContextRef.current.state.actionStack.peekCounterstack();
+      if (
+        (d1 && d1.do.targetType === TargetType.GEOJSONDATA) ||
+        (d2 && d2.undo.targetType === TargetType.GEOJSONDATA)
+      ) {
+        setRerender(rerender + 1);
       }
     }
 
@@ -287,6 +302,16 @@ export default function () {
 
       if (editorContextRef.current.state.map?.mapType === 'choropleth') {
         let intensity = currentRegionProps[myId].intensity ?? NaN;
+        if (choroplethKey !== DELETED_NAME) {
+          let p =
+            editorContextRef.current.state.mapDetails.regionData[myId]
+              .originalFeature.properties;
+          if (p) {
+            intensity = parseFloat(p[choroplethKey]);
+          } else {
+            intensity = NaN;
+          }
+        }
         let cData = editorContextRef.current.state.map!.globalChoroplethData;
         let ratio =
           (intensity - cData.minIntensity) /
