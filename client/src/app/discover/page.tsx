@@ -47,8 +47,12 @@ export default function () {
       .then((response) => {
         if (response.data.success) {
           let posts = response.data.posts;
-          posts.sort((a:MapCardProps, b:MapCardProps) => b.numLikes - a.numLikes)
-          posts = posts.slice(0, 6);
+          if (searchValue === '') {
+            posts.sort((a:MapCardProps, b:MapCardProps) => b.numLikes - a.numLikes)
+          } else {
+            posts = posts.filter((a:MapCardProps) => a.title.startsWith(searchValue));
+          }
+          posts = posts.slice(0, Math.min(6, posts.length));
           setMapCardData(
             posts.map((i: 
               { 
