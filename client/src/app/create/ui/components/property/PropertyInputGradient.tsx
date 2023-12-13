@@ -6,8 +6,8 @@ import style from './Property.module.scss';
 import clsx from 'clsx';
 
 export interface GradientInputProps {
-  minValue: number;
-  maxValue: number;
+  minIntensity: number;
+  maxIntensity: number;
   minColor: string;
   maxColor: string;
   onChange: (val: string) => void;
@@ -16,11 +16,16 @@ export interface GradientInputProps {
 export default function (props: GradientInputProps) {
   const [ranges, setRanges] = useState<GradientInputProps>(props);
 
-  function updateRanges(v: GradientInputProps) {
-    setRanges(v);
-    props.onChange(
-      `{minValue:${v.minValue},maxValue:${v.maxValue},minColor:${v.minColor},maxColor:${v.maxColor}}`,
-    );
+  function updateRanges(key: keyof GradientInputProps, val: any) {
+    let newRange = {
+      ...ranges,
+      [key]: val,
+    };
+    console.log('new range ');
+    console.log(newRange);
+    console.log(`${key}||${val}`);
+    setRanges(newRange);
+    props.onChange(`${key}||${val}`);
   }
   return (
     <div
@@ -34,17 +39,17 @@ export default function (props: GradientInputProps) {
         <PropertyColorInput
           color={ranges.minColor}
           colorChangeHandler={c => {
-            updateRanges({ ...ranges, minColor: c });
+            updateRanges('minColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
-          value={ranges.minValue}
+          value={ranges.minIntensity}
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
-            updateRanges({ ...ranges, minValue: parseFloat(e.target.value) });
+            updateRanges('minIntensity', parseFloat(e.target.value));
           }}
           className={clsx(
             style['default-input'],
@@ -67,17 +72,17 @@ export default function (props: GradientInputProps) {
         <PropertyColorInput
           color={ranges.maxColor}
           colorChangeHandler={c => {
-            updateRanges({ ...ranges, maxColor: c });
+            updateRanges('maxColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
-          value={ranges.maxValue}
+          value={ranges.maxIntensity}
           // className={style["prop-input"]}
           onChange={e => {
             // TODO: make this late validation
-            updateRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
+            updateRanges('maxIntensity', parseFloat(e.target.value));
           }}
           className={clsx(
             style['default-input'],

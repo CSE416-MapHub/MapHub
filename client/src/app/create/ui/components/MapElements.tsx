@@ -31,6 +31,31 @@ const dummySVG = `<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Re
 <path d="M3 13.6493C3 16.6044 5.41766 19 8.4 19L16.5 19C18.9853 19 21 16.9839 21 14.4969C21 12.6503 19.8893 10.9449 18.3 10.25C18.1317 7.32251 15.684 5 12.6893 5C10.3514 5 8.34694 6.48637 7.5 8.5C4.8 8.9375 3 11.2001 3 13.6493Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
+const mixColors = (c1: string, c2: string, ratio: number): string => {
+  return (
+    '#' +
+    (() => {
+      const [p1, p2] = [c1, c2].map(color => parseInt(color.slice(1), 16)),
+        a = [];
+
+      for (let i = 0; i <= 2; i += 1) {
+        a.push(
+          Math.floor(
+            ((p1 >> (i * 8)) & 0xff) * (1 - ratio) +
+              ((p2 >> (i * 8)) & 0xff) * ratio,
+          ),
+        );
+      }
+      let res = a
+        .reverse()
+        .map(num => num.toString(16).padStart(2, '0'))
+        .join('');
+      console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
+      return res;
+    })()
+  );
+};
+
 export default function () {
   const editorContextStaleable = useContext(EditorContext);
   const map = useMap();
@@ -258,6 +283,19 @@ export default function () {
         fillColor =
           editorContextRef.current.state.map!.globalCategoryData[categoryId]
             .color;
+      }
+
+      if (editorContextRef.current.state.map?.mapType === 'choropleth') {
+        let intensity = currentRegionProps[myId].intensity ?? NaN;
+        let cData = editorContextRef.current.state.map!.globalChoroplethData;
+        let ratio =
+          (intensity - cData.minIntensity) /
+          (cData.maxIntensity - cData.minIntensity);
+        if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+          fillColor = 'white';
+        } else {
+          fillColor = mixColors(cData.minColor, cData.maxColor, ratio);
+        }
       }
     }
 

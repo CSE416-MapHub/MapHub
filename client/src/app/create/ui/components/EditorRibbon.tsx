@@ -21,7 +21,11 @@ import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
-import { createNewMap, loadMapById, updateMapById } from './helpers/EditorAPICalls';
+import {
+  createNewMap,
+  loadMapById,
+  updateMapById,
+} from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
 import { useRouter, useSearchParams } from 'next/navigation';
@@ -45,7 +49,12 @@ export default function () {
     type: 'Point',
     coordinates: [0, 0],
   });
-  var GeoJSON = require('geojson');
+  const [visitor, setVisitor] = useState<GeoJSONVisitor>(
+    new GeoJSONVisitor({
+      type: 'Point',
+      coordinates: [0, 0],
+    }),
+  );
   const menus = {
     File: {
       Import: {
@@ -113,19 +122,19 @@ export default function () {
     setUpdatedTitle(editorContext.state.map?.title || '');
   };
 
-  const handleBlur = async() => {
+  const handleBlur = async () => {
     // Update the map title and close editing mode
-    const payload : MapPayload = { 
+    const payload: MapPayload = {
       mapId: editorContext.state.map_id,
       title: updatedTitle,
-    }
+    };
     console.log(payload);
-    await updateMapById(payload).then((success) => {
-      if(success) {
+    await updateMapById(payload).then(success => {
+      if (success) {
         editorContext.helpers.changeTitle(editorContext, updatedTitle);
         setEditingTitle(false);
       }
-    })
+    });
   };
 
   //--------- Modal States ---------
@@ -162,6 +171,7 @@ export default function () {
     mh.mapType = mapType;
     let v = new GeoJSONVisitor(mh.geoJSON, true);
     v.visitRoot();
+    setVisitor(v);
     mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
       return {};
     });
@@ -191,7 +201,7 @@ export default function () {
     const mapId = searchParams.get('mapid') as string;
     console.log(mapId);
     if (mapId && editorContext.state.map_id !== mapId) {
-      let getMap: Promise<MHJSON>
+      let getMap: Promise<MHJSON>;
       if (authContext.state.isLoggedIn) {
         getMap = loadMapById(mapId);
         getMap.then(map => {
@@ -205,7 +215,7 @@ export default function () {
           console.log('loaded map set');
           // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
           setOpenImport(false);
-        })
+        });
       }
     }
   }, [searchParams]);
@@ -255,14 +265,14 @@ export default function () {
       </div>
       <div className={styles['map-title']} onDoubleClick={handleEditMapTitle}>
         {editingTitle ? (
-            <TextField
-              id="outlined-basic" 
-              variant="outlined" 
-              value={updatedTitle}
-              onChange={(e) => setUpdatedTitle(e.target.value)}
-              onBlur={handleBlur}
-              size='small'
-            />
+          <TextField
+            id="outlined-basic"
+            variant="outlined"
+            value={updatedTitle}
+            onChange={e => setUpdatedTitle(e.target.value)}
+            onBlur={handleBlur}
+            size="small"
+          />
         ) : (
           <Typography variant="title">
             {editorContext.state.map?.title ?? ''}
@@ -304,7 +314,9 @@ export default function () {
         open={openChoropleth}
         onClose={() => setOpenChoropleth(false)}
         onConfirm={onChoroplethConfirm}
-        properties={selectedOptions}
+        properties={Array.from(
+          visitor.getFeatureResults().aggregate.numericKeys,
+        )}
       />
       <MultiMapLabelModal
         open={openMapLabelModal}

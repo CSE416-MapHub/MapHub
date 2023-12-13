@@ -32,6 +32,10 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.SYMBOL:
       deltaSymbol(map, d);
       break;
+    case TargetType.GLOBAL_CHOROPLETH:
+      deltaGlobalChoropleth(map, d);
+      break;
+
     default:
       throw new Error('uninmplemented');
   }
@@ -460,6 +464,26 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
         svg: p.svg,
       });
       break;
+    }
+  }
+}
+
+function deltaGlobalChoropleth(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      let cData = map.globalChoroplethData;
+      cData.indexingKey = d.payload.indexingKey ?? cData.indexingKey;
+      cData.minColor = d.payload.minColor ?? cData.minColor;
+      cData.maxColor = d.payload.maxColor ?? cData.maxColor;
+      cData.minIntensity = d.payload.minIntensity ?? cData.minIntensity;
+      cData.maxIntensity = d.payload.maxIntensity ?? cData.maxIntensity;
+      map.regionsData = [...map.regionsData];
+
+      break;
+    }
+    default: {
+      console.log(d);
+      console.error('Tried to delete or create a global choropleth object');
     }
   }
 }
