@@ -26,22 +26,15 @@ export default function (props: CardCarouselProps) {
   const [authors, setAuthors] = useState<string[]>([]);
 
   let leftArrow = (
-    <IconButton onClick={() => setPage(page - 1)}>
+    <IconButton onClick={() => setPage(page - 1)} disabled={page === 0}>
       <KeyboardArrowLeftIcon sx={{ fontSize: '96px' }} />
     </IconButton>
   );
   let rightArrow = (
-    <IconButton onClick={() => setPage(page + 1)}>
+    <IconButton onClick={() => setPage(page + 1)} disabled={(page + 1) * 5 >= props.maps.length}>
       <KeyboardArrowRightIcon sx={{ fontSize: '96px' }} />
     </IconButton>
   );
-
-  if (page === 0) {
-    leftArrow = <></>;
-  }
-  if ((page + 1) * 5 >= props.maps.length) {
-    rightArrow = <></>;
-  }
 
   const getAuthorById = async (id: string) => {
     try {
