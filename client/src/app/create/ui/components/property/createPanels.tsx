@@ -15,6 +15,7 @@ import { MutableRefObject } from 'react';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import { IPropertyPanelSectionProps } from './PropertyPanel';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { GradientInputProps } from './PropertyInputGradient';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
@@ -23,6 +24,7 @@ let textType: PropertyPanelInputType = 'text';
 let colorType: PropertyPanelInputType = 'color';
 let categoricalType: PropertyPanelInputType = 'dropdown';
 let deleteType: PropertyPanelInputType = 'delete';
+let choroplethType: PropertyPanelInputType = 'gradient';
 
 export type DotPanelData = IDotDensityProps | IDotInstance;
 
@@ -40,6 +42,8 @@ function updateField(
   let p0: DeltaPayload = {};
   p0[fieldName] = v0;
   let subid = subobjid ?? '-1';
+  console.log('updating ' + fieldName);
+  console.log(`${v0} => ${vf}`);
   ctx.helpers.addDelta(
     ctx,
     {
@@ -310,7 +314,7 @@ export function makeRegionPanel(
           input: {
             type: colorType,
             short: true,
-            disabled: m.mapType === 'categorical',
+            disabled: m.mapType === 'categorical' || m.mapType === 'choropleth',
             value: m.regionsData[id]?.color ?? '#FFFFFF',
             onChange(val: string) {
               updateField(
@@ -332,6 +336,9 @@ export function makeRegionPanel(
     panels = panels.concat(
       makeCategoricalPanel(ctx, id, openCategoricalDeleteModal),
     );
+  }
+  if (m.mapType === 'choropleth') {
+    panels = panels.concat(makeChoroplethPanel(ctx, id));
   }
   return panels;
 }
@@ -460,6 +467,83 @@ export function makeCategoricalPanel(
     },
   ];
 
+  return panels;
+}
+
+export function makeChoroplethPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let map = ctx.state.map!;
+  let cData = map.globalChoroplethData;
+  let iKey = cData.indexingKey;
+  let iValue = map.regionsData[id].intensity?.toString() ?? 'NaN';
+  if (map.globalChoroplethData.indexingKey !== DELETED_NAME) {
+    let p = ctx.state.mapDetails.regionData[id].originalFeature.properties;
+    if (p) {
+      iValue = p[iKey] ?? 'NaN';
+    } else {
+      iValue = 'NaN';
+    }
+  }
+  let panels: Array<IPropertyPanelSectionProps> = [
+    {
+      name: 'Region Choropleth',
+      items: [
+        {
+          name: 'Intensity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: iKey !== DELETED_NAME,
+            value: iValue,
+            onChange: val => {
+              updateField(
+                ctx,
+                id,
+                TargetType.REGION,
+                'intensity',
+                iValue,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'Global Choropleth',
+      items: [
+        {
+          name: 'Global Settings',
+          input: {
+            type: choroplethType,
+            short: false,
+            disabled: false,
+            value: [
+              cData.minIntensity.toString(),
+              cData.maxIntensity.toString(),
+              cData.minColor.toString(),
+              cData.maxColor.toString(),
+            ],
+            onChange: item => {
+              type t = keyof DeltaPayload & keyof GradientInputProps;
+              let key: t = item.split('||')[0] as t;
+              let val = item.split('||')[1];
+              updateField(
+                ctx,
+                id,
+                TargetType.GLOBAL_CHOROPLETH,
+                key,
+                cData[key],
+                key.includes('Color') ? val : parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+  ];
   return panels;
 }
 

@@ -13,7 +13,7 @@ export interface MHJSON {
   owner: string; //dont need cause we authorize the user.
   mapType: MapType;
   labels: Array<string>;
-  globalChoroplethData: IChoroplethProps | null;
+  globalChoroplethData: IChoroplethProps;
   globalCategoryData: Array<ICategoryProps>;
   globalSymbolData: Array<ISymbolProps>;
   globalDotDensityData: Array<IDotDensityProps>;

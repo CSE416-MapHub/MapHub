@@ -240,6 +240,8 @@ class helpers {
     if (ctx.state.actionStack.canUndo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekStack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
@@ -268,6 +270,8 @@ class helpers {
     if (ctx.state.actionStack.canRedo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekCounterstack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.do);

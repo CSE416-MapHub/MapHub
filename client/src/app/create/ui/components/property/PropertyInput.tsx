@@ -84,8 +84,8 @@ export default function (props: IInputProps) {
   } else if (props.type === 'gradient') {
     inputField = (
       <PropertyInputGradient
-        minValue={parseFloat(props.value[0] as string)}
-        maxValue={parseFloat(props.value[1] as string)}
+        minIntensity={parseFloat(props.value[0] as string)}
+        maxIntensity={parseFloat(props.value[1] as string)}
         minColor={props.value[2] as string}
         maxColor={props.value[3] as string}
         onChange={val => props.onChange(val)}
