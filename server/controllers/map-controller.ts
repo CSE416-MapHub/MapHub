@@ -11,6 +11,8 @@ import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
 
+import svg2img from 'svg2img';
+
 type MapDocument = typeof Map.prototype;
 
 enum DeltaType {
@@ -26,6 +28,25 @@ enum MapType {
   DOT = 'dot',
   FLOW = 'flow',
 }
+export enum SVGDetail {
+  DETAILED = 'detailed',
+  THUMBNAIL = 'thumbnail',
+}
+
+async function convertSvgToPngBase64(svgString: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    svg2img(svgString, function (error, buffer) {
+      if (error) {
+        console.error('Error converting SVG to PNG:', error);
+        reject(error);
+      } else {
+        // Convert buffer to a base64 encoded string
+        const base64Png = buffer.toString('base64');
+        resolve(base64Png);
+      }
+    });
+  });
+}
 
 function minifySVG(svgString: string): string {
   // Replace newlines and carriage returns with nothing
@@ -38,7 +59,10 @@ function minifySVG(svgString: string): string {
   return minified.trim();
 }
 
-export async function convertJsonToSVG(map: MapDocument) {
+export async function convertJsonToSVG(
+  map: MapDocument,
+  SVGDetailStr: SVGDetail,
+) {
   console.log('JSON TO SVG', JSON.stringify(map));
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
@@ -48,20 +72,22 @@ export async function convertJsonToSVG(map: MapDocument) {
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
-  console.log("svg created");
+  console.log('svg created');
   let box = builder.getBBox();
-  console.log("bbox gotten");
+  console.log('bbox gotten');
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">
   <rect x="${box[0]}" y="${box[1]}" width="100%" height="100%" fill="#CCEFF1" />
   ${svg}
 </svg>`;
+  if (SVGDetailStr === SVGDetail.THUMBNAIL) {
+    const pngString = await convertSvgToPngBase64(svgRepr);
+    console.log('THE PNG STRINGer', pngString);
+    return pngString;
+  }
   return minifySVG(svgRepr);
 }
-
-//idk if we should actually validate the user to see if the user matchees
-async function validUserForMap(req: Request, res: Response) {}
 
 const MapController = {
   createMap: async (req: Request, res: Response) => {
@@ -390,7 +416,7 @@ const MapController = {
       // console.log('THIS IS WHAT INSIDE MAPS', maps);
       const condensedMaps = await Promise.all(
         maps.map(async map => {
-          const svg = await convertJsonToSVG(map); //#TODO placeholder function
+          const svg = await convertJsonToSVG(map, SVGDetail.THUMBNAIL); //#TODO placeholder function
           return {
             _id: map._id,
             title: map.title,
