@@ -63,7 +63,7 @@ export async function convertJsonToSVG(
   map: MapDocument,
   SVGDetailStr: SVGDetail,
 ) {
-  console.log('JSON TO SVG', JSON.stringify(map));
+  console.log('JSON TO SVG STARTING IT NOW');
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
 
@@ -82,10 +82,12 @@ export async function convertJsonToSVG(
   ${svg}
 </svg>`;
   if (SVGDetailStr === SVGDetail.THUMBNAIL) {
+    console.log('Converting to THUMBNAIL');
     const pngString = await convertSvgToPngBase64(svgRepr);
-    console.log('THE PNG STRINGer', pngString);
     return pngString;
   }
+  console.log('Converting to SVG full');
+
   return minifySVG(svgRepr);
 }
 

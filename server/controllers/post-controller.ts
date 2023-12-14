@@ -130,6 +130,8 @@ const PostController = {
   getPostById: async (req: Request, res: Response) => {
     try {
       const postId = req.params.postId;
+      console.log('GETTING POST WITH ID', postId);
+
       const post = await Post.findById(postId)
         .populate({
           path: 'comments', // Path to the field in the Post model
@@ -196,7 +198,7 @@ const PostController = {
         comments: post.comments,
       };
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         post: postFound,
       });
