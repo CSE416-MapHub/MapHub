@@ -46,8 +46,15 @@ export default function () {
     PostAPI.queryPosts(searchValue)
       .then((response) => {
         if (response.data.success) {
+          let posts = response.data.posts;
+          if (searchValue === '') {
+            posts.sort((a:MapCardProps, b:MapCardProps) => b.numLikes - a.numLikes)
+          } else {
+            posts = posts.filter((a:MapCardProps) => a.title.startsWith(searchValue));
+          }
+          posts = posts.slice(0, Math.min(6, posts.length));
           setMapCardData(
-            response.data.posts.map((i: 
+            posts.map((i: 
               { 
                 postId: string; 
                 userId: string; 
@@ -83,7 +90,8 @@ export default function () {
     <>
       <SearchBar onSearch={handleSearch} searchResponse={searchResponse} />
       <div className={style['card-grid']}>
-        {mapCardData.map((map, i) => (
+        {
+        mapCardData.map((map, i) => (
           <MapCard
             key={i}
             id={map.id}

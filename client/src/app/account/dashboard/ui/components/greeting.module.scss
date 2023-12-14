@@ -13,7 +13,13 @@
     justify-content: left;
 
     background-color: colors.$secondary-container;
+    // background: url('../../../../background.jpg') center/cover no-repeat;
     color: colors.$on-secondary-container;
+
+    &.night {
+        background-color: colors.$primary; // Replace with your desired night background color
+        color: colors.$on-secondary; // Replace with your desired night text color
+    }
 
     @include elevation.elevation-3
 }
