@@ -1,12 +1,16 @@
 'use client';
 
-import React, { useReducer } from 'react';
+import React, { MouseEventHandler, useReducer, useContext } from 'react';
 import { Link, Typography } from '@mui/material';
-
+import AccountAPI from 'api/AccountAPI';
 import Button from '../../../../../components/button';
 import ValidatedTextField from '../../../components/ValidatedTextField';
-
+import { useRouter } from 'next/navigation';
 import styles from '../../../components/form.module.css';
+import {
+  NotificationsActionType,
+  NotificationsContext,
+} from 'context/notificationsProvider';
 
 interface ResetPasswordFieldState {
   value: string;
@@ -94,7 +98,14 @@ function ResetPasswordReducer(
   }
 }
 
-function ResetPasswordForm() {
+type ResetPasswordFormProps = {
+  token: string;
+};
+
+function ResetPasswordForm({ token }: ResetPasswordFormProps) {
+  const router = useRouter();
+  const notifications = useContext(NotificationsContext);
+
   const [ResetPasswordState, ResetPasswordDispatch] = useReducer(
     ResetPasswordReducer,
     {
@@ -111,7 +122,36 @@ function ResetPasswordForm() {
     },
   );
 
-  const handleResetPassword = (id: string) => {};
+  const handlePasswordReset = async () => {
+    try {
+      console.log(
+        'sending toke:',
+        token,
+        'with passwrod',
+        ResetPasswordState.passwordConfirm.value,
+      );
+      // Assuming resetUserPassword is imported or defined above
+      const response = await AccountAPI.resetUserPassword(
+        token,
+        ResetPasswordState.passwordConfirm.value,
+      );
+      if (response.data.success) {
+        router.push('/account/reset-password/success');
+      }
+    } catch (error: any) {
+      console.error('Error resetting password:', error);
+      // Handle errors (e.g., display a message to the user)
+      notifications.dispatch({
+        type: NotificationsActionType.enqueue,
+        value: {
+          message: error,
+          actions: {
+            close: true,
+          },
+        },
+      });
+    }
+  };
 
   const setPassword = (value: string) => {
     ResetPasswordDispatch({
@@ -167,7 +207,9 @@ function ResetPasswordForm() {
 
       {/* <Link href="/account/reset-password/success"> */}
 
-      <Button variant="filled">Reset Password</Button>
+      <Button variant="filled" onClick={handlePasswordReset}>
+        Reset Password
+      </Button>
       {/* </Link> */}
     </div>
   );
