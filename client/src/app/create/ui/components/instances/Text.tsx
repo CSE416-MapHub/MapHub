@@ -12,10 +12,10 @@ import L, { DivIcon } from 'leaflet';
 interface DotProps {
   value: Array<string>;
   box: [x: number, y: number, w: number, h: number];
-  mapClickHandler: (ev: L.LeafletMouseEvent) => void;
+  // mapClickHandler: (ev: L.LeafletMouseEvent) => void;
 }
 
-export default function ({ value, box, mapClickHandler }: DotProps) {
+export default function ({ value, box }: DotProps) {
   const center = L.latLng(box[1] + box[3] / 2, box[0] + box[2] / 2);
   const c1: [number, number] = [box[1], box[0]];
   const c2: [number, number] = [box[1] + box[3], box[0] + box[2]];
