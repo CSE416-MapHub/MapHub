@@ -78,7 +78,7 @@ abstract class DropZoneManager {
     return this.allowedExtensions.includes(fileExtension);
   }
 
-  abstract process(): string[];
+  abstract process(): Promise<string[]>;
 }
 
 export type { DropZoneOptions };

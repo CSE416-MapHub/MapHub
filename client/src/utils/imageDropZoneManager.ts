@@ -10,8 +10,8 @@ class ImageDropZoneManager extends DropZoneManager {
     });
   }
 
-  process() {
-    return this.files.map(file => blobToBase64String(file));
+  async process() {
+    return Promise.all(this.files.map(async file => blobToBase64String(file)));
   }
 }
 
