@@ -1,16 +1,17 @@
-import { HTMLAttributes } from 'react';
+import { AvatarProps } from '@mui/material';
+
 import Avatar from 'components/avatar';
 import styles from '../styles/settingsAvatar.module.scss';
 
-function SettingsAvatar({
-  className,
-  children,
-  ...props
-}: HTMLAttributes<HTMLDivElement>) {
+function SettingsAvatar({ className, children, ...props }: AvatarProps) {
   return (
-    <Avatar className={`${styles['settings__avatar']} ${className}`} {...props}>
+    <div className={styles['settings__container']}>
+      <Avatar
+        className={`${styles['settings__avatar']} ${className}`}
+        {...props}
+      />
       {children}
-    </Avatar>
+    </div>
   );
 }
 
