@@ -273,7 +273,7 @@ export default function () {
             label: 'New Arrow',
             color: 'black',
             opacity: 1,
-            capacity: 1,
+            capacity: 8,
             interpolationPoints: getInterpolationPoints(arrowBuffer),
           },
         },
@@ -289,7 +289,6 @@ export default function () {
 
   map.addEventListener('mousemove', ev => {
     if (buildingArrow) {
-      console.log('builfing');
       arrowBuffer.push({
         x: ev.latlng.lng,
         y: ev.latlng.lat,

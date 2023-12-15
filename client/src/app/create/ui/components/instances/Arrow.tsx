@@ -7,7 +7,7 @@ import {
 import { CircleMarker } from 'react-leaflet';
 import L, { map } from 'leaflet';
 import '@elfalem/leaflet-curve';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { useMap } from 'react-leaflet';
 import { IArrowInstance } from 'types/MHJSON';
 import {
@@ -147,32 +147,41 @@ interface ArrowProps {
 export default function (props: ArrowProps) {
   const map = useMap();
   const [arrow, setArrow] = useState<IArrowInstance>(props.arrow);
-  const [layers, setLayers] = useState<Array<L.Layer>>([]);
+  const layers = useRef<Array<L.Layer>>([]);
   const [draggingCtrl, setDraggingCtrl] = useState(-1);
   const [ctrlLatlng, setCtrlLaglng] = useState<[number, number]>([0, 0]);
-  const [controlLayers, setControlLayers] = useState<Array<L.CircleMarker>>([]);
-
+  const controlLayers = useRef<Array<L.CircleMarker>>([]);
+  const tool = useRef<ToolbarButtons | null>(null);
+  const isErasing = useRef(false);
   const editorContext = useContext(EditorContext);
 
+  useEffect(() => {
+    tool.current = editorContext.state.selectedTool;
+    isErasing.current = editorContext.state.isDeleting;
+  }, [editorContext.state.selectedTool, editorContext.state.isDeleting]);
+
   function handleClick(ev: L.LeafletEvent, id: number) {
-    editorContext.dispatch({
-      type: EditorActions.SET_SELECTED,
-      payload: {
-        selectedItem: {
-          type: TargetType.ARROW,
-          id: id,
-          subid: '-1',
+    console.log('tool is ' + tool);
+    if (tool.current === ToolbarButtons.select) {
+      editorContext.dispatch({
+        type: EditorActions.SET_SELECTED,
+        payload: {
+          selectedItem: {
+            type: TargetType.ARROW,
+            id: id,
+            subid: '-1',
+          },
         },
-      },
-    });
+      });
+    }
   }
 
   function forceDrawArrow() {
-    layers.forEach(c => {
+    layers.current.forEach(c => {
       map.removeLayer(c);
     });
-    while (layers.length !== 0) {
-      layers.pop();
+    while (layers.current.length !== 0) {
+      layers.current.pop();
     }
     // let l: Array<L.Layer> = [];
 
@@ -202,12 +211,22 @@ export default function (props: ArrowProps) {
         handleClick(ev, props.id);
         L.DomEvent.stopPropagation(ev);
       });
+      layer.addEventListener('mousedown', ev => {
+        if (tool.current === ToolbarButtons.erase) {
+          deleteSelf();
+        }
+      });
+      layer.addEventListener('mousemove', ev => {
+        if (isErasing.current) {
+          deleteSelf();
+        }
+      });
     });
-    layers.push(path);
-    layers.push(head);
+    layers.current.push(path);
+    layers.current.push(head);
     map.addLayer(path);
     map.addLayer(head);
-    controlLayers.forEach(x => {
+    controlLayers.current.forEach(x => {
       if (x) {
         x.bringToFront();
       }
@@ -218,7 +237,7 @@ export default function (props: ArrowProps) {
   useEffect(() => {
     forceDrawArrow();
     return () => {
-      layers.forEach(c => {
+      layers.current.forEach(c => {
         map.removeLayer(c);
       });
     };
@@ -233,8 +252,14 @@ export default function (props: ArrowProps) {
 
   function handleIPointMouseDown(ev: L.LeafletMouseEvent, subid: number) {
     L.DomEvent.stopPropagation(ev);
-    setDraggingCtrl(subid);
-    setCtrlLaglng([ev.latlng.lat, ev.latlng.lng]);
+    if (tool.current === ToolbarButtons.select) {
+      setDraggingCtrl(subid);
+      setCtrlLaglng([ev.latlng.lat, ev.latlng.lng]);
+    }
+
+    if (tool.current === ToolbarButtons.erase) {
+      deleteSelf();
+    }
   }
 
   function handleIPointMouseMove(
@@ -246,7 +271,7 @@ export default function (props: ArrowProps) {
       editorContext.state.selectedItem &&
       editorContext.state.selectedItem.id === id &&
       editorContext.state.selectedItem.type == TargetType.ARROW &&
-      editorContext.state.selectedTool === ToolbarButtons.select &&
+      tool.current === ToolbarButtons.select &&
       draggingCtrl >= 0 &&
       draggingCtrl <= 3;
     if (thisIsSelected) {
@@ -298,7 +323,7 @@ export default function (props: ArrowProps) {
           <CircleMarker
             ref={x => {
               if (x) {
-                controlLayers[i] = x;
+                controlLayers.current[i] = x;
               }
             }}
             key={`ctrl-${i}@${JSON.stringify(coord)}`}
@@ -324,6 +349,25 @@ export default function (props: ArrowProps) {
       });
     }
     return [];
+  }
+
+  function deleteSelf() {
+    console.log('deleting self');
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.DELETE,
+        targetType: TargetType.ARROW,
+        target: [editorContext.state.map_id, props.id, '-1'],
+        payload: {},
+      },
+      {
+        type: DeltaType.CREATE,
+        targetType: TargetType.ARROW,
+        target: [editorContext.state.map_id, props.id, '-1'],
+        payload: structuredClone(props.arrow),
+      },
+    );
   }
 
   function produceLabel() {
