@@ -1,5 +1,5 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { IArrowInstance, IDotDensityProps, MHJSON } from 'types/MHJSON';
 import { Delta, DeltaPayload, DeltaType, TargetType } from 'types/delta';
 import { GeoJSONVisitor } from './GeoJSONVisitor';
 import { IEditorContext } from 'context/EditorProvider';
@@ -35,7 +35,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.GLOBAL_CHOROPLETH:
       deltaGlobalChoropleth(map, d);
       break;
-
+    case TargetType.ARROW:
+      deltaArrow(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
@@ -484,6 +486,54 @@ function deltaGlobalChoropleth(map: MHJSON, d: Delta) {
     default: {
       console.log(d);
       console.error('Tried to delete or create a global choropleth object');
+    }
+  }
+}
+
+function deltaArrow(map: MHJSON, d: Delta) {
+  map.arrowsData = [...map.arrowsData];
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      let arrow = map.arrowsData[d.target[1]];
+      arrow.color = d.payload.color ?? arrow.color;
+      arrow.label = d.payload.label ?? arrow.label;
+      arrow.opacity = d.payload.opacity ?? arrow.opacity;
+      arrow.capacity = d.payload.capacity ?? arrow.capacity;
+      arrow.interpolationPoints =
+        d.payload.interpolationPoints ?? arrow.interpolationPoints;
+      break;
+    }
+    case DeltaType.CREATE: {
+      let p = d.payload;
+      if (
+        p.color === undefined ||
+        p.label == undefined ||
+        p.opacity === undefined ||
+        p.capacity === undefined ||
+        p.interpolationPoints === undefined ||
+        p.interpolationPoints.length !== 4
+      ) {
+        console.log(p);
+        throw new Error('Found malformed arrow in create arrow');
+      }
+      let arrow: IArrowInstance = {
+        color: p.color,
+        label: p.label,
+        opacity: p.opacity,
+        capacity: p.capacity,
+        interpolationPoints: p.interpolationPoints,
+      };
+      map.arrowsData[d.target[1]] = arrow;
+      break;
+    }
+    case DeltaType.DELETE: {
+      if (d.target[1] > map.arrowsData.length || d.target[1] < 0) {
+        throw new Error('Target out of bounds in delete arrow: ' + d.target[1]);
+      }
+      map.arrowsData[d.target[1]].label = DELETED_NAME;
+      map.arrowsData[d.target[1]].opacity = 0;
+      map.arrowsData[d.target[1]].capacity = 0;
+      break;
     }
   }
 }

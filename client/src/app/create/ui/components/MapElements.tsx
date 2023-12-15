@@ -20,6 +20,8 @@ import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import Dot from './instances/Dot';
 import Text from './instances/Text';
 import Symbol from './instances/Symbol';
+import { getInterpolationPoints } from './helpers/ArrowFixer';
+import ArrowCollection from './instances/ArrowCollection';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -73,7 +75,6 @@ export default function () {
     new Map(),
   );
   const [choroplethKey, setChoroplethKey] = useState<string>(DELETED_NAME);
-
   // const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
 
@@ -227,6 +228,9 @@ export default function () {
     handleMapClick(ev);
   });
 
+  let arrowBuffer: Array<{ x: number; y: number }> = [];
+  let buildingArrow = false;
+
   map.addEventListener('mousedown', ev => {
     if (editorContextRef.current.state.selectedTool === ToolbarButtons.erase) {
       editorContextRef.current.dispatch({
@@ -235,6 +239,11 @@ export default function () {
           isDeleting: true,
         },
       });
+    }
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.arrow) {
+      console.log('BEGIN BUILD');
+      arrowBuffer = [];
+      buildingArrow = true;
     }
   });
 
@@ -245,6 +254,45 @@ export default function () {
         payload: {
           isDeleting: false,
         },
+      });
+    }
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.arrow) {
+      buildingArrow = false;
+      let targetID = editorContextRef.current.state.map?.arrowsData.length;
+      if (targetID === undefined) {
+        return;
+      }
+      console.log('EMD BUILD');
+      editorContextRef.current.helpers.addDelta(
+        editorContextRef.current,
+        {
+          type: DeltaType.CREATE,
+          targetType: TargetType.ARROW,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {
+            label: 'New Arrow',
+            color: 'black',
+            opacity: 1,
+            capacity: 1,
+            interpolationPoints: getInterpolationPoints(arrowBuffer),
+          },
+        },
+        {
+          type: DeltaType.DELETE,
+          targetType: TargetType.ARROW,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {},
+        },
+      );
+    }
+  });
+
+  map.addEventListener('mousemove', ev => {
+    if (buildingArrow) {
+      console.log('builfing');
+      arrowBuffer.push({
+        x: ev.latlng.lat,
+        y: ev.latlng.lng,
       });
     }
   });
@@ -385,6 +433,23 @@ export default function () {
           );
         },
       )}
+      <ArrowCollection
+        arrows={editorContextRef.current.state.map?.arrowsData ?? []}
+      ></ArrowCollection>
+      {/* {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
+        if (arrow.label === DELETED_NAME) {
+          return;
+        }
+        return (
+          <Arrow
+            instance={arrow}
+            id={i}
+            key={`${i}_${arrow.label}_${arrow.color}_${arrow.capacity}_${
+              arrow.opacity
+            }_${JSON.stringify(arrow.interpolationPoints)}`}
+          />
+        );
+      })} */}
       {(() => {
         let details = editorContextRef.current.state.mapDetails.regionData;
         let activeLabels = editorContextRef.current.state.map!.labels;
