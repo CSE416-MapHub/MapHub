@@ -1,3 +1,5 @@
+import { blobToBase64String } from 'blob-util';
+
 interface DropZoneOptions {
   // Allowed extensions is a list of allowed file extensions that the dropzone
   // accepts. An empty list indicates that all files are accepted,
@@ -21,7 +23,7 @@ class DropZoneError extends Error {
 /**
  * DropZoneManager manages the files for file inputs and drag-and-drop.
  */
-abstract class DropZoneManager {
+class DropZoneManager {
   files: DropZoneFile[];
   allowedExtensions: string[];
   multiple: boolean;
@@ -62,6 +64,10 @@ abstract class DropZoneManager {
     return this;
   }
 
+  async process() {
+    return Promise.all(this.files.map(async file => blobToBase64String(file)));
+  }
+
   private isValidFile(file: File) {
     // If all files are valid
     if (this.allowedExtensions.length === 0) {
@@ -77,8 +83,6 @@ abstract class DropZoneManager {
     const fileExtension = `.${splitFileName.pop()}`;
     return this.allowedExtensions.includes(fileExtension);
   }
-
-  abstract process(): Promise<string[]>;
 }
 
 export type { DropZoneOptions };

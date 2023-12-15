@@ -1,4 +1,3 @@
-import { blobToBase64String } from 'blob-util';
 import DropZoneManager, { DropZoneOptions } from './dropZoneManager';
 
 class ImageDropZoneManager extends DropZoneManager {
@@ -8,10 +7,6 @@ class ImageDropZoneManager extends DropZoneManager {
       multiple: false,
       ...options,
     });
-  }
-
-  async process() {
-    return Promise.all(this.files.map(async file => blobToBase64String(file)));
   }
 }
 
