@@ -36,7 +36,7 @@ function Settings() {
           <Box className={styles['settings__option']}>
             <SettingsAvatar>
               <IconButton
-                className={styles['settings__edit-icon-button']}
+                className={styles['settings__editIconButton']}
                 variant="filled"
                 iconType="solid"
                 iconName="pencil"
