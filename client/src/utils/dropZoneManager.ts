@@ -7,16 +7,15 @@ interface DropZoneOptions {
   multiple?: boolean;
 }
 
-interface DropZoneFile extends File {
+interface DropZoneFile {
   id: string;
+  file: File;
 }
 
 class DropZoneError extends Error {
   constructor(message: string) {
     super(message);
     this.name = 'DropZoneError';
-
-    Object.setPrototypeOf(this, DropZoneError.prototype);
   }
 }
 
@@ -39,20 +38,32 @@ class DropZoneManager {
   }
 
   addAll(fileList: FileList) {
-    if (!this.multiple && fileList.length !== 1) {
-      throw new DropZoneError('Please upload one file.');
+    // Throw an error when the dropzone does not accept multiple files and
+    // there are multiple files being added.
+    if (!this.multiple && fileList.length > 1) {
+      console.log(fileList);
+      throw new DropZoneError('Please upload only one file.');
     }
 
+    // Check that every file being added is valid according to the
+    // accepted extensions.
     for (let i = 0; i < fileList.length; i += 1) {
       if (!this.isValidFile(fileList[i])) {
         throw new DropZoneError('Please upload valid files.');
       }
     }
 
+    // Replace the file if the dropzone does not accept multiple files and
+    // there is only a single file being added.
+    if (!this.multiple && fileList.length === 1) {
+      this.clear();
+    }
+
+    // Add each file with a unique ID.
     for (let i = 0; i < fileList.length; i += 1) {
       this.files.push({
         id: `${fileList[i].name}-${this.count++}`,
-        ...fileList[i],
+        file: fileList[i],
       });
     }
 
@@ -64,8 +75,21 @@ class DropZoneManager {
     return this;
   }
 
+  clear() {
+    this.files = [];
+  }
+
+  getAccept() {
+    return this.allowedExtensions.toString();
+  }
+
   async process() {
-    return Promise.all(this.files.map(async file => blobToBase64String(file)));
+    return Promise.all(
+      this.files.map(
+        async ({ file }) =>
+          `data:${file.type};base64,${await blobToBase64String(file)}`,
+      ),
+    );
   }
 
   private isValidFile(file: File) {
