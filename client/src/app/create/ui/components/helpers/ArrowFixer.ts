@@ -35,6 +35,11 @@ export const zero: IPoint = {
   y: 0,
 };
 
+export const eps: IPoint = {
+  x: 0.0000001,
+  y: 0.0000001,
+};
+
 // THE FOLLOWING FUNCTINOS ASSUME THAT THERE ARE AT LEAST 2 POINTS
 function findPeaks(p: Array<IPoint>): Array<[IPoint, number]> {
   let first = p[0];
@@ -133,7 +138,12 @@ export function getInterpolationPoints(
       p[p.length - 1],
     ];
   } else if (peaks.length === 1) {
-    interpolationPoints = [p[0], peaks[0][0], peaks[0][0], p[p.length - 1]];
+    interpolationPoints = [
+      p[0],
+      peaks[0][0],
+      addPoints(peaks[0][0], eps),
+      p[p.length - 1],
+    ];
   } else {
     let aux: Array<[IPoint, number, number]> = peaks.map((x, i) => {
       let t: [IPoint, number, number] = [...x, i];

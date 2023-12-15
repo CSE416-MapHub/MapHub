@@ -695,3 +695,105 @@ export function makeSymbolPanel(
 
   return panels;
 }
+
+export function makeArrowPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let arrow = ctx.state.map?.arrowsData[id];
+  if (arrow === undefined) {
+    console.log(ctx.state.map);
+    console.log(id);
+    throw new Error('Arrow is undefined at make panel');
+  }
+  let panels: Array<IPropertyPanelSectionProps> = [
+    {
+      name: 'Arrow',
+      items: [
+        {
+          name: 'Arrow Label',
+          input: {
+            type: textType,
+            short: false,
+            disabled: false,
+            value: arrow.label,
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow label',
+                );
+              }
+              updateField(ctx, id, TargetType.ARROW, 'label', arrow.label, val);
+            },
+          },
+        },
+        {
+          name: 'Arrow Color',
+          input: {
+            type: colorType,
+            short: false,
+            disabled: false,
+            value: arrow.color,
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow color',
+                );
+              }
+              updateField(ctx, id, TargetType.ARROW, 'color', arrow.color, val);
+            },
+          },
+        },
+        {
+          name: 'Arrow Opacity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: false,
+            value: arrow.opacity.toString(),
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow opacity',
+                );
+              }
+              updateField(
+                ctx,
+                id,
+                TargetType.ARROW,
+                'opacity',
+                arrow.opacity,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Arrow Capacity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: false,
+            value: arrow.capacity.toString(),
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow capacity',
+                );
+              }
+              updateField(
+                ctx,
+                id,
+                TargetType.ARROW,
+                'capacity',
+                arrow.capacity,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+  ];
+  return panels;
+}

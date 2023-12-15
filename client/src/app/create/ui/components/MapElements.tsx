@@ -21,7 +21,7 @@ import Dot from './instances/Dot';
 import Text from './instances/Text';
 import Symbol from './instances/Symbol';
 import { getInterpolationPoints } from './helpers/ArrowFixer';
-import ArrowCollection from './instances/ArrowCollection';
+import Arrow from './instances/Arrow';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -195,7 +195,7 @@ export default function () {
           payload: {
             y: latlng.lat,
             x: latlng.lng,
-            scale: 1,
+            scale: 5,
             symbol: symData.name,
           },
         },
@@ -291,8 +291,8 @@ export default function () {
     if (buildingArrow) {
       console.log('builfing');
       arrowBuffer.push({
-        x: ev.latlng.lat,
-        y: ev.latlng.lng,
+        x: ev.latlng.lng,
+        y: ev.latlng.lat,
       });
     }
   });
@@ -433,9 +433,18 @@ export default function () {
           );
         },
       )}
-      <ArrowCollection
-        arrows={editorContextRef.current.state.map?.arrowsData ?? []}
-      ></ArrowCollection>
+      {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
+        if (arrow.label === DELETED_NAME) {
+          return;
+        }
+        return (
+          <Arrow
+            arrow={arrow}
+            id={i}
+            key={`arrow_${i}_${JSON.stringify(arrow)}`}
+          />
+        );
+      })}
       {/* {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
         if (arrow.label === DELETED_NAME) {
           return;
@@ -466,7 +475,6 @@ export default function () {
               value={label}
               // box={[91.93, 31.8086, 30.67, 8.241]}
               box={d.box}
-              mapClickHandler={handleMapClick}
               key={`${i}${d.box}${label}`}
             ></Text>
           );
