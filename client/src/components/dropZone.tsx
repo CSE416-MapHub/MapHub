@@ -2,7 +2,7 @@
 
 import clsx from 'clsx';
 import { Typography } from '@mui/material';
-import { useState, DragEventHandler, HTMLAttributes } from 'react';
+import { forwardRef, useState, DragEventHandler, HTMLAttributes } from 'react';
 
 import Button from 'components/button';
 import Icon from 'components/icon';
@@ -32,6 +32,10 @@ function DropZone({
     setDragOver(true);
   };
 
+  const handleDragOver: DragEventHandler = event => {
+    event.preventDefault();
+  };
+
   const handleDrop: DragEventHandler = event => {
     event.preventDefault();
 
@@ -54,6 +58,7 @@ function DropZone({
       onDragEnter={handleDragEnter}
       onDragLeave={handleDragExit}
       onDrop={handleDrop}
+      onDragOver={handleDragOver}
       {...props}
     >
       <Icon
@@ -68,9 +73,13 @@ function DropZone({
       <div className={styles['dropzone__buttons']}>
         <Button
           variant="text"
-          component={props => (
-            <label htmlFor={inputId ? inputId : 'dropzone-input'} {...props} />
-          )}
+          component={forwardRef((props, ref) => (
+            <label
+              htmlFor={inputId ? inputId : 'dropzone-input'}
+              ref={ref}
+              {...props}
+            />
+          ))}
         >
           Select Files
           <input
@@ -78,6 +87,7 @@ function DropZone({
             type="file"
             accept={accept}
             multiple={multiple}
+            onChange={onChange}
             hidden
           />
         </Button>
