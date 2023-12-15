@@ -396,7 +396,7 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
 
-    await user.save();
+    const savedUser = await user.save();
 
     // Setup email transport
     let transporter = nodemailer.createTransport({
@@ -436,7 +436,7 @@ export const handlePasswordResetting = async (req: Request, res: Response) => {
 
     if (!user) {
       return res
-        .status(400)
+        .status(401)
         .send('Password reset token is invalid or has expired.');
     }
 

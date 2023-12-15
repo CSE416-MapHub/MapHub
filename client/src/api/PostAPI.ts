@@ -43,6 +43,7 @@ class PostAPI {
     return this.api.post('/posts/publish', { mapID, title, description });
   }
   static async getPostById(postId: string) {
+    console.log('Im sening a get post to ', postId);
     return this.api.get(`/posts/post/${postId}`);
   }
   static async queryPosts(searchQuery: string) {

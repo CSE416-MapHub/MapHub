@@ -8,7 +8,7 @@ import User from '../models/user-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { convertJsonToSVG } from './map-controller';
+import { convertJsonToSVG, SVGDetail } from './map-controller';
 
 type MapDocument = typeof Map.prototype;
 
@@ -90,7 +90,9 @@ const PostController = {
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
             const map = await Map.findById(post.map).exec();
-            const svg = map ? await convertJsonToSVG(map) : null;
+            const svg = map
+              ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
+              : null;
 
             return {
               title: post.title,
@@ -128,6 +130,8 @@ const PostController = {
   getPostById: async (req: Request, res: Response) => {
     try {
       const postId = req.params.postId;
+      console.log('GETTING POST WITH ID', postId);
+
       const post = await Post.findById(postId)
         .populate({
           path: 'comments', // Path to the field in the Post model
@@ -181,7 +185,7 @@ const PostController = {
         });
       }
 
-      const svg = map ? await convertJsonToSVG(map) : null;
+      const svg = map ? await convertJsonToSVG(map, SVGDetail.DETAILED) : null;
 
       const postFound = {
         title: post.title,
@@ -194,7 +198,7 @@ const PostController = {
         comments: post.comments,
       };
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         post: postFound,
       });
@@ -233,7 +237,9 @@ const PostController = {
 
             console.log('MAP', map);
 
-            const svg = map ? await convertJsonToSVG(map) : null;
+            const svg = map
+              ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
+              : null;
 
             return {
               title: post.title,
