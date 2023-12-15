@@ -75,6 +75,7 @@ class LabelsHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to add a label to the map
     // Example: map.labels.push({/* label details from payload */});
+
     return map;
   }
 
@@ -94,16 +95,29 @@ class LabelsHandler {
 class GlobalChoroplethHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a global choropleth to the map
+    throw new Error('Cant create global choropleth');
+
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a global choropleth on the map
+
+    let cData = map.globalChoroplethData;
+    cData.indexingKey = d.payload.indexingKey ?? cData.indexingKey;
+    cData.minColor = d.payload.minColor ?? cData.minColor;
+    cData.maxColor = d.payload.maxColor ?? cData.maxColor;
+    cData.minIntensity = d.payload.minIntensity ?? cData.minIntensity;
+    cData.maxIntensity = d.payload.maxIntensity ?? cData.maxIntensity;
+    map.regionsData = [...map.regionsData];
+
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global choropleth from the map
+    throw new Error('Cant delete global choropleth');
+
     return map;
   }
 }

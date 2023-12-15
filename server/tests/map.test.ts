@@ -1383,6 +1383,146 @@ describe('/map/payload/ symbol payload', () => {
     expect(response.body.message).toEqual('Malformed symbol in CREATE');
   });
 });
+
+describe('/map/payload/ choropleth', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('cant create global chroopleth create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_CHOROPLETH,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        minIntensity: 2,
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Cant create global choropleth');
+  });
+  it(' symbol update should do ok ', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalChoroplethData: {},
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.GLOBAL_CHOROPLETH,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        minIntensity: 10,
+        maxIntensity: 20000,
+        minColor: '#FFFFFF',
+        maxColor: '#000000',
+        indexingKey: 'GDP',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalChoroplethData).toEqual({
+      minIntensity: 10,
+      maxIntensity: 20000,
+      minColor: '#FFFFFF',
+      maxColor: '#000000',
+      indexingKey: 'GDP',
+      _id: response.body.map.globalChoroplethData._id,
+    });
+  });
+
+  it(' symbol delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+    };
+
+    const delta = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.GLOBAL_CHOROPLETH,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        minIntensity: 2,
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toBe('Cant delete global choropleth');
+  });
+});
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
