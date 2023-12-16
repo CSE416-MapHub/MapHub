@@ -8,7 +8,7 @@ import mapModel from '../models/map-model';
 import { LikeChange } from '../controllers/post-controller';
 import commentModel from '../models/comment-model';
 import { createMockMap } from './map.test';
-import fs from 'fs';
+import fs, { readFile } from 'fs';
 
 const mockUserID = new mongoose.Types.ObjectId();
 
@@ -33,7 +33,7 @@ let mapData = {
   symbolsData: [],
   dotsData: [],
   arrowsData: [],
-  geoJSON: 'some/path',
+  geoJSON: 'some/path/jijie38920rj83232.geojson',
   updatedAt: Math.floor(new Date().getTime() * Math.random()),
   createdAt: new Date().getTime(),
 };
@@ -52,14 +52,16 @@ beforeEach(() => {
   jest
     .spyOn(fs.promises, 'readFile')
     .mockResolvedValue(JSON.stringify(geoJSONTemp));
-  jest.spyOn(userModel, 'findById').mockResolvedValue({ id: mockUserID });
+  jest.spyOn(userModel, 'findById').mockResolvedValue({
+    id: mockUserID,
+    maps: [],
+    save: jest.fn().mockReturnThis(),
+  });
 });
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
 });
-
-jest.mock('../models/post-model');
 
 describe('POST /posts/publish', () => {
   it('publishing a map into a post', async () => {
@@ -78,7 +80,6 @@ describe('POST /posts/publish', () => {
     jest
       .spyOn(postModel.prototype, 'save')
       .mockImplementation(function (this: any) {
-        console.log('post saving hte post', this);
         return Promise.resolve(this);
       });
 
@@ -562,5 +563,124 @@ describe('POST /posts/comments/:commentId/replies', () => {
     expect(response.body.reply.user).toEqual(mockUserID.toString());
     expect(response.body.reply.likes).toEqual([]);
     expect(response.body.reply.replies).toEqual([]);
+  });
+});
+
+describe('POST /posts/fork/:postId', () => {
+  it('forks off a post', async () => {
+    const mockPostId = new mongoose.Types.ObjectId();
+    const mockMap = {
+      ...mapData,
+    };
+
+    jest.spyOn(postModel, 'findById').mockResolvedValue({
+      _id: new mongoose.Types.ObjectId(mockPostId),
+      map: mockMap._id,
+    } as any);
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData as any);
+
+    jest
+      .spyOn(fs.promises, 'readFile')
+      .mockResolvedValue(JSON.stringify(geoJSONTemp));
+
+    jest.spyOn(fs.promises, 'writeFile').mockResolvedValue();
+
+    const response = await supertest(app)
+      .post(`/posts/fork/${mockPostId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('forkedMap');
+    expect(fs.promises.readFile).toHaveBeenCalled();
+    expect(fs.promises.writeFile).toHaveBeenCalled();
+    expect(response.body.forkedMap.owner).toEqual(mockUserID.toString());
+  });
+});
+
+describe('DELETE /posts/comments/:commentId', () => {
+  it('deletes a comment', async () => {
+    const mockCommentId = new mongoose.Types.ObjectId();
+
+    jest
+      .spyOn(commentModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          user: {
+            username: 'someguy',
+            _id: mockUserID,
+            profilePic: Buffer.alloc(0),
+          },
+          content: 'THE BEST TCONTETN',
+          replies: [
+            {
+              user: {
+                username: 'someguy',
+                _id: mockUserID,
+                profilePic: Buffer.alloc(0),
+              },
+              content: 'SOME TEXT MESSAGE',
+            },
+          ], // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+          save: jest.fn().mockReturnThis(),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    const response = await supertest(app)
+      .delete(`/posts/comments/${mockCommentId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('deletedComment');
+    expect(response.body.deletedComment.content).toEqual(
+      'Comment has been deleted',
+    );
+  });
+  it('not your comment to delete', async () => {
+    const mockCommentId = new mongoose.Types.ObjectId();
+
+    jest
+      .spyOn(commentModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          user: {
+            username: 'someguy',
+            _id: new mongoose.Types.ObjectId(),
+            profilePic: Buffer.alloc(0),
+          },
+          content: 'THE BEST TCONTETN',
+          replies: [
+            {
+              user: {
+                username: 'someguy',
+                _id: mockUserID,
+                profilePic: Buffer.alloc(0),
+              },
+              content: 'SOME TEXT MESSAGE',
+            },
+          ], // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+          save: jest.fn().mockReturnThis(),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    const response = await supertest(app)
+      .delete(`/posts/comments/${mockCommentId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toHaveProperty('success', false);
+    expect(response.body.message).toEqual('User does not own the comment');
   });
 });

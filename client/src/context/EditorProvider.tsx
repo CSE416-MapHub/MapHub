@@ -1,18 +1,20 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
-import { Dispatch, createContext, useReducer } from 'react';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { Dispatch, createContext, useReducer, useContext } from 'react';
+import { IDotDensityProps, ISymbolProps, MHJSON } from 'types/MHJSON';
 import {
   GeoJSONVisitor,
   IFeatureVisitResults,
   mergeBBox,
 } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
+import {
+  NotificationsActionType,
+  NotificationsContext,
+} from 'context/notificationsProvider';
+
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import {
-  DELETED_NAME,
-  applyDelta,
-} from './editorHelpers/DeltaUtil';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -80,6 +82,8 @@ function reducer(
     payload: Partial<IEditorState>;
   },
 ): IEditorState {
+  const notifications = useContext(NotificationsContext);
+
   let newState: IEditorState = { ...prev };
   switch (action.type) {
     case EditorActions.SET_SELECTED: {
@@ -97,6 +101,19 @@ function reducer(
         let geoJSON = action.payload.map.geoJSON;
         let v = new GeoJSONVisitor(geoJSON);
         v.visitRoot();
+        console.log('AHHH HELOOO', v);
+        if (v.getFeatureResults().perFeature.length === 0) {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
+              actions: {
+                close: true,
+              },
+            },
+          });
+          break;
+        }
         newState.mapDetails = {
           availableProps: Array.from(
             v.getFeatureResults().aggregate.globallyAvailableKeys,
@@ -189,7 +206,6 @@ class helpers {
     let x = ctx.state.map;
     if (x !== null) {
       let map = x;
-
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack = [];
       nStack.stack.push({
@@ -201,9 +217,22 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-      let li = ctx.state.lastInstantiated;
-      if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
-        li = d.payload.name;
+      let li: string = ctx.state.lastInstantiated;
+      if (d.payload.name !== undefined) {
+        if (d.type === DeltaType.CREATE || d.type === DeltaType.UPDATE) {
+          li = d.payload.name;
+        } else {
+          if (d.targetType === TargetType.GLOBAL_DOT) {
+            li =
+              map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+          if (d.targetType === TargetType.GLOBAL_SYMBOL) {
+            li =
+              map.globalSymbolData.filter(x => x.name !== DELETED_NAME)[0]
+                ?.name ?? DELETED_NAME;
+          }
+        }
       }
 
       ctx.dispatch({
@@ -225,6 +254,8 @@ class helpers {
     if (ctx.state.actionStack.canUndo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekStack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
@@ -253,6 +284,8 @@ class helpers {
     if (ctx.state.actionStack.canRedo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekCounterstack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
       applyDelta(nMap, a.do);
@@ -280,6 +313,17 @@ class helpers {
     let name = ctx.state.lastInstantiated;
     if (name === DELETED_NAME || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalDotDensityData) {
+      if (d.name === name) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  public getLastInstantiatedSymbol(ctx: IEditorContext): ISymbolProps | null {
+    let name = ctx.state.lastInstantiated;
+    if (name === DELETED_NAME || !ctx.state.map) return null;
+    for (let d of ctx.state.map.globalSymbolData) {
       if (d.name === name) {
         return d;
       }

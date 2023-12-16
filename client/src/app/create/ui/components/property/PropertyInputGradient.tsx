@@ -6,8 +6,8 @@ import style from './Property.module.scss';
 import clsx from 'clsx';
 
 export interface GradientInputProps {
-  minValue: number;
-  maxValue: number;
+  minIntensity: number;
+  maxIntensity: number;
   minColor: string;
   maxColor: string;
   onChange: (val: string) => void;
@@ -16,11 +16,16 @@ export interface GradientInputProps {
 export default function (props: GradientInputProps) {
   const [ranges, setRanges] = useState<GradientInputProps>(props);
 
-  function updateRanges(v: GradientInputProps) {
-    setRanges(v);
-    props.onChange(
-      `{minValue:${v.minValue},maxValue:${v.maxValue},minColor:${v.minColor},maxColor:${v.maxColor}}`,
-    );
+  function updateRanges(key: keyof GradientInputProps, val: any) {
+    let newRange = {
+      ...ranges,
+      [key]: val,
+    };
+    setRanges(newRange);
+  }
+
+  function onBlur(key: keyof GradientInputProps, val: any) {
+    props.onChange(`${key}||${val}`);
   }
   return (
     <div
@@ -30,22 +35,22 @@ export default function (props: GradientInputProps) {
         gridTemplateColumns: '48px 1fr 48px',
       }}
     >
-      <div>
+      <div className={style['gradient-endpoint']}>
         <PropertyColorInput
           color={ranges.minColor}
           colorChangeHandler={c => {
-            updateRanges({ ...ranges, minColor: c });
+            updateRanges('minColor', c);
+            onBlur('minColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
-          value={ranges.minValue}
-          // className={style["prop-input"]}
-          onChange={e => {
-            // TODO: make this late validation
-            updateRanges({ ...ranges, minValue: parseFloat(e.target.value) });
-          }}
+          value={ranges.minIntensity}
+          onChange={e =>
+            updateRanges('minIntensity', parseFloat(e.target.value))
+          }
+          onBlur={e => onBlur('minIntensity', parseFloat(e.target.value))}
           className={clsx(
             style['default-input'],
             style['prop-input'],
@@ -63,22 +68,22 @@ export default function (props: GradientInputProps) {
           background: `linear-gradient(to right, ${ranges.minColor}, ${ranges.maxColor})`,
         }}
       ></div>
-      <div>
+      <div className={style['gradient-endpoint']}>
         <PropertyColorInput
           color={ranges.maxColor}
           colorChangeHandler={c => {
-            updateRanges({ ...ranges, maxColor: c });
+            updateRanges('maxColor', c);
+            onBlur('maxColor', c);
           }}
           disabled={false}
         />
         <input
           type="number"
-          value={ranges.maxValue}
-          // className={style["prop-input"]}
-          onChange={e => {
-            // TODO: make this late validation
-            updateRanges({ ...ranges, maxValue: parseFloat(e.target.value) });
-          }}
+          value={ranges.maxIntensity}
+          onBlur={e => onBlur('maxIntensity', parseFloat(e.target.value))}
+          onChange={e =>
+            updateRanges('maxIntensity', parseFloat(e.target.value))
+          }
           className={clsx(
             style['default-input'],
             style['prop-input'],

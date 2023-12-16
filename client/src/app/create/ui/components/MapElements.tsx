@@ -10,15 +10,29 @@ import { useContext, useState, useEffect, useRef } from 'react';
 import { CircleMarker, GeoJSON, SVGOverlay, useMap } from 'react-leaflet';
 
 import { DeltaType, TargetType } from 'types/delta';
-import { IDotDensityProps, IRegionProperties, MHJSON } from 'types/MHJSON';
+import {
+  IDotDensityProps,
+  IRegionProperties,
+  ISymbolProps,
+  MHJSON,
+} from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import Dot from './instances/Dot';
 import Text from './instances/Text';
+import Symbol from './instances/Symbol';
+import { getInterpolationPoints } from './helpers/ArrowFixer';
+import Arrow from './instances/Arrow';
+import { mixColors } from './helpers/MHJSONVisitor';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
 const MIN_ZOOM = 0;
 const MAX_ZOOM = 20;
+
+const dummySVG = `<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+<svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path d="M3 13.6493C3 16.6044 5.41766 19 8.4 19L16.5 19C18.9853 19 21 16.9839 21 14.4969C21 12.6503 19.8893 10.9449 18.3 10.25C18.1317 7.32251 15.684 5 12.6893 5C10.3514 5 8.34694 6.48637 7.5 8.5C4.8 8.9375 3 11.2001 3 13.6493Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>`;
 
 export default function () {
   const editorContextStaleable = useContext(EditorContext);
@@ -33,27 +47,54 @@ export default function () {
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
+  const [symbolNames, setSymbolNames] = useState<Map<string, ISymbolProps>>(
+    new Map(),
+  );
+  const [choroplethKey, setChoroplethKey] = useState<string>(DELETED_NAME);
   // const [draggingItem, setDraggingItem] = useState(null);
   editorContextRef.current = editorContextStaleable;
-
 
   useEffect(() => {
     let b = editorContextStaleable.state.mapDetails.bbox;
     let loadedMap = editorContextRef.current.state.map;
-    if (loadedMap && dotNames.size !== loadedMap.globalDotDensityData.length) {
-      let nameMap = new Map<string, IDotDensityProps>();
-      for (let ip of loadedMap.globalDotDensityData) {
-        nameMap.set(ip.name, ip);
+    if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
+      setCurrentRegionProps(loadedMap.regionsData);
+      setRerender(rerender + 1);
+    }
+    if (loadedMap) {
+      if (dotNames.size !== loadedMap.globalDotDensityData.length) {
+        let nameMap = new Map<string, IDotDensityProps>();
+        for (let ip of loadedMap.globalDotDensityData) {
+          nameMap.set(ip.name, ip);
+        }
+        setDotNames(nameMap);
       }
-      setDotNames(nameMap);
+      if (symbolNames.size !== loadedMap.globalSymbolData.length) {
+        let nameMap = new Map<string, ISymbolProps>();
+        for (let ip of loadedMap.globalSymbolData) {
+          nameMap.set(ip.name, ip);
+        }
+        setSymbolNames(nameMap);
+      }
+      if (loadedMap.globalChoroplethData.indexingKey !== choroplethKey) {
+        setChoroplethKey(loadedMap.globalChoroplethData.indexingKey);
+        setRerender(rerender + 1);
+      }
+      // if the top of either stack is a geojson delta, we will
+      // rerneder the map
+      let d1 = editorContextRef.current.state.actionStack.peekStack();
+      let d2 = editorContextRef.current.state.actionStack.peekCounterstack();
+      if (
+        (d1 && d1.do.targetType === TargetType.GEOJSONDATA) ||
+        (d2 && d2.undo.targetType === TargetType.GEOJSONDATA)
+      ) {
+        setRerender(rerender + 1);
+      }
     }
 
     // if theres a map, make sure the loaded regions and the displayed regions
     // are synced and no dot names
-    else if (loadedMap && loadedMap.regionsData !== currentRegionProps) {
-      setCurrentRegionProps(loadedMap.regionsData);
-      setRerender(rerender + 1);
-    }
+
     if (b[1] !== eBBox[0] || b[0] !== eBBox[1]) {
       let c: [number, number] = [b[1], b[0]];
       setEBBox(c);
@@ -75,12 +116,12 @@ export default function () {
       map.setMaxZoom(MAX_ZOOM);
       map.setMinZoom(MIN_ZOOM);
     }
-
   });
 
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
   function handleMapClick(ev: L.LeafletMouseEvent) {
+    console.log('handlnig map click');
     let latlng = ev.latlng;
     let map = editorContextRef.current.state.map;
     if (map === null) return;
@@ -113,9 +154,43 @@ export default function () {
         },
       );
     }
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.symbol) {
+      let symData = editorContextRef.current.helpers.getLastInstantiatedSymbol(
+        editorContextRef.current,
+      );
+      if (symData === null) {
+        throw new Error('Youve never made a symbol before');
+      }
+      let targetID = map.symbolsData.length;
+      editorContextRef.current.helpers.addDelta(
+        editorContextRef.current,
+        {
+          type: DeltaType.CREATE,
+          targetType: TargetType.SYMBOL,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {
+            y: latlng.lat,
+            x: latlng.lng,
+            scale: 5,
+            symbol: symData.name,
+          },
+        },
+        {
+          type: DeltaType.DELETE,
+          targetType: TargetType.SYMBOL,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {},
+        },
+      );
+    }
   }
 
+  map.removeEventListener('click');
+  map.removeEventListener('mousedown');
+  map.removeEventListener('mouseup');
+
   map.addEventListener('click', ev => {
+    console.log('logged a map click');
     if (editorContextRef.current.state.selectedTool === ToolbarButtons.select) {
       let action = {
         type: EditorActions.SET_SELECTED,
@@ -129,6 +204,9 @@ export default function () {
     handleMapClick(ev);
   });
 
+  let arrowBuffer: Array<{ x: number; y: number }> = [];
+  let buildingArrow = false;
+
   map.addEventListener('mousedown', ev => {
     if (editorContextRef.current.state.selectedTool === ToolbarButtons.erase) {
       editorContextRef.current.dispatch({
@@ -137,6 +215,11 @@ export default function () {
           isDeleting: true,
         },
       });
+    }
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.arrow) {
+      console.log('BEGIN BUILD');
+      arrowBuffer = [];
+      buildingArrow = true;
     }
   });
 
@@ -147,6 +230,44 @@ export default function () {
         payload: {
           isDeleting: false,
         },
+      });
+    }
+    if (editorContextRef.current.state.selectedTool === ToolbarButtons.arrow) {
+      buildingArrow = false;
+      let targetID = editorContextRef.current.state.map?.arrowsData.length;
+      if (targetID === undefined) {
+        return;
+      }
+      console.log('EMD BUILD');
+      editorContextRef.current.helpers.addDelta(
+        editorContextRef.current,
+        {
+          type: DeltaType.CREATE,
+          targetType: TargetType.ARROW,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {
+            label: 'New Arrow',
+            color: 'black',
+            opacity: 1,
+            capacity: 8,
+            interpolationPoints: getInterpolationPoints(arrowBuffer),
+          },
+        },
+        {
+          type: DeltaType.DELETE,
+          targetType: TargetType.ARROW,
+          target: [editorContextRef.current.state.map_id, targetID, '-1'],
+          payload: {},
+        },
+      );
+    }
+  });
+
+  map.addEventListener('mousemove', ev => {
+    if (buildingArrow) {
+      arrowBuffer.push({
+        x: ev.latlng.lng,
+        y: ev.latlng.lat,
       });
     }
   });
@@ -201,6 +322,29 @@ export default function () {
           editorContextRef.current.state.map!.globalCategoryData[categoryId]
             .color;
       }
+
+      if (editorContextRef.current.state.map?.mapType === 'choropleth') {
+        let intensity = currentRegionProps[myId].intensity ?? NaN;
+        if (choroplethKey !== DELETED_NAME) {
+          let p =
+            editorContextRef.current.state.mapDetails.regionData[myId]
+              .originalFeature.properties;
+          if (p) {
+            intensity = parseFloat(p[choroplethKey]);
+          } else {
+            intensity = NaN;
+          }
+        }
+        let cData = editorContextRef.current.state.map!.globalChoroplethData;
+        let ratio =
+          (intensity - cData.minIntensity) /
+          (cData.maxIntensity - cData.minIntensity);
+        if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+          fillColor = 'white';
+        } else {
+          fillColor = mixColors(cData.minColor, cData.maxColor, ratio);
+        }
+      }
     }
 
     p.setStyle({
@@ -244,22 +388,72 @@ export default function () {
           />
         );
       })}
+      {editorContextRef.current.state.map?.symbolsData.map(
+        (symbolInstance, i) => {
+          if (symbolInstance.symbol === DELETED_NAME) {
+            return;
+          }
+          let symbolClass = symbolNames.get(symbolInstance.symbol) ?? {
+            name: DELETED_NAME,
+            svg: dummySVG,
+          };
+          return (
+            <Symbol
+              symbolInstance={symbolInstance}
+              symbolClass={symbolClass}
+              id={i}
+              mapClickHandler={handleMapClick}
+              key={`${i}_${symbolInstance.symbol}_${symbolInstance.x}_${symbolInstance.y}_${symbolInstance.scale}_${symbolClass.name}`}
+            />
+          );
+        },
+      )}
+      {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
+        if (arrow.label === DELETED_NAME) {
+          return;
+        }
+        return (
+          <Arrow
+            arrow={arrow}
+            id={i}
+            key={`arrow_${i}_${JSON.stringify(arrow)}`}
+          />
+        );
+      })}
+      {/* {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
+        if (arrow.label === DELETED_NAME) {
+          return;
+        }
+        return (
+          <Arrow
+            instance={arrow}
+            id={i}
+            key={`${i}_${arrow.label}_${arrow.color}_${arrow.capacity}_${
+              arrow.opacity
+            }_${JSON.stringify(arrow.interpolationPoints)}`}
+          />
+        );
+      })} */}
       {(() => {
         let details = editorContextRef.current.state.mapDetails.regionData;
         let activeLabels = editorContextRef.current.state.map!.labels;
-        return details.map(d => (
-          <Text
-            value={activeLabels.map(l => {
-              if (d.originalFeature.properties !== null) {
-                return d.originalFeature.properties[l] ?? 'undefined';
-              }
-              return 'undefined';
-            })}
-            // box={[91.93, 31.8086, 30.67, 8.241]}
-            box={d.box}
-            mapClickHandler={handleMapClick}
-          ></Text>
-        ));
+        return details.map((d, i) => {
+          let label = activeLabels.map(l => {
+            if (d.originalFeature.properties !== null) {
+              return d.originalFeature.properties[l] ?? 'undefined';
+            }
+            return 'undefined';
+          });
+
+          return (
+            <Text
+              value={label}
+              // box={[91.93, 31.8086, 30.67, 8.241]}
+              box={d.box}
+              key={`${i}${d.box}${label}`}
+            ></Text>
+          );
+        });
       })()}
     </>
   );

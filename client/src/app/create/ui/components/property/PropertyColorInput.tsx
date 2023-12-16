@@ -2,7 +2,7 @@
 
 import { IconButton, Popover } from '@mui/material';
 import CircleIcon from '@mui/icons-material/Circle';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ColorPicker, IColor, useColor } from 'react-color-palette';
 import 'react-color-palette/css';
 import style from './Property.module.scss';
@@ -20,6 +20,15 @@ export default function ({
 }: ColorInputProps) {
   const [currColor, setColor] = useColor(color);
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
+  const [delayload, setDelayload] = useState(true);
+
+  useEffect(() => {
+    if (anchorEl !== null) {
+      setTimeout(() => {
+        setDelayload(false);
+      }, 150);
+    }
+  }, [anchorEl]);
   return (
     <>
       <IconButton
@@ -45,16 +54,18 @@ export default function ({
         onClose={() => {
           setAnchorEl(null);
           colorChangeHandler(currColor.hex);
+          setDelayload(true);
         }}
       >
-        <ColorPicker
-          height={100}
-          color={currColor}
-          onChange={setColor}
-          hideAlpha={true}
-          hideInput={['rgb', 'hsv']}
-        />
-        {/* <SketchPicker onChange={handleChange} color={currColor} /> */}
+        {!delayload && (
+          <ColorPicker
+            height={100}
+            color={currColor}
+            onChange={setColor}
+            hideAlpha={true}
+            hideInput={['rgb', 'hsv']}
+          />
+        )}
       </Popover>
     </>
   );

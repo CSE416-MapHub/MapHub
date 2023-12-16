@@ -1,39 +1,58 @@
+'use client';
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
-
+import { useEffect, useState } from 'react';
 import CommentsHead from './components/commentsHead';
 import CommentsDivider from './components/commentsDivider';
 import CommentsCoordinator from './components/commentsCoordinator';
-
+import PostAPI from 'api/PostAPI';
 import styles from './styles/post.module.scss';
 
-import 'dotenv/config';
-const baseURL = process.env.API_URL
-  ? process.env.API_URL
-  : 'https://api.maphub.pro';
+interface PostType {
+  title: string;
+  description: string;
+  owner: {
+    username: string;
+    profilePic: Buffer;
+  };
+  svg: string;
+}
+const Post = ({ params }: { params: { id: string } }) => {
+  const [post, setPost] = useState<PostType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-async function fetchData(id: string) {
-  try {
-    const post = await fetch(`${baseURL}/posts/post/${id}`, {
-      method: 'GET',
-      cache: 'no-store',
-    });
+  useEffect(() => {
+    async function loadPost() {
+      try {
+        const post = await PostAPI.getPostById(params.id);
 
-    if (!post.ok) {
-      return undefined;
+        console.log('FETCHING POST NOW', post);
+        const body: { success: boolean; post: any } = post.data;
+
+        if (!body.success) {
+          console.log('NOT SUCCESSFUL RETRIVEVELA OF POST ID');
+          return undefined;
+        }
+
+        setPost(body.post);
+      } catch (error) {
+        console.error('Error fetching post:', error);
+        setPost(null); // or handle the error as needed
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    const body: { success: boolean; post: any } = await post.json();
-    return body.post;
-  } catch (error) {
-    return undefined;
+    if (params.id) {
+      loadPost();
+    }
+  }, [params.id]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
   }
-}
-
-async function Post({ params }: { params: { id: string } }) {
-  const post = await fetchData(params.id);
-
   if (!post) {
+    console.log('CANNOT FIND THE POST');
     notFound();
   }
 
@@ -62,6 +81,6 @@ async function Post({ params }: { params: { id: string } }) {
       </div>
     </main>
   );
-}
+};
 
 export default Post;

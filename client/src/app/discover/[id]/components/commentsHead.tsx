@@ -18,11 +18,11 @@ function CommentsHead({ user, title, description }: CommentsHeadProps) {
     <div className={styles['comments-head__container']}>
       <div className={styles['comments-head__avatar']}>
         <Avatar />
-        <Typography variant="labelLarge">{user.username}</Typography>
+        <Typography variant="title">{user.username}</Typography>
       </div>
       <div className={styles['comments-head__texts']}>
-        <Typography variant="bodyMedium">{title}</Typography>
-        <Typography variant="bodyMedium">{description}</Typography>
+        <Typography variant="bodyLarge">{title}</Typography>
+        <Typography variant="bodySmall">{description}</Typography>
       </div>
     </div>
   );

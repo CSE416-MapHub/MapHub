@@ -13,9 +13,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@resvg/resvg-js": "^2.6.0",
+    "@types/d3-geo": "^3.1.0",
     "bcrypt": "^5.1.1",
+    "canvas": "^2.11.2",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "d3-geo": "^3.1.0",
     "dotenv": "^16.3.1",
     "express": "^4.18.2",
     "geojson": "^0.5.0",
@@ -24,6 +28,10 @@
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.0.0",
     "nodemailer": "^6.9.7",
+    "svg2img": "^1.0.0-beta.2",
+    "topojson-client": "^3.1.0",
+    "topojson-server": "^3.0.1",
+    "topojson-simplify": "^3.0.3",
     "sharp": "^0.33.0"
   },
   "devDependencies": {
@@ -40,6 +48,7 @@
     "@types/node": "^20.8.10",
     "@types/nodemailer": "^6.4.14",
     "@types/supertest": "^2.0.15",
+    "@types/topojson": "^3.2.6",
     "jest": "^29.7.0",
     "mongodb-memory-server": "^9.0.1",
     "nodemon": "^3.0.1",

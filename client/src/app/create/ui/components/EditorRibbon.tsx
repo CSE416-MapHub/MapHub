@@ -21,12 +21,18 @@ import { handleFiles } from './helpers/ImportHelpers';
 import { MHJSON, MapType } from 'types/MHJSON';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import exportMap from './helpers/ExportHelpers';
-import { createNewMap, loadMapById, updateMapById } from './helpers/EditorAPICalls';
+import {
+  createNewMap,
+  loadMapById,
+  updateMapById,
+} from './helpers/EditorAPICalls';
 import { AuthContext } from 'context/AuthProvider';
 import IconButton from 'components/iconButton';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { readFile } from 'fs';
 import { MapPayload } from 'types/mapPayload';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { DeltaType, TargetType } from 'types/delta';
 
 // A list of all accepted file types.
 const accept: string =
@@ -45,7 +51,12 @@ export default function () {
     type: 'Point',
     coordinates: [0, 0],
   });
-  var GeoJSON = require('geojson');
+  const [visitor, setVisitor] = useState<GeoJSONVisitor>(
+    new GeoJSONVisitor({
+      type: 'Point',
+      coordinates: [0, 0],
+    }),
+  );
   const menus = {
     File: {
       Import: {
@@ -113,19 +124,19 @@ export default function () {
     setUpdatedTitle(editorContext.state.map?.title || '');
   };
 
-  const handleBlur = async() => {
+  const handleBlur = async () => {
     // Update the map title and close editing mode
-    const payload : MapPayload = { 
+    const payload: MapPayload = {
       mapId: editorContext.state.map_id,
       title: updatedTitle,
-    }
+    };
     console.log(payload);
-    await updateMapById(payload).then((success) => {
-      if(success) {
+    await updateMapById(payload).then(success => {
+      if (success) {
         editorContext.helpers.changeTitle(editorContext, updatedTitle);
         setEditingTitle(false);
       }
-    })
+    });
   };
 
   //--------- Modal States ---------
@@ -154,14 +165,13 @@ export default function () {
     mapType: MapType,
     optionsProps: string[],
   ) {
-    console.log(mapName, optionsProps);
-    console.log(userGeoJSON);
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
     mh.mapType = mapType;
     let v = new GeoJSONVisitor(mh.geoJSON, true);
     v.visitRoot();
+    setVisitor(v);
     mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
       return {};
     });
@@ -181,6 +191,31 @@ export default function () {
   }
 
   function onChoroplethConfirm(optionsProps: string[]) {
+    let keyName = DELETED_NAME;
+    let oldName =
+      editorContext.state.map?.globalChoroplethData.indexingKey ?? DELETED_NAME;
+    if (optionsProps.length !== 0) {
+      keyName = optionsProps[0];
+    }
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.GLOBAL_CHOROPLETH,
+        target: [editorContext.state.map_id, 0, '-1'],
+        payload: {
+          indexingKey: keyName,
+        },
+      },
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.GLOBAL_CHOROPLETH,
+        target: [editorContext.state.map_id, 0, '-1'],
+        payload: {
+          indexingKey: oldName,
+        },
+      },
+    );
     setOpenChoropleth(false);
   }
   function onMultiMapConfirm(optionsProps: string[]) {
@@ -191,7 +226,7 @@ export default function () {
     const mapId = searchParams.get('mapid') as string;
     console.log(mapId);
     if (mapId && editorContext.state.map_id !== mapId) {
-      let getMap: Promise<MHJSON>
+      let getMap: Promise<MHJSON>;
       if (authContext.state.isLoggedIn) {
         getMap = loadMapById(mapId);
         getMap.then(map => {
@@ -205,7 +240,7 @@ export default function () {
           console.log('loaded map set');
           // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
           setOpenImport(false);
-        })
+        });
       }
     }
   }, [searchParams]);
@@ -255,14 +290,14 @@ export default function () {
       </div>
       <div className={styles['map-title']} onDoubleClick={handleEditMapTitle}>
         {editingTitle ? (
-            <TextField
-              id="outlined-basic" 
-              variant="outlined" 
-              value={updatedTitle}
-              onChange={(e) => setUpdatedTitle(e.target.value)}
-              onBlur={handleBlur}
-              size='small'
-            />
+          <TextField
+            id="outlined-basic"
+            variant="outlined"
+            value={updatedTitle}
+            onChange={e => setUpdatedTitle(e.target.value)}
+            onBlur={handleBlur}
+            size="small"
+          />
         ) : (
           <Typography variant="title">
             {editorContext.state.map?.title ?? ''}
@@ -272,16 +307,22 @@ export default function () {
       <div className={styles['undo-redo']}>
         <IconButton
           iconName={'Undo'}
+          disabled={!editorContext.state.actionStack.canUndo()}
           onClick={() => {
-            editorContext.helpers.undo(editorContext);
+            if (editorContext.state.actionStack.canUndo()) {
+              editorContext.helpers.undo(editorContext);
+            }
           }}
         >
           <Undo fontSize="medium" />
         </IconButton>
         <IconButton
           iconName={'Redo'}
+          disabled={!editorContext.state.actionStack.canRedo()}
           onClick={() => {
-            editorContext.helpers.redo(editorContext);
+            if (editorContext.state.actionStack.canRedo()) {
+              editorContext.helpers.redo(editorContext);
+            }
           }}
         >
           <Redo fontSize="medium" />
@@ -304,7 +345,9 @@ export default function () {
         open={openChoropleth}
         onClose={() => setOpenChoropleth(false)}
         onConfirm={onChoroplethConfirm}
-        properties={selectedOptions}
+        properties={Array.from(
+          visitor.getFeatureResults().aggregate.numericKeys,
+        )}
       />
       <MultiMapLabelModal
         open={openMapLabelModal}

@@ -10,6 +10,7 @@ import util from 'util';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
+import svg2img, { svg2imgOptions } from 'svg2img';
 
 type MapDocument = typeof Map.prototype;
 
@@ -26,6 +27,37 @@ enum MapType {
   DOT = 'dot',
   FLOW = 'flow',
 }
+export enum SVGDetail {
+  DETAILED = 'detailed',
+  THUMBNAIL = 'thumbnail',
+}
+
+async function convertSvgToPngBase64(svgString: string): Promise<string> {
+  const options: svg2imgOptions = {
+    resvg: {
+      dpi: 300,
+      shapeRendering: 2,
+      textRendering: 1,
+      imageRendering: 0,
+      fitTo: { mode: 'width', value: 800 },
+    },
+    quality: 100,
+  };
+
+  return new Promise((resolve, reject) => {
+    svg2img(svgString, options, function (error, buffer) {
+      if (error) {
+        console.error('Error converting SVG to PNG:', error);
+        resolve('FULL');
+      } else {
+        // Convert buffer to a base64 encoded string
+        const base64Png = buffer.toString('base64');
+        console.log('FINISHED CONVERTING ONE');
+        resolve(base64Png);
+      }
+    });
+  });
+}
 
 function minifySVG(svgString: string): string {
   // Replace newlines and carriage returns with nothing
@@ -38,12 +70,15 @@ function minifySVG(svgString: string): string {
   return minified.trim();
 }
 
-export async function convertJsonToSVG(map: MapDocument) {
-  console.log('JSON TO SVG', JSON.stringify(map));
+export async function convertJsonToSVG(
+  map: MapDocument,
+  SVGDetailStr: SVGDetail,
+) {
+  console.log('JSON TO SVG STARTING IT NOW');
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
 
-  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+  // console.log('GEOJSON DATA IN DO THE ', geoJSONData);
   map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
@@ -57,11 +92,23 @@ export async function convertJsonToSVG(map: MapDocument) {
   <rect x="${box[0]}" y="${box[1]}" width="100%" height="100%" fill="#CCEFF1" />
   ${svg}
 </svg>`;
+  if (SVGDetailStr === SVGDetail.THUMBNAIL) {
+    console.log('Converting to THUMBNAIL');
+    try {
+      const pngString = await convertSvgToPngBase64(svgRepr);
+      if (pngString === 'FULL') {
+        return minifySVG(svgRepr);
+      }
+      return pngString;
+    } catch (error: any) {
+      console.log('CAUGHT THE ERROR', error);
+      return minifySVG(svgRepr);
+    }
+  }
+  console.log('Converting to SVG full');
+
   return minifySVG(svgRepr);
 }
-
-//idk if we should actually validate the user to see if the user matchees
-async function validUserForMap(req: Request, res: Response) {}
 
 const MapController = {
   createMap: async (req: Request, res: Response) => {
@@ -192,7 +239,6 @@ const MapController = {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
-    console.log(map);
     //validating the requests
     if (delta.type === null || delta.type === undefined) {
       return res
@@ -266,11 +312,11 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      console.log('MAP bEFORE CAST', JSON.stringify(map));
+      // console.log('MAP bEFORE CAST', JSON.stringify(map));
       map = new Map(map);
 
       const updatedMap = await map.save();
-      console.log(updatedMap);
+      console.log('AFTER UPDATE MAP', updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       console.error(err.message);
@@ -310,7 +356,6 @@ const MapController = {
 
       const savedMap = await new Map(map).save();
 
-      console.log('finished updating ', savedMap);
       res.status(200).json({ success: true, map: savedMap });
     } catch (err: any) {
       console.log('error in update mapbyid', err);
@@ -392,7 +437,7 @@ const MapController = {
       // console.log('THIS IS WHAT INSIDE MAPS', maps);
       const condensedMaps = await Promise.all(
         maps.map(async map => {
-          const svg = await convertJsonToSVG(map); //#TODO placeholder function
+          const svg = await convertJsonToSVG(map, SVGDetail.THUMBNAIL); //#TODO placeholder function
           return {
             _id: map._id,
             title: map.title,
@@ -403,7 +448,6 @@ const MapController = {
         }),
       );
 
-      console.log('Map Controller MAPS', JSON.stringify(condensedMaps));
       // Success response
       res.status(200).json({
         success: true,

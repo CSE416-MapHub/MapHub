@@ -90,11 +90,11 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
     );
   };
 
-  const handleRadioChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    property: string,
-  ) => {
-    const newSelection = [property];
+  const handleRadioChange = (property: string) => {
+    let newSelection: Array<string> = [];
+    if (!selectedOptions.includes(property)) {
+      newSelection = [property];
+    }
     setSelectedOptions(newSelection);
     onSelect(newSelection);
   };
@@ -217,7 +217,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
                         selectedOptions.includes(property) &&
                         selectedOptions.length === 1
                       }
-                      onChange={e => handleRadioChange(e, property)}
+                      onClick={e => handleRadioChange(property)}
                     />
                   )
                 }

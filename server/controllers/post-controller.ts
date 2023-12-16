@@ -8,7 +8,9 @@ import User from '../models/user-model';
 import express from 'express';
 import fs from 'fs';
 import path from 'path';
-import { convertJsonToSVG } from './map-controller';
+import { convertJsonToSVG, SVGDetail } from './map-controller';
+
+type MapDocument = typeof Map.prototype;
 
 export enum LikeChange {
   ADD_LIKE = 'like',
@@ -52,7 +54,6 @@ const PostController = {
       map.published = true;
 
       savedPost = await newPost.save();
-      console.log(savedPost);
       await map.save();
 
       res.status(200).json({
@@ -71,11 +72,10 @@ const PostController = {
       console.log('in get user posts');
       const userId = req.params.userId;
       console.log(userId);
-      console.log(req.query.id);
 
       console.log('before finding posts');
 
-      const posts = await Post.find({ userId }).exec();
+      const posts = await Post.find({ owner: userId }).exec();
 
       console.log('after finding posts');
       console.log(
@@ -90,9 +90,9 @@ const PostController = {
           posts.map(async post => {
             console.log('STARTING POST BY POST', JSON.stringify(post));
             const map = await Map.findById(post.map).exec();
-            console.log(JSON.stringify(map));
-            const svg = map ? await convertJsonToSVG(map) : null;
-            console.log(svg);
+            const svg = map
+              ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
+              : null;
 
             return {
               title: post.title,
@@ -130,6 +130,8 @@ const PostController = {
   getPostById: async (req: Request, res: Response) => {
     try {
       const postId = req.params.postId;
+      console.log('GETTING POST WITH ID', postId);
+
       const post = await Post.findById(postId)
         .populate({
           path: 'comments', // Path to the field in the Post model
@@ -164,7 +166,16 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log('Got post', JSON.stringify(post), 'with id', postId);
+      console.log(
+        'Got post',
+        JSON.stringify({
+          title: post.title,
+          description: post.description,
+          owner: post.owner,
+        }),
+        'with id',
+        postId,
+      );
 
       const map = await Map.findById(post.map).exec();
       if (!map) {
@@ -174,7 +185,7 @@ const PostController = {
         });
       }
 
-      const svg = map ? await convertJsonToSVG(map) : null;
+      const svg = map ? await convertJsonToSVG(map, SVGDetail.DETAILED) : null;
 
       const postFound = {
         title: post.title,
@@ -187,7 +198,7 @@ const PostController = {
         comments: post.comments,
       };
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
         post: postFound,
       });
@@ -226,9 +237,9 @@ const PostController = {
 
             console.log('MAP', map);
 
-            // console.log(JSON.stringify(map));
-
-            const svg = map ? await convertJsonToSVG(map) : null;
+            const svg = map
+              ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
+              : null;
 
             return {
               title: post.title,
@@ -350,7 +361,57 @@ const PostController = {
     }
   },
 
-  deleteCommentById: async (req: Request, res: Response) => {},
+  deleteCommentById: async (req: Request, res: Response) => {
+    const commentId = req.params.commentId;
+    const userId = (req as any).userId;
+
+    try {
+      const commentToBeDeleted = await Comment.findById(commentId)
+        .populate({
+          path: 'user',
+          model: 'User',
+          select: 'username _id profilePic',
+        })
+        .populate({
+          path: 'replies',
+          model: 'Comment',
+          populate: {
+            path: 'user',
+            model: 'User',
+            select: 'username _id profilePic',
+          },
+        })
+        .exec();
+      if (!commentToBeDeleted) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Comment not found' });
+      }
+
+      console.log(
+        'USER WHO CALLED',
+        userId,
+        'COMMENT OWNER',
+        commentToBeDeleted.user._id,
+      );
+      if (commentToBeDeleted.user._id.toString() === userId.toString()) {
+        commentToBeDeleted.content = 'Comment has been deleted';
+
+        const savedComment = await commentToBeDeleted.save();
+        return res.status(200).json({
+          success: true,
+          deletedComment: savedComment,
+        });
+      } else {
+        return res
+          .status(401)
+          .json({ success: false, message: 'User does not own the comment' });
+      }
+    } catch (err: any) {
+      console.error('ERROR INside of delete comment', err.message);
+      return res.status(400).json({ success: false, message: err });
+    }
+  },
 
   likeChangeComment: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
@@ -436,6 +497,90 @@ const PostController = {
     }
   },
   getAllReplies: async (req: Request, res: Response) => {},
+
+  forkMap: async (req: Request, res: Response) => {
+    const userId = (req as any).userId;
+    const postId = req.params.postId;
+    console.log('ENTERING FORK');
+    try {
+      const post = await Post.findById(postId);
+
+      if (!post) {
+        return res
+          .status(400)
+          .json({ success: false, message: 'Post not found' });
+      }
+
+      console.log('Post in qu', post);
+      const mapPost = await Map.findById(post.map);
+
+      if (!mapPost || mapPost === undefined || !mapPost.geoJSON) {
+        return res
+          .status(500)
+          .json({ success: false, message: 'Map in Post not found' });
+      }
+
+      console.log('POST MAP ORIGINAL', JSON.stringify(mapPost));
+
+      const forkedMap = new Map({
+        ...post.map,
+        owner: userId,
+        _id: new mongoose.Types.ObjectId(), // Generate a new ID
+        createdAt: Date.now(), // Reset creation date
+        updatedAt: Date.now(), // Reset update date
+      });
+
+      console.log('POST MAP FORKED', JSON.stringify(forkedMap));
+
+      const user = await User.findById(userId);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message:
+            'User not found, WHICH SHOULDNT HAPPEN CAUSE WE ALREAYD VALIDATED',
+        });
+      }
+
+      const objectIdRegex = /[a-z0-9]+(?=\.geojson)/;
+
+      const newFilePath = mapPost.geoJSON.replace(
+        objectIdRegex,
+        forkedMap._id.toString(),
+      );
+
+      console.log(
+        'new file path',
+        newFilePath,
+        'old file path',
+        mapPost.geoJSON,
+      );
+
+      const data = await fs.promises.readFile(mapPost.geoJSON, 'utf8');
+
+      // Write to the new file
+      await fs.promises.writeFile(newFilePath, data, 'utf8');
+
+      console.log('Map duplicated successfully in directory');
+
+      forkedMap.geoJSON = newFilePath;
+
+      user.maps.push(forkedMap._id);
+
+      await user.save();
+      await forkedMap.save();
+
+      res.status(200).json({
+        success: true,
+        forkedMap: forkedMap,
+      });
+    } catch (err: any) {
+      console.error('Error in forking:', err.message);
+      res.status(500).json({
+        success: false,
+        message: 'Internal server error',
+      });
+    }
+  },
 };
 
 export default PostController;

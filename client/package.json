@@ -15,6 +15,7 @@
     "cypress:component": "cypress run --component"
   },
   "dependencies": {
+    "@elfalem/leaflet-curve": "^0.9.2",
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
     "@mapbox/togeojson": "^0.16.2",
