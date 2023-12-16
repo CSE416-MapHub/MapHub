@@ -378,10 +378,6 @@ export const putProfilePic = async (request: Request, response: Response) => {
     user.profilePic = await sharp(Buffer.from(profilePic, 'base64'))
       .webp()
       .toBuffer();
-
-    // user.profilePic = await ImageManager.toWebp(
-    //   Buffer.from(profilePic, 'base64'),
-    // );
     await user.save();
     return response.status(200).json({
       success: true,

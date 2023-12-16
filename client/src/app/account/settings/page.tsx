@@ -33,7 +33,13 @@ function Settings() {
         <SettingsSection id="settings-profile">
           <SettingsTitle>Profile</SettingsTitle>
           <Box className={styles['settings__option']}>
-            <SettingsAvatar>
+            <SettingsAvatar
+              src={
+                auth.state.user?.profilePic
+                  ? `data:image/webp;base64,${auth.state.user.profilePic}`
+                  : undefined
+              }
+            >
               <IconButton
                 className={styles['settings__edit-icon-button']}
                 variant="filled"
