@@ -311,8 +311,11 @@ export default function () {
       <div className={styles['undo-redo']}>
         <IconButton
           iconName={'Undo'}
+          disabled={!editorContext.state.actionStack.canUndo()}
           onClick={() => {
-            editorContext.helpers.undo(editorContext);
+            if (editorContext.state.actionStack.canUndo()) {
+              editorContext.helpers.undo(editorContext);
+            }
           }}
           disabled={editorContext.state.actionStack.stack.length == 0}
         >
@@ -320,8 +323,11 @@ export default function () {
         </IconButton>
         <IconButton
           iconName={'Redo'}
+          disabled={!editorContext.state.actionStack.canRedo()}
           onClick={() => {
-            editorContext.helpers.redo(editorContext);
+            if (editorContext.state.actionStack.canRedo()) {
+              editorContext.helpers.redo(editorContext);
+            }
           }}
           disabled={editorContext.state.actionStack.counterStack.length == 0}
         >
