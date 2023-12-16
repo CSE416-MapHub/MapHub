@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import MapModel from '../../models/map-model';
-
+import { GeoJSONVisitor } from './GeoJSONVisitor';
 type MapDocument = typeof MapModel.prototype;
 const DELETED_NAME = '_#DEL';
+import fs from 'fs';
 export interface DeltaPayload {
   // this is what a diff payload could contain
   // note that at no point should all fields be active
@@ -26,17 +27,17 @@ export interface DeltaPayload {
   opacity?: number;
   size?: number;
   intensity?: number;
-  category?: number;
+  category?: string;
   dot?: string;
   label?: string;
   capacity?: number;
-  interpolationPoints?: [
-    {
-      x: number;
-      y: number;
-    },
-  ];
+  interpolationPoints?: Array<{
+    x: number;
+    y: number;
+  }>;
   propertyValue?: string;
+
+  labels?: Array<string>;
 }
 
 //FOR MAP UPDAING LIKE TITLE AND SHIT
@@ -75,19 +76,25 @@ class LabelsHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to add a label to the map
     // Example: map.labels.push({/* label details from payload */});
-
+    throw new Error('Cant create a new label');
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Implement the logic to update a label on the map
     // Example: find the label in map.labels and update it
+    if (d.payload.labels === undefined) {
+      throw new Error('Labels is not set in updating labels');
+    }
+    map.labels = d.payload.labels;
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to delete a label from the map
     // Example: remove the label from map.labels
+    throw new Error('Cant delete a new label');
+
     return map;
   }
 }
@@ -596,18 +603,71 @@ class ArrowHandler {
 }
 
 class GeojsonDataHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding geoJSON data to the map
+    //TODO MAKE SURE THE FILE IS DONE
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    v.visitRoot();
+
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to create a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    for (let featureVisitResult of v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      feature.properties[d.target[2]] = d.payload.propertyValue;
+    }
+    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating geoJSON data on the map
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    let targFeature = v.getFeatureResults().perFeature[d.target[1]];
+    if (targFeature === undefined) {
+      throw new Error('Region out of bounds');
+    }
+    let propName = d.target[2];
+    let orig = targFeature.originalFeature;
+    if (!orig.properties) {
+      orig.properties = {};
+    }
+    orig.properties[propName] = d.payload.propertyValue;
+    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
+
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing geoJSON data from the map
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to delete a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    for (let featureVisitResult of v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      delete feature.properties[d.target[2]];
+    }
+    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
+
     return map;
   }
 }
