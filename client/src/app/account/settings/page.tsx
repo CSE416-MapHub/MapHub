@@ -1,11 +1,10 @@
 'use client';
 
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import { AuthContext } from '../../../context/AuthProvider';
-import Button from 'components/button';
 import IconButton from 'components/iconButton';
 import SettingsMain from './components/settingsMain';
 import SettingsHead from './components/settingsHead';
@@ -36,7 +35,7 @@ function Settings() {
           <Box className={styles['settings__option']}>
             <SettingsAvatar>
               <IconButton
-                className={styles['settings__editIconButton']}
+                className={styles['settings__edit-icon-button']}
                 variant="filled"
                 iconType="solid"
                 iconName="pencil"
@@ -58,21 +57,6 @@ function Settings() {
             label="Password"
             value={'********'}
           />
-        </SettingsSection>
-        <SettingsSection id="settings-delete-account">
-          <SettingsTitle className={styles['settings__title--red']}>
-            Delete Account
-          </SettingsTitle>
-          <Typography variant="bodyMedium">
-            Once you delete your account, there's no turning back. It will be
-            gone forever.
-          </Typography>
-          <Button
-            className={styles['settings__delete-button']}
-            variant="errorOutlined"
-          >
-            Delete Account
-          </Button>
         </SettingsSection>
       </SettingsPane>
     </SettingsMain>
