@@ -641,16 +641,21 @@ function getHandlerForTargetType(targetType: TargetType) {
 const mapHelper = {
   handleCreate: (delta: any, map: MapDocument): MapDocument => {
     const handler = getHandlerForTargetType(delta.targetType);
+    console.log('CREATED NEW ', delta.targetType);
     return handler.create(map, delta);
   },
 
   handleUpdate: (delta: any, map: MapDocument): MapDocument => {
     const handler = getHandlerForTargetType(delta.targetType);
+    console.log('UPDATED ', delta.targetType);
+
     return handler.update(map, delta);
   },
 
   handleDelete: (delta: any, map: MapDocument): MapDocument => {
     const handler = getHandlerForTargetType(delta.targetType);
+    console.log('DELETED', delta.targetType);
+
     return handler.delete(map, delta);
   },
 };

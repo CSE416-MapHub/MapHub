@@ -11,7 +11,7 @@ import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
 
-import svg2img from 'svg2img';
+import svg2img, { svg2imgOptions } from 'svg2img';
 
 type MapDocument = typeof Map.prototype;
 
@@ -34,14 +34,24 @@ export enum SVGDetail {
 }
 
 async function convertSvgToPngBase64(svgString: string): Promise<string> {
+  const options: svg2imgOptions = {
+    resvg: {
+      dpi: 300,
+      shapeRendering: 2,
+      textRendering: 1,
+      imageRendering: 0,
+      fitTo: { mode: 'zoom', value: 10 },
+    },
+  };
   return new Promise((resolve, reject) => {
-    svg2img(svgString, function (error, buffer) {
+    svg2img(svgString, options, function (error, buffer) {
       if (error) {
         console.error('Error converting SVG to PNG:', error);
         reject(error);
       } else {
         // Convert buffer to a base64 encoded string
         const base64Png = buffer.toString('base64');
+        console.log('FINISHED CONVERTING ONE');
         resolve(base64Png);
       }
     });
@@ -220,7 +230,6 @@ const MapController = {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
-    console.log(map);
     //validating the requests
     if (delta.type === null || delta.type === undefined) {
       return res
@@ -298,6 +307,7 @@ const MapController = {
       map = new Map(map);
 
       const updatedMap = await map.save();
+      console.log('AFTER UPDATE MAP', updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       console.error(err.message);
