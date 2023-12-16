@@ -532,19 +532,64 @@ class DotHandler {
     return map;
   }
 }
+interface IArrowInstance {
+  label: string;
+  color: string;
+  opacity: number;
+  capacity: number;
+  interpolationPoints: Array<{
+    x: number;
+    y: number;
+  }>;
+}
+
 class ArrowHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding an arrow to the map
+    let p = d.payload;
+    if (
+      p.color === undefined ||
+      p.label == undefined ||
+      p.opacity === undefined ||
+      p.capacity === undefined ||
+      p.interpolationPoints === undefined ||
+      (p.interpolationPoints.length as number) !== 4
+    ) {
+      console.log(p);
+      throw new Error('Found malformed arrow in create arrow');
+    }
+    let arrow: IArrowInstance = {
+      color: p.color,
+      label: p.label,
+      opacity: p.opacity,
+      capacity: p.capacity,
+      interpolationPoints: p.interpolationPoints,
+    };
+    map.arrowsData[d.target[1]] = arrow;
+
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating an arrow on the map
+    let arrow = map.arrowsData[d.target[1]];
+    arrow.color = d.payload.color ?? arrow.color;
+    arrow.label = d.payload.label ?? arrow.label;
+    arrow.opacity = d.payload.opacity ?? arrow.opacity;
+    arrow.capacity = d.payload.capacity ?? arrow.capacity;
+    arrow.interpolationPoints =
+      d.payload.interpolationPoints ?? arrow.interpolationPoints;
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing an arrow from the map
+    if (d.target[1] > map.arrowsData.length || d.target[1] < 0) {
+      throw new Error('Target out of bounds in delete arrow: ' + d.target[1]);
+    }
+    map.arrowsData[d.target[1]].label = DELETED_NAME;
+    map.arrowsData[d.target[1]].opacity = 0;
+    map.arrowsData[d.target[1]].capacity = 0;
     return map;
   }
 }

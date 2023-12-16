@@ -56,6 +56,10 @@ class PostAPI {
   static async createComment(postID: string, content: string) {
     return this.api.post(`/posts/comments/${postID} `, { content });
   }
+
+  static async deleteCommentById(commentId: string) {
+    return this.api.delete(`/posts/comments/${commentId}`);
+  }
   // static async updatePostInfo(postPayload: PostPayload) {
   //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
   // }

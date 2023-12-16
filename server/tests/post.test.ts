@@ -598,3 +598,89 @@ describe('POST /posts/fork/:postId', () => {
     expect(response.body.forkedMap.owner).toEqual(mockUserID.toString());
   });
 });
+
+describe('DELETE /posts/comments/:commentId', () => {
+  it('deletes a comment', async () => {
+    const mockCommentId = new mongoose.Types.ObjectId();
+
+    jest
+      .spyOn(commentModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          user: {
+            username: 'someguy',
+            _id: mockUserID,
+            profilePic: Buffer.alloc(0),
+          },
+          content: 'THE BEST TCONTETN',
+          replies: [
+            {
+              user: {
+                username: 'someguy',
+                _id: mockUserID,
+                profilePic: Buffer.alloc(0),
+              },
+              content: 'SOME TEXT MESSAGE',
+            },
+          ], // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+          save: jest.fn().mockReturnThis(),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    const response = await supertest(app)
+      .delete(`/posts/comments/${mockCommentId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success', true);
+    expect(response.body).toHaveProperty('deletedComment');
+    expect(response.body.deletedComment.content).toEqual(
+      'Comment has been deleted',
+    );
+  });
+  it('not your comment to delete', async () => {
+    const mockCommentId = new mongoose.Types.ObjectId();
+
+    jest
+      .spyOn(commentModel, 'findById')
+      .mockImplementation((postId: mongoose.Types.ObjectId | string) => {
+        const execMock = jest.fn().mockResolvedValue({
+          _id: new mongoose.Types.ObjectId(postId),
+          user: {
+            username: 'someguy',
+            _id: new mongoose.Types.ObjectId(),
+            profilePic: Buffer.alloc(0),
+          },
+          content: 'THE BEST TCONTETN',
+          replies: [
+            {
+              user: {
+                username: 'someguy',
+                _id: mockUserID,
+                profilePic: Buffer.alloc(0),
+              },
+              content: 'SOME TEXT MESSAGE',
+            },
+          ], // Assuming comments are already populated
+          populate: jest.fn().mockReturnThis(), // Chainable populate method
+          exec: jest.fn().mockResolvedValue({}),
+          save: jest.fn().mockReturnThis(),
+        });
+
+        return { populate: jest.fn().mockReturnThis(), exec: execMock } as any;
+      });
+
+    const response = await supertest(app)
+      .delete(`/posts/comments/${mockCommentId}`)
+      .set('Cookie', [`token=${auth.signToken(mockUserID.toString())}`]);
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body).toHaveProperty('success', false);
+    expect(response.body.message).toEqual('User does not own the comment');
+  });
+});

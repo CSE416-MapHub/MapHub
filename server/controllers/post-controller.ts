@@ -361,7 +361,57 @@ const PostController = {
     }
   },
 
-  deleteCommentById: async (req: Request, res: Response) => {},
+  deleteCommentById: async (req: Request, res: Response) => {
+    const commentId = req.params.commentId;
+    const userId = (req as any).userId;
+
+    try {
+      const commentToBeDeleted = await Comment.findById(commentId)
+        .populate({
+          path: 'user',
+          model: 'User',
+          select: 'username _id profilePic',
+        })
+        .populate({
+          path: 'replies',
+          model: 'Comment',
+          populate: {
+            path: 'user',
+            model: 'User',
+            select: 'username _id profilePic',
+          },
+        })
+        .exec();
+      if (!commentToBeDeleted) {
+        return res
+          .status(404)
+          .json({ success: false, message: 'Comment not found' });
+      }
+
+      console.log(
+        'USER WHO CALLED',
+        userId,
+        'COMMENT OWNER',
+        commentToBeDeleted.user._id,
+      );
+      if (commentToBeDeleted.user._id.toString() === userId.toString()) {
+        commentToBeDeleted.content = 'Comment has been deleted';
+
+        const savedComment = await commentToBeDeleted.save();
+        return res.status(200).json({
+          success: true,
+          deletedComment: savedComment,
+        });
+      } else {
+        return res
+          .status(401)
+          .json({ success: false, message: 'User does not own the comment' });
+      }
+    } catch (err: any) {
+      console.error('ERROR INside of delete comment', err.message);
+      return res.status(400).json({ success: false, message: err });
+    }
+  },
 
   likeChangeComment: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
