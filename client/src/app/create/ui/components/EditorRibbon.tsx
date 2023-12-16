@@ -155,15 +155,6 @@ export default function () {
   const [openNewLabelModal, setOpenNewLabelModal] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState('');
-  const selectedOptions = [
-    'Country Name',
-    'Languages',
-    'Population',
-    'chinese',
-    '조선글',
-    'arabic',
-    'Christians',
-  ];
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -228,9 +219,6 @@ export default function () {
       },
     );
     setOpenChoropleth(false);
-  }
-  function onMultiMapConfirm(optionsProps: string[]) {
-    setOpenMapLabelModal(false);
   }
 
   useEffect(() => {
@@ -365,8 +353,9 @@ export default function () {
       <MultiMapLabelModal
         open={openMapLabelModal}
         onClose={() => setOpenMapLabelModal(false)}
-        onConfirm={onMultiMapConfirm}
-        properties={selectedOptions}
+        properties={Array.from(
+          visitor.getFeatureResults().aggregate.globallyAvailableKeys,
+        )}
       />
       <RecentMapModal
         open={openRecentMapModal}
@@ -378,6 +367,7 @@ export default function () {
       />
       <NewLabelModal
         open={openNewLabelModal}
+        visitor={visitor}
         onClose={() => setOpenNewLabelModal(false)}
       />
       <input

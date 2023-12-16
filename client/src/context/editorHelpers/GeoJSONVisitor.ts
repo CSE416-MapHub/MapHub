@@ -66,6 +66,13 @@ export class GeoJSONVisitor {
     this.featuresOnly = featuresOnly ?? false;
   }
 
+  public addKey(key: string, isNumeric: boolean) {
+    this.featureAgg.globallyAvailableKeys.add(key);
+    if (isNumeric) {
+      this.featureAgg.numericKeys.add(key);
+    }
+  }
+
   public visitRoot() {
     console.log(this.mapData);
     switch (this.mapData.type) {
