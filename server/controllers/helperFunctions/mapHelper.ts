@@ -148,7 +148,7 @@ class GlobalCategoryHandler {
     let taken = map.globalCategoryData.filter(
       (c: any) => c.name === delta.payload.name,
     );
-    if (taken.length === 1 || delta.payload.name === DELETED_NAME) {
+    if (taken.length >= 1 && delta.payload.name !== DELETED_NAME) {
       throw new Error(
         'Category name ' + delta.payload.name + ' is already used',
       );

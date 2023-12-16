@@ -40,7 +40,7 @@ async function convertSvgToPngBase64(svgString: string): Promise<string> {
       shapeRendering: 2,
       textRendering: 1,
       imageRendering: 0,
-      fitTo: { mode: 'zoom', value: 10 },
+      fitTo: { mode: 'width', value: 800 },
     },
   };
   return new Promise((resolve, reject) => {
