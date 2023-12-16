@@ -11,7 +11,7 @@ import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
 import svg2img, { svg2imgOptions } from 'svg2img';
-
+import sharp from 'sharp';
 type MapDocument = typeof Map.prototype;
 
 enum DeltaType {
@@ -43,7 +43,7 @@ async function convertSvgToPngBase64(svgString: string): Promise<string> {
     },
     quality: 100,
   };
-
+  console.log('THE SVG to pARSE', svgString);
   return new Promise((resolve, reject) => {
     svg2img(svgString, options, function (error, buffer) {
       if (error) {
@@ -95,13 +95,27 @@ export async function convertJsonToSVG(
   if (SVGDetailStr === SVGDetail.THUMBNAIL) {
     console.log('Converting to THUMBNAIL');
     try {
-      const pngString = await convertSvgToPngBase64(svgRepr);
-      if (pngString === 'FULL') {
-        return minifySVG(svgRepr);
-      }
-      return pngString;
+      // const pngString = await convertSvgToPngBase64(svgRepr);
+      // if (pngString === 'FULL') {
+      //   return minifySVG(svgRepr);
+      // }
+      console.log('BOUNDING BOX of the thing', box[0], box[1]);
+      const pngString = await sharp(Buffer.from(svgRepr))
+        .png()
+        .resize({
+          width: 128,
+          height: 128,
+          fit: 'outside',
+          withoutEnlargement: true,
+          withoutReduction: true,
+          background: '#0081A7',
+          kernel: 'lanczos3',
+        })
+        .toBuffer();
+      return pngString.toString('base64');
     } catch (error: any) {
       console.log('CAUGHT THE ERROR', error);
+      console.log('The svg in question', svgRepr);
       return minifySVG(svgRepr);
     }
   }

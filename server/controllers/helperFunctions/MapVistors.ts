@@ -9,7 +9,7 @@ import {
 } from './types/MHJSON';
 import { getArrowhead, producePath } from './ArrowFixer';
 import MapModel from '../../models/map-model';
-
+import xmldom from 'xmldom';
 // import { useRef } from "react";
 type MapDocument = typeof MapModel.prototype;
 
@@ -144,32 +144,57 @@ class SVGBuilder {
 
   private svgOfSymbols(): string {
     // construct a map of names to objects
+    const DOMParser = xmldom.DOMParser;
     let symbolMap = new Map<string, [ISymbolProps, HTMLElement]>(
       this.mhjson.globalSymbolData.map((x: any) => {
-        let svgEl: HTMLElement = new DOMParser().parseFromString(
-          x.svg,
-          'image/svg+xml',
-        ).documentElement;
+        // Use querySelector to directly select the SVG element
+        const parser = new DOMParser();
+        let doc = parser.parseFromString(x.svg, 'image/svg+xml');
+
+        let svgEl = doc.getElementsByTagName('svg')[0];
+        // let svgEl: HTMLElement = new DOMParser().parseFromString(
+        //   x.svg,
+        //   'image/svg+xml',
+        // ).documentElement;
         return [x.name, [x, svgEl]];
       }),
     );
 
     let symbols = '';
+    let count = 0;
     for (let s of this.mhjson.symbolsData) {
       if (s.symbol === DELETED_NAME) {
         continue;
       }
+
       let symbolData = symbolMap.get(s.symbol)!;
       let viewbox = symbolData[1].getAttribute('viewBox');
       if (viewbox === null) {
         throw new Error('null viewbox');
       }
-      symbols += this.svgOfSymbol(
-        viewbox,
-        symbolData[1].innerHTML,
-        [s.x, s.y],
-        s.scale,
-      );
+
+      let innerHTML = '';
+      for (let i = 0; i < symbolData[1].childNodes.length; i++) {
+        const child = symbolData[1].childNodes[i];
+
+        if (child.nodeType === 1) {
+          // Element node
+          let childString = child.toString();
+          // Remove the xmlns attribute
+          childString = childString.replace(
+            /\s+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g,
+            '',
+          );
+          innerHTML += childString;
+        }
+      }
+      // console.log('inner', innerHTML);
+
+      symbols += this.svgOfSymbol(viewbox, innerHTML, [s.x, s.y], s.scale);
+      if (count === 0) {
+        // console.log('SYMBOLS', symbols);
+      }
+      count = count + 1;
     }
     return symbols;
   }
@@ -186,12 +211,12 @@ class SVGBuilder {
       DEFAULT_SZ * scale * 0.148,
       DEFAULT_SZ * scale * 0.148,
     ];
-
-    return `<svg x="${y}" y="${
-      -1 * x
-    }" width="${w}" height="${h}"><svg viewBox="${viewbox}" width="100%" height="100%">
+    // console.log('THESE ------------------------', children);
+    return `<svg x="${y}" y="${-1 * x}" width="${w}" height="${h}">
+    <svg viewBox="${viewbox}" width="100%" height="100%">
     ${children}
-  </svg></svg>`;
+    </svg>
+    </svg>`;
   }
 
   private svgOfArrows(): string {
