@@ -67,7 +67,7 @@ function DropZone({
         name="cloud-upload"
       />
       <Typography variant="headlineSmall">
-        {`Drag and Drop to Upload File${multiple ? 's' : ''}`}
+        {`Drag and Drop to Upload`}
       </Typography>
       <Typography variant="bodyMedium">{children}</Typography>
       <div className={styles['dropzone__buttons']}>

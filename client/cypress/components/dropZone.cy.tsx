@@ -23,15 +23,10 @@ describe('The drop zone ', () => {
   });
 });
 
-describe('The drop zone renders headline ', () => {
-  it('for single file.', () => {
+describe('The drop zone renders ', () => {
+  it('the headline.', () => {
     cy.mount(<DropZone id="cy-dropzone"></DropZone>);
-    cy.get('#cy-dropzone').contains('Drag and Drop to Upload File');
-  });
-
-  it('for multiple files.', () => {
-    cy.mount(<DropZone id="cy-dropzone" multiple></DropZone>);
-    cy.get('#cy-dropzone').contains('Drag and Drop to Upload Files');
+    cy.get('#cy-dropzone').contains('Drag and Drop to Upload');
   });
 });
 
