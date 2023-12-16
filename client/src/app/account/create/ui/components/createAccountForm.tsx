@@ -19,7 +19,6 @@ import { useRouter } from 'next/navigation';
 import Snackbar from '@mui/material/Snackbar';
 import MuiAlert, { AlertProps } from '@mui/material/Alert';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
-import { base64StringToBlob } from 'blob-util';
 
 /**
  * The CreateAccountState is an object filled with states of text field
@@ -322,13 +321,7 @@ function CreateAccountForm() {
         authDispatch({
           type: AuthActions.REGISTER_SUCCESS,
           payload: {
-            user: {
-              id: result.data.user.id,
-              username: result.data.user.username,
-              profilePic: URL.createObjectURL(
-                base64StringToBlob(result.data.user.profilePic),
-              ),
-            },
+            user: result.data.user,
           },
         });
         console.log('successfully registered');
@@ -440,7 +433,11 @@ function CreateAccountForm() {
         validate={validatePasswordConfirm}
         helperText={createAccountState.passwordConfirm.errorText}
       />
-      <Button className={styles.button} variant="filled" onClick={handleCreateAccountClick}>
+      <Button
+        className={styles.button}
+        variant="filled"
+        onClick={handleCreateAccountClick}
+      >
         Create Account
       </Button>
       <Snackbar
