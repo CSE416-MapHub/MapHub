@@ -7,7 +7,7 @@
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "outDir": "./build",
-    "moduleResolution": "Node"
+    "moduleResolution": "Node",
   },
   "include": ["index.ts", "tests/", "serverControls/serverControl.ts"],
   "exclude": ["node_modules"]

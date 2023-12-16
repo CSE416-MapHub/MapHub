@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import sharp from 'sharp';
 
 // Environment variables for email account
 // const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
@@ -96,7 +97,7 @@ export const registerUser = async (req: Request, res: Response) => {
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
-      // Duplicate key error - usualyl in the form of "dupKey": dupValue
+      // Duplicate key error - usually in the form of "dupKey": dupValue
       const duplicateField = Object.keys(err.keyValue)[0];
       // To make it look pretty :#
       const capitalizedField =
@@ -374,7 +375,13 @@ export const putProfilePic = async (request: Request, response: Response) => {
       });
     }
 
-    user.profilePic = Buffer.from(profilePic, 'base64');
+    user.profilePic = await sharp(Buffer.from(profilePic, 'base64'))
+      .webp()
+      .toBuffer();
+
+    // user.profilePic = await ImageManager.toWebp(
+    //   Buffer.from(profilePic, 'base64'),
+    // );
     await user.save();
     return response.status(200).json({
       success: true,
