@@ -30,6 +30,9 @@ export interface DeltaPayload {
     y: number;
   }>;
   propertyValue?: string;
+
+  // ALLEN ADD THIS TO BACKEND
+  labels?: Array<string>;
 }
 
 export enum DeltaType {

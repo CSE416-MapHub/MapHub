@@ -125,7 +125,6 @@ export default function () {
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
   function handleMapClick(ev: L.LeafletMouseEvent) {
-    console.log('handlnig map click');
     let latlng = ev.latlng;
     let map = editorContextRef.current.state.map;
     if (map === null) return;

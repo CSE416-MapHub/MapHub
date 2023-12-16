@@ -38,6 +38,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.ARROW:
       deltaArrow(map, d);
       break;
+    case TargetType.LABELS:
+      deltaLabels(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
@@ -556,6 +559,21 @@ function deltaArrow(map: MHJSON, d: Delta) {
       map.arrowsData[d.target[1]].opacity = 0;
       map.arrowsData[d.target[1]].capacity = 0;
       break;
+    }
+  }
+}
+
+function deltaLabels(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      if (d.payload.labels === undefined) {
+        throw new Error('Labels is not set in updating labels');
+      }
+      map.labels = d.payload.labels;
+      break;
+    }
+    default: {
+      throw new Error('Trying to create or delete labels??');
     }
   }
 }

@@ -7,19 +7,27 @@ import { ColorPicker, useColor } from 'react-color-palette';
 import 'react-color-palette/css';
 import { EditorContext } from 'context/EditorProvider';
 import { DeltaType, TargetType } from 'types/delta';
+import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 
 interface NewDotModalProps {
   open: boolean;
+  visitor: GeoJSONVisitor;
   onClose: () => void;
 }
 
-const NewLabelModal: React.FC<NewDotModalProps> = ({ open, onClose }) => {
+const NewLabelModal: React.FC<NewDotModalProps> = ({
+  open,
+  visitor,
+  onClose,
+}) => {
   const [name, setName] = useState('');
   const [def, setDef] = useState<string>('');
   const editorContext = useContext(EditorContext);
 
   const handleConfirm = () => {
     console.log('handling confirm');
+    let isNumeric = parseFloat(def).toString() === def;
+    visitor.addKey(name, isNumeric);
     editorContext.helpers.addDelta(
       editorContext,
       {
