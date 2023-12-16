@@ -223,6 +223,7 @@ export default function () {
   }
 
   useEffect(() => {
+    console.log("map loading!");
     const mapId = searchParams.get('mapid') as string;
     console.log(mapId);
     if (mapId && editorContext.state.map_id !== mapId) {
@@ -310,6 +311,7 @@ export default function () {
           onClick={() => {
             editorContext.helpers.undo(editorContext);
           }}
+          disabled={editorContext.state.actionStack.stack.length == 0}
         >
           <Undo fontSize="medium" />
         </IconButton>
@@ -318,6 +320,7 @@ export default function () {
           onClick={() => {
             editorContext.helpers.redo(editorContext);
           }}
+          disabled={editorContext.state.actionStack.counterStack.length == 0}
         >
           <Redo fontSize="medium" />
         </IconButton>
