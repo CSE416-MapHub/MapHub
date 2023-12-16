@@ -16,7 +16,7 @@ import SettingsPane from '../components/settingsPane';
 import SettingsReadTextField from '../components/settingsReadTextField';
 import SettingsSection from '../components/settingsSection';
 import SettingsTextField from '../components/settingsTextField';
-import SettingsButton from '../components/settingsButton.tsx';
+import SettingsButton from '../components/settingsButton';
 import styles from './styles/editUsername.module.scss';
 
 function EditUsername() {
