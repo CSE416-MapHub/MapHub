@@ -1,5 +1,5 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
-import { Dispatch, createContext, useReducer } from 'react';
+import { Dispatch, createContext, useReducer, useContext } from 'react';
 import { IDotDensityProps, ISymbolProps, MHJSON } from 'types/MHJSON';
 import {
   GeoJSONVisitor,
@@ -7,6 +7,11 @@ import {
   mergeBBox,
 } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
+import {
+  NotificationsActionType,
+  NotificationsContext,
+} from 'context/notificationsProvider';
+
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
 import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
@@ -77,6 +82,8 @@ function reducer(
     payload: Partial<IEditorState>;
   },
 ): IEditorState {
+  const notifications = useContext(NotificationsContext);
+
   let newState: IEditorState = { ...prev };
   switch (action.type) {
     case EditorActions.SET_SELECTED: {
@@ -96,9 +103,16 @@ function reducer(
         v.visitRoot();
         console.log('AHHH HELOOO', v);
         if (v.getFeatureResults().perFeature.length === 0) {
-          throw new Error(
-            'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
-          );
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
+              actions: {
+                close: true,
+              },
+            },
+          });
+          break;
         }
         newState.mapDetails = {
           availableProps: Array.from(

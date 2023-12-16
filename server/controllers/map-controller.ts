@@ -10,7 +10,6 @@ import util from 'util';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
-
 import svg2img, { svg2imgOptions } from 'svg2img';
 
 type MapDocument = typeof Map.prototype;
@@ -42,12 +41,14 @@ async function convertSvgToPngBase64(svgString: string): Promise<string> {
       imageRendering: 0,
       fitTo: { mode: 'width', value: 800 },
     },
+    quality: 100,
   };
+
   return new Promise((resolve, reject) => {
     svg2img(svgString, options, function (error, buffer) {
       if (error) {
         console.error('Error converting SVG to PNG:', error);
-        reject(error);
+        resolve('FULL');
       } else {
         // Convert buffer to a base64 encoded string
         const base64Png = buffer.toString('base64');
@@ -93,8 +94,16 @@ export async function convertJsonToSVG(
 </svg>`;
   if (SVGDetailStr === SVGDetail.THUMBNAIL) {
     console.log('Converting to THUMBNAIL');
-    const pngString = await convertSvgToPngBase64(svgRepr);
-    return pngString;
+    try {
+      const pngString = await convertSvgToPngBase64(svgRepr);
+      if (pngString === 'FULL') {
+        return minifySVG(svgRepr);
+      }
+      return pngString;
+    } catch (error: any) {
+      console.log('CAUGHT THE ERROR', error);
+      return minifySVG(svgRepr);
+    }
   }
   console.log('Converting to SVG full');
 
