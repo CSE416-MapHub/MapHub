@@ -10,6 +10,7 @@ import * as G from 'geojson';
 import {
   NotificationsActionType,
   NotificationsContext,
+  NotificationsContextValue,
 } from 'context/notificationsProvider';
 
 import { ActionStack } from './editorHelpers/Actions';
@@ -75,106 +76,114 @@ export enum EditorActions {
 }
 
 // the reducer
-function reducer(
-  prev: IEditorState,
-  action: {
-    type: EditorActions;
-    payload: Partial<IEditorState>;
-  },
-): IEditorState {
-  const notifications = useContext(NotificationsContext);
-
-  let newState: IEditorState = { ...prev };
-  switch (action.type) {
-    case EditorActions.SET_SELECTED: {
-      if (action.payload.selectedItem || action.payload.selectedItem === null) {
-        newState.selectedItem = action.payload.selectedItem;
-      } else {
-        throw new Error('SET_SELECTED must have a selectedItem in its payload');
-      }
-      break;
-    }
-    case EditorActions.SET_MAP: {
-      if (action.payload.map && action.payload.map_id) {
-        newState.map = action.payload.map;
-        newState.map_id = action.payload.map_id;
-        let geoJSON = action.payload.map.geoJSON;
-        let v = new GeoJSONVisitor(geoJSON);
-        v.visitRoot();
-        console.log('AHHH HELOOO', v);
-        if (v.getFeatureResults().perFeature.length === 0) {
-          notifications.dispatch({
-            type: NotificationsActionType.enqueue,
-            value: {
-              message: 'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
-              actions: {
-                close: true,
-              },
-            },
-          });
-          break;
+function getReducer(notifications: NotificationsContextValue) {
+  function reducer(
+    prev: IEditorState,
+    action: {
+      type: EditorActions;
+      payload: Partial<IEditorState>;
+    },
+  ): IEditorState {
+    let newState: IEditorState = { ...prev };
+    switch (action.type) {
+      case EditorActions.SET_SELECTED: {
+        if (
+          action.payload.selectedItem ||
+          action.payload.selectedItem === null
+        ) {
+          newState.selectedItem = action.payload.selectedItem;
+        } else {
+          throw new Error(
+            'SET_SELECTED must have a selectedItem in its payload',
+          );
         }
-        newState.mapDetails = {
-          availableProps: Array.from(
-            v.getFeatureResults().aggregate.globallyAvailableKeys,
-          ),
-          bbox: v
-            .getFeatureResults()
-            .perFeature.reduce(
-              (prev, curr) => mergeBBox(prev, curr.box),
-              v.getFeatureResults().perFeature[0].box,
+        break;
+      }
+      case EditorActions.SET_MAP: {
+        if (action.payload.map && action.payload.map_id) {
+          newState.map = action.payload.map;
+          newState.map_id = action.payload.map_id;
+          let geoJSON = action.payload.map.geoJSON;
+          let v = new GeoJSONVisitor(geoJSON);
+          v.visitRoot();
+          console.log('AHHH HELOOO', v);
+          if (v.getFeatureResults().perFeature.length === 0) {
+            notifications.dispatch({
+              type: NotificationsActionType.enqueue,
+              value: {
+                message: 'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
+                actions: {
+                  close: true,
+                },
+              },
+            });
+            break;
+          }
+          newState.mapDetails = {
+            availableProps: Array.from(
+              v.getFeatureResults().aggregate.globallyAvailableKeys,
             ),
-          regionData: v.getFeatureResults().perFeature,
-        };
-      } else {
-        throw new Error('SET_MAP must have a map and a map_id in its payload');
+            bbox: v
+              .getFeatureResults()
+              .perFeature.reduce(
+                (prev, curr) => mergeBBox(prev, curr.box),
+                v.getFeatureResults().perFeature[0].box,
+              ),
+            regionData: v.getFeatureResults().perFeature,
+          };
+        } else {
+          throw new Error(
+            'SET_MAP must have a map and a map_id in its payload',
+          );
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_TOOL: {
-      if (action.payload.selectedTool !== undefined) {
-        newState.selectedTool = action.payload.selectedTool;
-      } else {
-        throw new Error('SET_TOOL must have a tool in its payload');
+      case EditorActions.SET_TOOL: {
+        if (action.payload.selectedTool !== undefined) {
+          newState.selectedTool = action.payload.selectedTool;
+        } else {
+          throw new Error('SET_TOOL must have a tool in its payload');
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_TITLE: {
-      if (action.payload.map !== undefined) {
-        newState.map = action.payload.map;
-      } else {
-        throw new Error('SET_NAME must have a map in its payload');
+      case EditorActions.SET_TITLE: {
+        if (action.payload.map !== undefined) {
+          newState.map = action.payload.map;
+        } else {
+          throw new Error('SET_NAME must have a map in its payload');
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_ACTION: {
-      if (
-        action.payload.map !== undefined &&
-        action.payload.actionStack !== undefined &&
-        action.payload.lastInstantiated !== undefined
-      ) {
-        newState.map = action.payload.map;
-        newState.actionStack = action.payload.actionStack;
-        newState.lastInstantiated = action.payload.lastInstantiated;
-      } else {
-        throw new Error(
-          'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
-        );
+      case EditorActions.SET_ACTION: {
+        if (
+          action.payload.map !== undefined &&
+          action.payload.actionStack !== undefined &&
+          action.payload.lastInstantiated !== undefined
+        ) {
+          newState.map = action.payload.map;
+          newState.actionStack = action.payload.actionStack;
+          newState.lastInstantiated = action.payload.lastInstantiated;
+        } else {
+          throw new Error(
+            'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
+          );
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_DELETING: {
-      if (action.payload.isDeleting !== undefined) {
-        newState.isDeleting = action.payload.isDeleting;
-      } else {
-        throw new Error('SET_DELETING must have a isDeleting');
+      case EditorActions.SET_DELETING: {
+        if (action.payload.isDeleting !== undefined) {
+          newState.isDeleting = action.payload.isDeleting;
+        } else {
+          throw new Error('SET_DELETING must have a isDeleting');
+        }
+        break;
       }
-      break;
+      default:
+        throw new Error('UNHANDLED ACTION');
     }
-    default:
-      throw new Error('UNHANDLED ACTION');
+    return newState;
   }
-  return newState;
+  return reducer;
 }
 
 class helpers {
@@ -348,6 +357,7 @@ export const EditorContext = createContext<IEditorContext>({
 });
 
 export const EditorProvider = ({ children }: React.PropsWithChildren) => {
+  const reducer = getReducer(useContext(NotificationsContext));
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
     <EditorContext.Provider value={{ state, dispatch, helpers: new helpers() }}>

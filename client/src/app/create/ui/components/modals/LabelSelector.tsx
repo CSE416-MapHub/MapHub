@@ -128,30 +128,32 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
             setSearchInput(newInputValue)
           }
           options={properties}
-          renderInput={params => (
-            <TextField
-              {...params}
-              label="Search"
-              className={style.textField}
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleSortIconClick}>
-                      <SortIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          )}
+          renderInput={params => {
+            return (
+              <TextField
+                {...params}
+                label="Search"
+                className={style.textField}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconButton>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleSortIconClick}>
+                        <SortIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            );
+          }}
           style={{ minWidth: '40%' }}
           freeSolo
         />

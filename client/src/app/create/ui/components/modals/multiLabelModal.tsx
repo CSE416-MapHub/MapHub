@@ -1,29 +1,49 @@
-import React, { useState } from 'react';
+import React, { useContext, useRef, useState } from 'react';
 import { TextField } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import LabelSelector from './LabelSelector';
+import { EditorContext } from 'context/EditorProvider';
+import { DeltaType, TargetType } from 'types/delta';
 
 interface MapLabelModalProps {
   open: boolean;
   onClose: () => void;
-  onConfirm: (selectedOptions: string[]) => void;
   properties: string[];
 }
 
 const MultiMapLabelModal: React.FC<MapLabelModalProps> = ({
   open,
   onClose,
-  onConfirm,
   properties,
 }) => {
-  const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
+  const editorContext = useContext(EditorContext);
+  const oldItems = [...(editorContext.state.map?.labels ?? [])];
+  const [selectedOptions, setSelectedOptions] = useState<string[]>(oldItems);
 
   const handleSelectionChange = (selection: string[]) => {
     setSelectedOptions(selection);
   };
 
   const handleConfirm = () => {
-    onConfirm(selectedOptions);
+    editorContext.helpers.addDelta(
+      editorContext,
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.LABELS,
+        target: [editorContext.state.map_id, -1, '-1'],
+        payload: {
+          labels: selectedOptions,
+        },
+      },
+      {
+        type: DeltaType.UPDATE,
+        targetType: TargetType.LABELS,
+        target: [editorContext.state.map_id, -1, '-1'],
+        payload: {
+          labels: oldItems,
+        },
+      },
+    );
     onClose();
   };
 

@@ -38,6 +38,9 @@ export function applyDelta(map: MHJSON, d: Delta) {
     case TargetType.ARROW:
       deltaArrow(map, d);
       break;
+    case TargetType.LABELS:
+      deltaLabels(map, d);
+      break;
     default:
       throw new Error('uninmplemented');
   }
@@ -206,14 +209,29 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
 function deltaGeoJson(map: MHJSON, d: Delta) {
   let v = new GeoJSONVisitor(map.geoJSON, true);
   v.visitRoot();
-  let targFeature = v.getFeatureResults().perFeature[d.target[1]];
-  if (targFeature === undefined) {
-    throw new Error('Region out of bounds');
-  }
 
   switch (d.type) {
-    case DeltaType.CREATE:
+    case DeltaType.CREATE: {
+      if (d.target[1] !== -1) {
+        throw new Error(
+          'You are unsure if you are trying to create a geojason property or update; got target if not equal to -1: ' +
+            d.target[1],
+        );
+      }
+      for (let featureVisitResult of v.getFeatureResults().perFeature) {
+        let feature = featureVisitResult.originalFeature;
+        if (feature.properties === null) {
+          feature.properties = {};
+        }
+        feature.properties[d.target[2]] = d.payload.propertyValue;
+      }
+      break;
+    }
     case DeltaType.UPDATE: {
+      let targFeature = v.getFeatureResults().perFeature[d.target[1]];
+      if (targFeature === undefined) {
+        throw new Error('Region out of bounds');
+      }
       let propName = d.target[2];
       let orig = targFeature.originalFeature;
       if (!orig.properties) {
@@ -223,12 +241,19 @@ function deltaGeoJson(map: MHJSON, d: Delta) {
       break;
     }
     case DeltaType.DELETE: {
-      let propName = d.target[2];
-      let orig = targFeature.originalFeature;
-      if (!orig.properties) {
-        orig.properties = {};
+      if (d.target[1] !== -1) {
+        throw new Error(
+          'You are unsure if you are trying to delete a geojason property or update; got target if not equal to -1: ' +
+            d.target[1],
+        );
       }
-      delete orig.properties[propName];
+      for (let featureVisitResult of v.getFeatureResults().perFeature) {
+        let feature = featureVisitResult.originalFeature;
+        if (feature.properties === null) {
+          feature.properties = {};
+        }
+        delete feature.properties[d.target[2]];
+      }
     }
   }
 }
@@ -534,6 +559,21 @@ function deltaArrow(map: MHJSON, d: Delta) {
       map.arrowsData[d.target[1]].opacity = 0;
       map.arrowsData[d.target[1]].capacity = 0;
       break;
+    }
+  }
+}
+
+function deltaLabels(map: MHJSON, d: Delta) {
+  switch (d.type) {
+    case DeltaType.UPDATE: {
+      if (d.payload.labels === undefined) {
+        throw new Error('Labels is not set in updating labels');
+      }
+      map.labels = d.payload.labels;
+      break;
+    }
+    default: {
+      throw new Error('Trying to create or delete labels??');
     }
   }
 }

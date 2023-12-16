@@ -14,11 +14,6 @@ const expected = {
     title: 'Security',
     password: 'Password',
   },
-  delete: {
-    title: 'Delete Account',
-    body: "Once you delete your account, there's no turning back. It will be gone forever.",
-    buttonText: 'Delete Account',
-  },
 };
 function setUp() {
   cy.mount(
@@ -87,25 +82,5 @@ describe('Security settings ', () => {
   it('contain a password option.', () => {
     cy.get('@security').contains(expected.security.password);
     cy.get('@security').find('input');
-  });
-});
-
-describe('Delete account settings ', () => {
-  beforeEach(() => {
-    setUp();
-    cy.get('#settings-delete-account').as('delete');
-  });
-
-  it('render.', () => {
-    cy.get('@delete').should('be.visible');
-    cy.get('@delete').contains(expected.delete.title);
-  });
-
-  it('contain expected body.', () => {
-    cy.get('@delete').contains(expected.delete.body);
-  });
-
-  it('contain expected button text.', () => {
-    cy.get('@delete').find('button').contains(expected.delete.buttonText);
   });
 });

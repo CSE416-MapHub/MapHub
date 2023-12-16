@@ -355,6 +355,81 @@ describe('POST /auth/username', () => {
   });
 });
 
+describe('PUT /auth/profile-picture', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from('', 'base64'),
+    password: '********',
+    maps: [],
+    save: jest.fn().mockResolvedValue(this),
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+    (auth.verify as jest.Mock).mockImplementation((request, response, next) => {
+      request.userId = '65677439126531bcfbbe2c10';
+      return next();
+    });
+  });
+
+  it('returns the user when a profile picture is successfully edited.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app)
+      .put('/auth/profile-pic')
+      .send({
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.jpg'),
+        ).toString('base64'),
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: '65677439126531bcfbbe2c10',
+        username: 'someUser',
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.webp'),
+        ).toString('base64'),
+      },
+    });
+  });
+
+  it('returns a bad request response if there is an empty body.', async () => {
+    const response = await supertest(app).put('/auth/profile-pic').send({});
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(false);
+    expect(response.body).toHaveProperty('errorCode');
+    expect(response.body.errorCode).toBe(1);
+    expect(response.body).toHaveProperty('errorMessage');
+  });
+
+  it('returns a bad request response if there is no user.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app)
+      .put('/auth/profile-pic')
+      .send({
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.jpg'),
+        ).toString('base64'),
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(false);
+    expect(response.body).toHaveProperty('errorCode');
+    expect(response.body.errorCode).toBe(2);
+    expect(response.body).toHaveProperty('errorMessage');
+  });
+});
+
 describe('GET /auth/verify ', () => {
   const mockUser = {
     _id: '65677439126531bcfbbe2c10',

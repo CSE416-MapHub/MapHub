@@ -51,7 +51,7 @@ export default function () {
     new Map(),
   );
   const [choroplethKey, setChoroplethKey] = useState<string>(DELETED_NAME);
-  // const [draggingItem, setDraggingItem] = useState(null);
+  const stkLen = useRef(0);
   editorContextRef.current = editorContextStaleable;
 
   useEffect(() => {
@@ -85,8 +85,12 @@ export default function () {
       let d1 = editorContextRef.current.state.actionStack.peekStack();
       let d2 = editorContextRef.current.state.actionStack.peekCounterstack();
       if (
-        (d1 && d1.do.targetType === TargetType.GEOJSONDATA) ||
-        (d2 && d2.undo.targetType === TargetType.GEOJSONDATA)
+        stkLen.current !==
+          editorContextRef.current.state.actionStack.stack.length &&
+        ((d1 &&
+          d1.do.targetType === TargetType.GEOJSONDATA &&
+          d1.do.type == DeltaType.UPDATE) ||
+          (d2 && d2.undo.targetType === TargetType.GEOJSONDATA))
       ) {
         setRerender(rerender + 1);
       }
@@ -121,7 +125,6 @@ export default function () {
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
   function handleMapClick(ev: L.LeafletMouseEvent) {
-    console.log('handlnig map click');
     let latlng = ev.latlng;
     let map = editorContextRef.current.state.map;
     if (map === null) return;
