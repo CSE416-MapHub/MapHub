@@ -1523,6 +1523,243 @@ describe('/map/payload/ choropleth', () => {
     expect(response.body.message).toBe('Cant delete global choropleth');
   });
 });
+
+describe('/map/payload/ arrow handle payload', () => {
+  beforeEach(() => {
+    jest
+      .spyOn(mapModel.prototype, 'save')
+      .mockImplementation(function (this: any) {
+        return Promise.resolve(this);
+      });
+  });
+
+  it('arrow create', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      arrowsData: [],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.ARROW,
+      target: [mockMap._id, mockMap.arrowsData.length, '-1'],
+      payload: {
+        color: '#FFFFFF',
+        label: 'Somestring',
+        opacity: 1,
+        capacity: 2000,
+        interpolationPoints: [
+          {
+            x: 2,
+            y: 3,
+          },
+          {
+            x: 2,
+            y: 3,
+          },
+          {
+            x: 2,
+            y: 3,
+          },
+          {
+            x: 2,
+            y: 3,
+          },
+        ],
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.arrowsData.length).toEqual(1);
+    expect(response.body.map.arrowsData[0].interpolationPoints.length).toEqual(
+      4,
+    );
+    expect(response.body.map.arrowsData[0].color).toEqual('#FFFFFF');
+    expect(response.body.map.arrowsData[0].label).toEqual('Somestring');
+    expect(response.body.map.arrowsData[0].opacity).toEqual(1);
+    expect(response.body.map.arrowsData[0].capacity).toEqual(2000);
+  });
+  it('global dot update', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      arrowsData: [
+        {
+          color: '#FFFFFF',
+          label: 'Somestring',
+          opacity: 1,
+          capacity: 2000,
+          interpolationPoints: [
+            {
+              x: 2,
+              y: 3,
+            },
+            {
+              x: 2,
+              y: 3,
+            },
+            {
+              x: 2,
+              y: 3,
+            },
+            {
+              x: 2,
+              y: 3,
+            },
+          ],
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.UPDATE,
+      targetType: TargetType.ARROW,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        opacity: 0.2,
+        interpolationPoints: [
+          {
+            x: 1,
+            y: 1,
+          },
+          {
+            x: 2,
+            y: 2,
+          },
+          {
+            x: 3,
+            y: 3,
+          },
+          {
+            x: 4,
+            y: 4,
+          },
+        ],
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    console.log('UPDATING', response.body.map.arrowsData[0]);
+    expect(response.body.map.arrowsData[0].interpolationPoints).toEqual([
+      {
+        _id: response.body.map.arrowsData[0].interpolationPoints[0]._id,
+        x: 1,
+        y: 1,
+      },
+      {
+        _id: response.body.map.arrowsData[0].interpolationPoints[1]._id,
+
+        x: 2,
+        y: 2,
+      },
+      {
+        _id: response.body.map.arrowsData[0].interpolationPoints[2]._id,
+
+        x: 3,
+        y: 3,
+      },
+      {
+        _id: response.body.map.arrowsData[0].interpolationPoints[3]._id,
+
+        x: 4,
+        y: 4,
+      },
+    ]);
+    expect(response.body.map.arrowsData[0].opacity).toEqual(0.2);
+  });
+  it('no create payload delta', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      arrowsData: [
+        {
+          opacity: 'dak',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.ARROW,
+      target: [mockMap._id, mockMap.arrowsData.length, '-1'],
+      payload: {
+        color: 'd',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(400);
+    expect(response.body.message).toEqual(
+      'Found malformed arrow in create arrow',
+    );
+  });
+});
+
 afterEach(() => {
   // Reset mock after the test
   jest.clearAllMocks();
