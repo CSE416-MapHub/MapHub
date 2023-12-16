@@ -393,7 +393,7 @@ describe('PUT /auth/profile-picture', () => {
         id: '65677439126531bcfbbe2c10',
         username: 'someUser',
         profilePic: Buffer.from(
-          fs.readFileSync('./tests/fixtures/avatar.jpg'),
+          fs.readFileSync('./tests/fixtures/avatar.webp'),
         ).toString('base64'),
       },
     });
