@@ -9,13 +9,46 @@ import {
   isGeometryCollection,
 } from 'context/editorHelpers/utility';
 import L from 'leaflet';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import {
+  IArrowInstance,
+  IDotDensityProps,
+  ISymbolProps,
+  MHJSON,
+} from 'types/MHJSON';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { getArrowhead, producePath } from './ArrowFixer';
 // import { useRef } from "react";
 
 const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
+const lat2m = 10;
+const DEFAULT_SZ = 100;
+
+export const mixColors = (c1: string, c2: string, ratio: number): string => {
+  return (
+    '#' +
+    (() => {
+      const [p1, p2] = [c1, c2].map(color => parseInt(color.slice(1), 16)),
+        a = [];
+
+      for (let i = 0; i <= 2; i += 1) {
+        a.push(
+          Math.floor(
+            ((p1 >> (i * 8)) & 0xff) * (1 - ratio) +
+              ((p2 >> (i * 8)) & 0xff) * ratio,
+          ),
+        );
+      }
+      let res = a
+        .reverse()
+        .map(num => num.toString(16).padStart(2, '0'))
+        .join('');
+      console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
+      return res;
+    })()
+  );
+};
 
 class SVGBuilder {
   private featureNumber = 0;
@@ -59,6 +92,12 @@ class SVGBuilder {
     if (this.mhjson.mapType === 'dot') {
       els += this.svgOfDots();
     }
+    if (this.mhjson.mapType === 'flow') {
+      els += this.svgOfArrows();
+    }
+    if (this.mhjson.mapType === 'symbol') {
+      els += this.svgOfSymbols();
+    }
     return els;
   }
 
@@ -93,7 +132,6 @@ class SVGBuilder {
     opacity: number,
   ): string {
     let p = this.isPosition([x, y]);
-    let lat2m = 10;
 
     return `<circle
       cx="${p[0]}"
@@ -104,6 +142,112 @@ class SVGBuilder {
       stroke="black"
       stroke-width="${STROKE_WIDTH}%"
       />`;
+  }
+
+  private svgOfSymbols(): string {
+    // construct a map of names to objects
+    let symbolMap = new Map<string, [ISymbolProps, HTMLElement]>(
+      this.mhjson.globalSymbolData.map(x => {
+        let svgEl: HTMLElement = new DOMParser().parseFromString(
+          x.svg,
+          'image/svg+xml',
+        ).documentElement;
+        return [x.name, [x, svgEl]];
+      }),
+    );
+
+    let symbols = '';
+    for (let s of this.mhjson.symbolsData) {
+      if (s.symbol === DELETED_NAME) {
+        continue;
+      }
+      let symbolData = symbolMap.get(s.symbol)!;
+      let viewbox = symbolData[1].getAttribute('viewBox');
+      if (viewbox === null) {
+        throw new Error('null viewbox');
+      }
+      symbols += this.svgOfSymbol(
+        viewbox,
+        symbolData[1].innerHTML,
+        [s.x, s.y],
+        s.scale,
+      );
+    }
+    return symbols;
+  }
+
+  private svgOfSymbol(
+    viewbox: string,
+    children: string,
+    location: [x: number, y: number],
+    scale: number,
+  ): string {
+    let [x, y, w, h] = [
+      location[0] - (DEFAULT_SZ * scale) / 2,
+      location[1] + (DEFAULT_SZ * scale) / 2,
+      DEFAULT_SZ * scale * 0.148,
+      DEFAULT_SZ * scale * 0.148,
+    ];
+
+    return `<svg x="${y}" y="${
+      -1 * x
+    }" width="${w}" height="${h}"><svg viewBox="${viewbox}" width="100%" height="100%">
+    ${children}
+  </svg></svg>`;
+  }
+
+  private svgOfArrows(): string {
+    let arrows = '';
+    for (let arrow of this.mhjson.arrowsData) {
+      if (arrow.label === DELETED_NAME) {
+        continue;
+      }
+
+      arrows += this.svgOfArrow(arrow) + '\n';
+    }
+    return arrows;
+  }
+
+  private svgOfArrow(arrow: IArrowInstance): string {
+    let p = arrow.interpolationPoints;
+    let pdata = producePath(p[0], p[1], p[2], p[3]);
+    let d = pdata[0]
+      .map(x => {
+        if (typeof x === 'string') {
+          return x;
+        } else {
+          return `${x[1]} ${-1 * x[0]}`;
+        }
+      })
+      .reduce((prev, curr, i, arr) => {
+        if (
+          i > 0 &&
+          !Number.isNaN(parseFloat(arr[i - 1])) &&
+          !Number.isNaN(parseFloat(arr[i]))
+        ) {
+          return prev + ', ' + curr;
+        }
+        return prev + ' ' + curr;
+      }, '');
+    let [p0, p1] = pdata[1].map(p => {
+      // let t = p.x * -1;
+      // p.x = p.y;
+      // p.y = t;
+      return p;
+    });
+
+    let headPoints = getArrowhead(p0, p1, arrow.capacity / 5);
+    let head = `<polygon points="${headPoints
+      .map(x => `${x.x},${-1 * x.y}`)
+      .join(' ')}" fill="${arrow.color}" fill-opacity="${
+      arrow.opacity
+    }" line-cap="butt" />`;
+    let path = `<path d="${d}" fill="none" stroke="${
+      arrow.color
+    }" stroke-opacity="${arrow.opacity}" line-cap="butt" stroke-width="${
+      arrow.capacity / lat2m
+    }"/>`;
+    return path + head;
   }
 
   /**
@@ -132,11 +276,36 @@ class SVGBuilder {
   private svgOfFeature(feature: GeoJSON.Feature): string {
     let els = this.svgOfGeometry(feature.geometry);
     // determine the color of this feature
+
+    // start by saying the fill is what the user colored it
     let fill = 'white';
     let rColor = this.mhjson.regionsData[this.featureNumber].color;
     if (rColor !== undefined) {
       fill = rColor;
     }
+    // however, if it is choropleth
+    // use the written intensity
+    // but if global choropleth key is set, find the intensity in the properties
+    let intensity =
+      this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
+    let cData = this.mhjson.globalChoroplethData;
+
+    if (cData.indexingKey !== DELETED_NAME && feature.properties) {
+      intensity = parseFloat(feature.properties[cData.indexingKey]);
+    }
+
+    if (intensity !== undefined) {
+      let ratio =
+        (intensity - cData.minIntensity) /
+        (cData.maxIntensity - cData.minIntensity);
+      if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+        fill = 'white';
+      } else {
+        fill = mixColors(cData.minColor, cData.maxColor, ratio);
+      }
+    }
+
+    // if it has both an intensity and a category, use the category
     let category = this.mhjson.regionsData[this.featureNumber].category;
     if (category !== undefined && category !== DELETED_NAME) {
       let categoryObject = this.mhjson.globalCategoryData.filter(
@@ -146,6 +315,7 @@ class SVGBuilder {
         fill = categoryObject.color;
       }
     }
+
     this.featureNumber++;
     return `<g fill="${fill}">${els}</g>`;
   }

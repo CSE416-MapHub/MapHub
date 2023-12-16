@@ -201,7 +201,7 @@ export default function ({
                 <g
                   key={'' + i}
                   ref={ref => ref?.appendChild(el)}
-                  fillOpacity={0}
+                  // fillOpacity={0}
                 ></g>
               ))}
             </svg>
