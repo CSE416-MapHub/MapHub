@@ -34,7 +34,6 @@ export enum SVGDetail {
 }
 
 async function convertSvgToPngBase64(svgString: string): Promise<string> {
-  console.log('this is the string for svg string', svgString);
   const options: svg2imgOptions = {
     resvg: {
       dpi: 300,
