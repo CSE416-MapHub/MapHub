@@ -11,13 +11,13 @@ import {
   NotificationsContext,
 } from '../../../../context/notificationsProvider';
 import AccountAPI from '../../../../api/AccountAPI';
-import Button from '../../../../components/button';
 import SettingsMain from '../components/settingsMain';
 import SettingsHead from '../components/settingsHead';
 import SettingsPane from '../components/settingsPane';
 import SettingsReadTextField from '../components/settingsReadTextField';
 import SettingsSection from '../components/settingsSection';
 import SettingsTextField from '../components/settingsTextField';
+import SettingsButton from '../components/settingsButton.tsx';
 import styles from './styles/editUsername.module.scss';
 
 function EditUsername() {
@@ -171,13 +171,9 @@ function EditUsername() {
             validate={validate}
             helperText={newUsernameHelperText}
           />
-          <Button
-            className={styles['edit-username__button']}
-            variant="filled"
-            onClick={handleSaveClick}
-          >
+          <SettingsButton variant="filled" onClick={handleSaveClick}>
             Save
-          </Button>
+          </SettingsButton>
         </SettingsSection>
       </SettingsPane>
     </SettingsMain>
