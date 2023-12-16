@@ -307,16 +307,22 @@ export default function () {
       <div className={styles['undo-redo']}>
         <IconButton
           iconName={'Undo'}
+          disabled={!editorContext.state.actionStack.canUndo()}
           onClick={() => {
-            editorContext.helpers.undo(editorContext);
+            if (editorContext.state.actionStack.canUndo()) {
+              editorContext.helpers.undo(editorContext);
+            }
           }}
         >
           <Undo fontSize="medium" />
         </IconButton>
         <IconButton
           iconName={'Redo'}
+          disabled={!editorContext.state.actionStack.canRedo()}
           onClick={() => {
-            editorContext.helpers.redo(editorContext);
+            if (editorContext.state.actionStack.canRedo()) {
+              editorContext.helpers.redo(editorContext);
+            }
           }}
         >
           <Redo fontSize="medium" />

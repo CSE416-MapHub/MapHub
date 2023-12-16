@@ -22,6 +22,7 @@ import Text from './instances/Text';
 import Symbol from './instances/Symbol';
 import { getInterpolationPoints } from './helpers/ArrowFixer';
 import Arrow from './instances/Arrow';
+import { mixColors } from './helpers/MHJSONVisitor';
 
 const OPEN_BOUNDS = L.latLngBounds(L.latLng(-900, 1800), L.latLng(900, -1800));
 
@@ -32,31 +33,6 @@ const dummySVG = `<?xml version="1.0" encoding="utf-8"?><!-- Uploaded to: SVG Re
 <svg width="800px" height="800px" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
 <path d="M3 13.6493C3 16.6044 5.41766 19 8.4 19L16.5 19C18.9853 19 21 16.9839 21 14.4969C21 12.6503 19.8893 10.9449 18.3 10.25C18.1317 7.32251 15.684 5 12.6893 5C10.3514 5 8.34694 6.48637 7.5 8.5C4.8 8.9375 3 11.2001 3 13.6493Z" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
-
-const mixColors = (c1: string, c2: string, ratio: number): string => {
-  return (
-    '#' +
-    (() => {
-      const [p1, p2] = [c1, c2].map(color => parseInt(color.slice(1), 16)),
-        a = [];
-
-      for (let i = 0; i <= 2; i += 1) {
-        a.push(
-          Math.floor(
-            ((p1 >> (i * 8)) & 0xff) * (1 - ratio) +
-              ((p2 >> (i * 8)) & 0xff) * ratio,
-          ),
-        );
-      }
-      let res = a
-        .reverse()
-        .map(num => num.toString(16).padStart(2, '0'))
-        .join('');
-      console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
-      return res;
-    })()
-  );
-};
 
 export default function () {
   const editorContextStaleable = useContext(EditorContext);
