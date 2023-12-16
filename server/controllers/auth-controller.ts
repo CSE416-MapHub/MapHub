@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
 import nodemailer from 'nodemailer';
 import crypto from 'crypto';
+import sharp from 'sharp';
 
 // Environment variables for email account
 // const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
@@ -96,7 +97,7 @@ export const registerUser = async (req: Request, res: Response) => {
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
-      // Duplicate key error - usualyl in the form of "dupKey": dupValue
+      // Duplicate key error - usually in the form of "dupKey": dupValue
       const duplicateField = Object.keys(err.keyValue)[0];
       // To make it look pretty :#
       const capitalizedField =
@@ -352,6 +353,49 @@ export const postUsername = async (request: Request, response: Response) => {
   }
 };
 
+export const putProfilePic = async (request: Request, response: Response) => {
+  try {
+    const { profilePic } = request.body;
+    const { userId } = request as any;
+
+    if (!profilePic) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        errorMessage: 'Please upload a new profile picture.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage: 'The user does not exist.',
+      });
+    }
+
+    user.profilePic = await sharp(Buffer.from(profilePic, 'base64'))
+      .webp()
+      .toBuffer();
+    await user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorCode: 0,
+      errorMessage: 'There has been an internal error. Please try again later.',
+    });
+  }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     // Clear the token cookie on the client side
@@ -444,9 +488,8 @@ export const handlePasswordResetting = async (req: Request, res: Response) => {
 
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
-    const passwordHash = await bcrypt.hash(req.body.password, salt);
 
-    user.password = passwordHash;
+    user.password = await bcrypt.hash(req.body.password, salt);
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
 

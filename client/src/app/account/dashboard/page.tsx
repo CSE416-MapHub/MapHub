@@ -1,6 +1,6 @@
 'use client';
+
 import { useEffect, useState, useContext } from 'react';
-// TODO: make this not use client?
 import CardCarousel from './ui/components/CardCarousel';
 import Greeting from './ui/components/Greeting';
 import {

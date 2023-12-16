@@ -1,12 +1,10 @@
 'use client';
 
-import { Box, Typography } from '@mui/material';
+import { Box } from '@mui/material';
 import { useRouter } from 'next/navigation';
 import { useContext, useEffect } from 'react';
 
 import { AuthContext } from '../../../context/AuthProvider';
-import Avatar from 'components/avatar';
-import Button from 'components/button';
 import IconButton from 'components/iconButton';
 import SettingsMain from './components/settingsMain';
 import SettingsHead from './components/settingsHead';
@@ -14,6 +12,7 @@ import SettingsPane from './components/settingsPane';
 import SettingsSection from './components/settingsSection';
 import SettingsTitle from './components/settingsTitle';
 import SettingsTextFieldLink from './components/settingsTextFieldLink';
+import SettingsAvatar from './components/settingsAvatar';
 
 import styles from './styles/settings.module.scss';
 
@@ -34,14 +33,21 @@ function Settings() {
         <SettingsSection id="settings-profile">
           <SettingsTitle>Profile</SettingsTitle>
           <Box className={styles['settings__option']}>
-            <Avatar className={styles['settings__avatar']}>
+            <SettingsAvatar
+              src={
+                auth.state.user?.profilePic
+                  ? `data:image/webp;base64,${auth.state.user.profilePic}`
+                  : undefined
+              }
+            >
               <IconButton
                 className={styles['settings__edit-icon-button']}
                 variant="filled"
                 iconType="solid"
                 iconName="pencil"
+                onClick={() => router.push('/account/settings/profile-picture')}
               />
-            </Avatar>
+            </SettingsAvatar>
           </Box>
           <SettingsTextFieldLink
             href="/account/settings/username"
@@ -57,21 +63,6 @@ function Settings() {
             label="Password"
             value={'********'}
           />
-        </SettingsSection>
-        <SettingsSection id="settings-delete-account">
-          <SettingsTitle className={styles['settings__title--red']}>
-            Delete Account
-          </SettingsTitle>
-          <Typography variant="bodyMedium">
-            Once you delete your account, there's no turning back. It will be
-            gone forever.
-          </Typography>
-          <Button
-            className={styles['settings__delete-button']}
-            variant="errorOutlined"
-          >
-            Delete Account
-          </Button>
         </SettingsSection>
       </SettingsPane>
     </SettingsMain>

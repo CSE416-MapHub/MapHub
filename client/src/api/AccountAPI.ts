@@ -108,6 +108,14 @@ class AccountAPI {
     return this.api.post('/auth/username', { username });
   }
 
+  /**
+   * Makes an API call to modify the user's profile picture.
+   * @param profilePic - a base-64 string in WEBP format.
+   */
+  static async putProfilePic(profilePic: string) {
+    return this.api.put('/auth/profile-pic', { profilePic });
+  }
+
   static async getVerify() {
     return this.api.get('/auth/verify');
   }

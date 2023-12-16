@@ -1,0 +1,14 @@
+@use 'shape';
+
+.edit-profile-pic {
+  &__label {
+    &--leading {
+      align-self: flex-start;
+      margin-top: shape.$extra-large;
+    }
+  }
+  &__dropzone {
+    margin: shape.$extra-large 10%;
+  }
+}
+

@@ -8,9 +8,10 @@
   grid-area: pane;
   display: flex;
   flex-direction: column;
-  gap: shape.$extra-large;
+  gap: 48px;
 
-  width: calc(100% - 56px);
+  min-width: calc(100% - 56px);
+  width: fit-content;
   min-height: 80%;
   padding: shape.$extra-large;
 
