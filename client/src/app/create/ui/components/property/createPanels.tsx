@@ -447,16 +447,21 @@ export function makeCategoricalPanel(
               [
                 'Delete Category',
                 () => {
-                  openModal('Category', activeCategory!.name, () => {
-                    updateField(
-                      ctx,
-                      activeCategoryId,
-                      TargetType.GLOBAL_CATEGORY,
-                      'name',
-                      activeCategory!.name,
-                      DELETED_NAME,
-                    );
-                  });
+                  openModal(
+                    'Category',
+                    //TODO: DISABLE DOESNT ACTUALLY DISABLE
+                    activeCategory ? activeCategory?.name : '',
+                    () => {
+                      updateField(
+                        ctx,
+                        activeCategoryId,
+                        TargetType.GLOBAL_CATEGORY,
+                        'name',
+                        activeCategory!.name,
+                        DELETED_NAME,
+                      );
+                    },
+                  );
                 },
               ] as [string, () => void],
             ],

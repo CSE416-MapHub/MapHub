@@ -148,7 +148,7 @@ class GlobalCategoryHandler {
     let taken = map.globalCategoryData.filter(
       (c: any) => c.name === delta.payload.name,
     );
-    if (taken.length === 1 || delta.payload.name === DELETED_NAME) {
+    if (taken.length >= 1 && delta.payload.name !== DELETED_NAME) {
       throw new Error(
         'Category name ' + delta.payload.name + ' is already used',
       );
@@ -521,13 +521,14 @@ class DotHandler {
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a dot from the map
+    console.log('DELETING A DOT INSTANCE');
     const targetIndex = delta.target[1];
     //if target index within range then we can set the name to deleted
     if (targetIndex >= map.dotsData.length || targetIndex < 0) {
       throw new Error('DELETE DOT Target index out of bounds');
     }
 
-    map.dotsData[targetIndex].name = DELETED_NAME;
+    map.dotsData[targetIndex].dot = DELETED_NAME;
 
     return map;
   }
