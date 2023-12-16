@@ -33,6 +33,7 @@ import { readFile } from 'fs';
 import { MapPayload } from 'types/mapPayload';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 import { DeltaType, TargetType } from 'types/delta';
+import NewLabelModal from './modals/newProperty';
 
 // A list of all accepted file types.
 const accept: string =
@@ -112,7 +113,13 @@ export default function () {
         },
       },
     },
-    Map: {},
+    Map: {
+      'Add Property': {
+        onclick: () => {
+          setOpenNewLabelModal(true);
+        },
+      },
+    },
   };
 
   function handleMenuClose() {
@@ -145,6 +152,7 @@ export default function () {
   const [openMapLabelModal, setOpenMapLabelModal] = useState(false);
   const [openRecentMapModal, setOpenRecentMapModal] = useState(false);
   const [openPublishMapModal, setOpenPublishMapModal] = useState(false);
+  const [openNewLabelModal, setOpenNewLabelModal] = useState(false);
   const [editingTitle, setEditingTitle] = useState(false);
   const [updatedTitle, setUpdatedTitle] = useState('');
   const selectedOptions = [
@@ -224,7 +232,6 @@ export default function () {
 
   useEffect(() => {
     const mapId = searchParams.get('mapid') as string;
-    console.log(mapId);
     if (mapId && editorContext.state.map_id !== mapId) {
       let getMap: Promise<MHJSON>;
       if (authContext.state.isLoggedIn) {
@@ -362,6 +369,10 @@ export default function () {
       <PublishMapModal
         open={openPublishMapModal}
         onClose={() => setOpenPublishMapModal(false)}
+      />
+      <NewLabelModal
+        open={openNewLabelModal}
+        onClose={() => setOpenNewLabelModal(false)}
       />
       <input
         type="file"
