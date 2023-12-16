@@ -23,7 +23,6 @@ import styles from '../../../components/form.module.css';
 import AccountAPI from '../../../../../api/AccountAPI';
 import { useRouter } from 'next/navigation';
 import { AuthContext, AuthActions } from '../../../../../context/AuthProvider';
-import { base64StringToBlob } from 'blob-util';
 
 interface LoginFieldState {
   value: string;
@@ -200,13 +199,7 @@ function LoginForm() {
           authDispatch({
             type: AuthActions.LOGIN,
             payload: {
-              user: {
-                id: response.data.user.id,
-                username: response.data.user.username,
-                profilePic: URL.createObjectURL(
-                  base64StringToBlob(response.data.user.profilePic),
-                ),
-              },
+              user: response.data.user,
             },
           });
           //Redirect to dashboard
@@ -283,7 +276,12 @@ function LoginForm() {
           Forgot Password
         </Link>
       </Container>
-      <Button className={styles.button} id="sign-in-confirm" variant="filled" onClick={handleLoginClick}>
+      <Button
+        className={styles.button}
+        id="sign-in-confirm"
+        variant="filled"
+        onClick={handleLoginClick}
+      >
         Sign In
       </Button>
 

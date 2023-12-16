@@ -1,7 +1,6 @@
 'use client';
 
 import { isAxiosError } from 'axios';
-import { base64StringToBlob } from 'blob-util';
 import { MouseEventHandler, useContext, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
@@ -84,13 +83,7 @@ function EditUsername() {
       auth.dispatch({
         type: AuthActions.EDIT_USERNAME,
         payload: {
-          user: {
-            id: response.data.user.id,
-            username: response.data.user.username,
-            profilePic: URL.createObjectURL(
-              base64StringToBlob(response.data.user.profilePic),
-            ),
-          },
+          user: response.data.user,
         },
       });
       router.push('/account/settings');
