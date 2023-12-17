@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 import Map from '../models/map-model';
 import User from '../models/user-model';
 import fs from 'fs';
+import path from 'path';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
