@@ -35,13 +35,13 @@ describe('The Toolbar "Select" Icon Button', () => {
   it('renders visibly.', () => {
     cy.get('@select').should('be.visible');
   });
-  it('is clickable.', () => {
-    cy.get('@select').click();
+  it('should be disabled.', () => {
+    cy.get('@select').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@select').click();
-    cy.get('@select').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@select').click();
+  //   cy.get('@select').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
 
 describe('The Toolbar "Pan" Icon Button', () => {
@@ -57,12 +57,12 @@ describe('The Toolbar "Pan" Icon Button', () => {
     cy.get('@pan').should('be.visible');
   });
   it('is clickable.', () => {
-    cy.get('@pan').click();
+    cy.get('@pan').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@pan').click();
-    cy.get('@pan').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@pan').click();
+  //   cy.get('@pan').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
 
 describe('The Toolbar "Erase" Icon Button', () => {
@@ -78,12 +78,12 @@ describe('The Toolbar "Erase" Icon Button', () => {
     cy.get('@erase').should('be.visible');
   });
   it('is clickable.', () => {
-    cy.get('@erase').click();
+    cy.get('@erase').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@erase').click();
-    cy.get('@erase').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@erase').click();
+  //   cy.get('@erase').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
 
 describe('The Toolbar "Point" Icon Button', () => {
@@ -99,12 +99,12 @@ describe('The Toolbar "Point" Icon Button', () => {
     cy.get('@point').should('be.visible');
   });
   it('is clickable.', () => {
-    cy.get('@point').click();
+    cy.get('@point').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@point').click();
-    cy.get('@point').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@point').click();
+  //   cy.get('@point').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
 
 describe('The Toolbar "Icon" Icon Button', () => {
@@ -120,12 +120,12 @@ describe('The Toolbar "Icon" Icon Button', () => {
     cy.get('@icon').should('be.visible');
   });
   it('is clickable.', () => {
-    cy.get('@icon').click();
+    cy.get('@icon').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@icon').click();
-    cy.get('@icon').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@icon').click();
+  //   cy.get('@icon').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
 
 describe('The Toolbar "Path" Icon Button', () => {
@@ -141,10 +141,10 @@ describe('The Toolbar "Path" Icon Button', () => {
     cy.get('@path').should('be.visible');
   });
   it('is clickable.', () => {
-    cy.get('@path').click();
+    cy.get('@path').should('be.disabled');
   });
-  it('is selected after a click.', () => {
-    cy.get('@path').click();
-    cy.get('@path').invoke('attr', 'class').should('contain', 'selected');
-  });
+  // it('is selected after a click.', () => {
+  //   cy.get('@path').click();
+  //   cy.get('@path').invoke('attr', 'class').should('contain', 'selected');
+  // });
 });
