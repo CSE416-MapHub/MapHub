@@ -116,7 +116,9 @@ export async function convertJsonToSVG(
       return pngString.toString('base64');
     } catch (error: any) {
       console.log('CAUGHT THE ERROR', error);
-      // console.log('The svg in question', map.title, svgRepr);
+      if (map.title === 'Russian invasion') {
+        console.log('The svg in question', map.title, svgRepr);
+      }
       return minifySVG(svgRepr);
     }
   }
