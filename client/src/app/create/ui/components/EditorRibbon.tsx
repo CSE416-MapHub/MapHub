@@ -311,7 +311,6 @@ export default function () {
               editorContext.helpers.undo(editorContext);
             }
           }}
-          disabled={editorContext.state.actionStack.stack.length == 0}
         >
           <Undo fontSize="medium" />
         </IconButton>
@@ -323,7 +322,6 @@ export default function () {
               editorContext.helpers.redo(editorContext);
             }
           }}
-          disabled={editorContext.state.actionStack.counterStack.length == 0}
         >
           <Redo fontSize="medium" />
         </IconButton>
