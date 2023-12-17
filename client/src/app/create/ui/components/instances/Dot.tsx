@@ -123,7 +123,7 @@ export default function ({
     <CircleMarker
       center={L.latLng(y, x)}
       color="#000000"
-      weight={1}
+      weight={0}
       fillOpacity={dotClass.opacity}
       fillColor={dotClass.color}
       radius={dotClass.size * dotInstance.scale}

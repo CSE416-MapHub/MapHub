@@ -121,6 +121,7 @@ function deltaDot(map: MHJSON, d: Delta) {
  * @param d
  */
 function deltaGlobalDot(map: MHJSON, d: Delta) {
+  map.globalDotDensityData = [...map.globalDotDensityData];
   switch (d.type) {
     case DeltaType.UPDATE: {
       if (map.globalDotDensityData.length <= d.target[1] || d.target[1] < 0) {
@@ -197,6 +198,13 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
         size: p.size,
         color: p.color,
       });
+
+      // look for dots that have this name, but are deleted
+      for (let dot of map.dotsData) {
+        if (dot.dot === p.name + DELETED_NAME) {
+          dot.dot = p.name;
+        }
+      }
       break;
     }
   }
@@ -321,6 +329,7 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
     case DeltaType.CREATE: {
       // must have an name, opacity, size, color
       map.regionsData = [...map.regionsData];
+      map.globalCategoryData = [...map.globalCategoryData];
       let p = d.payload;
       if (p.name === undefined || p.color === undefined) {
         console.log(p);
@@ -340,10 +349,15 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
           'Tried to create a category with a name that already exists',
         );
       }
-      map.globalCategoryData.push({
+      map.globalCategoryData[d.target[1]] = {
         name: p.name,
         color: p.color,
-      });
+      };
+      for (let r of map.regionsData) {
+        if (r.category && r.category === p.name + DELETED_NAME) {
+          r.category = p.name;
+        }
+      }
 
       break;
     }
@@ -354,9 +368,10 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
       }
       let targName = map.globalCategoryData[d.target[1]].name;
       map.globalCategoryData[d.target[1]].name += DELETED_NAME;
+
       map.regionsData = map.regionsData.map(r => {
         if (r.category === targName) {
-          r.category = undefined;
+          r.category = targName + DELETED_NAME;
         }
         return r;
       });

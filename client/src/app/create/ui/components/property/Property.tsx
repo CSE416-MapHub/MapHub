@@ -45,7 +45,7 @@ export default function () {
         setPanels(makeSymbolPanel(editorContext, currTarg.id));
         break;
       case TargetType.DOT:
-        setPanels(makeDotPanel(editorContext, currTarg.id));
+        setPanels(makeDotPanel(editorContext, currTarg.id, openDeleteModal));
         break;
       case TargetType.ARROW:
         setPanels(makeArrowPanel(editorContext, currTarg.id));

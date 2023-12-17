@@ -138,8 +138,6 @@ class SVGBuilder {
       r="${radius / lat2m}"
       fill="${color}"
       opacity="${opacity}"
-      stroke="black"
-      stroke-width="${STROKE_WIDTH}%"
       />`;
   }
 
