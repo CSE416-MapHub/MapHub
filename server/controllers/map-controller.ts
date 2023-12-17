@@ -99,7 +99,6 @@ export async function convertJsonToSVG(
       // if (pngString === 'FULL') {
       //   return minifySVG(svgRepr);
       // }
-      console.log('BOUNDING BOX of', box[0], box[1]);
       const pngString = await sharp(Buffer.from(svgRepr))
         .png()
         .resize({
@@ -112,13 +111,19 @@ export async function convertJsonToSVG(
           kernel: 'lanczos3',
         })
         .toBuffer();
+      console.log('BOUNDING BOX of UNFAILED', box.join(' '), map.title);
 
+      if (map.title === 'hgf') {
+        console.log('The svg in question', map.title);
+      }
       return pngString.toString('base64');
     } catch (error: any) {
+      console.log('BOUNDING BOX of FAILED', box.join(' '), map.title);
+
       console.log('CAUGHT THE ERROR', error);
-      if (map.title === 'Russian invasion') {
-        console.log('The svg in question', map.title, svgRepr);
-      }
+      // if (map.title === 'testing symbol') {
+      //   console.log('The svg in question', map.title, svgRepr);
+      // }
       return minifySVG(svgRepr);
     }
   }
