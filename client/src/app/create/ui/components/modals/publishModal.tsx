@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
@@ -20,6 +20,10 @@ const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
   );
   const router = useRouter();
   const [description, setDescription] = useState('');
+
+  useEffect(() => {
+    setMapName(editorContext.state.map?.title ?? 'My New Map')
+  }, [editorContext.state.map?.title]);
 
   const handleConfirm = () => {
     editorContext.helpers.changeTitle(editorContext, mapName);
