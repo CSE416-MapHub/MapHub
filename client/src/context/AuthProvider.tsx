@@ -27,6 +27,7 @@ export enum AuthActions {
   EDIT_USERNAME,
   VERIFY,
   EDIT_PROFILE_PICTURE,
+  UPDATE_USER,
 }
 
 type AuthAction =
@@ -52,6 +53,16 @@ type AuthAction =
     }
   | {
       type: AuthActions.EDIT_PROFILE_PICTURE;
+      payload: {
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        };
+      };
+    }
+  | {
+      type: AuthActions.UPDATE_USER;
       payload: {
         user: {
           id: string;
@@ -114,6 +125,11 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
       return {
         ...prev,
         isLoggedIn: action.payload.isLoggedIn,
+        user: action.payload.user,
+      };
+    case AuthActions.UPDATE_USER:
+      return {
+        ...prev,
         user: action.payload.user,
       };
     default:
