@@ -86,6 +86,7 @@ function getReducer(notifications: NotificationsContextValue) {
     },
   ): IEditorState {
     let newState: IEditorState = { ...prev };
+    console.log(action);
     switch (action.type) {
       case EditorActions.SET_SELECTED: {
         if (

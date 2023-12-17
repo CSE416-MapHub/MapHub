@@ -48,6 +48,7 @@ export default function () {
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
+  const [gSymbolArray, setGSymbolArray] = useState<Array<ISymbolProps>>([]);
   const [symbolNames, setSymbolNames] = useState<Map<string, ISymbolProps>>(
     new Map(),
   );
@@ -73,11 +74,14 @@ export default function () {
         setDotNames(nameMap);
         setGDotArray(loadedMap.globalDotDensityData);
       }
-      if (symbolNames.size !== loadedMap.globalSymbolData.length) {
+      if (gSymbolArray !== loadedMap.globalSymbolData) {
         let nameMap = new Map<string, ISymbolProps>();
-        for (let ip of loadedMap.globalSymbolData) {
+        for (let ip of loadedMap.globalSymbolData.filter(
+          x => !x.name.endsWith(DELETED_NAME),
+        )) {
           nameMap.set(ip.name, ip);
         }
+        setGSymbolArray(loadedMap.globalSymbolData);
         setSymbolNames(nameMap);
       }
       if (loadedMap.globalChoroplethData.indexingKey !== choroplethKey) {
@@ -388,7 +392,6 @@ export default function () {
             color: '#000000',
             size: 0,
           };
-          console.log('dot class is ', dotClass);
           return (
             <Dot
               dotInstance={dotInstance}

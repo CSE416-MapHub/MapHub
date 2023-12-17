@@ -602,6 +602,11 @@ export function makeChoroplethPanel(
 export function makeSymbolPanel(
   ctx: IEditorContext,
   id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
 ): Array<IPropertyPanelSectionProps> {
   let loadedMap = ctx.state.map!;
   let symInstance = loadedMap.symbolsData[id];
@@ -720,6 +725,30 @@ export function makeSymbolPanel(
                 val,
               );
             },
+          },
+        },
+        {
+          name: 'Delete Symbol Class',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: false,
+            value: [
+              [
+                'Delete Symbol',
+                () => {
+                  openModal('Symbol', symClass.name.toString(), () => {
+                    deleteItem(
+                      ctx,
+                      classId,
+                      TargetType.GLOBAL_SYMBOL,
+                      structuredClone(symClass),
+                    );
+                  });
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
           },
         },
       ],
