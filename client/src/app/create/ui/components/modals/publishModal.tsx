@@ -8,6 +8,7 @@ import MapAPI from 'api/MapAPI';
 import PostAPI from 'api/PostAPI';
 import { publishMap } from '../helpers/EditorAPICalls';
 import { useRouter } from 'next/navigation';
+import { NotificationsActionType, NotificationsContext } from 'context/notificationsProvider';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,6 +16,7 @@ interface PublishModalProps {
 
 const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
   const editorContext = useContext(EditorContext);
+  const notificationContext = useContext(NotificationsContext);
   const [mapName, setMapName] = useState(
     editorContext.state.map?.title ?? 'My New Map',
   );
@@ -25,9 +27,24 @@ const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
     setMapName(editorContext.state.map?.title ?? 'My New Map')
   }, [editorContext.state.map?.title]);
 
+  const showError = (message : string) => {
+    notificationContext.dispatch({
+      type: NotificationsActionType.enqueue,
+      value: {
+        message: message,
+        actions: {/* actions if any */},
+        autoHideDuration: 3000, // Duration in ms
+      }
+    });
+  };
+
   const handleConfirm = () => {
     editorContext.helpers.changeTitle(editorContext, mapName);
     if (editorContext.state.map) {
+      if(description === '') {
+        showError('Please include a description.');
+        return;
+      }
       publishMap(editorContext.state.map_id, mapName, description).then(id => {
         if (id === 'ERROR') {
           //error handling
