@@ -5,6 +5,7 @@ import LabelSelector from './LabelSelector'; // Adjust the import path as needed
 import style from './LabelSelector.module.scss';
 import { EditorContext } from 'context/EditorProvider';
 import { MapType } from 'types/MHJSON';
+import { NotificationsActionType, NotificationsContext } from 'context/notificationsProvider';
 interface ImportModalProps {
   open: boolean;
   onClose: () => void;
@@ -24,15 +25,34 @@ const ImportModal: React.FC<ImportModalProps> = ({
 }: ImportModalProps) => {
   const [mapName, setMapName] = useState('My New Map');
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-  const [mapType, setMapType] = useState<MapType>(MapType.CATEGORICAL);
+  const [mapType, setMapType] = useState<MapType>(MapType.NONE);
+  const notificationContext = useContext(NotificationsContext);
 
   const handleSelectionChange = (selection: string[]) => {
     setSelectedOptions(selection);
   };
 
-  const handleConfirm = () => {
-    onConfirm(mapName, mapType, selectedOptions);
-    onClose();
+  const showError = (message : string) => {
+    notificationContext.dispatch({
+      type: NotificationsActionType.enqueue,
+      value: {
+        message: message,
+        actions: {/* actions if any */},
+        autoHideDuration: 3000, // Duration in ms
+      }
+    });
+  };
+
+  const handleConfirm = () => { 
+    // if(mapType === MapType.NONE) {
+    //   throw new Error('Please choose a map type.');
+    // }
+    try {
+      onConfirm(mapName, mapType, selectedOptions);
+      onClose();
+    } catch (error : any) {
+      showError(error.message);
+    }
   };
 
   return (

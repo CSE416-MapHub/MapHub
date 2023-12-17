@@ -165,6 +165,9 @@ export default function () {
     mapType: MapType,
     optionsProps: string[],
   ) {
+    if(mapType == MapType.NONE) {
+      throw new Error('Please select a map type.');
+    }
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
