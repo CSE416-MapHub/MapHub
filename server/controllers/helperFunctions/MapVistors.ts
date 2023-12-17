@@ -174,7 +174,6 @@ class SVGBuilder {
       // console.log('inner', innerHTML);
       const serializer = new XMLSerializer();
       const svgString = serializer.serializeToString(symbolData[1]);
-      console.log('-------------SVG STRING ---------', svgString);
       symbols += this.svgOfSymbol(svgString, [s.x, s.y], s.scale);
     }
     return symbols;
