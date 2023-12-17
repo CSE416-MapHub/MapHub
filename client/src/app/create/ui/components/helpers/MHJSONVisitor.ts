@@ -108,7 +108,7 @@ class SVGBuilder {
 
     let dots = '';
     for (let d of this.mhjson.dotsData) {
-      if (d.dot === DELETED_NAME) {
+      if (d.dot.endsWith(DELETED_NAME)) {
         continue;
       }
       let dclass = dotMap.get(d.dot)!;
@@ -159,7 +159,7 @@ class SVGBuilder {
 
     let symbols = '';
     for (let s of this.mhjson.symbolsData) {
-      if (s.symbol === DELETED_NAME) {
+      if (s.symbol.endsWith(DELETED_NAME)) {
         continue;
       }
       let symbolData = symbolMap.get(s.symbol)!;
@@ -188,7 +188,7 @@ class SVGBuilder {
   private svgOfArrows(): string {
     let arrows = '';
     for (let arrow of this.mhjson.arrowsData) {
-      if (arrow.label === DELETED_NAME) {
+      if (arrow.label.endsWith(DELETED_NAME)) {
         continue;
       }
 
@@ -279,7 +279,7 @@ class SVGBuilder {
       this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
     let cData = this.mhjson.globalChoroplethData;
 
-    if (cData.indexingKey !== DELETED_NAME && feature.properties) {
+    if (!cData.indexingKey.endsWith(DELETED_NAME) && feature.properties) {
       intensity = parseFloat(feature.properties[cData.indexingKey]);
     }
 
@@ -296,7 +296,7 @@ class SVGBuilder {
 
     // if it has both an intensity and a category, use the category
     let category = this.mhjson.regionsData[this.featureNumber].category;
-    if (category !== undefined && category !== DELETED_NAME) {
+    if (category !== undefined && !category.endsWith(DELETED_NAME)) {
       let categoryObject = this.mhjson.globalCategoryData.filter(
         x => x.name === category,
       )[0];

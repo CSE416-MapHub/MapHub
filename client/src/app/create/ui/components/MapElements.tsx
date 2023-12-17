@@ -308,7 +308,7 @@ export default function () {
         fillColor = c;
       }
       c = currentRegionProps[myId].category;
-      if (c !== undefined && c !== DELETED_NAME) {
+      if (c !== undefined && !c.endsWith(DELETED_NAME)) {
         // find the category
         let categoryId = -1;
         editorContextRef.current.state.map?.globalCategoryData.forEach(
@@ -375,7 +375,7 @@ export default function () {
       </Pane>
       <Pane name={'map-elements'} style={{ zIndex: 92 }}>
         {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
-          if (dotInstance.dot === DELETED_NAME) {
+          if (dotInstance.dot.endsWith(DELETED_NAME)) {
             return;
           }
           let dotClass = dotNames.get(dotInstance.dot) ?? {
@@ -396,7 +396,7 @@ export default function () {
         })}
         {editorContextRef.current.state.map?.symbolsData.map(
           (symbolInstance, i) => {
-            if (symbolInstance.symbol === DELETED_NAME) {
+            if (symbolInstance.symbol.endsWith(DELETED_NAME)) {
               return;
             }
             let symbolClass = symbolNames.get(symbolInstance.symbol) ?? {

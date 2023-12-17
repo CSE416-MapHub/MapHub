@@ -50,7 +50,7 @@ export default function ({ items, onChange }: IPropertySVGInputProps) {
   let parser = new DOMParser();
   const icons = items
     .map(x => x.split(`|${DELETED_NAME}|`) as [string, string])
-    .filter(x => x[0] !== DELETED_NAME)
+    .filter(x => !x[0].endsWith(DELETED_NAME))
     .map(x => {
       let svgEl: HTMLElement = parser.parseFromString(
         x[1],
