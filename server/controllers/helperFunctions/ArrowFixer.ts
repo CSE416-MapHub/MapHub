@@ -13,7 +13,12 @@ export function addPoints(...points: IPoint[]): IPoint {
 }
 
 export function scalePoint(p: IPoint, factor: number): IPoint {
-  let nPoint = structuredClone(p);
+  let nPoint: IPoint = {
+    x: p.x,
+    y: p.y,
+  };
+  console.log('Scalepoint', nPoint, 'but p is ', p);
+
   nPoint.x *= factor;
   nPoint.y *= factor;
   return nPoint;
@@ -176,6 +181,9 @@ export function findControls(
   p2: IPoint,
   p3: IPoint,
 ): [IPoint, IPoint, IPoint, IPoint, IPoint, IPoint] {
+  console.log('Find controls ', p0, p1, p2, p3);
+  console.log(addPoints(p0, p1), 'ADDING POINT P0 AND P1 ');
+
   let c1 = scalePoint(addPoints(p0, p1), 0.5);
   let c2 = scalePoint(addPoints(p1, p2), 0.5);
   let c3 = scalePoint(addPoints(p2, p3), 0.5);
@@ -226,6 +234,7 @@ export function producePath(
   p3: IPoint,
 ): [CurvePathData, [IPoint, IPoint]] {
   let controls = findControls(p0, p1, p2, p3);
+  console.log('Produce path', p0, p1, p2, p3);
   let ans = [
     p0,
     controls[0],

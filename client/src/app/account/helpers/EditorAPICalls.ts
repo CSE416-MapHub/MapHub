@@ -47,7 +47,7 @@ export function getRecentUnpublished(): Promise<
     svg: string;
   }>
 > {
-  return MapAPI.getRecentMapIds(6).then(res => {
+  return MapAPI.getRecentMapIds(69).then(res => {
     if (res.status === 200) {
       let maps = res.data.maps;
       if (typeof maps !== 'object') {

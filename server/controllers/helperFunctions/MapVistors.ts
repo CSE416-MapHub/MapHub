@@ -228,6 +228,7 @@ class SVGBuilder {
 
       arrows += this.svgOfArrow(arrow) + '\n';
     }
+
     return arrows;
   }
 
