@@ -192,12 +192,12 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
           'Tried to create a dot with a name that already exists',
         );
       }
-      map.globalDotDensityData.splice(d.target[1], 0, {
+      map.globalDotDensityData[d.target[1]] = {
         name: p.name,
         opacity: p.opacity,
         size: p.size,
         color: p.color,
-      });
+      };
 
       // look for dots that have this name, but are deleted
       for (let dot of map.dotsData) {
@@ -467,8 +467,7 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
       if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
         throw new Error('Target index out of bounds');
       }
-      // TODO: is this the smartest thing to do?
-      // map.globalDotDensityData.splice(d.target[1], 1);
+
       let targName = map.globalSymbolData[d.target[1]].name;
       map.globalSymbolData[d.target[1]].name += DELETED_NAME;
       map.symbolsData = map.symbolsData.map(s => {
