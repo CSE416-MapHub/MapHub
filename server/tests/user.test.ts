@@ -355,6 +355,102 @@ describe('POST /auth/username', () => {
   });
 });
 
+describe('PUT /auth/password', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from('', 'base64'),
+    password: '********',
+    maps: [],
+    save: jest.fn().mockResolvedValue(this),
+  };
+
+  beforeEach(() => {
+    jest.mock('bcrypt');
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+    (auth.verify as jest.Mock).mockImplementation((request, response, next) => {
+      request.userId = '65677439126531bcfbbe2c10';
+      return next();
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (bcrypt.hash as jest.Mock).mockResolvedValue('*********');
+  });
+
+  it('returns the user when successfully edited password.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Passw0rd',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: '65677439126531bcfbbe2c10',
+        username: 'someUser',
+        profilePic: '',
+      },
+    });
+  });
+
+  it('returns a bad request when some fields are missing.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(1);
+    expect(response.body.missingFields).toBe(0b011);
+  });
+
+  it('returns a bad request when the new password does not meet requirements.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: '********',
+      newPasswordConfirm: '********',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(2);
+  });
+
+  it('returns a bad request when the new password does not match its confirmation.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Password',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(3);
+  });
+
+  it('returns an unauthorized request if the current password is incorrect.', async () => {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Passw0rd',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(5);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+});
+
 describe('PUT /auth/profile-picture', () => {
   const mockUser = {
     _id: '65677439126531bcfbbe2c10',
@@ -427,6 +523,11 @@ describe('PUT /auth/profile-picture', () => {
     expect(response.body).toHaveProperty('errorCode');
     expect(response.body.errorCode).toBe(2);
     expect(response.body).toHaveProperty('errorMessage');
+  });
+
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 });
 
@@ -571,6 +672,7 @@ describe('GET /auth/reset-password/:token ', () => {
     console.log('Password resetted user', response.body.user);
     expect(response.body.user.resetPasswordToken).toEqual(undefined);
     expect(response.body.user.resetPasswordExpires).toEqual(undefined);
+    console.log(response.body.user);
     expect(response.body.user.password).not.toEqual('********');
   });
 });

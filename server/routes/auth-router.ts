@@ -14,7 +14,7 @@ router.post('/username', auth.verify, AuthController.postUsername);
 router.post('/login', AuthController.loginUser);
 router.post('/logout', AuthController.logoutUser);
 router.put('/profile-pic', auth.verify, AuthController.putProfilePic);
-// router.get('/loggedIn', AuthController.getLoggedIn)
+router.put('/password', auth.verify, AuthController.putPassword);
 
 router.post('/request-reset-password', AuthController.getResetPasswordLink);
 router.post('/reset-password/:token', AuthController.handlePasswordResetting);

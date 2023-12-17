@@ -396,6 +396,84 @@ export const putProfilePic = async (request: Request, response: Response) => {
   }
 };
 
+
+export const putPassword = async (request: Request, response: Response) => {
+  try {
+    const { currentPassword, newPassword, newPasswordConfirm } = request.body;
+    const { userId } = request as any;
+
+    let missingFields = 0;
+    if (!currentPassword) {
+      missingFields |= 1 << 2;
+    }
+    if (!newPassword) {
+      missingFields |= 1 << 1;
+    }
+    if (!newPasswordConfirm) {
+      missingFields |= 1 << 0;
+    }
+    if (missingFields) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        missingFields,
+        errorMessage: 'Please enter all fields.',
+      });
+    }
+
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(newPassword)) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage: 'Please enter a valid password.',
+      });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 3,
+        errorMessage: 'Please confirm the new password.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 4,
+        errorMessage: 'The user is missing.',
+      });
+    }
+
+    if (!(await bcrypt.compare(currentPassword, user.password))) {
+      return response.status(401).json({
+        success: false,
+        errorCode: 5,
+        errorMessage: 'The current password is incorrect.',
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorCode: 0,
+      errorMessage: 'There has been an internal error. Please try again later.',
+    });
+  }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     // Clear the token cookie on the client side
@@ -440,7 +518,7 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
     user.resetPasswordToken = resetToken;
     user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
 
-    const savedUser = await user.save();
+    await user.save();
 
     // Setup email transport
     let transporter = nodemailer.createTransport({
