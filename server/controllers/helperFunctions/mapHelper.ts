@@ -603,13 +603,17 @@ class ArrowHandler {
 }
 
 class GeojsonDataHandler {
+  private v: GeoJSONVisitor;
+
+  constructor(map: MapDocument) {
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    this.v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    this.v.visitRoot();
+  }
   create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding geoJSON data to the map
     //TODO MAKE SURE THE FILE IS DONE
-    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
-
-    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
-    v.visitRoot();
 
     if (d.target[1] !== -1) {
       throw new Error(
@@ -617,23 +621,23 @@ class GeojsonDataHandler {
           d.target[1],
       );
     }
-    for (let featureVisitResult of v.getFeatureResults().perFeature) {
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
       let feature = featureVisitResult.originalFeature;
       if (feature.properties === null) {
         feature.properties = {};
       }
       feature.properties[d.target[2]] = d.payload.propertyValue;
     }
-    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
+    console.log('updated MAP DATA', JSON.stringify(this.v.getMapData()));
+
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
   update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating geoJSON data on the map
-    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
 
-    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
-    let targFeature = v.getFeatureResults().perFeature[d.target[1]];
+    let targFeature = this.v.getFeatureResults().perFeature[d.target[1]];
     if (targFeature === undefined) {
       throw new Error('Region out of bounds');
     }
@@ -643,36 +647,38 @@ class GeojsonDataHandler {
       orig.properties = {};
     }
     orig.properties[propName] = d.payload.propertyValue;
-    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
 
+    console.log('Updated Map data', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
   delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing geoJSON data from the map
-    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
 
-    let v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
     if (d.target[1] !== -1) {
       throw new Error(
         'You are unsure if you are trying to delete a geojason property or update; got target if not equal to -1: ' +
           d.target[1],
       );
     }
-    for (let featureVisitResult of v.getFeatureResults().perFeature) {
+    console.log('Features in delete', this.v.getFeatureResults().perFeature);
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
       let feature = featureVisitResult.originalFeature;
+
       if (feature.properties === null) {
         feature.properties = {};
       }
       delete feature.properties[d.target[2]];
     }
-    fs.writeFileSync(map.geoJSON, JSON.stringify(v.getMapData()));
+    console.log('MAP DATA in DELETE', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
 
     return map;
   }
 }
 
-function getHandlerForTargetType(targetType: TargetType) {
+function getHandlerForTargetType(targetType: TargetType, map: MapDocument) {
   switch (targetType) {
     case TargetType.LABELS:
       return new LabelsHandler();
@@ -693,7 +699,7 @@ function getHandlerForTargetType(targetType: TargetType) {
     case TargetType.ARROW:
       return new ArrowHandler();
     case TargetType.GEOJSONDATA:
-      return new GeojsonDataHandler();
+      return new GeojsonDataHandler(map);
     default:
       throw new Error('Unsupported Target Type');
   }
@@ -701,20 +707,20 @@ function getHandlerForTargetType(targetType: TargetType) {
 
 const mapHelper = {
   handleCreate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('CREATED NEW ', delta.targetType);
     return handler.create(map, delta);
   },
 
   handleUpdate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('UPDATED ', delta.targetType);
 
     return handler.update(map, delta);
   },
 
   handleDelete: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('DELETED', delta.targetType);
 
     return handler.delete(map, delta);
