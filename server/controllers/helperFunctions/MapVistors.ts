@@ -1,15 +1,49 @@
 import { GeoJSON } from 'geojson';
 import { BBox, addPointToLocalBBox, mergeBBox } from './GeoJSONVisitor';
 import { isGeometry, isGeometryCollection } from './utility';
+import {
+  IArrowInstance,
+  IDotDensityProps,
+  ISymbolProps,
+  MHJSON,
+} from './types/MHJSON';
+import { getArrowhead, producePath } from './ArrowFixer';
 import MapModel from '../../models/map-model';
-import { IDotDensityProps, MHJSON, ICategoryProps } from './types/MHJSON';
+import xmldom from 'xmldom';
 // import { useRef } from "react";
 type MapDocument = typeof MapModel.prototype;
+
+export const DELETED_NAME = '_#DEL';
+
 const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
+const lat2m = 10;
 
-export const DELETED_NAME = '_#DEL';
+export const mixColors = (c1: string, c2: string, ratio: number): string => {
+  return (
+    '#' +
+    (() => {
+      const [p1, p2] = [c1, c2].map(color => parseInt(color.slice(1), 16)),
+        a = [];
+
+      for (let i = 0; i <= 2; i += 1) {
+        a.push(
+          Math.floor(
+            ((p1 >> (i * 8)) & 0xff) * (1 - ratio) +
+              ((p2 >> (i * 8)) & 0xff) * ratio,
+          ),
+        );
+      }
+      let res = a
+        .reverse()
+        .map(num => num.toString(16).padStart(2, '0'))
+        .join('');
+      console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
+      return res;
+    })()
+  );
+};
 
 class SVGBuilder {
   private featureNumber = 0;
@@ -55,23 +89,22 @@ class SVGBuilder {
     if (this.mhjson.mapType === 'dot') {
       els += this.svgOfDots();
     }
+    if (this.mhjson.mapType === 'flow') {
+      els += this.svgOfArrows();
+    }
+    if (this.mhjson.mapType === 'symbol') {
+      els += this.svgOfSymbols();
+    }
     return els;
   }
 
   private svgOfDots(): string {
     // construct a map of names to objects
-
     let dotMap = new Map<string, IDotDensityProps>(
-      this.mhjson.globalDotDensityData.map((x: IDotDensityProps) => [
-        x.name,
-        x,
-      ]),
+      this.mhjson.globalDotDensityData.map((x: any) => [x.name, x]),
     );
-    let dots = '';
-    if (dotMap.size === 0) {
-      return dots;
-    }
 
+    let dots = '';
     for (let d of this.mhjson.dotsData) {
       if (d.dot === DELETED_NAME) {
         continue;
@@ -96,7 +129,6 @@ class SVGBuilder {
     opacity: number,
   ): string {
     let p = this.isPosition([x, y]);
-    let lat2m = 10;
 
     return `<circle
       cx="${p[0]}"
@@ -107,6 +139,115 @@ class SVGBuilder {
       stroke="black"
       stroke-width="${STROKE_WIDTH}%"
       />`;
+  }
+
+  private svgOfSymbols(): string {
+    // construct a map of names to objects
+    const DOMParser = xmldom.DOMParser;
+    const XMLSerializer = xmldom.XMLSerializer;
+    let symbolMap = new Map<string, [ISymbolProps, HTMLElement]>(
+      this.mhjson.globalSymbolData.map((x: any) => {
+        // Use querySelector to directly select the SVG element
+        const parser = new DOMParser();
+        let doc = parser.parseFromString(x.svg, 'image/svg+xml');
+
+        let svgEl = doc.getElementsByTagName('svg')[0];
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('height', '100%');
+
+        // let svgEl: HTMLElement = new DOMParser().parseFromString(
+        //   x.svg,
+        //   'image/svg+xml',
+        // ).documentElement;
+        return [x.name, [x, svgEl]];
+      }),
+    );
+
+    let symbols = '';
+    for (let s of this.mhjson.symbolsData) {
+      if (s.symbol === DELETED_NAME) {
+        continue;
+      }
+
+      let symbolData = symbolMap.get(s.symbol)!;
+
+      // console.log('inner', innerHTML);
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(symbolData[1]);
+      symbols += this.svgOfSymbol(svgString, [s.x, s.y], s.scale);
+    }
+    return symbols;
+  }
+
+  private svgOfSymbol(
+    svg: string,
+    location: [x: number, y: number],
+    scale: number,
+  ): string {
+    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 10;
+    let [x, y, w, h] = [
+      location[0] - (DEFAULT_SZ * scale) / 2,
+      -1 * (location[1] + (DEFAULT_SZ * scale) / 2),
+      DEFAULT_SZ * scale,
+      DEFAULT_SZ * scale,
+    ];
+
+    return `<svg x="${x}" y="${y}" width="${w}" height="${h}">${svg}</svg>`;
+  }
+
+  private svgOfArrows(): string {
+    let arrows = '';
+    for (let arrow of this.mhjson.arrowsData) {
+      if (arrow.label === DELETED_NAME) {
+        continue;
+      }
+
+      arrows += this.svgOfArrow(arrow) + '\n';
+    }
+
+    return arrows;
+  }
+
+  private svgOfArrow(arrow: IArrowInstance): string {
+    let p = arrow.interpolationPoints;
+    let pdata = producePath(p[0], p[1], p[2], p[3]);
+    let d = pdata[0]
+      .map(x => {
+        if (typeof x === 'string') {
+          return x;
+        } else {
+          return `${x[1]} ${-1 * x[0]}`;
+        }
+      })
+      .reduce((prev, curr, i, arr) => {
+        if (
+          i > 0 &&
+          !Number.isNaN(parseFloat(arr[i - 1])) &&
+          !Number.isNaN(parseFloat(arr[i]))
+        ) {
+          return prev + ', ' + curr;
+        }
+        return prev + ' ' + curr;
+      }, '');
+    let [p0, p1] = pdata[1].map(p => {
+      // let t = p.x * -1;
+      // p.x = p.y;
+      // p.y = t;
+      return p;
+    });
+
+    let headPoints = getArrowhead(p0, p1, arrow.capacity / 5);
+    let head = `<polygon points="${headPoints
+      .map(x => `${x.x},${-1 * x.y}`)
+      .join(' ')}" fill="${arrow.color}" fill-opacity="${
+      arrow.opacity
+    }" line-cap="butt" />`;
+    let path = `<path d="${d}" fill="none" stroke="${
+      arrow.color
+    }" stroke-opacity="${arrow.opacity}" line-cap="butt" stroke-width="${
+      arrow.capacity / lat2m
+    }"/>`;
+    return path + head;
   }
 
   /**
@@ -145,15 +286,39 @@ class SVGBuilder {
     if (rColor !== undefined) {
       fill = rColor;
     }
+    // however, if it is choropleth
+    // use the written intensity
+    // but if global choropleth key is set, find the intensity in the properties
+    let intensity =
+      this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
+    let cData = this.mhjson.globalChoroplethData;
+
+    if (cData.indexingKey !== DELETED_NAME && feature.properties) {
+      intensity = parseFloat(feature.properties[cData.indexingKey]);
+    }
+
+    if (intensity !== undefined) {
+      let ratio =
+        (intensity - cData.minIntensity) /
+        (cData.maxIntensity - cData.minIntensity);
+      if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+        fill = 'white';
+      } else {
+        fill = mixColors(cData.minColor, cData.maxColor, ratio);
+      }
+    }
+
+    // if it has both an intensity and a category, use the category
     let category = this.mhjson.regionsData[this.featureNumber].category;
     if (category !== undefined && category !== DELETED_NAME) {
       let categoryObject = this.mhjson.globalCategoryData.filter(
-        (x: ICategoryProps) => x.name === category,
+        (x: any) => x.name === category,
       )[0];
       if (categoryObject !== undefined) {
         fill = categoryObject.color;
       }
     }
+
     this.featureNumber++;
     return `<g fill="${fill}">${els}</g>`;
   }
@@ -332,7 +497,6 @@ class SVGBuilder {
           .join('');
       }
     }
-    return elements;
   }
 
   /**

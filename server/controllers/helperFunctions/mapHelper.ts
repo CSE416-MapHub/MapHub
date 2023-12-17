@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import MapModel from '../../models/map-model';
-
+import { GeoJSONVisitor } from './GeoJSONVisitor';
 type MapDocument = typeof MapModel.prototype;
 const DELETED_NAME = '_#DEL';
+import fs from 'fs';
 export interface DeltaPayload {
   // this is what a diff payload could contain
   // note that at no point should all fields be active
@@ -26,17 +27,17 @@ export interface DeltaPayload {
   opacity?: number;
   size?: number;
   intensity?: number;
-  category?: number;
+  category?: string;
   dot?: string;
   label?: string;
   capacity?: number;
-  interpolationPoints?: [
-    {
-      x: number;
-      y: number;
-    },
-  ];
+  interpolationPoints?: Array<{
+    x: number;
+    y: number;
+  }>;
   propertyValue?: string;
+
+  labels?: Array<string>;
 }
 
 //FOR MAP UPDAING LIKE TITLE AND SHIT
@@ -75,19 +76,25 @@ class LabelsHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to add a label to the map
     // Example: map.labels.push({/* label details from payload */});
-
+    throw new Error('Cant create a new label');
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Implement the logic to update a label on the map
     // Example: find the label in map.labels and update it
+    if (d.payload.labels === undefined) {
+      throw new Error('Labels is not set in updating labels');
+    }
+    map.labels = d.payload.labels;
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to delete a label from the map
     // Example: remove the label from map.labels
+    throw new Error('Cant delete a new label');
+
     return map;
   }
 }
@@ -596,23 +603,82 @@ class ArrowHandler {
 }
 
 class GeojsonDataHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  private v: GeoJSONVisitor;
+
+  constructor(map: MapDocument) {
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    this.v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    this.v.visitRoot();
+  }
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding geoJSON data to the map
+    //TODO MAKE SURE THE FILE IS DONE
+
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to create a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      feature.properties[d.target[2]] = d.payload.propertyValue;
+    }
+    console.log('updated MAP DATA', JSON.stringify(this.v.getMapData()));
+
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating geoJSON data on the map
+
+    let targFeature = this.v.getFeatureResults().perFeature[d.target[1]];
+    if (targFeature === undefined) {
+      throw new Error('Region out of bounds');
+    }
+    let propName = d.target[2];
+    let orig = targFeature.originalFeature;
+    if (!orig.properties) {
+      orig.properties = {};
+    }
+    orig.properties[propName] = d.payload.propertyValue;
+
+    console.log('Updated Map data', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing geoJSON data from the map
+
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to delete a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    console.log('Features in delete', this.v.getFeatureResults().perFeature);
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      delete feature.properties[d.target[2]];
+    }
+    console.log('MAP DATA in DELETE', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
+
     return map;
   }
 }
 
-function getHandlerForTargetType(targetType: TargetType) {
+function getHandlerForTargetType(targetType: TargetType, map: MapDocument) {
   switch (targetType) {
     case TargetType.LABELS:
       return new LabelsHandler();
@@ -633,7 +699,7 @@ function getHandlerForTargetType(targetType: TargetType) {
     case TargetType.ARROW:
       return new ArrowHandler();
     case TargetType.GEOJSONDATA:
-      return new GeojsonDataHandler();
+      return new GeojsonDataHandler(map);
     default:
       throw new Error('Unsupported Target Type');
   }
@@ -641,20 +707,20 @@ function getHandlerForTargetType(targetType: TargetType) {
 
 const mapHelper = {
   handleCreate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('CREATED NEW ', delta.targetType);
     return handler.create(map, delta);
   },
 
   handleUpdate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('UPDATED ', delta.targetType);
 
     return handler.update(map, delta);
   },
 
   handleDelete: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
     console.log('DELETED', delta.targetType);
 
     return handler.delete(map, delta);

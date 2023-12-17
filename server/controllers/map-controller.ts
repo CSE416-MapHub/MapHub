@@ -11,7 +11,7 @@ import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
 import svg2img, { svg2imgOptions } from 'svg2img';
-
+import sharp from 'sharp';
 type MapDocument = typeof Map.prototype;
 
 enum DeltaType {
@@ -32,32 +32,32 @@ export enum SVGDetail {
   THUMBNAIL = 'thumbnail',
 }
 
-async function convertSvgToPngBase64(svgString: string): Promise<string> {
-  const options: svg2imgOptions = {
-    resvg: {
-      dpi: 300,
-      shapeRendering: 2,
-      textRendering: 1,
-      imageRendering: 0,
-      fitTo: { mode: 'width', value: 800 },
-    },
-    quality: 100,
-  };
-
-  return new Promise((resolve, reject) => {
-    svg2img(svgString, options, function (error, buffer) {
-      if (error) {
-        console.error('Error converting SVG to PNG:', error);
-        resolve('FULL');
-      } else {
-        // Convert buffer to a base64 encoded string
-        const base64Png = buffer.toString('base64');
-        console.log('FINISHED CONVERTING ONE');
-        resolve(base64Png);
-      }
-    });
-  });
-}
+// async function convertSvgToPngBase64(svgString: string): Promise<string> {
+//   const options: svg2imgOptions = {
+//     resvg: {
+//       dpi: 300,
+//       shapeRendering: 2,
+//       textRendering: 1,
+//       imageRendering: 0,
+//       fitTo: { mode: 'width', value: 800 },
+//     },
+//     quality: 100,
+//   };
+//   console.log('THE SVG to pARSE', svgString);
+//   return new Promise((resolve, reject) => {
+//     svg2img(svgString, options, function (error, buffer) {
+//       if (error) {
+//         console.error('Error converting SVG to PNG:', error);
+//         resolve('FULL');
+//       } else {
+//         // Convert buffer to a base64 encoded string
+//         const base64Png = buffer.toString('base64');
+//         console.log('FINISHED CONVERTING ONE');
+//         resolve(base64Png);
+//       }
+//     });
+//   });
+// }
 
 function minifySVG(svgString: string): string {
   // Replace newlines and carriage returns with nothing
@@ -95,13 +95,35 @@ export async function convertJsonToSVG(
   if (SVGDetailStr === SVGDetail.THUMBNAIL) {
     console.log('Converting to THUMBNAIL');
     try {
-      const pngString = await convertSvgToPngBase64(svgRepr);
-      if (pngString === 'FULL') {
-        return minifySVG(svgRepr);
+      // const pngString = await convertSvgToPngBase64(svgRepr);
+      // if (pngString === 'FULL') {
+      //   return minifySVG(svgRepr);
+      // }
+      const pngString = await sharp(Buffer.from(svgRepr))
+        .png()
+        .resize({
+          width: 128,
+          height: 128,
+          fit: 'inside',
+          withoutEnlargement: true,
+          withoutReduction: true,
+          background: '#0081A7',
+          kernel: 'lanczos3',
+        })
+        .toBuffer();
+      console.log('BOUNDING BOX of UNFAILED', box.join(' '), map.title);
+
+      if (map.title === 'hgf') {
+        console.log('The svg in question', map.title);
       }
-      return pngString;
+      return pngString.toString('base64');
     } catch (error: any) {
+      console.log('BOUNDING BOX of FAILED', box.join(' '), map.title);
+
       console.log('CAUGHT THE ERROR', error);
+      // if (map.title === 'testing symbol') {
+      //   console.log('The svg in question', map.title, svgRepr);
+      // }
       return minifySVG(svgRepr);
     }
   }
