@@ -69,6 +69,7 @@ describe('Uploads', () => {
     }
   });
 
+
   it('should change the name of the map when I import it', () => {
     cy.visit('/create');
     cy.get('button:contains("File")').click();
@@ -81,6 +82,10 @@ describe('Uploads', () => {
       },
     );
     cy.get('[value="My New Map"]').type('My Cool Map Name');
+
+    cy.get('#map-type-dropdown').click();
+    cy.get('li:contains("Choropleth")').click();
+
     cy.get(`p:contains("Confirm")`).click();
     cy.get('h3:contains("My New MapMy Cool Map Name")');
   });
