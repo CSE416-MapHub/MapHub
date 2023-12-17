@@ -1,26 +1,59 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
+import { EditorContext } from 'context/EditorProvider';
+import { DeltaType, TargetType } from 'types/delta';
 interface NewSymbolModalProps {
   open: boolean;
   onClose: (created: boolean) => void;
-  onConfirm: (svgFile: File, name: string, preview: string) => void;
+  // onConfirm: (svgFile: File, name: string, preview: string) => void;
 }
 
 const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   open,
   onClose,
-  onConfirm,
+  // onConfirm,
 }) => {
+  const editorContext = useContext(EditorContext);
   const [name, setName] = useState('');
   const [svgFile, setSvgFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
     if (svgFile && preview) {
-      onConfirm(svgFile, name, preview);
-      onClose(true);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        let res = reader.result as string;
+
+        let map = editorContext.state.map;
+        if (!map) {
+          throw new Error('Cannot make dot type without map');
+        }
+        let mapId = editorContext.state.map_id;
+        let targetId = map.globalSymbolData.length;
+        editorContext.helpers.addDelta(
+          editorContext,
+          {
+            type: DeltaType.CREATE,
+            targetType: TargetType.GLOBAL_SYMBOL,
+            target: [mapId, targetId, '-1'],
+            payload: {
+              svg: res,
+              name: name,
+            },
+          },
+          {
+            type: DeltaType.DELETE,
+            targetType: TargetType.GLOBAL_SYMBOL,
+            target: [mapId, targetId, '-1'],
+            payload: {},
+          },
+        );
+        console.log('calling onclose');
+        onClose(true);
+      };
+      reader.readAsText(svgFile);
     }
   };
 
