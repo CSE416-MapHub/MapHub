@@ -86,6 +86,7 @@ function getReducer(notifications: NotificationsContextValue) {
     },
   ): IEditorState {
     let newState: IEditorState = { ...prev };
+    console.log(action);
     switch (action.type) {
       case EditorActions.SET_SELECTED: {
         if (
@@ -240,11 +241,12 @@ class helpers {
       }
       if (
         d.type === DeltaType.DELETE &&
-        map.globalSymbolData[d.target[1]].name === DELETED_NAME
+        map.globalDotDensityData[d.target[1]].name.endsWith(DELETED_NAME)
       ) {
         li =
-          map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
-            ?.name ?? DELETED_NAME;
+          map.globalDotDensityData.filter(
+            x => !x.name.endsWith(DELETED_NAME),
+          )[0]?.name ?? DELETED_NAME;
       }
     }
     if (d.targetType === TargetType.GLOBAL_SYMBOL) {
@@ -253,11 +255,12 @@ class helpers {
       }
       if (
         d.type === DeltaType.DELETE &&
-        map.globalSymbolData[d.target[1]].name === DELETED_NAME
+        map.globalSymbolData[d.target[1]].name.endsWith(DELETED_NAME)
       ) {
         li =
-          map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
-            ?.name ?? DELETED_NAME;
+          map.globalDotDensityData.filter(
+            x => !x.name.endsWith(DELETED_NAME),
+          )[0]?.name ?? DELETED_NAME;
       }
     }
     return li;
@@ -373,7 +376,7 @@ class helpers {
 
   public getLastInstantiatedDot(ctx: IEditorContext): IDotDensityProps | null {
     let name = ctx.state.lastInstantiated;
-    if (name === DELETED_NAME || !ctx.state.map) return null;
+    if (name.endsWith(DELETED_NAME) || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalDotDensityData) {
       if (d.name === name) {
         return d;
@@ -384,7 +387,7 @@ class helpers {
 
   public getLastInstantiatedSymbol(ctx: IEditorContext): ISymbolProps | null {
     let name = ctx.state.lastInstantiated;
-    if (name === DELETED_NAME || !ctx.state.map) return null;
+    if (name.endsWith(DELETED_NAME) || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalSymbolData) {
       if (d.name === name) {
         return d;

@@ -7,7 +7,7 @@ import {
 import * as G from 'geojson';
 import * as L from 'leaflet';
 import { useContext, useState, useEffect, useRef } from 'react';
-import { CircleMarker, GeoJSON, SVGOverlay, useMap } from 'react-leaflet';
+import { CircleMarker, GeoJSON, Pane, SVGOverlay, useMap } from 'react-leaflet';
 
 import { DeltaType, TargetType } from 'types/delta';
 import {
@@ -44,9 +44,11 @@ export default function () {
   >([]);
   const editorContextRef = useRef(editorContextStaleable);
 
+  const [gDotArray, setGDotArray] = useState<Array<IDotDensityProps>>([]);
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
+  const [gSymbolArray, setGSymbolArray] = useState<Array<ISymbolProps>>([]);
   const [symbolNames, setSymbolNames] = useState<Map<string, ISymbolProps>>(
     new Map(),
   );
@@ -62,18 +64,24 @@ export default function () {
       setRerender(rerender + 1);
     }
     if (loadedMap) {
-      if (dotNames.size !== loadedMap.globalDotDensityData.length) {
+      if (gDotArray !== loadedMap.globalDotDensityData) {
         let nameMap = new Map<string, IDotDensityProps>();
-        for (let ip of loadedMap.globalDotDensityData) {
+        for (let ip of loadedMap.globalDotDensityData.filter(
+          x => !x.name.endsWith(DELETED_NAME),
+        )) {
           nameMap.set(ip.name, ip);
         }
         setDotNames(nameMap);
+        setGDotArray(loadedMap.globalDotDensityData);
       }
-      if (symbolNames.size !== loadedMap.globalSymbolData.length) {
+      if (gSymbolArray !== loadedMap.globalSymbolData) {
         let nameMap = new Map<string, ISymbolProps>();
-        for (let ip of loadedMap.globalSymbolData) {
+        for (let ip of loadedMap.globalSymbolData.filter(
+          x => !x.name.endsWith(DELETED_NAME),
+        )) {
           nameMap.set(ip.name, ip);
         }
+        setGSymbolArray(loadedMap.globalSymbolData);
         setSymbolNames(nameMap);
       }
       if (loadedMap.globalChoroplethData.indexingKey !== choroplethKey) {
@@ -308,7 +316,7 @@ export default function () {
         fillColor = c;
       }
       c = currentRegionProps[myId].category;
-      if (c !== undefined && c !== DELETED_NAME) {
+      if (c !== undefined && !c.endsWith(DELETED_NAME)) {
         // find the category
         let categoryId = -1;
         editorContextRef.current.state.map?.globalCategoryData.forEach(
@@ -366,98 +374,88 @@ export default function () {
 
   return (
     <>
-      <GeoJSON
-        key={rerender}
-        data={editorContextStaleable.state.map?.geoJSON}
-        onEachFeature={perFeatureHandler}
-      />
-      {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
-        if (dotInstance.dot === DELETED_NAME) {
-          return;
-        }
-        let dotClass = dotNames.get(dotInstance.dot) ?? {
-          opacity: 0,
-          name: DELETED_NAME,
-          color: '#000000',
-          size: 0,
-        };
-        return (
-          <Dot
-            dotInstance={dotInstance}
-            dotClass={dotClass}
-            id={i}
-            mapClickHandler={handleMapClick}
-            key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}_${dotClass.opacity}_${dotClass.name}_${dotClass.color}_${dotClass.opacity}`}
-          />
-        );
-      })}
-      {editorContextRef.current.state.map?.symbolsData.map(
-        (symbolInstance, i) => {
-          if (symbolInstance.symbol === DELETED_NAME) {
+      <Pane name={'map'} style={{ zIndex: 64 }}>
+        <GeoJSON
+          key={rerender}
+          data={editorContextStaleable.state.map?.geoJSON}
+          onEachFeature={perFeatureHandler}
+        />
+      </Pane>
+      <Pane name={'map-elements'} style={{ zIndex: 92 }}>
+        {editorContextRef.current.state.map?.dotsData.map((dotInstance, i) => {
+          if (dotInstance.dot.endsWith(DELETED_NAME)) {
             return;
           }
-          let symbolClass = symbolNames.get(symbolInstance.symbol) ?? {
+          let dotClass = dotNames.get(dotInstance.dot) ?? {
+            opacity: 0,
             name: DELETED_NAME,
-            svg: dummySVG,
+            color: '#000000',
+            size: 0,
           };
           return (
-            <Symbol
-              symbolInstance={symbolInstance}
-              symbolClass={symbolClass}
+            <Dot
+              dotInstance={dotInstance}
+              dotClass={dotClass}
               id={i}
               mapClickHandler={handleMapClick}
-              key={`${i}_${symbolInstance.symbol}_${symbolInstance.x}_${symbolInstance.y}_${symbolInstance.scale}_${symbolClass.name}`}
+              key={`${i}_${dotInstance.dot}_${dotInstance.x}_${dotInstance.y}_${dotInstance.scale}_${dotClass.opacity}_${dotClass.name}_${dotClass.color}_${dotClass.opacity}`}
             />
           );
-        },
-      )}
-      {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
-        if (arrow.label === DELETED_NAME) {
-          return;
-        }
-        return (
-          <Arrow
-            arrow={arrow}
-            id={i}
-            key={`arrow_${i}_${JSON.stringify(arrow)}`}
-          />
-        );
-      })}
-      {/* {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
-        if (arrow.label === DELETED_NAME) {
-          return;
-        }
-        return (
-          <Arrow
-            instance={arrow}
-            id={i}
-            key={`${i}_${arrow.label}_${arrow.color}_${arrow.capacity}_${
-              arrow.opacity
-            }_${JSON.stringify(arrow.interpolationPoints)}`}
-          />
-        );
-      })} */}
-      {(() => {
-        let details = editorContextRef.current.state.mapDetails.regionData;
-        let activeLabels = editorContextRef.current.state.map!.labels;
-        return details.map((d, i) => {
-          let label = activeLabels.map(l => {
-            if (d.originalFeature.properties !== null) {
-              return d.originalFeature.properties[l] ?? 'undefined';
+        })}
+        {editorContextRef.current.state.map?.symbolsData.map(
+          (symbolInstance, i) => {
+            if (symbolInstance.symbol.endsWith(DELETED_NAME)) {
+              return;
             }
-            return 'undefined';
-          });
-
+            let symbolClass = symbolNames.get(symbolInstance.symbol) ?? {
+              name: DELETED_NAME,
+              svg: dummySVG,
+            };
+            return (
+              <Symbol
+                symbolInstance={symbolInstance}
+                symbolClass={symbolClass}
+                id={i}
+                mapClickHandler={handleMapClick}
+                key={`${i}_${symbolInstance.symbol}_${symbolInstance.x}_${symbolInstance.y}_${symbolInstance.scale}_${symbolClass.name}`}
+              />
+            );
+          },
+        )}
+        {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
+          if (arrow.label.endsWith(DELETED_NAME)) {
+            return;
+          }
           return (
-            <Text
-              value={label}
-              // box={[91.93, 31.8086, 30.67, 8.241]}
-              box={d.box}
-              key={`${i}${d.box}${label}`}
-            ></Text>
+            <Arrow
+              arrow={arrow}
+              id={i}
+              key={`arrow_${i}_${JSON.stringify(arrow)}`}
+            />
           );
-        });
-      })()}
+        })}
+        {(() => {
+          let details = editorContextRef.current.state.mapDetails.regionData;
+          let activeLabels = editorContextRef.current.state.map!.labels;
+          return details.map((d, i) => {
+            let label = activeLabels.map(l => {
+              if (d.originalFeature.properties !== null) {
+                return d.originalFeature.properties[l] ?? 'undefined';
+              }
+              return 'undefined';
+            });
+
+            return (
+              <Text
+                value={label}
+                // box={[91.93, 31.8086, 30.67, 8.241]}
+                box={d.box}
+                key={`${i}${d.box}${label}`}
+              ></Text>
+            );
+          });
+        })()}
+      </Pane>
     </>
   );
 }

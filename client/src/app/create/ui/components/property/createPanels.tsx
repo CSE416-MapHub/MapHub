@@ -61,6 +61,29 @@ function updateField(
   );
 }
 
+function deleteItem(
+  ctx: IEditorContext,
+  id: number,
+  typ: TargetType,
+  orig: DeltaPayload,
+) {
+  ctx.helpers.addDelta(
+    ctx,
+    {
+      type: DeltaType.DELETE,
+      targetType: typ,
+      target: [ctx.state.map_id, id, '-1'],
+      payload: {},
+    },
+    {
+      type: DeltaType.CREATE,
+      targetType: typ,
+      target: [ctx.state.map_id, id, '-1'],
+      payload: orig,
+    },
+  );
+}
+
 /**
  * Makes the dotpanel action
  * @param ctx
@@ -72,6 +95,11 @@ function updateField(
 export function makeDotPanel(
   ctx: IEditorContext,
   id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
 ): Array<IPropertyPanelSectionProps> {
   let loadedMap = ctx.state.map!;
   let dotInstance = loadedMap.dotsData[id];
@@ -134,16 +162,11 @@ export function makeDotPanel(
             type: dotType,
             short: true,
             disabled: false,
-            value: loadedMap.globalDotDensityData.map(el => el.name),
+            value: loadedMap.globalDotDensityData
+              .filter(x => !x.name.endsWith(DELETED_NAME))
+              .map(el => el.name),
             onChange(val: string) {
-              updateField(
-                ctx,
-                id,
-                TargetType.DOT,
-                'dot',
-                loadedMap.globalDotDensityData.map(el => el.name),
-                val,
-              );
+              updateField(ctx, id, TargetType.DOT, 'dot', dotInstance.dot, val);
             },
           },
         },
@@ -245,6 +268,30 @@ export function makeDotPanel(
                 val,
               );
             },
+          },
+        },
+        {
+          name: 'Delete Dot Class',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: false,
+            value: [
+              [
+                'Delete Dot',
+                () => {
+                  openModal('Dot', dotClass.name.toString(), () => {
+                    deleteItem(
+                      ctx,
+                      classId,
+                      TargetType.GLOBAL_DOT,
+                      structuredClone(dotClass),
+                    );
+                  });
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
           },
         },
       ],
@@ -357,7 +404,7 @@ export function makeCategoricalPanel(
   let ac = ctx.state.map!.regionsData[id].category;
   let activeCategoryId = -1;
   let activeCategory: ICategoryProps | null = null;
-  if (ac !== undefined && ac !== DELETED_NAME) {
+  if (ac !== undefined && !ac.endsWith(DELETED_NAME)) {
     activeCategory =
       ctx.state.map!.globalCategoryData.filter((c, i) => {
         if (c.name === ac) {
@@ -379,7 +426,7 @@ export function makeCategoricalPanel(
             short: false,
             disabled: false,
             value: allCategories
-              .filter(c => c.name !== DELETED_NAME)
+              .filter(c => !c.name.endsWith(DELETED_NAME))
               .map(c => c.name),
             auxiliaryComponent: ctx.state.map!.regionsData[id].category ?? '',
             onChange(val: string) {
@@ -442,7 +489,9 @@ export function makeCategoricalPanel(
           input: {
             type: deleteType,
             short: false,
-            disabled: activeCategory === null,
+            disabled:
+              activeCategory === null ||
+              activeCategory.name.endsWith(DELETED_NAME),
             value: [
               [
                 'Delete Category',
@@ -452,13 +501,11 @@ export function makeCategoricalPanel(
                     //TODO: DISABLE DOESNT ACTUALLY DISABLE
                     activeCategory ? activeCategory?.name : '',
                     () => {
-                      updateField(
+                      deleteItem(
                         ctx,
                         activeCategoryId,
                         TargetType.GLOBAL_CATEGORY,
-                        'name',
-                        activeCategory!.name,
-                        DELETED_NAME,
+                        structuredClone(activeCategory!),
                       );
                     },
                   );
@@ -555,6 +602,11 @@ export function makeChoroplethPanel(
 export function makeSymbolPanel(
   ctx: IEditorContext,
   id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
 ): Array<IPropertyPanelSectionProps> {
   let loadedMap = ctx.state.map!;
   let symInstance = loadedMap.symbolsData[id];
@@ -675,25 +727,30 @@ export function makeSymbolPanel(
             },
           },
         },
-        // {
-        //   name: 'TODO SYMBOL SVG?',
-        //   input: {
-        //     type: numType,
-        //     short: false,
-        //     disabled: false,
-        //     value: dotClass.size.toString(),
-        //     onChange(val: string) {
-        //       updateField(
-        //         ctx,
-        //         classId,
-        //         TargetType.GLOBAL_DOT,
-        //         'size',
-        //         dotClass.size.toString(),
-        //         val,
-        //       );
-        //     },
-        //   },
-        // },
+        {
+          name: 'Delete Symbol Class',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: false,
+            value: [
+              [
+                'Delete Symbol',
+                () => {
+                  openModal('Symbol', symClass.name.toString(), () => {
+                    deleteItem(
+                      ctx,
+                      classId,
+                      TargetType.GLOBAL_SYMBOL,
+                      structuredClone(symClass),
+                    );
+                  });
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
+          },
+        },
       ],
     },
   ];

@@ -74,7 +74,6 @@ export class GeoJSONVisitor {
   }
 
   public visitRoot() {
-    console.log(this.mapData);
     switch (this.mapData.type) {
       case 'Feature': {
         this.visitFeature(this.mapData);
