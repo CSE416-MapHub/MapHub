@@ -76,7 +76,7 @@ function deltaDot(map: MHJSON, d: Delta) {
       }
       // TODO: is this the smartest thing to do?
       // map.dotsData.splice(d.target[1], 1);
-      map.dotsData[d.target[1]].dot = DELETED_NAME;
+      map.dotsData[d.target[1]].dot += DELETED_NAME;
       break;
     }
 
@@ -153,10 +153,11 @@ function deltaGlobalDot(map: MHJSON, d: Delta) {
       // TODO: is this the smartest thing to do?
       // map.globalDotDensityData.splice(d.target[1], 1);
       let targName = map.globalDotDensityData[d.target[1]].name;
-      map.globalDotDensityData[d.target[1]].name = DELETED_NAME;
+      map.globalDotDensityData[d.target[1]].name += DELETED_NAME;
+
       map.dotsData = map.dotsData.map(d => {
         if (d.dot === targName) {
-          d.dot = DELETED_NAME;
+          d.dot += DELETED_NAME;
         }
         return d;
       });
@@ -298,7 +299,7 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
       }
       // check if the category name is taken
       let taken = map.globalCategoryData.filter(c => c.name === d.payload.name);
-      if (taken.length >= 1 && d.payload.name !== DELETED_NAME) {
+      if (taken.length >= 1 && d.payload.name?.endsWith(DELETED_NAME)) {
         throw new Error('Category name ' + d.payload.name + ' is already used');
       }
       let targ = map.globalCategoryData[d.target[1]];
@@ -352,7 +353,7 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
         throw new Error('Target index out of bounds');
       }
       let targName = map.globalCategoryData[d.target[1]].name;
-      map.globalCategoryData[d.target[1]].name = DELETED_NAME;
+      map.globalCategoryData[d.target[1]].name += DELETED_NAME;
       map.regionsData = map.regionsData.map(r => {
         if (r.category === targName) {
           r.category = undefined;
@@ -384,7 +385,7 @@ function deltaSymbol(map: MHJSON, d: Delta) {
       }
       // TODO: is this the smartest thing to do?
       // map.dotsData.splice(d.target[1], 1);
-      map.symbolsData[d.target[1]].symbol = DELETED_NAME;
+      map.symbolsData[d.target[1]].symbol += DELETED_NAME;
       break;
     }
 
@@ -454,10 +455,10 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
       // TODO: is this the smartest thing to do?
       // map.globalDotDensityData.splice(d.target[1], 1);
       let targName = map.globalSymbolData[d.target[1]].name;
-      map.globalSymbolData[d.target[1]].name = DELETED_NAME;
+      map.globalSymbolData[d.target[1]].name += DELETED_NAME;
       map.symbolsData = map.symbolsData.map(s => {
         if (s.symbol === targName) {
-          s.symbol = DELETED_NAME;
+          s.symbol += DELETED_NAME;
         }
         return s;
       });
@@ -555,7 +556,7 @@ function deltaArrow(map: MHJSON, d: Delta) {
       if (d.target[1] > map.arrowsData.length || d.target[1] < 0) {
         throw new Error('Target out of bounds in delete arrow: ' + d.target[1]);
       }
-      map.arrowsData[d.target[1]].label = DELETED_NAME;
+      map.arrowsData[d.target[1]].label += DELETED_NAME;
       map.arrowsData[d.target[1]].opacity = 0;
       map.arrowsData[d.target[1]].capacity = 0;
       break;

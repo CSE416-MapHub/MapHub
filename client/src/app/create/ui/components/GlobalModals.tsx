@@ -22,19 +22,19 @@ export default function () {
     // find nearest dot and symbol name
     let aDotName =
       editorContext.state.map?.globalDotDensityData.filter(
-        x => x.name !== DELETED_NAME,
+        x => !x.name.endsWith(DELETED_NAME),
       )[0]?.name ?? DELETED_NAME;
     let aSymbolName =
       editorContext.state.map?.globalSymbolData.filter(
-        x => x.name !== DELETED_NAME,
+        x => !x.name.endsWith(DELETED_NAME),
       )[0]?.name ?? DELETED_NAME;
     if (
       editorContext.state.selectedTool === ToolbarButtons.dot &&
       editorContext.state.map &&
-      editorContext.state.lastInstantiated === DELETED_NAME &&
+      editorContext.state.lastInstantiated.endsWith(DELETED_NAME) &&
       !openDotModal
     ) {
-      if (aDotName !== DELETED_NAME) {
+      if (!aDotName.endsWith(DELETED_NAME)) {
         editorContext.dispatch({
           type: EditorActions.SET_LAST_INSTANTIATED,
           payload: {
@@ -48,10 +48,10 @@ export default function () {
     if (
       editorContext.state.selectedTool === ToolbarButtons.symbol &&
       editorContext.state.map &&
-      editorContext.state.lastInstantiated === DELETED_NAME &&
+      editorContext.state.lastInstantiated.endsWith(DELETED_NAME) &&
       !openSymbolModal
     ) {
-      if (aSymbolName !== DELETED_NAME) {
+      if (aSymbolName.endsWith(DELETED_NAME)) {
         editorContext.dispatch({
           type: EditorActions.SET_LAST_INSTANTIATED,
           payload: {

@@ -357,7 +357,7 @@ export function makeCategoricalPanel(
   let ac = ctx.state.map!.regionsData[id].category;
   let activeCategoryId = -1;
   let activeCategory: ICategoryProps | null = null;
-  if (ac !== undefined && ac !== DELETED_NAME) {
+  if (ac !== undefined && !ac.endsWith(DELETED_NAME)) {
     activeCategory =
       ctx.state.map!.globalCategoryData.filter((c, i) => {
         if (c.name === ac) {
@@ -379,7 +379,7 @@ export function makeCategoricalPanel(
             short: false,
             disabled: false,
             value: allCategories
-              .filter(c => c.name !== DELETED_NAME)
+              .filter(c => !c.name.endsWith(DELETED_NAME))
               .map(c => c.name),
             auxiliaryComponent: ctx.state.map!.regionsData[id].category ?? '',
             onChange(val: string) {
@@ -458,7 +458,7 @@ export function makeCategoricalPanel(
                         TargetType.GLOBAL_CATEGORY,
                         'name',
                         activeCategory!.name,
-                        DELETED_NAME,
+                        activeCategory!.name + DELETED_NAME,
                       );
                     },
                   );
