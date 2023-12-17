@@ -240,7 +240,7 @@ class helpers {
       }
       if (
         d.type === DeltaType.DELETE &&
-        map.globalSymbolData[d.target[1]].name.endsWith(DELETED_NAME)
+        map.globalDotDensityData[d.target[1]].name.endsWith(DELETED_NAME)
       ) {
         li =
           map.globalDotDensityData.filter(

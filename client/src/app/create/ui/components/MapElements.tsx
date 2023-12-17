@@ -44,6 +44,7 @@ export default function () {
   >([]);
   const editorContextRef = useRef(editorContextStaleable);
 
+  const [gDotArray, setGDotArray] = useState<Array<IDotDensityProps>>([]);
   const [dotNames, setDotNames] = useState<Map<string, IDotDensityProps>>(
     new Map(),
   );
@@ -62,12 +63,15 @@ export default function () {
       setRerender(rerender + 1);
     }
     if (loadedMap) {
-      if (dotNames.size !== loadedMap.globalDotDensityData.length) {
+      if (gDotArray !== loadedMap.globalDotDensityData) {
         let nameMap = new Map<string, IDotDensityProps>();
-        for (let ip of loadedMap.globalDotDensityData) {
+        for (let ip of loadedMap.globalDotDensityData.filter(
+          x => !x.name.endsWith(DELETED_NAME),
+        )) {
           nameMap.set(ip.name, ip);
         }
         setDotNames(nameMap);
+        setGDotArray(loadedMap.globalDotDensityData);
       }
       if (symbolNames.size !== loadedMap.globalSymbolData.length) {
         let nameMap = new Map<string, ISymbolProps>();
@@ -384,6 +388,7 @@ export default function () {
             color: '#000000',
             size: 0,
           };
+          console.log('dot class is ', dotClass);
           return (
             <Dot
               dotInstance={dotInstance}
@@ -415,7 +420,7 @@ export default function () {
           },
         )}
         {editorContextRef.current.state.map?.arrowsData.map((arrow, i) => {
-          if (arrow.label === DELETED_NAME) {
+          if (arrow.label.endsWith(DELETED_NAME)) {
             return;
           }
           return (
