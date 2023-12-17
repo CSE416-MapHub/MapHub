@@ -19,13 +19,31 @@ export default function () {
 
   let createdDot = false;
   useEffect(() => {
+    // find nearest dot and symbol name
+    let aDotName =
+      editorContext.state.map?.globalDotDensityData.filter(
+        x => x.name !== DELETED_NAME,
+      )[0]?.name ?? DELETED_NAME;
+    let aSymbolName =
+      editorContext.state.map?.globalSymbolData.filter(
+        x => x.name !== DELETED_NAME,
+      )[0]?.name ?? DELETED_NAME;
     if (
       editorContext.state.selectedTool === ToolbarButtons.dot &&
       editorContext.state.map &&
       editorContext.state.lastInstantiated === DELETED_NAME &&
       !openDotModal
     ) {
-      setOpenDotModal(true);
+      if (aDotName !== DELETED_NAME) {
+        editorContext.dispatch({
+          type: EditorActions.SET_LAST_INSTANTIATED,
+          payload: {
+            lastInstantiated: aDotName,
+          },
+        });
+      } else {
+        setOpenDotModal(true);
+      }
     }
     if (
       editorContext.state.selectedTool === ToolbarButtons.symbol &&
@@ -33,7 +51,16 @@ export default function () {
       editorContext.state.lastInstantiated === DELETED_NAME &&
       !openSymbolModal
     ) {
-      setOpenSymbolModal(true);
+      if (aSymbolName !== DELETED_NAME) {
+        editorContext.dispatch({
+          type: EditorActions.SET_LAST_INSTANTIATED,
+          payload: {
+            lastInstantiated: aSymbolName,
+          },
+        });
+      } else {
+        setOpenSymbolModal(true);
+      }
     }
   });
   return (
@@ -99,6 +126,7 @@ export default function () {
       <NewSymbolModal
         open={openSymbolModal}
         onClose={function (created): void {
+          console.log('CLOSING WITH CREATED ' + created);
           if (!created) {
             editorContext.dispatch({
               type: EditorActions.SET_TOOL,
@@ -108,43 +136,6 @@ export default function () {
             });
           }
           setOpenSymbolModal(false);
-        }}
-        onConfirm={function (
-          svgFile: File,
-          name: string,
-          preview: string,
-        ): void {
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            let res = reader.result as string;
-
-            let map = editorContext.state.map;
-            if (!map) {
-              throw new Error('Cannot make dot type without map');
-            }
-            let mapId = editorContext.state.map_id;
-            let targetId = map.globalSymbolData.length;
-            editorContext.helpers.addDelta(
-              editorContext,
-              {
-                type: DeltaType.CREATE,
-                targetType: TargetType.GLOBAL_SYMBOL,
-                target: [mapId, targetId, '-1'],
-                payload: {
-                  svg: res,
-                  name: name,
-                },
-              },
-              {
-                type: DeltaType.DELETE,
-                targetType: TargetType.GLOBAL_SYMBOL,
-                target: [mapId, targetId, '-1'],
-                payload: {},
-              },
-            );
-            setOpenSymbolModal(false);
-          };
-          reader.readAsText(svgFile);
         }}
       ></NewSymbolModal>
     </>
