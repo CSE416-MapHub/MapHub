@@ -51,7 +51,7 @@ export default function () {
       editorContext.state.lastInstantiated.endsWith(DELETED_NAME) &&
       !openSymbolModal
     ) {
-      if (aSymbolName.endsWith(DELETED_NAME)) {
+      if (!aSymbolName.endsWith(DELETED_NAME)) {
         editorContext.dispatch({
           type: EditorActions.SET_LAST_INSTANTIATED,
           payload: {

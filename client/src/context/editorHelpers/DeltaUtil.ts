@@ -46,11 +46,6 @@ export function applyDelta(map: MHJSON, d: Delta) {
   }
 }
 
-// HACK
-function m(a: any): a is string | Array<string | [string, () => void]> {
-  return true;
-}
-
 /**
  * Applies a Delta to the map in place
  * @param map
@@ -440,6 +435,8 @@ function deltaSymbol(map: MHJSON, d: Delta) {
 }
 
 function deltaGlobalSymbol(map: MHJSON, d: Delta) {
+  map.globalSymbolData = [...map.globalSymbolData];
+  map.symbolsData = [...map.symbolsData];
   switch (d.type) {
     case DeltaType.UPDATE: {
       if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
@@ -501,10 +498,17 @@ function deltaGlobalSymbol(map: MHJSON, d: Delta) {
           'Tried to create a symbol with a name that already exists',
         );
       }
-      map.globalSymbolData.splice(d.target[1], 0, {
+      map.globalSymbolData[d.target[1]] = {
         name: p.name,
         svg: p.svg,
-      });
+      };
+
+      // look for previously deleted symbols
+      for (let sym of map.symbolsData) {
+        if (sym.symbol === p.name + DELETED_NAME) {
+          sym.symbol = p.name;
+        }
+      }
       break;
     }
   }
