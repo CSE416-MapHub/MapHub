@@ -23,7 +23,6 @@ const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
 const lat2m = 10;
-const DEFAULT_SZ = 100;
 
 export const mixColors = (c1: string, c2: string, ratio: number): string => {
   return (
@@ -152,6 +151,8 @@ class SVGBuilder {
           x.svg,
           'image/svg+xml',
         ).documentElement;
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('height', '100%');
         return [x.name, [x, svgEl]];
       }),
     );
@@ -162,38 +163,26 @@ class SVGBuilder {
         continue;
       }
       let symbolData = symbolMap.get(s.symbol)!;
-      let viewbox = symbolData[1].getAttribute('viewBox');
-      if (viewbox === null) {
-        throw new Error('null viewbox');
-      }
-      symbols += this.svgOfSymbol(
-        viewbox,
-        symbolData[1].innerHTML,
-        [s.x, s.y],
-        s.scale,
-      );
+
+      symbols += this.svgOfSymbol(symbolData[1].outerHTML, [s.x, s.y], s.scale);
     }
     return symbols;
   }
 
   private svgOfSymbol(
-    viewbox: string,
-    children: string,
+    svg: string,
     location: [x: number, y: number],
     scale: number,
   ): string {
+    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 10;
     let [x, y, w, h] = [
       location[0] - (DEFAULT_SZ * scale) / 2,
-      location[1] + (DEFAULT_SZ * scale) / 2,
-      DEFAULT_SZ * scale * 0.148,
-      DEFAULT_SZ * scale * 0.148,
+      -1 * (location[1] + (DEFAULT_SZ * scale) / 2),
+      DEFAULT_SZ * scale,
+      DEFAULT_SZ * scale,
     ];
 
-    return `<svg x="${y}" y="${
-      -1 * x
-    }" width="${w}" height="${h}"><svg viewBox="${viewbox}" width="100%" height="100%">
-    ${children}
-  </svg></svg>`;
+    return `<svg x="${x}" y="${y}" width="${w}" height="${h}">${svg}</svg>`;
   }
 
   private svgOfArrows(): string {

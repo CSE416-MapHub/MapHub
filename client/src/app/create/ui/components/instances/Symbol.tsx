@@ -4,7 +4,7 @@ import {
   ToolbarButtons,
 } from 'context/EditorProvider';
 import { CircleMarker, Rectangle, SVGOverlay, useMap } from 'react-leaflet';
-import { useContext, useRef, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import { ISymbolInstance, ISymbolProps, MHJSON } from 'types/MHJSON';
 import { DeltaType, TargetType } from 'types/delta';
 import L from 'leaflet';
@@ -24,24 +24,47 @@ export default function ({
   id,
   mapClickHandler,
 }: SymbolProps) {
-  let editorContextRef = useContext(EditorContext);
-
+  let editorContext = useContext(EditorContext);
+  const map = useMap();
   const [dragging, setDragging] = useState(false);
   const [x, setX] = useState(symbolInstance.x);
   const [y, setY] = useState(symbolInstance.y);
   const [rerender, setRerender] = useState(2);
-  const map = useMap();
+
+  // function changeBounds() {
+  //   console.log('CHANGING BOUNDS');
+  //   console.log(bounds);
+  //   mapsz = map.getSize();
+  //   mapbds = map.getBounds();
+  //   zoom = map.getZoom();
+
+  //   let newBounds: [[number, number], [number, number]] = [
+  //     [y + zoom * scale, x - zoom * scale],
+  //     [y - zoom * scale, x + zoom * scale],
+  //   ];
+  //   console.log(newBounds);
+  //   setBounds(newBounds);
+  //   setRerender(rerender + 1);
+  // }
+
+  useEffect(() => {
+    // console.log('adding evt lsitner');
+    // map.addEventListener('zoomend', changeBounds);
+    // return () => {
+    //   map.removeEventListener('zoomend', changeBounds);
+    // };
+  }, []);
 
   function handleClick(ev: L.LeafletMouseEvent) {
-    if (editorContextRef.state.selectedTool === ToolbarButtons.select) {
+    if (editorContext.state.selectedTool === ToolbarButtons.select) {
       let loadedMap: MHJSON;
-      if (editorContextRef.state.map) {
-        loadedMap = editorContextRef.state.map;
+      if (editorContext.state.map) {
+        loadedMap = editorContext.state.map;
       } else {
         return;
       }
       console.log('HANDLING SOMETHING IN SYMBOL');
-      editorContextRef.dispatch({
+      editorContext.dispatch({
         type: EditorActions.SET_SELECTED,
         payload: {
           selectedItem: {
@@ -59,12 +82,12 @@ export default function ({
   function handleMouseUp(ev: L.LeafletMouseEvent) {
     if (dragging) {
       setDragging(false);
-      editorContextRef.helpers.addDelta(
-        editorContextRef,
+      editorContext.helpers.addDelta(
+        editorContext,
         {
           type: DeltaType.UPDATE,
           targetType: TargetType.SYMBOL,
-          target: [editorContextRef.state.map_id, id, '-1'],
+          target: [editorContext.state.map_id, id, '-1'],
           payload: {
             x,
             y,
@@ -73,7 +96,7 @@ export default function ({
         {
           type: DeltaType.UPDATE,
           targetType: TargetType.SYMBOL,
-          target: [editorContextRef.state.map_id, id, '-1'],
+          target: [editorContext.state.map_id, id, '-1'],
           payload: {
             x: symbolInstance.x,
             y: symbolInstance.y,
@@ -84,18 +107,18 @@ export default function ({
   }
 
   function deleteSelf() {
-    editorContextRef.helpers.addDelta(
-      editorContextRef,
+    editorContext.helpers.addDelta(
+      editorContext,
       {
         type: DeltaType.DELETE,
         targetType: TargetType.SYMBOL,
-        target: [editorContextRef.state.map_id, id, '-1'],
+        target: [editorContext.state.map_id, id, '-1'],
         payload: {},
       },
       {
         type: DeltaType.CREATE,
         targetType: TargetType.SYMBOL,
-        target: [editorContextRef.state.map_id, id, '-1'],
+        target: [editorContext.state.map_id, id, '-1'],
         payload: structuredClone(symbolInstance),
       },
     );
@@ -103,14 +126,14 @@ export default function ({
 
   function handleMouseDown(ev: L.LeafletMouseEvent) {
     const thisIsSelected =
-      editorContextRef.state.selectedItem &&
-      editorContextRef.state.selectedItem.id === id &&
-      editorContextRef.state.selectedItem.type == TargetType.SYMBOL &&
-      editorContextRef.state.selectedTool === ToolbarButtons.select;
+      editorContext.state.selectedItem &&
+      editorContext.state.selectedItem.id === id &&
+      editorContext.state.selectedItem.type == TargetType.SYMBOL &&
+      editorContext.state.selectedTool === ToolbarButtons.select;
     if (thisIsSelected) {
       setDragging(true);
     }
-    if (editorContextRef.state.selectedTool === ToolbarButtons.erase) {
+    if (editorContext.state.selectedTool === ToolbarButtons.erase) {
       deleteSelf();
     }
   }
@@ -121,32 +144,25 @@ export default function ({
       setY(ev.latlng.lat);
       setRerender(rerender + 1);
     }
-    if (!dragging && editorContextRef.state.isDeleting) {
+    if (!dragging && editorContext.state.isDeleting) {
       deleteSelf();
     }
   }
 
-  let mapsz = map.getSize();
-  let mapbds = map.getBounds();
-  let lngPerPx = (mapbds.getEast() - mapbds.getWest()) / mapsz.x;
-  let latPerPx = (mapbds.getSouth() - mapbds.getNorth()) / mapsz.y;
+  let mapbox = editorContext.state.mapDetails.bbox;
   let scale = symbolInstance.scale;
+  let DEFAULT_SZ = Math.min(mapbox[2], mapbox[3]) / 10;
+  let bounds: [[number, number], [number, number]] = [
+    [y + DEFAULT_SZ * scale, x - DEFAULT_SZ * scale],
+    [y - DEFAULT_SZ * scale, x + DEFAULT_SZ * scale],
+  ];
 
   return (
     <>
       <Rectangle
         className="map-symbol"
         key={rerender + 'symbol' + id}
-        bounds={[
-          [
-            y + (latPerPx * DEFAULT_SZ * scale) / 2,
-            x - (lngPerPx * DEFAULT_SZ * scale) / 2,
-          ],
-          [
-            y - (latPerPx * DEFAULT_SZ * scale) / 2,
-            x + (lngPerPx * DEFAULT_SZ * scale) / 2,
-          ],
-        ]}
+        bounds={bounds}
         fillOpacity={0}
         stroke={false}
         eventHandlers={{
@@ -168,19 +184,7 @@ export default function ({
           },
         }}
       ></Rectangle>
-      <SVGOverlay
-        key={rerender * -1 + 'symbol' + id}
-        bounds={[
-          [
-            y + (latPerPx * DEFAULT_SZ * scale) / 2,
-            x - (lngPerPx * DEFAULT_SZ * scale) / 2,
-          ],
-          [
-            y - (latPerPx * DEFAULT_SZ * scale) / 2,
-            x + (lngPerPx * DEFAULT_SZ * scale) / 2,
-          ],
-        ]}
-      >
+      <SVGOverlay key={rerender * -1 + 'symbol' + id} bounds={bounds}>
         {(() => {
           let parser = new DOMParser();
           let svgEl: HTMLElement = parser.parseFromString(
@@ -188,24 +192,16 @@ export default function ({
             'image/svg+xml',
           ).documentElement;
 
+          svgEl.setAttribute('width', '100%');
+          svgEl.setAttribute('height', '100%');
           // find the viewbox. if theres no viewbox, throw an error
-          let viewbox = svgEl.getAttribute('viewBox');
-          if (viewbox === null) {
-            throw new Error('null viewbox');
-          }
-          let svgChildren = Array.from(svgEl.children);
+          // let viewbox = svgEl.getAttribute('viewBox');
+          // if (viewbox === null) {
+          //   throw new Error('null viewbox');
+          // }
+          // let svgChildren = Array.from(svgEl.children);
 
-          return (
-            <svg viewBox={viewbox} width="100%" height="100%">
-              {svgChildren.map((el, i) => (
-                <g
-                  key={'' + i}
-                  ref={ref => ref?.appendChild(el)}
-                  // fillOpacity={0}
-                ></g>
-              ))}
-            </svg>
-          );
+          return <g ref={ref => ref?.appendChild(svgEl)}></g>;
         })()}
       </SVGOverlay>
     </>

@@ -73,6 +73,7 @@ export enum EditorActions {
   SET_TITLE,
   SET_ACTION,
   SET_DELETING,
+  SET_LAST_INSTANTIATED,
 }
 
 // the reducer
@@ -178,6 +179,16 @@ function getReducer(notifications: NotificationsContextValue) {
         }
         break;
       }
+      case EditorActions.SET_LAST_INSTANTIATED: {
+        if (action.payload.lastInstantiated !== undefined) {
+          newState.lastInstantiated = action.payload.lastInstantiated;
+        } else {
+          throw new Error(
+            'SET_LAST_INSTANTIATED must have a lastInstantiated in its payload',
+          );
+        }
+        break;
+      }
       default:
         throw new Error('UNHANDLED ACTION');
     }
@@ -211,6 +222,47 @@ class helpers {
     });
   }
 
+  private getLastInitialized(map: MHJSON, d: Delta, li: string): string {
+    // if we transformed into a new type, make it the li
+    if (d.targetType === TargetType.DOT) {
+      if (d.type === DeltaType.UPDATE && d.payload.dot) {
+        li = d.payload.dot;
+      }
+    }
+    if (d.targetType === TargetType.SYMBOL) {
+      if (d.type === DeltaType.UPDATE && d.payload.symbol) {
+        li = d.payload.symbol;
+      }
+    }
+    if (d.targetType === TargetType.GLOBAL_DOT) {
+      if (d.type === DeltaType.CREATE && d.payload.name) {
+        li = d.payload.name;
+      }
+      if (
+        d.type === DeltaType.DELETE &&
+        map.globalSymbolData[d.target[1]].name === DELETED_NAME
+      ) {
+        li =
+          map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
+            ?.name ?? DELETED_NAME;
+      }
+    }
+    if (d.targetType === TargetType.GLOBAL_SYMBOL) {
+      if (d.type === DeltaType.CREATE && d.payload.name) {
+        li = d.payload.name;
+      }
+      if (
+        d.type === DeltaType.DELETE &&
+        map.globalSymbolData[d.target[1]].name === DELETED_NAME
+      ) {
+        li =
+          map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
+            ?.name ?? DELETED_NAME;
+      }
+    }
+    return li;
+  }
+
   public addDelta(ctx: IEditorContext, d: Delta, dInv: Delta) {
     let x = ctx.state.map;
     if (x !== null) {
@@ -226,23 +278,12 @@ class helpers {
       if (ctx.state.map_id !== GUEST_MAP_ID) {
         MapAPI.updateMapPayload(d);
       }
-      let li: string = ctx.state.lastInstantiated;
-      if (d.payload.name !== undefined) {
-        if (d.type === DeltaType.CREATE || d.type === DeltaType.UPDATE) {
-          li = d.payload.name;
-        } else {
-          if (d.targetType === TargetType.GLOBAL_DOT) {
-            li =
-              map.globalDotDensityData.filter(x => x.name !== DELETED_NAME)[0]
-                ?.name ?? DELETED_NAME;
-          }
-          if (d.targetType === TargetType.GLOBAL_SYMBOL) {
-            li =
-              map.globalSymbolData.filter(x => x.name !== DELETED_NAME)[0]
-                ?.name ?? DELETED_NAME;
-          }
-        }
-      }
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        d,
+        ctx.state.lastInstantiated,
+      );
 
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -274,13 +315,19 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        a.do,
+        ctx.state.lastInstantiated,
+      );
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           map: nMap,
           actionStack: nStack,
-          lastInstantiated: ctx.state.lastInstantiated,
+          lastInstantiated: li,
         },
       });
     } else {
@@ -304,13 +351,19 @@ class helpers {
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        a.undo,
+        ctx.state.lastInstantiated,
+      );
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           map: nMap,
           actionStack: nStack,
-          lastInstantiated: ctx.state.lastInstantiated,
+          lastInstantiated: li,
         },
       });
     } else {

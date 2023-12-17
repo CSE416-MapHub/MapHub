@@ -174,7 +174,7 @@ export default function () {
           payload: {
             y: latlng.lat,
             x: latlng.lng,
-            scale: 5,
+            scale: 1,
             symbol: symData.name,
           },
         },
