@@ -232,13 +232,12 @@ export default function () {
           console.log(typeof parsedGeoJSON);
           map.geoJSON = parsedGeoJSON;
           editorContext.helpers.setLoadedMap(editorContext, mapId, map);
-          console.log('loaded map set');
           // setUserGeoJSON(typeof geoJSON === 'string' ? JSON.parse(geoJSON) : geoJSON);
           setOpenImport(false);
         });
       }
     }
-  }, [searchParams]);
+  }, [searchParams, authContext.state.isLoggedIn]);
 
   return (
     <div className={styles['ribbon-container']}>
