@@ -121,7 +121,7 @@ class AccountAPI {
     newPassword: string,
     newPasswordConfirm: string,
   ) {
-    return this.api.put('/auth/profile-pic', {
+    return this.api.put('/auth/password', {
       currentPassword,
       newPassword,
       newPasswordConfirm,
