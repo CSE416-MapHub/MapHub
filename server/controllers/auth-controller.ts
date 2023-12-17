@@ -455,6 +455,7 @@ export const putPassword = async (request: Request, response: Response) => {
 
     const salt = await bcrypt.genSalt(10);
     user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
     return response.status(200).json({
       success: true,
       user: {
