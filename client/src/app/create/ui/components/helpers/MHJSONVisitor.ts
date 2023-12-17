@@ -273,33 +273,36 @@ class SVGBuilder {
     // however, if it is choropleth
     // use the written intensity
     // but if global choropleth key is set, find the intensity in the properties
-    let intensity =
-      this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
-    let cData = this.mhjson.globalChoroplethData;
+    if (this.mhjson.mapType === 'choropleth') {
+      let intensity =
+        this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
+      let cData = this.mhjson.globalChoroplethData;
 
-    if (!cData.indexingKey.endsWith(DELETED_NAME) && feature.properties) {
-      intensity = parseFloat(feature.properties[cData.indexingKey]);
-    }
+      if (!cData.indexingKey.endsWith(DELETED_NAME) && feature.properties) {
+        intensity = parseFloat(feature.properties[cData.indexingKey]);
+      }
 
-    if (intensity !== undefined) {
-      let ratio =
-        (intensity - cData.minIntensity) /
-        (cData.maxIntensity - cData.minIntensity);
-      if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
-        fill = 'white';
-      } else {
-        fill = mixColors(cData.minColor, cData.maxColor, ratio);
+      if (intensity !== undefined) {
+        let ratio =
+          (intensity - cData.minIntensity) /
+          (cData.maxIntensity - cData.minIntensity);
+        if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+          fill = 'white';
+        } else {
+          fill = mixColors(cData.minColor, cData.maxColor, ratio);
+        }
       }
     }
 
-    // if it has both an intensity and a category, use the category
-    let category = this.mhjson.regionsData[this.featureNumber].category;
-    if (category !== undefined && !category.endsWith(DELETED_NAME)) {
-      let categoryObject = this.mhjson.globalCategoryData.filter(
-        x => x.name === category,
-      )[0];
-      if (categoryObject !== undefined) {
-        fill = categoryObject.color;
+    if (this.mhjson.mapType === 'categorical') {
+      let category = this.mhjson.regionsData[this.featureNumber].category;
+      if (category !== undefined && !category.endsWith(DELETED_NAME)) {
+        let categoryObject = this.mhjson.globalCategoryData.filter(
+          x => x.name === category,
+        )[0];
+        if (categoryObject !== undefined) {
+          fill = categoryObject.color;
+        }
       }
     }
 
