@@ -19,7 +19,6 @@ const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
 const lat2m = 10;
-const DEFAULT_SZ = 100;
 
 export const mixColors = (c1: string, c2: string, ratio: number): string => {
   return (
@@ -145,6 +144,7 @@ class SVGBuilder {
   private svgOfSymbols(): string {
     // construct a map of names to objects
     const DOMParser = xmldom.DOMParser;
+    const XMLSerializer = xmldom.XMLSerializer;
     let symbolMap = new Map<string, [ISymbolProps, HTMLElement]>(
       this.mhjson.globalSymbolData.map((x: any) => {
         // Use querySelector to directly select the SVG element
@@ -152,6 +152,9 @@ class SVGBuilder {
         let doc = parser.parseFromString(x.svg, 'image/svg+xml');
 
         let svgEl = doc.getElementsByTagName('svg')[0];
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('height', '100%');
+
         // let svgEl: HTMLElement = new DOMParser().parseFromString(
         //   x.svg,
         //   'image/svg+xml',
@@ -161,62 +164,36 @@ class SVGBuilder {
     );
 
     let symbols = '';
-    let count = 0;
     for (let s of this.mhjson.symbolsData) {
       if (s.symbol === DELETED_NAME) {
         continue;
       }
 
       let symbolData = symbolMap.get(s.symbol)!;
-      let viewbox = symbolData[1].getAttribute('viewBox');
-      if (viewbox === null) {
-        throw new Error('null viewbox');
-      }
 
-      let innerHTML = '';
-      for (let i = 0; i < symbolData[1].childNodes.length; i++) {
-        const child = symbolData[1].childNodes[i];
-
-        if (child.nodeType === 1) {
-          // Element node
-          let childString = child.toString();
-          // Remove the xmlns attribute
-          childString = childString.replace(
-            /\s+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/g,
-            '',
-          );
-          innerHTML += childString;
-        }
-      }
       // console.log('inner', innerHTML);
-
-      symbols += this.svgOfSymbol(viewbox, innerHTML, [s.x, s.y], s.scale);
-      if (count === 0) {
-        // console.log('SYMBOLS', symbols);
-      }
-      count = count + 1;
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(symbolData[1]);
+      console.log('-------------SVG STRING ---------', svgString);
+      symbols += this.svgOfSymbol(svgString, [s.x, s.y], s.scale);
     }
     return symbols;
   }
 
   private svgOfSymbol(
-    viewbox: string,
-    children: string,
+    svg: string,
     location: [x: number, y: number],
     scale: number,
   ): string {
+    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 10;
     let [x, y, w, h] = [
       location[0] - (DEFAULT_SZ * scale) / 2,
-      location[1] + (DEFAULT_SZ * scale) / 2,
-      DEFAULT_SZ * scale * 0.148,
-      DEFAULT_SZ * scale * 0.148,
+      -1 * (location[1] + (DEFAULT_SZ * scale) / 2),
+      DEFAULT_SZ * scale,
+      DEFAULT_SZ * scale,
     ];
-    // console.log('THESE ------------------------', children);
-    return `<svg x="${y}" y="${-1 * x}" width="${w}" height="${h}">
-    <svg viewBox="${viewbox}" width="100%" height="100%">
-    ${children}
-    </svg>
-    </svg>`;
+
+    return `<svg x="${x}" y="${y}" width="${w}" height="${h}">${svg}</svg>`;
   }
 
   private svgOfArrows(): string {
