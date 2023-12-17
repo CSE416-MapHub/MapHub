@@ -32,32 +32,32 @@ export enum SVGDetail {
   THUMBNAIL = 'thumbnail',
 }
 
-async function convertSvgToPngBase64(svgString: string): Promise<string> {
-  const options: svg2imgOptions = {
-    resvg: {
-      dpi: 300,
-      shapeRendering: 2,
-      textRendering: 1,
-      imageRendering: 0,
-      fitTo: { mode: 'width', value: 800 },
-    },
-    quality: 100,
-  };
-  console.log('THE SVG to pARSE', svgString);
-  return new Promise((resolve, reject) => {
-    svg2img(svgString, options, function (error, buffer) {
-      if (error) {
-        console.error('Error converting SVG to PNG:', error);
-        resolve('FULL');
-      } else {
-        // Convert buffer to a base64 encoded string
-        const base64Png = buffer.toString('base64');
-        console.log('FINISHED CONVERTING ONE');
-        resolve(base64Png);
-      }
-    });
-  });
-}
+// async function convertSvgToPngBase64(svgString: string): Promise<string> {
+//   const options: svg2imgOptions = {
+//     resvg: {
+//       dpi: 300,
+//       shapeRendering: 2,
+//       textRendering: 1,
+//       imageRendering: 0,
+//       fitTo: { mode: 'width', value: 800 },
+//     },
+//     quality: 100,
+//   };
+//   console.log('THE SVG to pARSE', svgString);
+//   return new Promise((resolve, reject) => {
+//     svg2img(svgString, options, function (error, buffer) {
+//       if (error) {
+//         console.error('Error converting SVG to PNG:', error);
+//         resolve('FULL');
+//       } else {
+//         // Convert buffer to a base64 encoded string
+//         const base64Png = buffer.toString('base64');
+//         console.log('FINISHED CONVERTING ONE');
+//         resolve(base64Png);
+//       }
+//     });
+//   });
+// }
 
 function minifySVG(svgString: string): string {
   // Replace newlines and carriage returns with nothing
@@ -99,23 +99,24 @@ export async function convertJsonToSVG(
       // if (pngString === 'FULL') {
       //   return minifySVG(svgRepr);
       // }
-      console.log('BOUNDING BOX of the thing', box[0], box[1]);
+      console.log('BOUNDING BOX of', box[0], box[1]);
       const pngString = await sharp(Buffer.from(svgRepr))
         .png()
         .resize({
           width: 128,
           height: 128,
-          fit: 'outside',
+          fit: 'inside',
           withoutEnlargement: true,
           withoutReduction: true,
           background: '#0081A7',
           kernel: 'lanczos3',
         })
         .toBuffer();
+
       return pngString.toString('base64');
     } catch (error: any) {
       console.log('CAUGHT THE ERROR', error);
-      console.log('The svg in question', svgRepr);
+      // console.log('The svg in question', map.title, svgRepr);
       return minifySVG(svgRepr);
     }
   }
