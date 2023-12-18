@@ -116,7 +116,7 @@ export async function convertJsonToSVG(
     } catch (error: any) {
       console.log('BOUNDING BOX of FAILED', box.join(' '), map.title);
 
-      console.log('CAUGHT THE ERROR', error);
+      // console.log('CAUGHT THE ERROR', error);
       // if (map.title === 'testing symbol') {
       //   console.log('The svg in question', map.title, svgRepr);
       // }
@@ -150,7 +150,7 @@ const MapController = {
       geoJSON,
     } = req.body.map;
     console.log('REQ BODY IS');
-    console.log(req.body);
+    // console.log(req.body);
 
     // if (verifiedUser !== owner) {
     //   return res
@@ -193,7 +193,6 @@ const MapController = {
         geoJSON: 'placeholder',
         owner: verifiedUser,
       });
-      console.log(newMap);
     } catch (err: any) {
       console.error(err.message);
       return res
@@ -334,7 +333,7 @@ const MapController = {
       map = new Map(map);
 
       const updatedMap = await map.save();
-      console.log('AFTER UPDATE MAP', updatedMap);
+      // console.log('AFTER UPDATE MAP', updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
       console.error(err.message);
@@ -347,7 +346,7 @@ const MapController = {
     const userId = (req as any).userId;
     const { mapId, title } = req.body.mapPayload;
 
-    console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
+    // console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
     if (!mapId) {
       return res
         .status(400)
