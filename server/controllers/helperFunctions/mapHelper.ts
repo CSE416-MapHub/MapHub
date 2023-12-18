@@ -136,10 +136,16 @@ class GlobalCategoryHandler {
     if (!payload.name) throw new Error('GlobalCategory Name is required');
     if (!payload.color) throw new Error(' GlobalCategoryColor is required');
 
-    map.globalCategoryData.splice(delta.target[1], 0, {
+    map.globalCategoryData[delta.target[1]] = {
       name: payload.name,
       color: payload.color,
-    });
+    };
+    for (let r of map.regionsData) {
+      if (r.category && r.category === payload.name + DELETED_NAME) {
+        r.category = payload.name;
+      }
+    }
+
     return map;
   }
 
@@ -149,17 +155,20 @@ class GlobalCategoryHandler {
       map.globalCategoryData.length <= delta.target[1] ||
       delta.target[1] < 0
     ) {
-      throw new Error('Target index out of bounds');
+      throw new Error('Target index UPDATE global category out of bounds');
     }
+
     // check if the category name is taken
     let taken = map.globalCategoryData.filter(
       (c: any) => c.name === delta.payload.name,
     );
-    if (taken.length >= 1 && delta.payload.name !== DELETED_NAME) {
+
+    if (taken.length >= 1 || delta.payload.name?.endsWith(DELETED_NAME)) {
       throw new Error(
         'Category name ' + delta.payload.name + ' is already used',
       );
     }
+
     let targ = map.globalCategoryData[delta.target[1]];
 
     // if the name changed, we have to change the name of each dot
@@ -174,6 +183,7 @@ class GlobalCategoryHandler {
     }
     targ.name = delta.payload.name ?? targ.name;
     targ.color = delta.payload.color ?? targ.color;
+
     return map;
   }
 
@@ -186,13 +196,16 @@ class GlobalCategoryHandler {
       throw new Error('Target DELETE Global Category index out of bounds');
     }
     let targName = map.globalCategoryData[delta.target[1]].name;
-    map.globalCategoryData[delta.target[1]].name = DELETED_NAME;
+
+    map.globalCategoryData[delta.target[1]].name += DELETED_NAME;
+
     map.regionsData = map.regionsData.map((r: any) => {
       if (r.category === targName) {
-        r.category = undefined;
+        r.category = targName + DELETED_NAME;
       }
       return r;
     });
+
     return map;
   }
 }
@@ -218,10 +231,17 @@ class GlobalSymbolHandler {
         'Tried to create a symbol with a name that already exists',
       );
     }
-    map.globalSymbolData.splice(d.target[1], 0, {
+    map.globalSymbolData[d.target[1]] = {
       name: p.name,
       svg: p.svg,
-    });
+    };
+
+    // look for previously deleted symbols
+    for (let sym of map.symbolsData) {
+      if (sym.symbol === p.name + DELETED_NAME) {
+        sym.symbol = p.name;
+      }
+    }
     return map;
   }
 
@@ -260,10 +280,10 @@ class GlobalSymbolHandler {
     }
 
     let targName = map.globalSymbolData[d.target[1]].name;
-    map.globalSymbolData[d.target[1]].name = DELETED_NAME;
+    map.globalSymbolData[d.target[1]].name += DELETED_NAME;
     map.symbolsData = map.symbolsData.map((s: any) => {
       if (s.symbol === targName) {
-        s.symbol = DELETED_NAME;
+        s.symbol += DELETED_NAME;
       }
       return s;
     });
@@ -288,12 +308,20 @@ class GlobalDotHandler {
     if (!payload.size) throw new Error('GlobalDot Size is required');
     if (!payload.color) throw new Error('GlobalDot Color is required');
 
-    map.globalDotDensityData.splice(delta.target[1], 0, {
+    map.globalDotDensityData[delta.target[1]] = {
       name: payload.name,
       opacity: payload.opacity,
       size: payload.size,
       color: payload.color,
-    });
+    };
+
+    //also change back the anmes of all the dots that have been deleted.
+    for (let dot of map.dotsData) {
+      if (dot.dot === payload.name + DELETED_NAME) {
+        dot.dot = payload.name;
+      }
+    }
+
     return map;
   }
 
@@ -332,29 +360,39 @@ class GlobalDotHandler {
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global dot from the map
-    const targetIndex = delta.target[1];
-    //if target index within range then we can set the name to deleted
-    if (targetIndex > map.globalDotDensityData.length || targetIndex < 0) {
-      throw new Error('Global Dot Delete target index out of bounds');
+    if (
+      delta.target[1] >= map.globalDotDensityData.length ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Global Dot UPDATE target index out of bounds');
     }
-    map.globalDotDensityData[targetIndex].name = DELETED_NAME;
 
+    // TODO: is this the smartest thing to do?
+    // map.globalDotDensityData.splice(d.target[1], 1);
+    let targName = map.globalDotDensityData[delta.target[1]].name;
+    map.globalDotDensityData[delta.target[1]].name += DELETED_NAME;
+
+    map.dotsData = map.dotsData.map((subDot: any) => {
+      if (subDot.dot === targName) {
+        subDot.dot += DELETED_NAME;
+      }
+      return subDot;
+    });
     return map;
   }
 }
 class RegionHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a region to the map
-    map.regionsData = [...map.regionsData];
-
     const payload = delta.payload;
     if (!payload.color) throw new Error('Region Color is required');
     if (!payload.intensity) throw new Error('INtensity coordinate is required');
     if (!payload.category) throw new Error('Region category is required');
 
-    if (map.regionsData > delta.target[1] || delta.target[1] < 0) {
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
       throw new Error('CREATE Region target id out of bounds');
     }
+
     if (
       !map.globalCategoryData.find(
         (globalCategory: any) => globalCategory.name === payload.category,
@@ -365,18 +403,23 @@ class RegionHandler {
       );
     }
 
-    map.regionsData.splice(delta.target[1], 0, {
-      color: payload.color,
-      intensity: payload.intensity,
-      category: payload.category,
-    });
+    if (delta.payload.color) {
+      map.regionsData[delta.target[1]].color = delta.payload.color;
+    }
+    if (delta.payload.intensity) {
+      map.regionsData[delta.target[1]].intensity = delta.payload.intensity;
+    }
+    if (delta.payload.category) {
+      map.regionsData[delta.target[1]].category = delta.payload.category;
+    }
+    return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
     // Logic for updating a region on the map
 
-    if (map.regionsData >= delta.target[1] || delta.target[1] < 0) {
-      throw new Error('Update Region target id out of bounds');
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
+      throw new Error('DELETE Region target id out of bounds');
     }
     if (delta.payload.color) {
       map.regionsData[delta.target[1]].color = delta.payload.color;
@@ -392,7 +435,7 @@ class RegionHandler {
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a region from the map
-    if (map.regionsData >= delta.target[1] || delta.target[1] < 0) {
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
       throw new Error('DELETE Region target id out of bounds');
     }
     if (delta.payload.color) {
@@ -438,12 +481,13 @@ class SymbolHandler {
       console.log(p);
       throw new Error('Tried to create nonexistent symbol type');
     }
-    map.symbolsData.splice(d.target[1], 0, {
+    map.symbolsData[d.target[1]] = {
       x: p.x,
       y: p.y,
       scale: p.scale,
       symbol: p.symbol,
-    });
+    };
+
     return map;
   }
 
@@ -469,13 +513,18 @@ class SymbolHandler {
       throw new Error('Delete symbol Target index out of bounds');
     }
 
-    map.symbolsData[d.target[1]].symbol = DELETED_NAME;
+    map.symbolsData[d.target[1]].symbol += DELETED_NAME;
     return map;
   }
 }
 class DotHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     const payload = delta.payload;
+
+    if (delta.target[1] > map.dotsData.length || delta.target[1] < 0) {
+      throw new Error('CREATE DOT target id out of bounds');
+    }
+
     if (!payload.dot) throw new Error('Dot name is required');
     if (!payload.x) throw new Error('Dot X coordinate is required');
     if (!payload.y) throw new Error('Dot Y coordinate is required');
@@ -492,12 +541,12 @@ class DotHandler {
     }
 
     // Add a new dot to the map
-    map.dotsData.splice(delta.target[1], 0, {
+    map.dotsData[delta.target[1]] = {
       x: payload.x,
       y: payload.y,
       scale: payload.scale,
       dot: payload.dot,
-    });
+    };
     return map;
   }
 
@@ -535,7 +584,7 @@ class DotHandler {
       throw new Error('DELETE DOT Target index out of bounds');
     }
 
-    map.dotsData[targetIndex].dot = DELETED_NAME;
+    map.dotsData[targetIndex].dot += DELETED_NAME;
 
     return map;
   }
@@ -595,7 +644,7 @@ class ArrowHandler {
     if (d.target[1] > map.arrowsData.length || d.target[1] < 0) {
       throw new Error('Target out of bounds in delete arrow: ' + d.target[1]);
     }
-    map.arrowsData[d.target[1]].label = DELETED_NAME;
+    map.arrowsData[d.target[1]].label += DELETED_NAME;
     map.arrowsData[d.target[1]].opacity = 0;
     map.arrowsData[d.target[1]].capacity = 0;
     return map;

@@ -106,7 +106,7 @@ class SVGBuilder {
 
     let dots = '';
     for (let d of this.mhjson.dotsData) {
-      if (d.dot === DELETED_NAME) {
+      if (d.dot.endsWith(DELETED_NAME)) {
         continue;
       }
       let dclass = dotMap.get(d.dot)!;
@@ -131,21 +131,22 @@ class SVGBuilder {
     let p = this.isPosition([x, y]);
 
     return `<circle
-      cx="${p[0]}"
-      cy="${p[1]}"
-      r="${radius / lat2m}"
-      fill="${color}"
-      opacity="${opacity}"
-      stroke="black"
-      stroke-width="${STROKE_WIDTH}%"
-      />`;
+    cx="${p[0]}"
+    cy="${p[1]}"
+    r="${radius / lat2m}"
+    fill="${color}"
+    opacity="${opacity}"
+    />`;
   }
 
   private svgOfSymbols(): string {
     // construct a map of names to objects
     const DOMParser = xmldom.DOMParser;
     const XMLSerializer = xmldom.XMLSerializer;
-    let symbolMap = new Map<string, [ISymbolProps, HTMLElement]>(
+    let symbolMap: Map<string, [ISymbolProps, HTMLElement]> = new Map<
+      string,
+      [ISymbolProps, HTMLElement]
+    >(
       this.mhjson.globalSymbolData.map((x: any) => {
         // Use querySelector to directly select the SVG element
         const parser = new DOMParser();
@@ -165,7 +166,7 @@ class SVGBuilder {
 
     let symbols = '';
     for (let s of this.mhjson.symbolsData) {
-      if (s.symbol === DELETED_NAME) {
+      if (s.symbol.endsWith(DELETED_NAME)) {
         continue;
       }
 
@@ -198,10 +199,9 @@ class SVGBuilder {
   private svgOfArrows(): string {
     let arrows = '';
     for (let arrow of this.mhjson.arrowsData) {
-      if (arrow.label === DELETED_NAME) {
+      if (arrow.label.endsWith(DELETED_NAME)) {
         continue;
       }
-
       arrows += this.svgOfArrow(arrow) + '\n';
     }
 
@@ -289,33 +289,36 @@ class SVGBuilder {
     // however, if it is choropleth
     // use the written intensity
     // but if global choropleth key is set, find the intensity in the properties
-    let intensity =
-      this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
-    let cData = this.mhjson.globalChoroplethData;
+    if (this.mhjson.mapType === 'choropleth') {
+      let intensity =
+        this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
+      let cData = this.mhjson.globalChoroplethData;
 
-    if (cData.indexingKey !== DELETED_NAME && feature.properties) {
-      intensity = parseFloat(feature.properties[cData.indexingKey]);
-    }
+      if (!cData.indexingKey.endsWith(DELETED_NAME) && feature.properties) {
+        intensity = parseFloat(feature.properties[cData.indexingKey]);
+      }
 
-    if (intensity !== undefined) {
-      let ratio =
-        (intensity - cData.minIntensity) /
-        (cData.maxIntensity - cData.minIntensity);
-      if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
-        fill = 'white';
-      } else {
-        fill = mixColors(cData.minColor, cData.maxColor, ratio);
+      if (intensity !== undefined) {
+        let ratio =
+          (intensity - cData.minIntensity) /
+          (cData.maxIntensity - cData.minIntensity);
+        if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+          fill = 'white';
+        } else {
+          fill = mixColors(cData.minColor, cData.maxColor, ratio);
+        }
       }
     }
 
-    // if it has both an intensity and a category, use the category
-    let category = this.mhjson.regionsData[this.featureNumber].category;
-    if (category !== undefined && category !== DELETED_NAME) {
-      let categoryObject = this.mhjson.globalCategoryData.filter(
-        (x: any) => x.name === category,
-      )[0];
-      if (categoryObject !== undefined) {
-        fill = categoryObject.color;
+    if (this.mhjson.mapType === 'categorical') {
+      let category = this.mhjson.regionsData[this.featureNumber].category;
+      if (category !== undefined && !category.endsWith(DELETED_NAME)) {
+        let categoryObject = this.mhjson.globalCategoryData.filter(
+          (x: any) => x.name === category,
+        )[0];
+        if (categoryObject !== undefined) {
+          fill = categoryObject.color;
+        }
       }
     }
 
