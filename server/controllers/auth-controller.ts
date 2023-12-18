@@ -67,7 +67,7 @@ export const registerUser = async (req: Request, res: Response) => {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const passwordHash = await bcrypt.hash(password, salt);
-    console.log('passwordHash: ' + passwordHash);
+    // console.log('passwordHash: ' + passwordHash);
 
     const newUser = new User({
       username,
@@ -130,7 +130,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const user = await User.findOne({ username });
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       return res.status(400).json({ errorMessage: 'Incorrect username.' });
@@ -396,7 +396,6 @@ export const putProfilePic = async (request: Request, response: Response) => {
   }
 };
 
-
 export const putPassword = async (request: Request, response: Response) => {
   try {
     const { currentPassword, newPassword, newPasswordConfirm } = request.body;
@@ -531,7 +530,7 @@ export const getResetPasswordLink = async (req: Request, res: Response) => {
         pass: EMAIL_PASSWORD,
       },
     });
-    console.log('THIS THE USER after sending request', user);
+    // console.log('THIS THE USER after sending request', user);
 
     const resetUrl = `/account/reset-password/${resetToken}`; // Frontend URL
 

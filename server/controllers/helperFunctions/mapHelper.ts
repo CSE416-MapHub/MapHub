@@ -677,7 +677,7 @@ class GeojsonDataHandler {
       }
       feature.properties[d.target[2]] = d.payload.propertyValue;
     }
-    console.log('updated MAP DATA', JSON.stringify(this.v.getMapData()));
+    // console.log('updated MAP DATA', JSON.stringify(this.v.getMapData()));
 
     fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
@@ -697,7 +697,7 @@ class GeojsonDataHandler {
     }
     orig.properties[propName] = d.payload.propertyValue;
 
-    console.log('Updated Map data', JSON.stringify(this.v.getMapData()));
+    // console.log('Updated Map data', JSON.stringify(this.v.getMapData()));
     fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
@@ -711,7 +711,7 @@ class GeojsonDataHandler {
           d.target[1],
       );
     }
-    console.log('Features in delete', this.v.getFeatureResults().perFeature);
+    // console.log('Features in delete', this.v.getFeatureResults().perFeature);
     for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
       let feature = featureVisitResult.originalFeature;
 
@@ -720,7 +720,7 @@ class GeojsonDataHandler {
       }
       delete feature.properties[d.target[2]];
     }
-    console.log('MAP DATA in DELETE', JSON.stringify(this.v.getMapData()));
+    // console.log('MAP DATA in DELETE', JSON.stringify(this.v.getMapData()));
     fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
 
     return map;

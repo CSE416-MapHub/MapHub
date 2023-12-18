@@ -39,7 +39,7 @@ export const mixColors = (c1: string, c2: string, ratio: number): string => {
         .reverse()
         .map(num => num.toString(16).padStart(2, '0'))
         .join('');
-      console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
+      // console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
       return res;
     })()
   );
@@ -107,9 +107,9 @@ class SVGBuilder {
   }
 
   private svgOfCategoryLegend(): string {
-    let items = this.mhjson.globalCategoryData.map(
-      (x: any) => [x.color, x.name] as [string, string],
-    );
+    let items = this.mhjson.globalCategoryData
+      .filter((x: any) => !x.name.endsWith(DELETED_NAME))
+      .map((x: any) => [x.color, x.name] as [string, string]);
 
     let children = '';
     let y = 10;

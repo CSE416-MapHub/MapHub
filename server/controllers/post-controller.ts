@@ -76,18 +76,18 @@ const PostController = {
 
       const posts = await Post.find({ owner: userId }).exec();
 
-      console.log('after finding posts');
-      console.log(
-        'Getting posts by user',
-        req.params.userId,
-        JSON.stringify(posts),
-        posts.length,
-      );
+      // console.log('after finding posts');
+      // console.log(
+      //   'Getting posts by user',
+      //   req.params.userId,
+      //   JSON.stringify(posts),
+      //   posts.length,
+      // );
 
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
-            console.log('STARTING POST BY POST', JSON.stringify(post));
+            // console.log('STARTING POST BY POST', JSON.stringify(post));
             const map = await Map.findById(post.map).exec();
             const svg = map
               ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
@@ -129,7 +129,6 @@ const PostController = {
   getPostById: async (req: Request, res: Response) => {
     try {
       const postId = req.params.postId;
-      console.log('GETTING POST WITH ID', postId);
 
       const post = await Post.findById(postId)
         .populate<{ comments: PopulatedComment[] }>({
@@ -165,15 +164,15 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log(
-        'Got post',
-        JSON.stringify({
-          title: post.title,
-          description: post.description,
-        }),
-        'with id',
-        postId,
-      );
+      // console.log(
+      //   'Got post',
+      //   JSON.stringify({
+      //     title: post.title,
+      //     description: post.description,
+      //   }),
+      //   'with id',
+      //   postId,
+      // );
 
       const map = await Map.findById(post.map).exec();
       if (!map) {
@@ -259,19 +258,14 @@ const PostController = {
 
       const posts = await Post.find(queryCondition).exec();
 
-      console.log(
-        'These are the posts by the search',
-        JSON.stringify(posts),
-        posts.length,
-      );
       if (posts && posts.length > 0) {
         const transformedPosts = await Promise.all(
           posts.map(async post => {
-            console.log('STARTING POST BY POST', JSON.stringify(post));
+            // console.log('STARTING POST BY POST', JSON.stringify(post));
 
             const map = await Map.findById(post.map).exec();
 
-            console.log('MAP', map);
+            // console.log('MAP', map);
 
             const svg = map
               ? await convertJsonToSVG(map, SVGDetail.THUMBNAIL)
@@ -362,7 +356,7 @@ const PostController = {
 
   changeLikeToPost: async (req: Request, res: Response) => {
     const userId = (req as any).userId;
-    console.log(req.body);
+    // console.log(req.body);
     const { postId, likeChange } = req.body;
 
     if (!postId) {
@@ -389,7 +383,7 @@ const PostController = {
           like => like.toString() !== userId.toString(),
         );
       }
-      console.log(JSON.stringify(post));
+      // console.log(JSON.stringify(post));
       await post.save();
 
       //returns the new likes amount
@@ -484,7 +478,7 @@ const PostController = {
           like => like.toString() !== userId.toString(),
         );
       }
-      console.log(JSON.stringify(comment));
+      // console.log(JSON.stringify(comment));
       await comment.save();
 
       //returns the new likes amount
@@ -525,8 +519,8 @@ const PostController = {
       const savedReply = await newReply.save();
       comment.replies.push(new mongoose.Types.ObjectId(savedReply._id));
 
-      console.log('THIS IS A REPLY', savedReply);
-      console.log('THIS IS A COMMENT', comment);
+      // console.log('THIS IS A REPLY', savedReply);
+      // console.log('THIS IS A COMMENT', comment);
 
       await comment.save();
       const user = await User.findById(comment.user);
@@ -574,7 +568,6 @@ const PostController = {
           .json({ success: false, message: 'Post not found' });
       }
 
-      console.log('Post in qu', post);
       const mapPost = await Map.findById(post.map);
 
       if (!mapPost || mapPost === undefined || !mapPost.geoJSON) {
@@ -583,7 +576,7 @@ const PostController = {
           .json({ success: false, message: 'Map in Post not found' });
       }
 
-      console.log('POST MAP ORIGINAL', mapPost);
+      // console.log('POST MAP ORIGINAL', mapPost);
 
       const objMap = mapPost.toObject();
 
@@ -596,7 +589,7 @@ const PostController = {
         updatedAt: Date.now(), // Reset update date
       });
 
-      console.log('POST MAP FORKED', forkedMap);
+      // console.log('POST MAP FORKED', forkedMap);
 
       const user = await User.findById(userId);
       if (!user) {
