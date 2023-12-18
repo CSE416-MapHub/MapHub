@@ -186,7 +186,11 @@ export default function () {
     let v = new GeoJSONVisitor(mh.geoJSON, true);
     v.visitRoot();
     mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
-      return {};
+      return {
+        color: '#FFFFFF',
+        intensity: 0,
+        category: DELETED_NAME,
+      };
     });
     let createMapProm: Promise<string>;
     if (authContext.state.isLoggedIn) {

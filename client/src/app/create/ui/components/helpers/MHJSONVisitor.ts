@@ -109,9 +109,9 @@ class SVGBuilder {
   }
 
   private svgOfCategoryLegend(): string {
-    let items = this.mhjson.globalCategoryData.map(
-      x => [x.color, x.name] as [string, string],
-    );
+    let items = this.mhjson.globalCategoryData
+      .filter(x => !x.name.endsWith(DELETED_NAME))
+      .map(x => [x.color, x.name] as [string, string]);
 
     let children = '';
     let y = 10;
@@ -134,10 +134,12 @@ class SVGBuilder {
   }
 
   private svgOfDotLegend(): string {
-    let items = this.mhjson.globalDotDensityData.map(
-      x => [x.color, x.name, x.opacity] as [string, string, number],
-    );
+    let items = this.mhjson.globalDotDensityData
+      .filter(x => !x.name.endsWith(DELETED_NAME))
+      .map(x => [x.color, x.name, x.opacity] as [string, string, number]);
 
+    console.log('DOT LEGEND LOOKS LIKE');
+    console.log(items);
     let children = '';
     let y = 10;
     const ITEM_HEIGHT = 32;
@@ -161,9 +163,9 @@ class SVGBuilder {
   }
 
   private svgOfSymbolLegend(): string {
-    let items = this.mhjson.globalSymbolData.map(
-      x => [x.svg, x.name] as [string, string],
-    );
+    let items = this.mhjson.globalSymbolData
+      .filter(x => !x.name.endsWith(DELETED_NAME))
+      .map(x => [x.svg, x.name] as [string, string]);
 
     let children = '';
     let y = 10;
