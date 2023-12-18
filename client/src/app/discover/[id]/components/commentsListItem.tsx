@@ -12,8 +12,16 @@ interface CommentsListItemProps {
   };
   content: string;
   time: string;
+  onStartReply: Function;
+  key: string;
 }
-function CommentsListItem({ user, content, time }: CommentsListItemProps) {
+function CommentsListItem({
+  user,
+  content,
+  time,
+  onStartReply,
+  key,
+}: CommentsListItemProps) {
   return (
     <li className={styles['comments__list-item']}>
       <Avatar
@@ -33,10 +41,19 @@ function CommentsListItem({ user, content, time }: CommentsListItemProps) {
         >
           {content}
         </Typography>
-        <div className={styles['meta__container']}>
+        <div className={styles['comments__meta']}>
           <Typography variant="bodySmall">
             {TimeDelta.getTimeDeltaString(time)}
           </Typography>
+
+          <button
+            className={styles['comments__reply']}
+            onClick={() =>
+              onStartReply({ username: user.username, content, id: key })
+            }
+          >
+            <Typography variant="bodySmall">Reply</Typography>
+          </button>
         </div>
       </div>
     </li>

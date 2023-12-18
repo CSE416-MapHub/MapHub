@@ -7,6 +7,7 @@ import {
   useState,
 } from 'react';
 import { useRouter } from 'next/navigation';
+import { Typography } from '@mui/material';
 
 import { AuthContext } from 'context/AuthProvider';
 import {
@@ -16,15 +17,27 @@ import {
 import PostAPI from 'api/PostAPI';
 import IconButton from 'components/iconButton';
 import TextField from 'components/textField';
+import CommentsDivider from '../components/commentsDivider';
 
 import styles from '../styles/commentsField.module.scss';
 
 interface CommentsFieldProps {
   postId: string;
   pushComment: Function;
+  reply?: {
+    id: string;
+    username: string;
+    content: string;
+  };
+  onCloseReply: MouseEventHandler;
 }
 
-function CommentsField({ postId, pushComment }: CommentsFieldProps) {
+function CommentsField({
+  postId,
+  pushComment,
+  reply,
+  onCloseReply,
+}: CommentsFieldProps) {
   const auth = useContext(AuthContext);
   const notifications = useContext(NotificationsContext);
   const router = useRouter();
@@ -74,27 +87,56 @@ function CommentsField({ postId, pushComment }: CommentsFieldProps) {
   };
 
   return (
-    <div className={styles['comments-field__container']}>
-      <TextField
-        className={styles['comments-field__input']}
-        label="Add a Comment..."
-        value={comment}
-        onChange={handleCommentChange}
-        variant="outlined"
-        autoComplete="off"
-        multiline={true}
-        maxRows={4}
-        endAdornment={
-          <IconButton
-            className={styles['trailing-icon']}
-            onClick={handleCommentClick}
-            iconName="send"
-            iconType="regular"
-            disabled={comment.length === 0}
-          />
-        }
-      />
-    </div>
+    <>
+      {reply ? (
+        <>
+          <CommentsDivider />
+          <div className={styles['comments-reply__container']}>
+            <div>
+              <Typography variant="bodyMedium">{`Replying to ${reply.username}`}</Typography>
+              <Typography
+                className={styles['comments-reply__content']}
+                variant="bodySmall"
+              >
+                {reply.content}
+              </Typography>
+            </div>
+            <div className={styles['close__container']}>
+              <IconButton
+                iconType="regular"
+                iconName="x"
+                onClick={onCloseReply}
+              />
+            </div>
+          </div>
+        </>
+      ) : (
+        ''
+      )}
+
+      <div className={styles['comments-field__container']}>
+        <TextField
+          className={styles['comments-field__input']}
+          label="Add a Comment..."
+          value={comment}
+          onChange={handleCommentChange}
+          variant="outlined"
+          autoComplete="off"
+          multiline={true}
+          maxRows={4}
+          disabled={!auth.state.isLoggedIn}
+          endAdornment={
+            <IconButton
+              className={styles['trailing-icon']}
+              onClick={handleCommentClick}
+              iconName="send"
+              iconType="regular"
+              disabled={comment.length === 0}
+            />
+          }
+        />
+      </div>
+    </>
   );
 }
 

@@ -23,3 +23,20 @@
     }
   }
 }
+
+.comments-reply {
+  &__container {
+    margin: 8px 32px shape.$medium;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+  }
+}
+
+.close__container{
+  display: flex;
+
+}

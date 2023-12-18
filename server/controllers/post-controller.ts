@@ -188,10 +188,12 @@ const PostController = {
 
       const comments = post.comments.map(comment => {
         return {
+          id: comment._id,
           likes: comment.likes,
           content: comment.content,
           replies: comment.replies.map(reply => {
             return {
+              id: reply._id,
               likes: reply.likes,
               content: reply.content,
               user: {
@@ -334,7 +336,14 @@ const PostController = {
 
       res.status(200).json({
         success: true,
-        comment: savedComment,
+        comment: {
+          id: savedComment._id,
+          user: savedComment.user,
+          content: savedComment.content,
+          replies: savedComment.replies,
+          likes: savedComment.likes,
+          createdAt: savedComment.createdAt,
+        },
         user: {
           _id: userCommented?._id,
           username: userCommented?.username,

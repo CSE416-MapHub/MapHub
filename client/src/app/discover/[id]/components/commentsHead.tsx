@@ -29,7 +29,7 @@ function CommentsHead({ user, title, description, time }: CommentsHeadProps) {
         <Typography variant="bodyLarge">{user.username}</Typography>
         <Typography variant="bodyMedium">{title}</Typography>
         <Typography variant="bodyMedium">{description}</Typography>
-        <div>
+        <div className={styles['comments__meta']}>
           <Typography variant="bodySmall">
             {TimeDelta.getTimeDeltaString(time)}
           </Typography>
