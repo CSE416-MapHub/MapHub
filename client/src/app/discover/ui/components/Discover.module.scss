@@ -1,8 +1,7 @@
-@use "colors";
-@use "elevation";
+@use 'colors';
+@use 'elevation';
 
-
-// map cards 
+// map cards
 
 .map-card-container {
   height: 280px;
@@ -11,11 +10,12 @@
 
   &:hover {
     // Styles to apply on hover
-    background-color: colors.$on-primary-container; 
-    cursor: pointer; 
+    background-color: colors.$on-primary-container;
+    cursor: pointer;
 
     // Styles to apply on hover to child elements (text)
-    .map-text, .map-icon{
+    .map-text,
+    .map-icon {
       color: colors.$on-primary;
     }
   }
@@ -32,8 +32,10 @@
   display: flex;
   flex-direction: column;
   padding: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
-
 
 // discover
 .search-container {
@@ -54,7 +56,7 @@
 
   // height: '1000px',
 
-  @include elevation.elevation-3
+  @include elevation.elevation-3;
 }
 
 .search-input {
@@ -81,5 +83,5 @@
   left: 0;
   z-index: 1;
 
-  @include elevation.elevation-3
+  @include elevation.elevation-3;
 }
