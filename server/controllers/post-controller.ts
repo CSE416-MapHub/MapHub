@@ -202,7 +202,7 @@ const PostController = {
         post: postFound,
       });
     } catch (error) {
-      console.error('Error in queryPosts:', error);
+      console.error('Error in get post by id:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
