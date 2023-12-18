@@ -15,7 +15,7 @@ export default function ({ name, items }: IPropertyPanelSectionProps) {
     <div className={styles['properties-panel-container']}>
       <Divider />
       {/* TODO: make this an h4! */}
-      <Typography variant="titleMedium" className={styles['properties-panel-title']}>{name}</Typography>
+      <Typography variant="titleMedium">{name}</Typography>
       <Divider />
       <div
         style={{
