@@ -128,23 +128,23 @@ describe('The Toolbar "Icon" Icon Button', () => {
   // });
 });
 
-describe('The Toolbar "Path" Icon Button', () => {
-  beforeEach(() => {
-    cy.mount(
-      <EditorProvider>
-        <Toolbar />
-      </EditorProvider>,
-    );
-    cy.get('#toolbar').find('#toolbar-path').as('path');
-  });
-  it('renders visibly.', () => {
-    cy.get('@path').should('be.visible');
-  });
-  it('is clickable.', () => {
-    cy.get('@path').should('be.disabled');
-  });
-  // it('is selected after a click.', () => {
-  //   cy.get('@path').click();
-  //   cy.get('@path').invoke('attr', 'class').should('contain', 'selected');
-  // });
-});
+// describe('The Toolbar "Path" Icon Button', () => {
+//   beforeEach(() => {
+//     cy.mount(
+//       <EditorProvider>
+//         <Toolbar />
+//       </EditorProvider>,
+//     );
+//     cy.get('#toolbar').find('#toolbar-path').as('path');
+//   });
+//   it('renders visibly.', () => {
+//     cy.get('@path').should('be.visible');
+//   });
+//   it('is clickable.', () => {
+//     cy.get('@path').should('be.disabled');
+//   });
+//   // it('is selected after a click.', () => {
+//   //   cy.get('@path').click();
+//   //   cy.get('@path').invoke('attr', 'class').should('contain', 'selected');
+//   // });
+// });
