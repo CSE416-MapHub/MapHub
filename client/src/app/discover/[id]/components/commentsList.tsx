@@ -8,7 +8,7 @@ interface CommentsListProps {
     user: {
       _id: string;
       username: string;
-      profilePic: Buffer;
+      profilePic: string;
     };
     content: string;
     replies: [];

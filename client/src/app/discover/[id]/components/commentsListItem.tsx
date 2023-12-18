@@ -7,14 +7,20 @@ import styles from '../styles/commentsListItem.module.scss';
 interface CommentsListItemProps {
   user: {
     username: string;
-    profilePic: Buffer;
+    profilePic: string;
   };
   content: string;
 }
 function CommentsListItem({ user, content }: CommentsListItemProps) {
   return (
     <li className={styles['comments__list-item']}>
-      <Avatar />
+      <Avatar
+        src={
+          user.profilePic
+            ? `data:image/webp;base64,${user.profilePic}`
+            : undefined
+        }
+      />
       <div className={styles['text__container']}>
         <Typography className={styles['comments__label']} variant="bodyLarge">
           {user.username}
