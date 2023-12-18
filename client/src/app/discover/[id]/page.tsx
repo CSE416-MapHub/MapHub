@@ -1,11 +1,15 @@
 'use client';
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { CircularProgress } from '@mui/material';
+
 import CommentsHead from './components/commentsHead';
 import CommentsDivider from './components/commentsDivider';
 import CommentsCoordinator from './components/commentsCoordinator';
 import PostAPI from 'api/PostAPI';
+
 import styles from './styles/post.module.scss';
 
 interface PostType {
@@ -27,33 +31,33 @@ const Post = ({ params }: { params: { id: string } }) => {
       try {
         const post = await PostAPI.getPostById(params.id);
 
-        console.log('FETCHING POST NOW', post);
         const body: { success: boolean; post: any } = post.data;
 
         if (!body.success) {
-          console.log('NOT SUCCESSFUL RETRIVEVELA OF POST ID');
           return undefined;
         }
 
         setPost(body.post);
       } catch (error) {
-        console.error('Error fetching post:', error);
         setPost(null); // or handle the error as needed
       } finally {
         setIsLoading(false);
       }
     }
 
-    if (params.id) {
+    if (params.id && !post) {
       loadPost();
     }
-  }, [params.id]);
+  }, [params.id, post]);
 
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <main className={styles['post__loading']}>
+        <CircularProgress />
+      </main>
+    );
   }
   if (!post) {
-    console.log('CANNOT FIND THE POST');
     notFound();
   }
 

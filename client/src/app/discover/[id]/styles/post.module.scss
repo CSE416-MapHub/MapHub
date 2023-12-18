@@ -17,6 +17,13 @@
     color: colors.$on-surface;
   }
 
+  &__loading {
+    min-height: calc(100% - 180px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__container {
     @include shape.extra-large();
 
