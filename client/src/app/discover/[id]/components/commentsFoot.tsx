@@ -57,9 +57,33 @@ function CommentsFoot({ likes, postId }: CommentsFootProps) {
           isLiked ? LikeChange.REMOVE_LIKE : LikeChange.ADD_LIKE,
         );
         setNumLikes(response.data.likes);
-      } catch {}
+      } catch { }
     }
   };
+
+  const handleCopyClick = async () => {
+    if (auth.state.isLoggedIn === false) {
+      notifications.dispatch({
+        type: NotificationsActionType.enqueue,
+        value: {
+          message: 'Please sign up to like the map.',
+          actions: {
+            label: {
+              text: 'Sign Up',
+              onClick: () => router.push('/account/create'),
+            },
+          },
+        },
+      });
+    } else {
+      try {
+        const response = await PostAPI.forkMap(postId);
+        const forkedMap = response.data.forkedMap;
+        const route = '/create?mapid=' + forkedMap._id;
+        router.push(route);
+      } catch { }
+    }
+  }
 
   return (
     <div className={styles['comments__foot']}>
@@ -72,7 +96,11 @@ function CommentsFoot({ likes, postId }: CommentsFootProps) {
           iconType={isLiked ? 'solid' : 'regular'}
           onClick={handleLikeClick}
         />
-        <IconButton iconName="copy" iconType="regular" />
+        <IconButton
+          iconName="copy"
+          iconType="regular"
+          onClick={handleCopyClick}
+        />
       </div>
       <Typography
         className={styles['comments__text--like-count']}

@@ -520,17 +520,20 @@ const PostController = {
           .json({ success: false, message: 'Map in Post not found' });
       }
 
-      console.log('POST MAP ORIGINAL', JSON.stringify(mapPost));
+      console.log('POST MAP ORIGINAL', mapPost);
+      
+      const objMap = mapPost.toObject();
 
       const forkedMap = new Map({
-        ...post.map,
+        ...objMap,
+        published: false,
         owner: userId,
         _id: new mongoose.Types.ObjectId(), // Generate a new ID
         createdAt: Date.now(), // Reset creation date
         updatedAt: Date.now(), // Reset update date
       });
 
-      console.log('POST MAP FORKED', JSON.stringify(forkedMap));
+      console.log('POST MAP FORKED', forkedMap);
 
       const user = await User.findById(userId);
       if (!user) {
