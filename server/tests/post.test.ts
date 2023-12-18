@@ -552,6 +552,12 @@ describe('POST /posts/comments/:commentId/replies', () => {
       likes: [],
       save: jest.fn().mockReturnThis(),
     };
+    const mockUser = {
+      _id: new mongoose.Types.ObjectId(),
+      username: 'someUser',
+      profilePic: Buffer.alloc(0),
+    };
+    jest.spyOn(userModel, 'findById').mockResolvedValue(mockUser);
 
     jest.spyOn(commentModel, 'findById').mockImplementation((id: any) => {
       return mockComment as any;
@@ -568,9 +574,12 @@ describe('POST /posts/comments/:commentId/replies', () => {
     expect(response.body).toHaveProperty('success', true);
     expect(response.body).toHaveProperty('reply');
     expect(response.body.reply.content).toEqual('THIS NEW REPLY');
-    expect(response.body.reply.user).toEqual(mockUserID.toString());
+    expect(response.body.reply.user).toStrictEqual({
+      username: 'someUser',
+      id: mockUser._id.toString(),
+      profilePic: '',
+    });
     expect(response.body.reply.likes).toEqual([]);
-    expect(response.body.reply.replies).toEqual([]);
   });
 });
 
