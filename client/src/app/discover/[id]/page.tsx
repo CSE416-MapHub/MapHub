@@ -13,7 +13,7 @@ interface PostType {
   description: string;
   owner: {
     username: string;
-    profilePic: Buffer;
+    profilePic: string;
   };
   svg: string;
 }

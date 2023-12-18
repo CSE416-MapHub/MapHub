@@ -7,7 +7,7 @@ import styles from '../styles/commentsHead.module.scss';
 interface CommentsHeadProps {
   user: {
     username: string;
-    profilePic: Buffer;
+    profilePic: string;
   };
   title: string;
   description: string;
@@ -15,14 +15,18 @@ interface CommentsHeadProps {
 
 function CommentsHead({ user, title, description }: CommentsHeadProps) {
   return (
-    <div className={styles['comments-head__container']}>
-      <div className={styles['comments-head__avatar']}>
-        <Avatar />
-        <Typography variant="title">{user.username}</Typography>
-      </div>
-      <div className={styles['comments-head__texts']}>
-        <Typography variant="bodyLarge">{title}</Typography>
-        <Typography variant="bodySmall">{description}</Typography>
+    <div className={styles['comments__head']}>
+      <Avatar
+        src={
+          user.profilePic
+            ? `data:image/webp;base64,${user.profilePic}`
+            : undefined
+        }
+      />
+      <div>
+        <Typography variant="bodyLarge">{user.username}</Typography>
+        <Typography variant="bodyMedium">{title}</Typography>
+        <Typography variant="bodyMedium">{description}</Typography>
       </div>
     </div>
   );
