@@ -186,21 +186,28 @@ const PostController = {
 
       const svg = map ? await convertJsonToSVG(map, SVGDetail.DETAILED) : null;
 
-      let comments: any[] = [...post.comments];
-      for (let i = 0; i < comments.length; i += 1) {
-        let comment = comments[i];
-        comment.user.profilePic = Buffer.from(comment.user.profilePic).toString(
-          'base64',
-        );
-
-        const replies = comment.replies;
-        for (let j = 0; j < replies.length; j += 1) {
-          let reply = replies[j];
-          reply.user.profilePic = Buffer.from(reply.user.profilePic).toString(
-            'base64',
-          );
-        }
-      }
+      const comments = post.comments.map(comment => {
+        return {
+          ...comment,
+          replies: comment.replies.map(reply => {
+            return {
+              ...reply,
+              user: {
+                id: reply.user._id,
+                username: reply.user.username,
+                profilePic: Buffer.from(reply.user.profilePic).toString(
+                  'base64',
+                ),
+              },
+            };
+          }),
+          user: {
+            id: comment.user._id,
+            username: comment.user.username,
+            profilePic: Buffer.from(comment.user.profilePic).toString('base64'),
+          },
+        };
+      });
 
       const userProfilePic = Buffer.from(post.owner.profilePic).toString(
         'base64',

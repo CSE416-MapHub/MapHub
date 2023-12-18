@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 interface UserType {
+  _id: mongoose.Schema.Types.ObjectId;
   username: string;
   email: string;
   password: string;
