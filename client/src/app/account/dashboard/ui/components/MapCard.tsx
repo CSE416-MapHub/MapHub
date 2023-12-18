@@ -29,7 +29,11 @@ const placeholderImage =
 export default function (props: MapCardProps) {
   let dataurl = '';
   if (props.preview) {
-    if (props.preview.includes('svg')) {
+    if (
+      props.preview.includes('svg') &&
+      props.preview.includes('xmlns') &&
+      props.preview.includes('www.w3.org')
+    ) {
       dataurl = `data:image/svg+xml;utf8,${encodeURIComponent(props.preview)}`;
     } else {
       dataurl = `data:image/png;base64,${encodeURIComponent(props.preview)}`;
