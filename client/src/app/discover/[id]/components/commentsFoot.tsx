@@ -66,7 +66,7 @@ function CommentsFoot({ likes, postId }: CommentsFootProps) {
       notifications.dispatch({
         type: NotificationsActionType.enqueue,
         value: {
-          message: 'Please sign up to like the map.',
+          message: 'Please sign up to copy the map.',
           actions: {
             label: {
               text: 'Sign Up',
