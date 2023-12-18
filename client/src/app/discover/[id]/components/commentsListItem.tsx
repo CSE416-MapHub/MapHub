@@ -4,26 +4,29 @@ import Avatar from 'components/avatar';
 import TimeDelta from 'utils/timeDelta';
 
 import styles from '../styles/commentsListItem.module.scss';
+import { HTMLAttributes } from 'react';
 
-interface CommentsListItemProps {
+interface CommentsListItemProps extends HTMLAttributes<HTMLDivElement> {
   user: {
     username: string;
     profilePic: string;
   };
   content: string;
   time: string;
-  onStartReply: Function;
+  onStartReply?: Function;
   key: string;
+  id: string;
 }
 function CommentsListItem({
+  className,
   user,
   content,
   time,
   onStartReply,
-  key,
+  id,
 }: CommentsListItemProps) {
   return (
-    <li className={styles['comments__list-item']}>
+    <li className={`${styles['comments__list-item']} ${className}`}>
       <Avatar
         src={
           user.profilePic
@@ -46,14 +49,18 @@ function CommentsListItem({
             {TimeDelta.getTimeDeltaString(time)}
           </Typography>
 
-          <button
-            className={styles['comments__reply']}
-            onClick={() =>
-              onStartReply({ username: user.username, content, id: key })
-            }
-          >
-            <Typography variant="bodySmall">Reply</Typography>
-          </button>
+          {onStartReply ? (
+            <button
+              className={styles['comments__reply']}
+              onClick={() =>
+                onStartReply({ username: user.username, content, id })
+              }
+            >
+              <Typography variant="bodySmall">Reply</Typography>
+            </button>
+          ) : (
+            ''
+          )}
         </div>
       </div>
     </li>

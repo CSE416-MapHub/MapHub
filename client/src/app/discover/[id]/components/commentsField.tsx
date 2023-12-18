@@ -24,19 +24,21 @@ import styles from '../styles/commentsField.module.scss';
 interface CommentsFieldProps {
   postId: string;
   pushComment: Function;
+  pushReply: Function;
   reply?: {
     id: string;
     username: string;
     content: string;
   };
-  onCloseReply: MouseEventHandler;
+  setReply: Function;
 }
 
 function CommentsField({
   postId,
   pushComment,
+  pushReply,
   reply,
-  onCloseReply,
+  setReply,
 }: CommentsFieldProps) {
   const auth = useContext(AuthContext);
   const notifications = useContext(NotificationsContext);
@@ -63,20 +65,26 @@ function CommentsField({
       });
     } else {
       try {
-        const response = await PostAPI.createComment(postId, comment);
-        response.data.comment.user = {
-          username: auth.state.user?.username,
-        };
-        pushComment({
-          ...response.data.comment,
-          user: { ...response.data.user },
-        });
-        setComment('');
+        if (!reply) {
+          const response = await PostAPI.createComment(postId, comment);
+          pushComment({
+            ...response.data.comment,
+            user: { ...response.data.user },
+          });
+          setComment('');
+        } else {
+          const response = await PostAPI.addReplyToComment(reply.id, comment);
+          pushReply(reply.id, response.data.reply);
+          setComment('');
+          setReply(undefined);
+        }
       } catch (error) {
         notifications.dispatch({
           type: NotificationsActionType.enqueue,
           value: {
-            message: "There is a network error. Can't leave comment.",
+            message: `There is a network error. Can't leave ${
+              reply ? 'reply' : 'comment'
+            }.`,
             actions: {
               close: true,
             },
@@ -105,7 +113,7 @@ function CommentsField({
               <IconButton
                 iconType="regular"
                 iconName="x"
-                onClick={onCloseReply}
+                onClick={() => setReply(undefined)}
               />
             </div>
           </div>

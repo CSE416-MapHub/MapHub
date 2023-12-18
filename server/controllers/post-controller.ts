@@ -505,6 +505,7 @@ const PostController = {
     const userId = (req as any).userId;
     const { content } = req.body;
     const commentId = req.params.commentId;
+    console.log(commentId);
 
     const comment = await Comment.findById(commentId);
 
@@ -523,16 +524,33 @@ const PostController = {
 
     try {
       const savedReply = await newReply.save();
-      comment.replies.push(savedReply._id);
+      comment.replies.push(new mongoose.Types.ObjectId(savedReply._id));
 
       console.log('THIS IS A REPLY', savedReply);
       console.log('THIS IS A COMMENT', comment);
 
       await comment.save();
+      const user = await User.findById(comment.user);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'User not found.',
+        });
+      }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        reply: savedReply,
+        reply: {
+          id: savedReply._id,
+          user: {
+            id: user._id,
+            username: user.username,
+            profilePic: Buffer.from(user.profilePic).toString('base64'),
+          },
+          content: savedReply.content,
+          likes: savedReply.likes,
+          createdAt: savedReply.createdAt,
+        },
       });
     } catch (err: any) {
       console.error('Error in comment creation:', err);
