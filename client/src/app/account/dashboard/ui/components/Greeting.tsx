@@ -1,7 +1,7 @@
 'use client';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import style from './greeting.module.scss';
-import { Typography } from '@mui/material';
+import { Avatar, Typography } from '@mui/material';
 import { AuthContext } from 'context/AuthProvider';
 import { useContext } from 'react';
 
@@ -18,11 +18,11 @@ export default function () {
   const getTimeBasedGreeting = () => {
     const currentHour = new Date().getHours();
     if (currentHour < 12) {
-      return "Good Morning";
+      return "Good morning";
     } else if (currentHour < 18) {
-      return "Good Afternoon";
+      return "Good afternoon";
     } else {
-      return "Good Evening";
+      return "Good evening";
     }
   };
 
@@ -39,7 +39,9 @@ export default function () {
     ? `${style['greet-banner']} ${style['night']}`
     : style['greet-banner'];
 
-  let usericon = <AccountCircleIcon sx={{ fontSize: '8rem' }} />;
+  let usericon = authContext.state.user?.profilePic ? <Avatar className={style['dashboard-avatar']} src={authContext.state.user?.profilePic
+    ? `data:image/webp;base64,${authContext.state.user.profilePic}`
+    : undefined} /> : <AccountCircleIcon sx={{ fontSize: '8rem' }} />;
   // if (props.pfp.length !== 0) {
   //   // TODO make img element
   // }
@@ -47,8 +49,8 @@ export default function () {
   return (
     <div className={bannerClass}>
       {usericon}
-      <Typography variant="headline">
-        {greeting} {authContext.state.user?.username}
+      <Typography className={style['greeting']} variant="headline">
+        {greeting + ','} {authContext.state.user?.username}
       </Typography>
     </div>
   );
