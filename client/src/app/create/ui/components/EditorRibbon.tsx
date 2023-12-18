@@ -164,7 +164,7 @@ export default function () {
     mapType: MapType,
     optionsProps: string[],
   ) {
-    if(mapType == MapType.NONE) {
+    if (mapType == MapType.NONE) {
       throw new Error('Please select a map type.');
     }
     let mh: MHJSON = buildMHJSON(userGeoJSON);
@@ -222,7 +222,7 @@ export default function () {
   }
 
   useEffect(() => {
-    console.log("map loading!");
+    console.log('map loading!');
     const mapId = searchParams.get('mapid') as string;
     if (mapId && editorContext.state.map_id !== mapId) {
       let getMap: Promise<MHJSON>;
@@ -373,15 +373,50 @@ export default function () {
         accept={accept}
         onChange={ev => {
           let targ = ev.target as HTMLInputElement;
+
           if (targ.files && targ.files.length) {
-            handleFiles(targ.files)
-              .then(v => {
-                setUserGeoJSON(v);
-                setOpenImport(true);
-              })
-              .catch(e => {
-                alert(e);
-              });
+            if (
+              targ.files.length === 1 &&
+              targ.files[0].name.endsWith('.json') &&
+              targ.files[0].name.includes('.mh')
+            ) {
+              const reader = new FileReader();
+              reader.onload = e => {
+                const content = e.target?.result as string;
+                const mh: MHJSON = JSON.parse(content);
+                let v = new GeoJSONVisitor(mh.geoJSON, true);
+                v.visitRoot();
+                setVisitor(v);
+                mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
+                  return {};
+                });
+                let createMapProm: Promise<string>;
+                if (authContext.state.isLoggedIn) {
+                  mh.owner = authContext.state.user?.id
+                    ? authContext.state.user?.id
+                    : '';
+                  createMapProm = createNewMap(mh);
+                } else {
+                  createMapProm = Promise.resolve(GUEST_MAP_ID);
+                }
+                createMapProm.then(id => {
+                  // router.push('?mapid=' + id);
+                  console.log(mh);
+                  editorContext.helpers.setLoadedMap(editorContext, id, mh);
+                  setOpenImport(false);
+                });
+              };
+              reader.readAsText(targ.files[0]);
+            } else {
+              handleFiles(targ.files)
+                .then(v => {
+                  setUserGeoJSON(v);
+                  setOpenImport(true);
+                })
+                .catch(e => {
+                  alert(e);
+                });
+            }
           }
         }}
         id="import-file-upload-button"
