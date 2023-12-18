@@ -8,6 +8,7 @@ import {
   EditorContext,
   ToolbarButtons,
 } from 'context/EditorProvider';
+import { MapType } from 'types/MHJSON';
 
 function Toolbar() {
   // const [selectedIconButton, setIconButton] = useState<ToolbarButtons | null>(
@@ -153,7 +154,7 @@ function Toolbar() {
         selected={editorContext.state.selectedTool === ToolbarButtons.symbol}
         disabled={editorContext.state.map === null}
       />
-      <IconButton
+      {editorContext.state.map?.mapType === MapType.FLOW && <IconButton
         id="toolbar-path"
         iconType="solid"
         iconName="right-top-arrow-circle"
@@ -161,7 +162,7 @@ function Toolbar() {
         onClick={handlePathClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.arrow}
         disabled={editorContext.state.map === null}
-      />
+      />}
     </div>
   );
 }
