@@ -171,7 +171,6 @@ const PostController = {
         JSON.stringify({
           title: post.title,
           description: post.description,
-          owner: post.owner,
         }),
         'with id',
         postId,
@@ -203,7 +202,7 @@ const PostController = {
         post: postFound,
       });
     } catch (error) {
-      console.error('Error in queryPosts:', error);
+      console.error('Error in get post by id:', error);
       res.status(500).json({
         success: false,
         message: 'Internal server error',
@@ -521,7 +520,7 @@ const PostController = {
       }
 
       console.log('POST MAP ORIGINAL', mapPost);
-      
+
       const objMap = mapPost.toObject();
 
       const forkedMap = new Map({

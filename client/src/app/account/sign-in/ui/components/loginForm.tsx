@@ -266,12 +266,12 @@ function LoginForm() {
         sx={{
           display: 'flex',
           flexDirection: 'row',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
         }}
       >
-        <Link variant="body1" href="/account/forgot-account?query=username">
+        {/* <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
-        </Link>
+        </Link> */}
         <Link variant="body1" href="/account/forgot-account?query=password">
           Forgot Password
         </Link>
