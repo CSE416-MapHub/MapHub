@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { TextField, Box, Grid, Typography } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
@@ -8,6 +8,7 @@ import MapAPI from 'api/MapAPI';
 import PostAPI from 'api/PostAPI';
 import { publishMap } from '../helpers/EditorAPICalls';
 import { useRouter } from 'next/navigation';
+import { NotificationsActionType, NotificationsContext } from 'context/notificationsProvider';
 interface PublishModalProps {
   open: boolean;
   onClose: () => void;
@@ -15,15 +16,35 @@ interface PublishModalProps {
 
 const PublishMapModal: React.FC<PublishModalProps> = ({ open, onClose }) => {
   const editorContext = useContext(EditorContext);
+  const notificationContext = useContext(NotificationsContext);
   const [mapName, setMapName] = useState(
     editorContext.state.map?.title ?? 'My New Map',
   );
   const router = useRouter();
   const [description, setDescription] = useState('');
 
+  useEffect(() => {
+    setMapName(editorContext.state.map?.title ?? 'My New Map')
+  }, [editorContext.state.map?.title]);
+
+  const showError = (message : string) => {
+    notificationContext.dispatch({
+      type: NotificationsActionType.enqueue,
+      value: {
+        message: message,
+        actions: {/* actions if any */},
+        autoHideDuration: 3000, // Duration in ms
+      }
+    });
+  };
+
   const handleConfirm = () => {
     editorContext.helpers.changeTitle(editorContext, mapName);
     if (editorContext.state.map) {
+      if(description === '') {
+        showError('Please include a description.');
+        return;
+      }
       publishMap(editorContext.state.map_id, mapName, description).then(id => {
         if (id === 'ERROR') {
           //error handling

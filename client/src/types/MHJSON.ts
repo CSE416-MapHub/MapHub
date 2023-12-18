@@ -1,6 +1,7 @@
 import * as G from 'geojson';
 
 export enum MapType {
+  NONE = '',
   CHOROPLETH = 'choropleth',
   CATEGORICAL = 'categorical',
   SYMBOL = 'symbol',

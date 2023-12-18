@@ -116,6 +116,7 @@ class AccountAPI {
     return this.api.put('/auth/profile-pic', { profilePic });
   }
 
+
   static async putPassword(
     currentPassword: string,
     newPassword: string,

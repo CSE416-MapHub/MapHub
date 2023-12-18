@@ -62,6 +62,7 @@ type AuthAction =
       };
     }
   | {
+
       type: AuthActions.UPDATE_USER;
       payload: {
         user: {

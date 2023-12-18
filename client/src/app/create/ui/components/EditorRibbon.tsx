@@ -164,6 +164,9 @@ export default function () {
     mapType: MapType,
     optionsProps: string[],
   ) {
+    if(mapType == MapType.NONE) {
+      throw new Error('Please select a map type.');
+    }
     let mh: MHJSON = buildMHJSON(userGeoJSON);
     mh.title = mapName;
     mh.labels = optionsProps;
@@ -219,6 +222,7 @@ export default function () {
   }
 
   useEffect(() => {
+    console.log("map loading!");
     const mapId = searchParams.get('mapid') as string;
     if (mapId && editorContext.state.map_id !== mapId) {
       let getMap: Promise<MHJSON>;

@@ -396,6 +396,7 @@ export const putProfilePic = async (request: Request, response: Response) => {
   }
 };
 
+
 export const putPassword = async (request: Request, response: Response) => {
   try {
     const { currentPassword, newPassword, newPasswordConfirm } = request.body;

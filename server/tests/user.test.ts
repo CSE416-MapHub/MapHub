@@ -525,6 +525,7 @@ describe('PUT /auth/profile-picture', () => {
     expect(response.body).toHaveProperty('errorMessage');
   });
 
+
   afterEach(() => {
     jest.clearAllMocks();
   });
