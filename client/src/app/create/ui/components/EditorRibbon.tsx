@@ -58,6 +58,18 @@ export default function () {
       coordinates: [0, 0],
     }),
   );
+
+  useEffect(() => {
+    let visitor = new GeoJSONVisitor(
+      editorContext.state.map?.geoJSON ?? {
+        type: 'Point',
+        coordinates: [0, 0],
+      },
+    );
+    visitor.visitRoot();
+    setVisitor(visitor);
+  }, [editorContext.state.map]);
+
   const menus = {
     File: {
       Import: {
@@ -173,7 +185,6 @@ export default function () {
     mh.mapType = mapType;
     let v = new GeoJSONVisitor(mh.geoJSON, true);
     v.visitRoot();
-    setVisitor(v);
     mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
       return {};
     });
@@ -386,7 +397,6 @@ export default function () {
                 const mh: MHJSON = JSON.parse(content);
                 let v = new GeoJSONVisitor(mh.geoJSON, true);
                 v.visitRoot();
-                setVisitor(v);
                 mh.regionsData = v.getFeatureResults().perFeature.map(_ => {
                   return {};
                 });
