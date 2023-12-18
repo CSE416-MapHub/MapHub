@@ -188,10 +188,12 @@ const PostController = {
 
       const comments = post.comments.map(comment => {
         return {
-          ...comment,
+          likes: comment.likes,
+          content: comment.content,
           replies: comment.replies.map(reply => {
             return {
-              ...reply,
+              likes: reply.likes,
+              content: reply.content,
               user: {
                 id: reply.user._id,
                 username: reply.user.username,
