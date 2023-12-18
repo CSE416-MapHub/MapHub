@@ -4,6 +4,7 @@ import { useContext, useState } from 'react';
 import NewCategoryModal from '../modals/newCategoryModal';
 import { EditorContext } from 'context/EditorProvider';
 import { DeltaType, TargetType } from 'types/delta';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 export interface PropertyDropdownInputProps {
   options: Array<string>;
@@ -62,7 +63,7 @@ export default function (props: PropertyDropdownInputProps) {
       <Select
         labelId="demo-simple-select-label"
         id="demo-simple-select"
-        value={selected}
+        value={selected.endsWith(DELETED_NAME) ? '' : selected}
         label=""
         variant="outlined"
         onChange={e => handleChange(e.target.value)}
@@ -77,15 +78,17 @@ export default function (props: PropertyDropdownInputProps) {
           },
         }}
       >
-        {(props.options as Array<string>).map(op => (
-          <MenuItem
-            //   className={style['dropdown-option']}
-            key={op}
-            value={op}
-          >
-            {op}
-          </MenuItem>
-        ))}
+        {(props.options as Array<string>)
+          .filter(op => !op.endsWith(DELETED_NAME))
+          .map(op => (
+            <MenuItem
+              //   className={style['dropdown-option']}
+              key={op}
+              value={op}
+            >
+              {op}
+            </MenuItem>
+          ))}
         <MenuItem value="+ New Category">+ New Category</MenuItem>
       </Select>
       <NewCategoryModal
