@@ -3,7 +3,7 @@ import {
   EditorContext,
   ToolbarButtons,
 } from 'context/EditorProvider';
-import { CircleMarker } from 'react-leaflet';
+import { Circle, CircleMarker } from 'react-leaflet';
 import { useContext, useRef, useState } from 'react';
 import { IDotDensityProps, IDotInstance, MHJSON } from 'types/MHJSON';
 import { DeltaType, TargetType } from 'types/delta';
@@ -27,6 +27,7 @@ export default function ({
   const [dragging, setDragging] = useState(false);
   const [x, setX] = useState(dotInstance.x);
   const [y, setY] = useState(dotInstance.y);
+  const [rerender, setRerender] = useState(0);
   function handleClick(ev: L.LeafletMouseEvent) {
     if (editorContextRef.state.selectedTool === ToolbarButtons.select) {
       let loadedMap: MHJSON;
@@ -110,23 +111,29 @@ export default function ({
   }
 
   function handleMouseMove(ev: L.LeafletMouseEvent) {
+    console.log('MOUSE IS OVER');
     if (dragging) {
+      console.log('moving dot to ', ev.latlng);
       setX(ev.latlng.lng);
       setY(ev.latlng.lat);
+      setRerender(rerender + 1);
     }
     if (!dragging && editorContextRef.state.isDeleting) {
       deleteSelf();
     }
   }
-
+  let mapbox = editorContextRef.state.mapDetails.bbox;
+  let DEFAULT_SZ = Math.min(mapbox[2], mapbox[3]) * 2000;
+  // console.log('size is ' + DEFAULT_SZ * dotClass.size * dotInstance.scale);
   return (
-    <CircleMarker
+    <Circle
       center={L.latLng(y, x)}
+      key={rerender}
       color="#000000"
       weight={0}
       fillOpacity={dotClass.opacity}
       fillColor={dotClass.color}
-      radius={dotClass.size * dotInstance.scale}
+      radius={DEFAULT_SZ * dotClass.size * dotInstance.scale}
       className="map-dot"
       eventHandlers={{
         click: ev => {
