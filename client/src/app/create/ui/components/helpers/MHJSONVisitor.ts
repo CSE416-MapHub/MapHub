@@ -88,6 +88,9 @@ class SVGBuilder {
         }
       }
     }
+    if (this.mhjson.mapType === 'categorical') {
+      els += this.svgOfCategoryLegend();
+    }
     if (this.mhjson.mapType === 'dot') {
       els += this.svgOfDots();
     }
@@ -98,6 +101,31 @@ class SVGBuilder {
       els += this.svgOfSymbols();
     }
     return els;
+  }
+
+  private svgOfCategoryLegend(): string {
+    let items = this.mhjson.globalCategoryData.map(
+      x => [x.color, x.name] as [string, string],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      children += `<rect width="32" height="32" x="10" y="${y}" fill="${i[0]}"/>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000" textLength="75%" lengthAdjust="spacingAndGlyphs">
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
   }
 
   private svgOfDots(): string {
