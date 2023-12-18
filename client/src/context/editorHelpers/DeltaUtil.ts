@@ -240,6 +240,7 @@ function deltaGeoJson(map: MHJSON, d: Delta) {
       }
       let propName = d.target[2];
       let orig = targFeature.originalFeature;
+      map.regionsData = [...map.regionsData];
       if (!orig.properties) {
         orig.properties = {};
       }

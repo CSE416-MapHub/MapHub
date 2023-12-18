@@ -88,20 +88,6 @@ export default function () {
         setChoroplethKey(loadedMap.globalChoroplethData.indexingKey);
         setRerender(rerender + 1);
       }
-      // if the top of either stack is a geojson delta, we will
-      // rerneder the map
-      let d1 = editorContextRef.current.state.actionStack.peekStack();
-      let d2 = editorContextRef.current.state.actionStack.peekCounterstack();
-      if (
-        stkLen.current !==
-          editorContextRef.current.state.actionStack.stack.length &&
-        ((d1 &&
-          d1.do.targetType === TargetType.GEOJSONDATA &&
-          d1.do.type == DeltaType.UPDATE) ||
-          (d2 && d2.undo.targetType === TargetType.GEOJSONDATA))
-      ) {
-        setRerender(rerender + 1);
-      }
     }
 
     // if theres a map, make sure the loaded regions and the displayed regions
@@ -129,6 +115,23 @@ export default function () {
       map.setMinZoom(MIN_ZOOM);
     }
   });
+
+  useEffect(() => {
+    // if the top of either stack is a geojson delta, we will
+    // rerneder the map
+    let d1 = editorContextRef.current.state.actionStack.peekStack();
+    let d2 = editorContextRef.current.state.actionStack.peekCounterstack();
+    if (
+      stkLen.current !==
+        editorContextRef.current.state.actionStack.stack.length &&
+      ((d1 &&
+        d1.do.targetType === TargetType.GEOJSONDATA &&
+        d1.do.type == DeltaType.UPDATE) ||
+        (d2 && d2.undo.targetType === TargetType.GEOJSONDATA))
+    ) {
+      setRerender(rerender + 1);
+    }
+  }, [editorContextRef.current.state.map?.regionsData]);
 
   // handles clicks, regardless of whether or not theyre on a
   // this is for tools that create items, like dot, symbol, arrow
