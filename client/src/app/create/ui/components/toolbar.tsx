@@ -136,7 +136,7 @@ function Toolbar() {
         selected={editorContext.state.selectedTool === ToolbarButtons.erase}
         disabled={editorContext.state.map === null}
       />
-      <IconButton
+      {editorContext.state.map?.mapType === MapType.DOT && <IconButton
         id="toolbar-point"
         iconType="solid"
         iconName="circle"
@@ -144,8 +144,8 @@ function Toolbar() {
         onClick={handlePointClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.dot}
         disabled={editorContext.state.map === null}
-      />
-      <IconButton
+      />}
+      {editorContext.state.map?.mapType === MapType.SYMBOL && <IconButton
         id="toolbar-icon"
         iconType="solid"
         iconName="shapes"
@@ -153,7 +153,7 @@ function Toolbar() {
         onClick={handleIconClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.symbol}
         disabled={editorContext.state.map === null}
-      />
+      />}
       {editorContext.state.map?.mapType === MapType.FLOW && <IconButton
         id="toolbar-path"
         iconType="solid"
