@@ -1,6 +1,7 @@
 import { Typography } from '@mui/material';
 
 import Avatar from 'components/avatar';
+import TimeDelta from 'utils/timeDelta';
 
 import styles from '../styles/commentsHead.module.scss';
 
@@ -11,9 +12,10 @@ interface CommentsHeadProps {
   };
   title: string;
   description: string;
+  time: string;
 }
 
-function CommentsHead({ user, title, description }: CommentsHeadProps) {
+function CommentsHead({ user, title, description, time }: CommentsHeadProps) {
   return (
     <div className={styles['comments__head']}>
       <Avatar
@@ -27,6 +29,11 @@ function CommentsHead({ user, title, description }: CommentsHeadProps) {
         <Typography variant="bodyLarge">{user.username}</Typography>
         <Typography variant="bodyMedium">{title}</Typography>
         <Typography variant="bodyMedium">{description}</Typography>
+        <div>
+          <Typography variant="bodySmall">
+            {TimeDelta.getTimeDeltaString(time)}
+          </Typography>
+        </div>
       </div>
     </div>
   );

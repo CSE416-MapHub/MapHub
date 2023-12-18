@@ -29,6 +29,7 @@ function CommentsList({ comments }: CommentsListProps) {
           }}
           content={comment.content}
           key={comment._id}
+          time={comment.createdAt}
         />
       ))}
     </ul>

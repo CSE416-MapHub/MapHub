@@ -201,6 +201,7 @@ const PostController = {
                   'base64',
                 ),
               },
+              createdAt: reply.createdAt,
             };
           }),
           user: {
@@ -208,6 +209,7 @@ const PostController = {
             username: comment.user.username,
             profilePic: Buffer.from(comment.user.profilePic).toString('base64'),
           },
+          createdAt: comment.createdAt,
         };
       });
 
@@ -219,7 +221,8 @@ const PostController = {
         title: post.title,
         description: post.description,
         owner: {
-          ...post.owner,
+          id: post.owner._id,
+          username: post.owner.username,
           profilePic: userProfilePic,
         },
         postID: post._id,
@@ -227,6 +230,7 @@ const PostController = {
         svg: svg,
         likes: post.likes,
         comments: comments,
+        createdAt: post.createdAt,
       };
 
       return res.status(200).json({

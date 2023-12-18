@@ -1,11 +1,10 @@
 import { Schema, model } from 'mongoose';
 import { UserType } from './user-model';
 
-interface PopulatedComment {
+interface PopulatedComment
+  extends Omit<typeof Comment.prototype, 'user' | 'replies'> {
   user: UserType;
-  content: string;
   replies: PopulatedComment[];
-  likes: Schema.Types.ObjectId;
 }
 
 const commentSchema = new Schema(

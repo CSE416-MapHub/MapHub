@@ -16,6 +16,7 @@ interface PostType {
     profilePic: string;
   };
   svg: string;
+  createdAt: string;
 }
 const Post = ({ params }: { params: { id: string } }) => {
   const [post, setPost] = useState<PostType | null>(null);
@@ -75,6 +76,7 @@ const Post = ({ params }: { params: { id: string } }) => {
           }}
           title={post.title}
           description={post.description}
+          time={post.createdAt}
         />
         <CommentsDivider />
         <CommentsCoordinator post={post} />

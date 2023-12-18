@@ -1,6 +1,7 @@
-import Typography from '@mui/material/Typography';
+import { Typography } from '@mui/material';
 
 import Avatar from 'components/avatar';
+import TimeDelta from 'utils/timeDelta';
 
 import styles from '../styles/commentsListItem.module.scss';
 
@@ -10,8 +11,9 @@ interface CommentsListItemProps {
     profilePic: string;
   };
   content: string;
+  time: string;
 }
-function CommentsListItem({ user, content }: CommentsListItemProps) {
+function CommentsListItem({ user, content, time }: CommentsListItemProps) {
   return (
     <li className={styles['comments__list-item']}>
       <Avatar
@@ -31,6 +33,11 @@ function CommentsListItem({ user, content }: CommentsListItemProps) {
         >
           {content}
         </Typography>
+        <div className={styles['meta__container']}>
+          <Typography variant="bodySmall">
+            {TimeDelta.getTimeDeltaString(time)}
+          </Typography>
+        </div>
       </div>
     </li>
   );
