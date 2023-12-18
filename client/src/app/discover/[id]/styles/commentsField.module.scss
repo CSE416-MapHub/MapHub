@@ -9,7 +9,13 @@
     width: 100%;
 
     .trailing-icon {
-      align-self: flex-start;
+      align-self: center;
+      height: 24px;
+      width: 24px;
+
+      i {
+        font-size: 16px;
+      }
 
       &:hover {
         cursor: pointer;

@@ -334,7 +334,9 @@ const PostController = {
         user: {
           _id: userCommented?._id,
           username: userCommented?.username,
-          profilePic: userCommented?.profilePic,
+          profilePic: userCommented?.profilePic
+            ? Buffer.from(userCommented.profilePic).toString('base64')
+            : '',
         },
       });
     } catch (err: any) {

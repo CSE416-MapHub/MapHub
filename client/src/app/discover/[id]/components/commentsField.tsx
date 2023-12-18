@@ -54,7 +54,10 @@ function CommentsField({ postId, pushComment }: CommentsFieldProps) {
         response.data.comment.user = {
           username: auth.state.user?.username,
         };
-        pushComment(response.data.comment);
+        pushComment({
+          ...response.data.comment,
+          user: { ...response.data.user },
+        });
         setComment('');
       } catch (error) {
         notifications.dispatch({
