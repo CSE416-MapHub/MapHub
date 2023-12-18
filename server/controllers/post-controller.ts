@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
-import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Post from '../models/post-model';
 import Comment from '../models/comment-model';
 import Map from '../models/map-model';
 import User from '../models/user-model';
-import express from 'express';
 import fs from 'fs';
-import path from 'path';
 import { convertJsonToSVG, SVGDetail } from './map-controller';
+import { PopulatedComment } from '../models/comment-model';
+import { UserType } from '../models/user-model';
 
 type MapDocument = typeof Map.prototype;
 
@@ -133,7 +132,7 @@ const PostController = {
       console.log('GETTING POST WITH ID', postId);
 
       const post = await Post.findById(postId)
-        .populate({
+        .populate<{ comments: PopulatedComment[] }>({
           path: 'comments', // Path to the field in the Post model
           model: 'Comment', // Model to use for population
           populate: [
@@ -153,7 +152,7 @@ const PostController = {
             },
           ],
         })
-        .populate({
+        .populate<{ owner: UserType }>({
           path: 'owner', // Path to the user field in the Post model
           model: 'User', // Model to use for population of the post's user
           select: 'username _id profilePic', // Only select specific fields for the user of the post
@@ -186,15 +185,53 @@ const PostController = {
 
       const svg = map ? await convertJsonToSVG(map, SVGDetail.DETAILED) : null;
 
+      const comments = post.comments.map(comment => {
+        return {
+          id: comment._id,
+          likes: comment.likes,
+          content: comment.content,
+          replies: comment.replies.map(reply => {
+            return {
+              id: reply._id,
+              likes: reply.likes,
+              content: reply.content,
+              user: {
+                id: reply.user._id,
+                username: reply.user.username,
+                profilePic: Buffer.from(reply.user.profilePic).toString(
+                  'base64',
+                ),
+              },
+              createdAt: reply.createdAt,
+            };
+          }),
+          user: {
+            id: comment.user._id,
+            username: comment.user.username,
+            profilePic: Buffer.from(comment.user.profilePic).toString('base64'),
+          },
+          createdAt: comment.createdAt,
+        };
+      });
+
+      const userProfilePic = Buffer.from(post.owner.profilePic).toString(
+        'base64',
+      );
+
       const postFound = {
         title: post.title,
         description: post.description,
-        owner: post.owner,
+        owner: {
+          id: post.owner._id,
+          username: post.owner.username,
+          profilePic: userProfilePic,
+        },
         postID: post._id,
         mapID: post.map,
         svg: svg,
         likes: post.likes,
-        comments: post.comments,
+        comments: comments,
+        createdAt: post.createdAt,
       };
 
       return res.status(200).json({
@@ -298,11 +335,20 @@ const PostController = {
 
       res.status(200).json({
         success: true,
-        comment: savedComment,
+        comment: {
+          id: savedComment._id,
+          user: savedComment.user,
+          content: savedComment.content,
+          replies: savedComment.replies,
+          likes: savedComment.likes,
+          createdAt: savedComment.createdAt,
+        },
         user: {
           _id: userCommented?._id,
           username: userCommented?.username,
-          profilePic: userCommented?.profilePic,
+          profilePic: userCommented?.profilePic
+            ? Buffer.from(userCommented.profilePic).toString('base64')
+            : '',
         },
       });
     } catch (err: any) {
@@ -458,6 +504,7 @@ const PostController = {
     const userId = (req as any).userId;
     const { content } = req.body;
     const commentId = req.params.commentId;
+    console.log(commentId);
 
     const comment = await Comment.findById(commentId);
 
@@ -476,16 +523,33 @@ const PostController = {
 
     try {
       const savedReply = await newReply.save();
-      comment.replies.push(savedReply._id);
+      comment.replies.push(new mongoose.Types.ObjectId(savedReply._id));
 
       console.log('THIS IS A REPLY', savedReply);
       console.log('THIS IS A COMMENT', comment);
 
       await comment.save();
+      const user = await User.findById(comment.user);
+      if (!user) {
+        return res.status(400).json({
+          success: false,
+          message: 'User not found.',
+        });
+      }
 
-      res.status(200).json({
+      return res.status(200).json({
         success: true,
-        reply: savedReply,
+        reply: {
+          id: savedReply._id,
+          user: {
+            id: user._id,
+            username: user.username,
+            profilePic: Buffer.from(user.profilePic).toString('base64'),
+          },
+          content: savedReply.content,
+          likes: savedReply.likes,
+          createdAt: savedReply.createdAt,
+        },
       });
     } catch (err: any) {
       console.error('Error in comment creation:', err);

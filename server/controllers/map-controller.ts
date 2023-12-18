@@ -1,16 +1,12 @@
 import { Request, Response } from 'express';
-import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Map from '../models/map-model';
 import User from '../models/user-model';
-import express from 'express';
 import fs from 'fs';
-import path, { parse } from 'path';
-import util from 'util';
+import path from 'path';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
-import svg2img, { svg2imgOptions } from 'svg2img';
 import sharp from 'sharp';
 type MapDocument = typeof Map.prototype;
 

@@ -228,7 +228,7 @@ const labelMediumProminent: TypographyStyleOptions = {
 };
 
 const labelSmall: TypographyStyleOptions = {
-  fontFamily: `var(--fira) ${fallbackFontFamilies}`,
+  fontFamily: `var(--fira), ${fallbackFontFamilies}`,
   fontWeight: 500,
   fontSize: '11px',
   letterSpacing: '0.5px',
