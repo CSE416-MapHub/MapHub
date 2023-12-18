@@ -86,16 +86,140 @@ class SVGBuilder {
         }
       }
     }
+    if (this.mhjson.mapType === 'categorical') {
+      els += this.svgOfCategoryLegend();
+    }
+    if (this.mhjson.mapType === 'choropleth') {
+      els += this.svgOfChoroplethLegend();
+    }
     if (this.mhjson.mapType === 'dot') {
       els += this.svgOfDots();
+      els += this.svgOfDotLegend();
     }
     if (this.mhjson.mapType === 'flow') {
       els += this.svgOfArrows();
     }
     if (this.mhjson.mapType === 'symbol') {
       els += this.svgOfSymbols();
+      els += this.svgOfSymbolLegend();
     }
     return els;
+  }
+
+  private svgOfCategoryLegend(): string {
+    let items = this.mhjson.globalCategoryData.map(
+      (x: any) => [x.color, x.name] as [string, string],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      children += `<rect width="32" height="32" x="10" y="${y}" fill="${i[0]}"/>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000" >
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfDotLegend(): string {
+    let items = this.mhjson.globalDotDensityData.map(
+      (x: any) => [x.color, x.name, x.opacity] as [string, string, number],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      children += `<rect width="32" height="32" x="10" y="${y}" fill="${
+        i[0]
+      }" opacity="${i[2]}"/>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000">
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfSymbolLegend(): string {
+    const DOMParser = xmldom.DOMParser;
+    const XMLSerializer = xmldom.XMLSerializer;
+
+    let items = this.mhjson.globalSymbolData.map(
+      (x: any) => [x.svg, x.name] as [string, string],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      const parser = new DOMParser();
+      let doc = parser.parseFromString(i[0], 'image/svg+xml');
+
+      let svgEl = doc.getElementsByTagName('svg')[0];
+      svgEl.setAttribute('width', '100%');
+      svgEl.setAttribute('height', '100%');
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgEl);
+      children += `<svg width="32" height="32" x="10" y="${y}">${svgString}</svg>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000" >
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfChoroplethLegend(): string {
+    let cData = this.mhjson.globalChoroplethData;
+    let children = `<rect width="100%" height="100%" fill="#ffffff" />
+    <defs>
+        <linearGradient id="Gradient1">
+        <stop stop-color="${cData.minColor}" offset="0%" />
+        <stop stop-color="${cData.maxColor}" offset="100%" />
+      </linearGradient>
+      </defs>
+      <style>
+     #legend-gradient-bar {
+        fill: url(#Gradient1);
+      }
+      </style>
+    <rect id="legend-gradient-bar" width="280" height="32" x="10" y="10"/>
+    <text y="52" x="10" dominant-baseline="hanging" text-anchor="start" font-family="Arial" font-size="16" fill="#000000">
+     ${cData.minIntensity}
+    </text>
+    <text y="52" x="290" dominant-baseline="hanging" text-anchor="end" font-family="Arial" font-size="16" fill="#000000">
+    ${cData.maxIntensity}
+    </text>`;
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 78">
+
+    ${children}
+    </svg>`;
   }
 
   private svgOfDots(): string {
