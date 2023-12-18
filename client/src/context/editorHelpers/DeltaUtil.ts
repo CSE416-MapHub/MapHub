@@ -99,12 +99,14 @@ function deltaDot(map: MHJSON, d: Delta) {
         console.log(p);
         throw new Error('Tried to create nonexistent dot type');
       }
-      map.dotsData.splice(d.target[1], 0, {
+
+      //for the purpose of undo redo. we will replce the target id with the same original payload
+      map.dotsData[d.target[1]] = {
         x: p.x,
         y: p.y,
         scale: p.scale,
         dot: p.dot,
-      });
+      };
       break;
     }
   }
@@ -266,6 +268,9 @@ function deltaRegion(map: MHJSON, d: Delta) {
   switch (d.type) {
     case DeltaType.UPDATE:
     case DeltaType.CREATE: {
+      if (d.target[1] >= map.regionsData.length || d.target[1] < 0) {
+        throw new Error('CREATE Region target id out of bounds');
+      }
       map.regionsData = [...map.regionsData];
       if (d.payload.color) {
         map.regionsData[d.target[1]].color = d.payload.color;
@@ -279,6 +284,9 @@ function deltaRegion(map: MHJSON, d: Delta) {
       break;
     }
     case DeltaType.DELETE: {
+      if (d.target[1] >= map.regionsData.length || d.target[1] < 0) {
+        throw new Error('DELETE Region target id out of bounds');
+      }
       if (d.payload.color) {
         delete map.regionsData[d.target[1]].color;
       }
@@ -302,7 +310,7 @@ function deltaGlobalCategory(map: MHJSON, d: Delta) {
       }
       // check if the category name is taken
       let taken = map.globalCategoryData.filter(c => c.name === d.payload.name);
-      if (taken.length >= 1 && d.payload.name?.endsWith(DELETED_NAME)) {
+      if (taken.length >= 1 || d.payload.name?.endsWith(DELETED_NAME)) {
         throw new Error('Category name ' + d.payload.name + ' is already used');
       }
       let targ = map.globalCategoryData[d.target[1]];
@@ -411,6 +419,10 @@ function deltaSymbol(map: MHJSON, d: Delta) {
         console.log(p);
         throw new Error('Malformed symbol in CREATE');
       }
+      if (map.symbolsData.length < d.target[1] || d.target[1] < 0) {
+        throw new Error('global symbol index out of bounds');
+      }
+
       // verify that the dot we are trying to create actually exists
       let exists = false;
       for (let symMeta of map.globalSymbolData) {
@@ -423,12 +435,13 @@ function deltaSymbol(map: MHJSON, d: Delta) {
         console.log(p);
         throw new Error('Tried to create nonexistent symbol type');
       }
-      map.symbolsData.splice(d.target[1], 0, {
+      map.symbolsData[d.target[1]] = {
         x: p.x,
         y: p.y,
         scale: p.scale,
         symbol: p.symbol,
-      });
+      };
+
       break;
     }
   }

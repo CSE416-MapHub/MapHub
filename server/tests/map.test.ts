@@ -7,6 +7,7 @@ import auth from '../auth/index';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
+import { DELETED_NAME } from '../controllers/helperFunctions/MapVistors';
 import {
   DeltaType,
   TargetType,
@@ -426,6 +427,75 @@ describe('/map/payload/ dot payload', () => {
       'GLOBAL Dot doesnt exist for this dot name SOME DOT 2',
     );
   });
+
+  it('dot undo delete dot', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT' + DELETED_NAME,
+        },
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+      ],
+      globalDotDensityData: [
+        {
+          name: 'IM DOT',
+          opacity: 1,
+          size: 2,
+          color: '#FFFFFF',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        x: 2,
+        y: 2,
+        scale: 1,
+        dot: 'IM DOT',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData[0].dot).toEqual('IM DOT');
+    expect(response.body.map.dotsData[0].x).toEqual(2);
+    expect(response.body.map.dotsData[0].y).toEqual(2);
+  });
+
   it('dot update', async () => {
     const mockMap = {
       ...createMockMap(
@@ -487,6 +557,66 @@ describe('/map/payload/ dot payload', () => {
       y: 212121,
       scale: 100,
       dot: 'UPDATED DOT',
+      _id: response.body.map.dotsData[1]._id,
+    });
+  });
+
+  it('dot deleting', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      dotsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          dot: 'IM DOT',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          dot: 'SOME DOT 2',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.DOT,
+      target: [mockMap._id, 1, '-1'],
+      payload: {},
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.dotsData[1]).toEqual({
+      x: 2,
+      y: 2,
+      scale: 1,
+      dot: 'SOME DOT 2' + DELETED_NAME,
       _id: response.body.map.dotsData[1]._id,
     });
   });
@@ -603,6 +733,69 @@ describe('/map/payload/ global dot payload', () => {
       },
     ]);
   });
+
+  it('global dot undo delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalDotDensityData: [
+        {
+          name: 'dot group global' + DELETED_NAME,
+          opacity: 1,
+          size: 10,
+          color: '#FFFFFF',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_DOT,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'dot group global',
+        opacity: 1,
+        size: 10,
+        color: '#FFFFFF',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalDotDensityData.length).toEqual(1);
+    expect(response.body.map.globalDotDensityData).toEqual([
+      {
+        name: 'dot group global',
+        opacity: 1,
+        size: 10,
+        color: '#FFFFFF',
+        _id: response.body.map.globalDotDensityData[0]._id,
+      },
+    ]);
+  });
+
   it('global dot update', async () => {
     const mockMap = {
       ...createMockMap(
@@ -697,6 +890,63 @@ describe('/map/payload/ global dot payload', () => {
       },
     ]);
   });
+  it('global dot delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalDotDensityData: [
+        {
+          name: 'dot group global',
+          opacity: 1,
+          size: 10,
+          color: '#FFFFFF',
+        },
+      ],
+    };
+
+    const delta = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.GLOBAL_DOT,
+      target: [mockMap._id, 0, '-1'],
+      payload: {},
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    const response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: delta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalDotDensityData.length).toEqual(1);
+    expect(response.body.map.globalDotDensityData).toEqual([
+      {
+        name: 'dot group global' + DELETED_NAME,
+        opacity: 1,
+        size: 10,
+        color: '#FFFFFF',
+        _id: response.body.map.globalDotDensityData[0]._id,
+      },
+    ]);
+  });
+
   it('no create payload delta', async () => {
     const mockMap = {
       ...createMockMap(
@@ -796,6 +1046,93 @@ describe('/map/payload/ global Category ', () => {
       'new Category about russia',
     );
     expect(response.body.map.globalCategoryData[0].color).toEqual('#FFFFFF');
+  });
+
+  it('global category delete then undo delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      globalCategoryData: [
+        {
+          name: 'existing category 1',
+          color: '#FFFFFF',
+        },
+      ],
+      regionsData: [
+        {
+          color: '#FFFFFF',
+          intensity: 2,
+          category: 'existing category 1',
+        },
+      ],
+    };
+    const deltaDelete = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.GLOBAL_CATEGORY,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'existing category 1',
+        color: '#FFFFFF',
+      },
+    };
+
+    const deltaCreate = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_CATEGORY,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        name: 'existing category 1',
+        color: '#FFFFFF',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    let response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: deltaDelete })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalCategoryData[0].name).toEqual(
+      'existing category 1' + DELETED_NAME,
+    );
+    expect(response.body.map.regionsData[0].category).toEqual(
+      'existing category 1' + DELETED_NAME,
+    );
+
+    response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: deltaCreate })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalCategoryData[0].name).toEqual(
+      'existing category 1',
+    );
+    expect(response.body.map.regionsData[0].category).toEqual(
+      'existing category 1',
+    );
   });
 
   it('global category update', async () => {
@@ -936,7 +1273,7 @@ describe('/map/map update map by id', () => {
     expect(response.body.map.title).toEqual(mapPayload.mapPayload.title);
   });
 
-  it('update title of map', async () => {
+  it('update title of map without id', async () => {
     const mapPayload = { mapPayload: { title: 'UPDATED MAP NEW BIGN' } };
 
     jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData);
@@ -1092,6 +1429,126 @@ describe('/map/payload/ global symbol payload', () => {
       },
     ]);
   });
+
+  it('global symbol delete then undo delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      symbolsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+      ],
+      globalSymbolData: [
+        {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+          name: 'polygonA',
+        },
+        {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+          name: 'randomsh',
+        },
+      ],
+    };
+
+    const deleteDelta = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.GLOBAL_SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {},
+    };
+    const createDelta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.GLOBAL_SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+        name: 'polygonA',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    let response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: deleteDelta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalSymbolData[0].name).toEqual(
+      'polygonA' + DELETED_NAME,
+    );
+    expect(response.body.map.symbolsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'polygonA' + DELETED_NAME,
+        _id: response.body.map.symbolsData[0]._id,
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        symbol: 'polygonA' + DELETED_NAME,
+        _id: response.body.map.symbolsData[1]._id,
+      },
+    ]);
+
+    response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: createDelta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.globalSymbolData[0].name).toEqual('polygonA');
+    expect(response.body.map.symbolsData).toEqual([
+      {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'polygonA',
+        _id: response.body.map.symbolsData[0]._id,
+      },
+      {
+        x: 2,
+        y: 2,
+        scale: 1,
+        symbol: 'polygonA',
+        _id: response.body.map.symbolsData[1]._id,
+      },
+    ]);
+  });
+
   it('no create payload delta', async () => {
     const mockMap = {
       ...createMockMap(
@@ -1205,6 +1662,7 @@ describe('/map/payload/ symbol payload', () => {
       },
     ]);
   });
+
   it(' symbol create nonexisitend global ', async () => {
     const mockMap = {
       ...createMockMap(
@@ -1332,6 +1790,102 @@ describe('/map/payload/ symbol payload', () => {
       },
     ]);
   });
+  it('symbol delete then undo delete', async () => {
+    const mockMap = {
+      ...createMockMap(
+        'Map Three',
+        'Polygon',
+        [
+          [
+            [-73.935242, 40.73061],
+            [-74.935242, 41.73061],
+            [-74.935242, 39.73061],
+            [-73.935242, 40.73061],
+          ],
+        ],
+        0.7,
+      ),
+      geoJSON: 'somepath/path/now',
+      symbolsData: [
+        {
+          x: 10,
+          y: 20,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+        {
+          x: 2,
+          y: 2,
+          scale: 1,
+          symbol: 'polygonA',
+        },
+      ],
+      globalSymbolData: [
+        {
+          svg: '<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="-73.935242 -40.73061 0 0"> <rect x="-73.935242" y="-40.73061" width="100%" height="100%" fill="#CCEFF1" /> </svg>',
+          name: 'polygonA',
+        },
+      ],
+    };
+
+    const deleteDelta = {
+      type: DeltaType.DELETE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {},
+    };
+    const createDelta = {
+      type: DeltaType.CREATE,
+      targetType: TargetType.SYMBOL,
+      target: [mockMap._id, 0, '-1'],
+      payload: {
+        x: 10,
+        y: 20,
+        scale: 1,
+        symbol: 'polygonA',
+      },
+    };
+
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
+
+    let response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: deleteDelta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+
+    expect(response.body.map.symbolsData[0]).toEqual({
+      x: 10,
+      y: 20,
+      scale: 1,
+      symbol: 'polygonA' + DELETED_NAME,
+      _id: response.body.map.symbolsData[0]._id,
+    });
+
+    response = await supertest(app)
+      .put('/map/map/payload')
+      .send({ delta: createDelta })
+      .set('Cookie', [`token=${auth.signToken(userId.toString())}`]);
+
+    console.log(JSON.stringify(response.body));
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(true);
+    expect(response.body).toHaveProperty('map');
+    expect(response.body.map.symbolsData[0]).toEqual({
+      x: 10,
+      y: 20,
+      scale: 1,
+      symbol: 'polygonA',
+      _id: response.body.map.symbolsData[0]._id,
+    });
+  });
+
   it('no create payload delta', async () => {
     const mockMap = {
       ...createMockMap(
@@ -1430,7 +1984,7 @@ describe('/map/payload/ choropleth', () => {
     expect(response.statusCode).toBe(400);
     expect(response.body.message).toBe('Cant create global choropleth');
   });
-  it(' symbol update should do ok ', async () => {
+  it(' choropleth update should do ok ', async () => {
     const mockMap = {
       ...createMockMap(
         'Map Three',
@@ -1485,7 +2039,7 @@ describe('/map/payload/ choropleth', () => {
     });
   });
 
-  it(' symbol delete', async () => {
+  it(' choropleth delete cant work', async () => {
     const mockMap = {
       ...createMockMap(
         'Map Three',
