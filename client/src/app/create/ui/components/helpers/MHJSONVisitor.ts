@@ -131,7 +131,7 @@ class SVGBuilder {
     opacity: number,
   ): string {
     let p = this.isPosition([x, y]);
-    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 42;
+    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 27;
     console.log('defaultsz is ' + DEFAULT_SZ);
     return `<circle
       cx="${p[0]}"

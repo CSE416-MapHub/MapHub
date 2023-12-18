@@ -46,10 +46,10 @@ describe('i can use the dot tool', () => {
       let origX = parseFloat(($inputs[0] as HTMLInputElement).value);
       let origY = parseFloat(($inputs[1] as HTMLInputElement).value);
 
-      cy.get('.map-dot')
-        .trigger('mousedown')
-        .trigger('mousemove', { clientX: 300, clientY: 300 })
-        .trigger('mouseup');
+      cy.get('.map-dot').as('md');
+      cy.get('@md').trigger('mousedown');
+      cy.get('@md').trigger('mousemove', { clientX: 300, clientY: 300 });
+      cy.get('@md').trigger('mouseup');
       cy.wait(500);
       cy.get("[type='number']").then($inputs => {
         let newX = parseFloat(($inputs[0] as HTMLInputElement).value);

@@ -123,7 +123,7 @@ export default function ({
     }
   }
   let mapbox = editorContextRef.state.mapDetails.bbox;
-  let DEFAULT_SZ = Math.min(mapbox[2], mapbox[3]) * 2000;
+  let DEFAULT_SZ = Math.min(mapbox[2], mapbox[3]) * 3000;
   // console.log('size is ' + DEFAULT_SZ * dotClass.size * dotInstance.scale);
   return (
     <Circle
