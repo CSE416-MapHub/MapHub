@@ -313,7 +313,7 @@ class helpers {
       let nMap = { ...map };
       applyDelta(nMap, a.undo);
       if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(a.do);
+        MapAPI.updateMapPayload(a.undo);
       }
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
