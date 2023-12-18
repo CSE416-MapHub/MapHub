@@ -171,7 +171,6 @@ const PostController = {
         JSON.stringify({
           title: post.title,
           description: post.description,
-          owner: post.owner,
         }),
         'with id',
         postId,
@@ -521,7 +520,7 @@ const PostController = {
       }
 
       console.log('POST MAP ORIGINAL', mapPost);
-      
+
       const objMap = mapPost.toObject();
 
       const forkedMap = new Map({

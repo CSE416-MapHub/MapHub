@@ -134,9 +134,15 @@ function getReducer(notifications: NotificationsContextValue) {
             regionData: v.getFeatureResults().perFeature,
           };
         } else {
-          throw new Error(
-            'SET_MAP must have a map and a map_id in its payload',
-          );
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_MAP must have a map and a map_id in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
@@ -144,7 +150,15 @@ function getReducer(notifications: NotificationsContextValue) {
         if (action.payload.selectedTool !== undefined) {
           newState.selectedTool = action.payload.selectedTool;
         } else {
-          throw new Error('SET_TOOL must have a tool in its payload');
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_TOOL must have a tool in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
@@ -152,7 +166,15 @@ function getReducer(notifications: NotificationsContextValue) {
         if (action.payload.map !== undefined) {
           newState.map = action.payload.map;
         } else {
-          throw new Error('SET_NAME must have a map in its payload');
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_NAME must have a map in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
@@ -166,9 +188,16 @@ function getReducer(notifications: NotificationsContextValue) {
           newState.actionStack = action.payload.actionStack;
           newState.lastInstantiated = action.payload.lastInstantiated;
         } else {
-          throw new Error(
-            'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
-          );
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message:
+                'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
@@ -176,7 +205,15 @@ function getReducer(notifications: NotificationsContextValue) {
         if (action.payload.isDeleting !== undefined) {
           newState.isDeleting = action.payload.isDeleting;
         } else {
-          throw new Error('SET_DELETING must have a isDeleting');
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_DELETING must have a isDeleting',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
@@ -184,14 +221,29 @@ function getReducer(notifications: NotificationsContextValue) {
         if (action.payload.lastInstantiated !== undefined) {
           newState.lastInstantiated = action.payload.lastInstantiated;
         } else {
-          throw new Error(
-            'SET_LAST_INSTANTIATED must have a lastInstantiated in its payload',
-          );
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message:
+                'SET_LAST_INSTANTIATED must have a lastInstantiated in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
         }
         break;
       }
       default:
-        throw new Error('UNHANDLED ACTION');
+        notifications.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: 'UNHANDLED ACTION',
+            actions: {
+              close: true,
+            },
+          },
+        });
     }
     return newState;
   }
@@ -199,6 +251,11 @@ function getReducer(notifications: NotificationsContextValue) {
 }
 
 class helpers {
+  private notificationContext: NotificationsContextValue;
+  constructor(notificationContext?: NotificationsContextValue) {
+    this.notificationContext = notificationContext!;
+  }
+
   public changeTitle(ctx: IEditorContext, newTitle: string) {
     let newMap = structuredClone(ctx.state.map);
     if (newMap === null) {
@@ -277,9 +334,22 @@ class helpers {
         undo: dInv,
       });
       let nMap = { ...map };
-      applyDelta(nMap, d);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(d);
+
+      try {
+        applyDelta(nMap, d);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(d);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
 
       let li: string = this.getLastInitialized(
@@ -311,10 +381,23 @@ class helpers {
       if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
-      applyDelta(nMap, a.undo);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(a.do);
+      try {
+        applyDelta(nMap, a.undo);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(a.undo);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
@@ -347,10 +430,24 @@ class helpers {
       if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
-      applyDelta(nMap, a.do);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(a.do);
+
+      try {
+        applyDelta(nMap, a.do);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(a.do);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
@@ -416,7 +513,13 @@ export const EditorProvider = ({ children }: React.PropsWithChildren) => {
   const reducer = getReducer(useContext(NotificationsContext));
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <EditorContext.Provider value={{ state, dispatch, helpers: new helpers() }}>
+    <EditorContext.Provider
+      value={{
+        state,
+        dispatch,
+        helpers: new helpers(useContext(NotificationsContext)),
+      }}
+    >
       {children}
     </EditorContext.Provider>
   );
