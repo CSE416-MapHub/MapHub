@@ -77,7 +77,11 @@ export default function (props: IInputProps) {
     );
   } else if (props.type === 'delete') {
     inputField = (
-      <Button variant="error" onClick={getFunctionOfOption(props.value[0])}>
+      <Button
+        disabled={props.disabled}
+        variant="error"
+        onClick={getFunctionOfOption(props.value[0])}
+      >
         {getNameOfOption(props.value[0])}
       </Button>
     );
