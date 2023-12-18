@@ -35,7 +35,10 @@ function CommentsList({ comments, onStartReply }: CommentsListProps) {
             onStartReply={onStartReply}
           />
           {comment.replies.length > 0 ? (
-            <RepliesListItem replies={comment.replies} />
+            <RepliesListItem
+              replies={comment.replies}
+              key={`${comment.id}-reply-divider`}
+            />
           ) : (
             ''
           )}
