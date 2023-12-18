@@ -32,7 +32,7 @@ describe('Files should be exported in different forms', () => {
     cy.get('span:contains("Export As JSON")').click();
 
     // check the downloads
-    cy.readFile('./cypress/downloads/map.json');
+    cy.readFile('./cypress/downloads/map.mh.json');
     const downloadsFolder = Cypress.config('downloadsFolder');
     cy.task('emptyDirectory', downloadsFolder);
   });

@@ -12,6 +12,7 @@ import {
 } from './createPanels';
 import DeleteModal from '../modals/deleteInstance';
 import { Typography } from '@mui/material';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 export interface IPropertiesProps {
   panels: Array<IPropertyPanelSectionProps>;
@@ -24,10 +25,40 @@ export default function () {
   // const editorContextRef = useRef(editorContext);
   const [deleteModal, setDeleteModal] = useState<JSX.Element | null>(null);
   const [panels, setPanels] = useState<Array<IPropertyPanelSectionProps>>([]);
+
+  function itemExists(
+    targ: {
+      type: TargetType;
+      id: number;
+      subid: string;
+    } | null,
+  ): boolean {
+    let map = editorContext.state.map!;
+    if (targ === null) return false;
+    if (targ.type === TargetType.DOT) {
+      // get the dot
+      let dot = map.dotsData[targ.id];
+      if (dot.dot.endsWith(DELETED_NAME)) {
+        return false;
+      }
+    } else if (targ.type === TargetType.SYMBOL) {
+      let sym = map.symbolsData[targ.id];
+      if (sym.symbol.endsWith(DELETED_NAME)) {
+        return false;
+      }
+    } else if (targ.type === TargetType.ARROW) {
+      let arr = map.arrowsData[targ.id];
+      if (arr.label.endsWith(DELETED_NAME)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   useEffect(() => {
     ctr++;
     let currTarg = editorContext.state.selectedItem;
-    if (currTarg === null) {
+    if (!itemExists(currTarg) || currTarg === null) {
       setPanels([]);
       return;
     }
