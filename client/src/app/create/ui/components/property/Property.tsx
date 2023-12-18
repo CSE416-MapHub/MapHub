@@ -11,6 +11,7 @@ import {
   makeSymbolPanel,
 } from './createPanels';
 import DeleteModal from '../modals/deleteInstance';
+import { Typography } from '@mui/material';
 
 export interface IPropertiesProps {
   panels: Array<IPropertyPanelSectionProps>;
@@ -79,9 +80,14 @@ export default function () {
     return <></>;
   }
 
+  const mapType = editorContext.state.map?.mapType as string;
+  const capitalizedName = mapType.charAt(0).toUpperCase() + mapType.slice(1);
   return (
     <>
       <div className={styles['properties-container']}>
+        <Typography className={styles['properties-title']} variant='titleLarge'>
+          {capitalizedName} Map Properties
+        </Typography>
         {panels.map((p, i) => (
           <PropertyPanel {...p} key={'' + ctr + i} />
         ))}
