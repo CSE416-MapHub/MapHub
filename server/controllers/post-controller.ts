@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
-import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Post from '../models/post-model';
 import Comment from '../models/comment-model';
 import Map from '../models/map-model';
 import User from '../models/user-model';
-import express from 'express';
 import fs from 'fs';
-import path from 'path';
 import { convertJsonToSVG, SVGDetail } from './map-controller';
+import { PopulatedComment } from '../models/comment-model';
+import { UserType } from '../models/user-model';
 
 type MapDocument = typeof Map.prototype;
 
@@ -133,7 +132,7 @@ const PostController = {
       console.log('GETTING POST WITH ID', postId);
 
       const post = await Post.findById(postId)
-        .populate({
+        .populate<{ comments: PopulatedComment[] }>({
           path: 'comments', // Path to the field in the Post model
           model: 'Comment', // Model to use for population
           populate: [
@@ -153,7 +152,7 @@ const PostController = {
             },
           ],
         })
-        .populate({
+        .populate<{ owner: UserType }>({
           path: 'owner', // Path to the user field in the Post model
           model: 'User', // Model to use for population of the post's user
           select: 'username _id profilePic', // Only select specific fields for the user of the post
@@ -187,15 +186,38 @@ const PostController = {
 
       const svg = map ? await convertJsonToSVG(map, SVGDetail.DETAILED) : null;
 
+      let comments: any[] = [...post.comments];
+      for (let i = 0; i < comments.length; i += 1) {
+        let comment = comments[i];
+        comment.user.profilePic = Buffer.from(comment.user.profilePic).toString(
+          'base64',
+        );
+
+        const replies = comment.replies;
+        for (let j = 0; j < replies.length; j += 1) {
+          let reply = replies[j];
+          reply.user.profilePic = Buffer.from(reply.user.profilePic).toString(
+            'base64',
+          );
+        }
+      }
+
+      const userProfilePic = Buffer.from(post.owner.profilePic).toString(
+        'base64',
+      );
+
       const postFound = {
         title: post.title,
         description: post.description,
-        owner: post.owner,
+        owner: {
+          ...post.owner,
+          profilePic: userProfilePic,
+        },
         postID: post._id,
         mapID: post.map,
         svg: svg,
         likes: post.likes,
-        comments: post.comments,
+        comments: comments,
       };
 
       return res.status(200).json({

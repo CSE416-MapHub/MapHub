@@ -1,4 +1,12 @@
 import { Schema, model } from 'mongoose';
+import { UserType } from './user-model';
+
+interface PopulatedComment {
+  user: UserType;
+  content: string;
+  replies: PopulatedComment[];
+  likes: Schema.Types.ObjectId;
+}
 
 const commentSchema = new Schema(
   {
@@ -21,4 +29,5 @@ const commentSchema = new Schema(
 
 const Comment = model('Comment', commentSchema);
 
+export type { PopulatedComment };
 export default Comment;

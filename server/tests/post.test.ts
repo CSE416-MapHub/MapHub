@@ -7,8 +7,7 @@ import auth from '../auth/index';
 import mapModel from '../models/map-model';
 import { LikeChange } from '../controllers/post-controller';
 import commentModel from '../models/comment-model';
-import { createMockMap } from './map.test';
-import fs, { readFile } from 'fs';
+import fs from 'fs';
 
 const mockUserID = new mongoose.Types.ObjectId();
 
@@ -69,19 +68,19 @@ describe('POST /posts/publish', () => {
       title: 'Blah blah',
       _id: new mongoose.Types.ObjectId(),
       published: false,
-      save: jest
-        .spyOn(mapModel.prototype, 'save')
-        .mockImplementation(function (this: any) {
-          console.log('POST: saving the edited map', this);
-          return Promise.resolve(this);
-        }),
+      save: jest.spyOn(mapModel.prototype, 'save').mockImplementation(function (
+        this: any,
+      ) {
+        console.log('POST: saving the edited map', this);
+        return Promise.resolve(this);
+      }),
     };
 
-    jest
-      .spyOn(postModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        return Promise.resolve(this);
-      });
+    jest.spyOn(postModel.prototype, 'save').mockImplementation(function (
+      this: any,
+    ) {
+      return Promise.resolve(this);
+    });
 
     jest.spyOn(mapModel, 'findById').mockImplementation((id: any) => {
       const queryLikeObject = {
@@ -165,7 +164,7 @@ describe('GET /posts/all', () => {
               mockPosts.filter(post => post.title.includes(searchQuery)),
             );
           }),
-        } as any),
+        }) as any,
     );
 
     jest
@@ -249,7 +248,7 @@ describe('GET /posts/user', () => {
               ),
             );
           }),
-        } as any),
+        }) as any,
     );
 
     jest
@@ -295,9 +294,13 @@ describe('GET /posts/:postId', () => {
     const mockComments = [
       {
         _id: new mongoose.Types.ObjectId(),
-        user: new mongoose.Types.ObjectId(),
+        user: {
+          id: new mongoose.Types.ObjectId(),
+          username: 'aUser',
+          profilePic: Buffer.alloc(0),
+        },
         content: 'this is a comment',
-        replies: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
+        replies: [],
         likes: [new mongoose.Types.ObjectId(), new mongoose.Types.ObjectId()],
       },
     ];
@@ -342,6 +345,11 @@ describe('GET /posts/:postId', () => {
         const execMock = jest.fn().mockResolvedValue({
           _id: new mongoose.Types.ObjectId(postId),
           map: mockMapId,
+          owner: {
+            id: new mongoose.Types.ObjectId(),
+            username: 'aUser',
+            profilePic: Buffer.alloc(0),
+          },
           comments: mockComments, // Assuming comments are already populated
           populate: jest.fn().mockReturnThis(), // Chainable populate method
           exec: jest.fn().mockResolvedValue({}),
@@ -373,12 +381,12 @@ describe('GET /posts/:postId', () => {
 
 describe('POST /posts/comments/:postId', () => {
   it('creating a comment in a post', async () => {
-    jest
-      .spyOn(commentModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        console.log('post saving hte post', this);
-        return Promise.resolve(this);
-      });
+    jest.spyOn(commentModel.prototype, 'save').mockImplementation(function (
+      this: any,
+    ) {
+      console.log('post saving hte post', this);
+      return Promise.resolve(this);
+    });
     const mockPostId = new mongoose.Types.ObjectId();
     const mockMapId = new mongoose.Types.ObjectId();
     const mockPost = {
@@ -529,12 +537,12 @@ describe('PATCH /posts/comments/likeChange', () => {
 
 describe('POST /posts/comments/:commentId/replies', () => {
   it('add a reply to a comment', async () => {
-    jest
-      .spyOn(commentModel.prototype, 'save')
-      .mockImplementation(function (this: any) {
-        console.log('post saving hte post', this);
-        return Promise.resolve(this);
-      });
+    jest.spyOn(commentModel.prototype, 'save').mockImplementation(function (
+      this: any,
+    ) {
+      console.log('post saving hte post', this);
+      return Promise.resolve(this);
+    });
     const mockCommentId = new mongoose.Types.ObjectId();
     const mockComment = {
       _id: mockCommentId,

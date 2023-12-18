@@ -2,6 +2,16 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
+interface UserType {
+  username: string;
+  email: string;
+  password: string;
+  profilePic: Buffer;
+  maps: mongoose.Schema.Types.ObjectId;
+  resetPasswordToken: string;
+  resetPasswordExpires: Date;
+}
+
 const userSchema = new Schema(
   {
     username: { type: String, required: true, unique: true },
@@ -16,5 +26,6 @@ const userSchema = new Schema(
 );
 
 const userModel = mongoose.model('User', userSchema);
+export type { UserType };
 
 export default userModel;
