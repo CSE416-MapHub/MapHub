@@ -46,12 +46,16 @@
     margin-bottom: 30px;
   }
 
+  .forgotLink {
+    color: white;
+  }
+
   .button {
     margin-top: 12px;
   }
   
   .confirmButton:hover {
-    background-color: #138BAE;
+    background-color: #00AFb9;
     box-shadow:
       0   1px 2px 0   rgba(0, 0, 0, 30%),
       0   1px 3px 1px rgba(0, 0, 0, 15%);

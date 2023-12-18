@@ -272,8 +272,8 @@ function LoginForm() {
         {/* <Link variant="body1" href="/account/forgot-account?query=username">
           Forgot Username
         </Link> */}
-        <Link variant="body1" href="/account/forgot-account?query=password">
-          Forgot Password
+        <Link className={styles.forgotLink} variant="body1" href="/account/forgot-account?query=password">
+          Forgot Password?
         </Link>
       </Container>
       <Button
