@@ -1,16 +1,13 @@
 import { Request, Response } from 'express';
-import auth from '../auth/index';
 import mongoose from 'mongoose';
 import Map from '../models/map-model';
 import User from '../models/user-model';
-import express from 'express';
 import fs from 'fs';
-import path, { parse } from 'path';
-import util from 'util';
+import path from 'path';
 import * as gjv from 'geojson-validation';
 import mapHelper from './helperFunctions/mapHelper';
 import { SVGBuilder } from './helperFunctions/MapVistors';
-
+import sharp from 'sharp';
 type MapDocument = typeof Map.prototype;
 
 enum DeltaType {
@@ -26,6 +23,37 @@ enum MapType {
   DOT = 'dot',
   FLOW = 'flow',
 }
+export enum SVGDetail {
+  DETAILED = 'detailed',
+  THUMBNAIL = 'thumbnail',
+}
+
+// async function convertSvgToPngBase64(svgString: string): Promise<string> {
+//   const options: svg2imgOptions = {
+//     resvg: {
+//       dpi: 300,
+//       shapeRendering: 2,
+//       textRendering: 1,
+//       imageRendering: 0,
+//       fitTo: { mode: 'width', value: 800 },
+//     },
+//     quality: 100,
+//   };
+//   console.log('THE SVG to pARSE', svgString);
+//   return new Promise((resolve, reject) => {
+//     svg2img(svgString, options, function (error, buffer) {
+//       if (error) {
+//         console.error('Error converting SVG to PNG:', error);
+//         resolve('FULL');
+//       } else {
+//         // Convert buffer to a base64 encoded string
+//         const base64Png = buffer.toString('base64');
+//         console.log('FINISHED CONVERTING ONE');
+//         resolve(base64Png);
+//       }
+//     });
+//   });
+// }
 
 function minifySVG(svgString: string): string {
   // Replace newlines and carriage returns with nothing
@@ -38,27 +66,67 @@ function minifySVG(svgString: string): string {
   return minified.trim();
 }
 
-export async function convertJsonToSVG(map: MapDocument) {
-  console.log('JSON TO SVG', JSON.stringify(map));
+export async function convertJsonToSVG(
+  map: MapDocument,
+  SVGDetailStr: SVGDetail,
+) {
+  console.log('JSON TO SVG STARTING IT NOW');
 
   const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-  console.log('GEOJSON DATA IN DO THE ', geoJSONData);
+
+  // console.log('GEOJSON DATA IN DO THE ', geoJSONData);
   map.geoJSON = geoJSONData; //JSON.parse(geoJSONData);
 
   let builder = new SVGBuilder(map);
   let svg = builder.createSVG();
+  console.log('svg created');
   let box = builder.getBBox();
+  console.log('bbox gotten');
   let svgRepr = `<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="${box.join(
     ' ',
   )}">
   <rect x="${box[0]}" y="${box[1]}" width="100%" height="100%" fill="#CCEFF1" />
   ${svg}
 </svg>`;
+  if (SVGDetailStr === SVGDetail.THUMBNAIL) {
+    console.log('Converting to THUMBNAIL');
+    try {
+      // const pngString = await convertSvgToPngBase64(svgRepr);
+      // if (pngString === 'FULL') {
+      //   return minifySVG(svgRepr);
+      // }
+      const pngString = await sharp(Buffer.from(svgRepr))
+        .png()
+        .resize({
+          width: 128,
+          height: 128,
+          fit: 'inside',
+          withoutEnlargement: true,
+          withoutReduction: true,
+          background: '#0081A7',
+          kernel: 'lanczos3',
+        })
+        .toBuffer();
+      console.log('BOUNDING BOX of UNFAILED', box.join(' '), map.title);
+
+      if (map.title === 'hgf') {
+        console.log('The svg in question', map.title);
+      }
+      return pngString.toString('base64');
+    } catch (error: any) {
+      console.log('BOUNDING BOX of FAILED', box.join(' '), map.title);
+
+      // console.log('CAUGHT THE ERROR', error);
+      // if (map.title === 'testing symbol') {
+      //   console.log('The svg in question', map.title, svgRepr);
+      // }
+      return minifySVG(svgRepr);
+    }
+  }
+  console.log('Converting to SVG full');
+
   return minifySVG(svgRepr);
 }
-
-//idk if we should actually validate the user to see if the user matchees
-async function validUserForMap(req: Request, res: Response) {}
 
 const MapController = {
   createMap: async (req: Request, res: Response) => {
@@ -82,7 +150,7 @@ const MapController = {
       geoJSON,
     } = req.body.map;
     console.log('REQ BODY IS');
-    console.log(req.body);
+    // console.log(req.body);
 
     // if (verifiedUser !== owner) {
     //   return res
@@ -125,7 +193,6 @@ const MapController = {
         geoJSON: 'placeholder',
         owner: verifiedUser,
       });
-      console.log(newMap);
     } catch (err: any) {
       console.error(err.message);
       return res
@@ -189,7 +256,6 @@ const MapController = {
     // Implementation of updating a map
     const delta = req.body.delta;
     let map: MapDocument | null;
-    console.log(map);
     //validating the requests
     if (delta.type === null || delta.type === undefined) {
       return res
@@ -263,13 +329,14 @@ const MapController = {
             .status(400)
             .json({ success: false, message: 'Map Delta Type Incorrect' });
       }
-      console.log('MAP bEFORE CAST', JSON.stringify(map));
+      // console.log('MAP bEFORE CAST', JSON.stringify(map));
       map = new Map(map);
 
       const updatedMap = await map.save();
-      console.log(updatedMap);
+      // console.log('AFTER UPDATE MAP', updatedMap);
       return res.status(200).json({ success: true, map: updatedMap });
     } catch (err: any) {
+      console.error(err.message);
       return res.status(400).json({ success: false, message: err.message });
     }
   },
@@ -277,9 +344,9 @@ const MapController = {
   updateMapById: async (req: Request, res: Response) => {
     // Implementation of deleting a map by ID
     const userId = (req as any).userId;
-    const { mapId, title } = req.body;
+    const { mapId, title } = req.body.mapPayload;
 
-    console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
+    // console.log('UPDATE MPA BY ID REQ BODY', JSON.stringify(req.body));
     if (!mapId) {
       return res
         .status(400)
@@ -306,7 +373,6 @@ const MapController = {
 
       const savedMap = await new Map(map).save();
 
-      console.log('finished updating ', savedMap);
       res.status(200).json({ success: true, map: savedMap });
     } catch (err: any) {
       console.log('error in update mapbyid', err);
@@ -345,8 +411,9 @@ const MapController = {
       // Check if the GeoJSON path is valid
       if (map.geoJSON && typeof map.geoJSON === 'string') {
         try {
+          // console.log(map.geoJSON)
           const geoJSONData = await fs.promises.readFile(map.geoJSON, 'utf8');
-          map.geoJSON = JSON.parse(geoJSONData);
+          map.geoJSON = geoJSONData;
         } catch (fileReadError) {
           console.error('Error reading GeoJSON file:', fileReadError);
         }
@@ -387,7 +454,7 @@ const MapController = {
       // console.log('THIS IS WHAT INSIDE MAPS', maps);
       const condensedMaps = await Promise.all(
         maps.map(async map => {
-          const svg = await convertJsonToSVG(map); //#TODO placeholder function
+          const svg = await convertJsonToSVG(map, SVGDetail.THUMBNAIL); //#TODO placeholder function
           return {
             _id: map._id,
             title: map.title,
@@ -398,7 +465,6 @@ const MapController = {
         }),
       );
 
-      console.log('Map Controller MAPS', JSON.stringify(condensedMaps));
       // Success response
       res.status(200).json({
         success: true,

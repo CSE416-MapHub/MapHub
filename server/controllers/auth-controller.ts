@@ -3,6 +3,15 @@ import auth from '../auth/index';
 import User from '../models/user-model';
 import bcrypt from 'bcrypt';
 import mongoose from 'mongoose';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import sharp from 'sharp';
+
+// Environment variables for email account
+// const EMAIL_ADDRESS = process.env.EMAIL_ADDRESS;
+// const EMAIL_PASSWORD = process.env.EMAIL_PASSWORD;
+const EMAIL_ADDRESS = 'maphubbers@gmail.com';
+const EMAIL_PASSWORD = 'rxcamkbeykxzoflr';
 
 export const registerUser = async (req: Request, res: Response) => {
   try {
@@ -58,7 +67,7 @@ export const registerUser = async (req: Request, res: Response) => {
     const saltRounds = 10;
     const salt = await bcrypt.genSalt(saltRounds);
     const passwordHash = await bcrypt.hash(password, salt);
-    console.log('passwordHash: ' + passwordHash);
+    // console.log('passwordHash: ' + passwordHash);
 
     const newUser = new User({
       username,
@@ -88,7 +97,7 @@ export const registerUser = async (req: Request, res: Response) => {
   } catch (err: any) {
     if (err.code === 11000) {
       console.log(err);
-      // Duplicate key error - usualyl in the form of "dupKey": dupValue
+      // Duplicate key error - usually in the form of "dupKey": dupValue
       const duplicateField = Object.keys(err.keyValue)[0];
       // To make it look pretty :#
       const capitalizedField =
@@ -121,7 +130,7 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const user = await User.findOne({ username });
-    console.log(user);
+    // console.log(user);
 
     if (!user) {
       return res.status(400).json({ errorMessage: 'Incorrect username.' });
@@ -149,8 +158,8 @@ export const loginUser = async (req: Request, res: Response) => {
           profilePic: Buffer.from(user.profilePic).toString('base64'),
         },
       });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, errorMessage: 'Server error' });
   }
 };
@@ -195,21 +204,18 @@ export const getUserById = async (request: Request, response: Response) => {
 
     const user = await User.findById(id);
     if (!user) {
-      return response
-        .status(400).json({
-          success: false,
-          errorMessage: 'User not found.'
-        });
+      return response.status(400).json({
+        success: false,
+        errorMessage: 'User not found.',
+      });
     } else {
-      return response
-        .status(200)
-        .json({
-          user: {
-            id: user._id,
-            username: user.username,
-            profilePic: Buffer.from(user.profilePic).toString('base64'),
-          }
-        })
+      return response.status(200).json({
+        user: {
+          id: user._id,
+          username: user.username,
+          profilePic: Buffer.from(user.profilePic).toString('base64'),
+        },
+      });
     }
   } catch (error) {
     return response.status(500).json({
@@ -217,7 +223,7 @@ export const getUserById = async (request: Request, response: Response) => {
       errorMessage: 'There is an internal error. Please try again.',
     });
   }
-}
+};
 
 export const getVerify = async (request: Request, response: Response) => {
   const headers = {
@@ -347,6 +353,126 @@ export const postUsername = async (request: Request, response: Response) => {
   }
 };
 
+export const putProfilePic = async (request: Request, response: Response) => {
+  try {
+    const { profilePic } = request.body;
+    const { userId } = request as any;
+
+    if (!profilePic) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        errorMessage: 'Please upload a new profile picture.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage: 'The user does not exist.',
+      });
+    }
+
+    user.profilePic = await sharp(Buffer.from(profilePic, 'base64'))
+      .webp()
+      .toBuffer();
+    await user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorCode: 0,
+      errorMessage: 'There has been an internal error. Please try again later.',
+    });
+  }
+};
+
+export const putPassword = async (request: Request, response: Response) => {
+  try {
+    const { currentPassword, newPassword, newPasswordConfirm } = request.body;
+    const { userId } = request as any;
+
+    let missingFields = 0;
+    if (!currentPassword) {
+      missingFields |= 1 << 2;
+    }
+    if (!newPassword) {
+      missingFields |= 1 << 1;
+    }
+    if (!newPasswordConfirm) {
+      missingFields |= 1 << 0;
+    }
+    if (missingFields) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 1,
+        missingFields,
+        errorMessage: 'Please enter all fields.',
+      });
+    }
+
+    if (!/^(?=.*?[A-Z])(?=.*?[a-z])(?=.*?[0-9]).{8,}$/.test(newPassword)) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 2,
+        errorMessage: 'Please enter a valid password.',
+      });
+    }
+
+    if (newPassword !== newPasswordConfirm) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 3,
+        errorMessage: 'Please confirm the new password.',
+      });
+    }
+
+    const user = await User.findById(userId);
+    if (!user) {
+      return response.status(400).json({
+        success: false,
+        errorCode: 4,
+        errorMessage: 'The user is missing.',
+      });
+    }
+
+    if (!(await bcrypt.compare(currentPassword, user.password))) {
+      return response.status(401).json({
+        success: false,
+        errorCode: 5,
+        errorMessage: 'The current password is incorrect.',
+      });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    user.password = await bcrypt.hash(newPassword, salt);
+    await user.save();
+    return response.status(200).json({
+      success: true,
+      user: {
+        id: user._id,
+        username: user.username,
+        profilePic: Buffer.from(user.profilePic).toString('base64'),
+      },
+    });
+  } catch (error) {
+    return response.status(500).json({
+      success: false,
+      errorCode: 0,
+      errorMessage: 'There has been an internal error. Please try again later.',
+    });
+  }
+};
+
 export const logoutUser = async (req: Request, res: Response) => {
   try {
     // Clear the token cookie on the client side
@@ -360,8 +486,8 @@ export const logoutUser = async (req: Request, res: Response) => {
     res
       .status(200)
       .json({ success: true, message: 'User logged out successfully.' });
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ success: false, errorMessage: 'Server error' });
   }
 };
@@ -373,8 +499,81 @@ export const getAllUsers = async (req: Request, res: Response) => {
 
     // Send the user data as a JSON response
     res.status(200).json(users);
-  } catch (error) {
-    console.error(error);
+  } catch (error: any) {
+    console.error(error.message);
     res.status(500).json({ error: 'Server error' });
+  }
+};
+
+export const getResetPasswordLink = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({ email: req.body.email });
+    if (!user) {
+      return res.status(400).send('User not found.');
+    }
+
+    // Generate a token
+    const resetToken = crypto.randomBytes(20).toString('hex');
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = new Date(Date.now() + 3600000); // 1 hour from now
+
+    await user.save();
+
+    // Setup email transport
+    let transporter = nodemailer.createTransport({
+      service: 'gmail',
+      host: 'smtp.gmail.com',
+      port: 465,
+      secure: true,
+      auth: {
+        user: EMAIL_ADDRESS,
+        pass: EMAIL_PASSWORD,
+      },
+    });
+    // console.log('THIS THE USER after sending request', user);
+
+    const resetUrl = `/account/reset-password/${resetToken}`; // Frontend URL
+
+    // Sending email
+    await transporter.sendMail({
+      to: user.email,
+      subject: 'Password Reset',
+      text: `Please go to this link to reset your password: https://maphub.pro${resetUrl}. It expires in 1 hour`,
+    });
+
+    res.status(200).json({ success: true, resetURL: resetUrl });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: 'ERROR 500' });
+  }
+};
+
+export const handlePasswordResetting = async (req: Request, res: Response) => {
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: req.params.token,
+      resetPasswordExpires: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return res
+        .status(401)
+        .send('Password reset token is invalid or has expired.');
+    }
+
+    // Set the new password
+
+    const saltRounds = 10;
+    const salt = await bcrypt.genSalt(saltRounds);
+
+    user.password = await bcrypt.hash(req.body.password, salt);
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+
+    await user.save();
+    res.status(200).json({ success: true, user: user });
+  } catch (error: any) {
+    console.error(error.message);
+    res.status(500).json({ success: false, message: error });
   }
 };

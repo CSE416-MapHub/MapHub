@@ -1,47 +1,53 @@
-@use "colors";
-@use "elevation";
+@use 'colors';
+@use 'elevation';
 
-
-// map cards 
+// map cards
 
 .published-map-card-container {
-    height: 187px;
-    background-color: colors.$primary-container;
-    border-radius: 12px;
+  height: 187px;
+  width: 200px;
+  background-color: colors.$primary-container;
+  border-radius: 12px;
 
-    &:hover {
-        // Styles to apply on hover
-        background-color: colors.$on-primary-container; 
-        cursor: pointer; 
-        .map-text, .map-icon{
-            color: colors.$on-primary;
-        }
+  &:hover {
+    // Styles to apply on hover
+    background-color: colors.$on-primary-container;
+    cursor: pointer;
+    .map-text,
+    .map-icon {
+      color: colors.$on-primary;
     }
+  }
 }
 
 .unpublished-map-card-container {
-    height: 187px;
-    background-color: lightgrey;
-    border-radius: 12px;
-    &:hover {
-        // Styles to apply on hover
-        background-color: colors.$on-primary-container; 
-        cursor: pointer; 
-        .map-text, .map-icon{
-            color: colors.$on-primary;
-        }
+  height: 187px;
+  width: 200px;
+  background-color: lightgrey;
+  border-radius: 12px;
+  &:hover {
+    // Styles to apply on hover
+    background-color: colors.$on-primary-container;
+    cursor: pointer;
+    .map-text,
+    .map-icon {
+      color: colors.$on-primary;
     }
+  }
 }
 
 .map-preview {
-    height: 128px;
-    width: 100%;
-    border-radius: 12px;
-    background-color: colors.$primary;
+  height: 128px;
+  width: 100%;
+  border-radius: 12px;
+  background-color: colors.$primary;
 }
 
 .map-details {
-    display: flex;
-    flex-direction: column;
-    padding: 6px;
+  display: flex;
+  flex-direction: column;
+  padding: 6px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

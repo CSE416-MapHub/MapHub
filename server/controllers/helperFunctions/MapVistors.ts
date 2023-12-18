@@ -1,15 +1,49 @@
 import { GeoJSON } from 'geojson';
 import { BBox, addPointToLocalBBox, mergeBBox } from './GeoJSONVisitor';
 import { isGeometry, isGeometryCollection } from './utility';
+import {
+  IArrowInstance,
+  IDotDensityProps,
+  ISymbolProps,
+  MHJSON,
+} from './types/MHJSON';
+import { getArrowhead, producePath } from './ArrowFixer';
 import MapModel from '../../models/map-model';
-import { IDotDensityProps, MHJSON, ICategoryProps } from './types/MHJSON';
+import xmldom from 'xmldom';
 // import { useRef } from "react";
 type MapDocument = typeof MapModel.prototype;
+
+export const DELETED_NAME = '_#DEL';
+
 const STROKE_WIDTH = 0.1;
 const STROKE_COLOR = 'black';
 const MAX_VAL = Number.MAX_SAFE_INTEGER;
+const lat2m = 10;
 
-export const DELETED_NAME = '_#DEL';
+export const mixColors = (c1: string, c2: string, ratio: number): string => {
+  return (
+    '#' +
+    (() => {
+      const [p1, p2] = [c1, c2].map(color => parseInt(color.slice(1), 16)),
+        a = [];
+
+      for (let i = 0; i <= 2; i += 1) {
+        a.push(
+          Math.floor(
+            ((p1 >> (i * 8)) & 0xff) * (1 - ratio) +
+              ((p2 >> (i * 8)) & 0xff) * ratio,
+          ),
+        );
+      }
+      let res = a
+        .reverse()
+        .map(num => num.toString(16).padStart(2, '0'))
+        .join('');
+      // console.log(`mixing ${c1} and ${c2} at ${ratio}; got ${res}`);
+      return res;
+    })()
+  );
+};
 
 class SVGBuilder {
   private featureNumber = 0;
@@ -30,9 +64,10 @@ class SVGBuilder {
    */
   public createSVG(): string {
     this.featureNumber = 0;
+
     let map: GeoJSON = JSON.parse(this.mhjson.geoJSON);
     let els = '';
-    console.log('GET MAP TYPE', JSON.stringify(map));
+    console.log('GET MAP TYPE', map.type);
     switch (map.type) {
       case 'Feature': {
         els = this.svgOfFeature(map);
@@ -51,28 +86,151 @@ class SVGBuilder {
         }
       }
     }
+    if (this.mhjson.mapType === 'categorical') {
+      els += this.svgOfCategoryLegend();
+    }
+    if (this.mhjson.mapType === 'choropleth') {
+      els += this.svgOfChoroplethLegend();
+    }
     if (this.mhjson.mapType === 'dot') {
       els += this.svgOfDots();
+      els += this.svgOfDotLegend();
+    }
+    if (this.mhjson.mapType === 'flow') {
+      els += this.svgOfArrows();
+    }
+    if (this.mhjson.mapType === 'symbol') {
+      els += this.svgOfSymbols();
+      els += this.svgOfSymbolLegend();
     }
     return els;
   }
 
+  private svgOfCategoryLegend(): string {
+    let items = this.mhjson.globalCategoryData
+      .filter((x: any) => !x.name.endsWith(DELETED_NAME))
+      .map((x: any) => [x.color, x.name] as [string, string]);
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      children += `<rect width="32" height="32" x="10" y="${y}" fill="${i[0]}"/>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000" >
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfDotLegend(): string {
+    let items = this.mhjson.globalDotDensityData.map(
+      (x: any) => [x.color, x.name, x.opacity] as [string, string, number],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      children += `<rect width="32" height="32" x="10" y="${y}" fill="${
+        i[0]
+      }" opacity="${i[2]}"/>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000">
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfSymbolLegend(): string {
+    const DOMParser = xmldom.DOMParser;
+    const XMLSerializer = xmldom.XMLSerializer;
+
+    let items = this.mhjson.globalSymbolData.map(
+      (x: any) => [x.svg, x.name] as [string, string],
+    );
+
+    let children = '';
+    let y = 10;
+    const ITEM_HEIGHT = 32;
+    for (let i of items) {
+      const parser = new DOMParser();
+      let doc = parser.parseFromString(i[0], 'image/svg+xml');
+
+      let svgEl = doc.getElementsByTagName('svg')[0];
+      svgEl.setAttribute('width', '100%');
+      svgEl.setAttribute('height', '100%');
+
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(svgEl);
+      children += `<svg width="32" height="32" x="10" y="${y}">${svgString}</svg>
+      <text x="20%" y="${
+        y + ITEM_HEIGHT / 2
+      }" dominant-baseline="middle"  font-family="Arial" font-size="${
+        ITEM_HEIGHT / 2
+      }" fill="#000000" >
+      ${i[1]}</text>`;
+      y += 42;
+    }
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 ${y}">
+    <rect width="100%" height="100%" fill="#000000" />
+    <rect x="3%" y="3%" width="94%" height="94%" fill="#ffffff" />
+    ${children}
+    </svg>`;
+  }
+
+  private svgOfChoroplethLegend(): string {
+    let cData = this.mhjson.globalChoroplethData;
+    let children = `<rect width="100%" height="100%" fill="#ffffff" />
+    <defs>
+        <linearGradient id="Gradient1">
+        <stop stop-color="${cData.minColor}" offset="0%" />
+        <stop stop-color="${cData.maxColor}" offset="100%" />
+      </linearGradient>
+      </defs>
+      <style>
+     #legend-gradient-bar {
+        fill: url(#Gradient1);
+      }
+      </style>
+    <rect id="legend-gradient-bar" width="280" height="32" x="10" y="10"/>
+    <text y="52" x="10" dominant-baseline="hanging" text-anchor="start" font-family="Arial" font-size="16" fill="#000000">
+     ${cData.minIntensity}
+    </text>
+    <text y="52" x="290" dominant-baseline="hanging" text-anchor="end" font-family="Arial" font-size="16" fill="#000000">
+    ${cData.maxIntensity}
+    </text>`;
+    return `<svg x="${this.bbox[0]}" y="${this.bbox[1]}" width="20%" height="20%" viewBox="0 0 300 78">
+
+    ${children}
+    </svg>`;
+  }
+
   private svgOfDots(): string {
     // construct a map of names to objects
-
     let dotMap = new Map<string, IDotDensityProps>(
-      this.mhjson.globalDotDensityData.map((x: IDotDensityProps) => [
-        x.name,
-        x,
-      ]),
+      this.mhjson.globalDotDensityData.map((x: any) => [x.name, x]),
     );
-    let dots = '';
-    if (dotMap.size === 0) {
-      return dots;
-    }
 
+    let dots = '';
     for (let d of this.mhjson.dotsData) {
-      if (d.dot === DELETED_NAME) {
+      if (d.dot.endsWith(DELETED_NAME)) {
         continue;
       }
       let dclass = dotMap.get(d.dot)!;
@@ -95,17 +253,125 @@ class SVGBuilder {
     opacity: number,
   ): string {
     let p = this.isPosition([x, y]);
-    let lat2m = 10;
 
     return `<circle
-      cx="${p[0]}"
-      cy="${p[1]}"
-      r="${radius / lat2m}"
-      fill="${color}"
-      opacity="${opacity}"
-      stroke="black"
-      stroke-width="${STROKE_WIDTH}%"
-      />`;
+    cx="${p[0]}"
+    cy="${p[1]}"
+    r="${radius / lat2m}"
+    fill="${color}"
+    opacity="${opacity}"
+    />`;
+  }
+
+  private svgOfSymbols(): string {
+    // construct a map of names to objects
+    const DOMParser = xmldom.DOMParser;
+    const XMLSerializer = xmldom.XMLSerializer;
+    let symbolMap: Map<string, [ISymbolProps, HTMLElement]> = new Map<
+      string,
+      [ISymbolProps, HTMLElement]
+    >(
+      this.mhjson.globalSymbolData.map((x: any) => {
+        // Use querySelector to directly select the SVG element
+        const parser = new DOMParser();
+        let doc = parser.parseFromString(x.svg, 'image/svg+xml');
+
+        let svgEl = doc.getElementsByTagName('svg')[0];
+        svgEl.setAttribute('width', '100%');
+        svgEl.setAttribute('height', '100%');
+
+        // let svgEl: HTMLElement = new DOMParser().parseFromString(
+        //   x.svg,
+        //   'image/svg+xml',
+        // ).documentElement;
+        return [x.name, [x, svgEl]];
+      }),
+    );
+
+    let symbols = '';
+    for (let s of this.mhjson.symbolsData) {
+      if (s.symbol.endsWith(DELETED_NAME)) {
+        continue;
+      }
+
+      let symbolData = symbolMap.get(s.symbol)!;
+
+      // console.log('inner', innerHTML);
+      const serializer = new XMLSerializer();
+      const svgString = serializer.serializeToString(symbolData[1]);
+      symbols += this.svgOfSymbol(svgString, [s.x, s.y], s.scale);
+    }
+    return symbols;
+  }
+
+  private svgOfSymbol(
+    svg: string,
+    location: [x: number, y: number],
+    scale: number,
+  ): string {
+    let DEFAULT_SZ = Math.min(this.bbox[2], this.bbox[3]) / 10;
+    let [x, y, w, h] = [
+      location[0] - (DEFAULT_SZ * scale) / 2,
+      -1 * (location[1] + (DEFAULT_SZ * scale) / 2),
+      DEFAULT_SZ * scale,
+      DEFAULT_SZ * scale,
+    ];
+
+    return `<svg x="${x}" y="${y}" width="${w}" height="${h}">${svg}</svg>`;
+  }
+
+  private svgOfArrows(): string {
+    let arrows = '';
+    for (let arrow of this.mhjson.arrowsData) {
+      if (arrow.label.endsWith(DELETED_NAME)) {
+        continue;
+      }
+      arrows += this.svgOfArrow(arrow) + '\n';
+    }
+
+    return arrows;
+  }
+
+  private svgOfArrow(arrow: IArrowInstance): string {
+    let p = arrow.interpolationPoints;
+    let pdata = producePath(p[0], p[1], p[2], p[3]);
+    let d = pdata[0]
+      .map(x => {
+        if (typeof x === 'string') {
+          return x;
+        } else {
+          return `${x[1]} ${-1 * x[0]}`;
+        }
+      })
+      .reduce((prev, curr, i, arr) => {
+        if (
+          i > 0 &&
+          !Number.isNaN(parseFloat(arr[i - 1])) &&
+          !Number.isNaN(parseFloat(arr[i]))
+        ) {
+          return prev + ', ' + curr;
+        }
+        return prev + ' ' + curr;
+      }, '');
+    let [p0, p1] = pdata[1].map(p => {
+      // let t = p.x * -1;
+      // p.x = p.y;
+      // p.y = t;
+      return p;
+    });
+
+    let headPoints = getArrowhead(p0, p1, arrow.capacity / 5);
+    let head = `<polygon points="${headPoints
+      .map(x => `${x.x},${-1 * x.y}`)
+      .join(' ')}" fill="${arrow.color}" fill-opacity="${
+      arrow.opacity
+    }" line-cap="butt" />`;
+    let path = `<path d="${d}" fill="none" stroke="${
+      arrow.color
+    }" stroke-opacity="${arrow.opacity}" line-cap="butt" stroke-width="${
+      arrow.capacity / lat2m
+    }"/>`;
+    return path + head;
   }
 
   /**
@@ -135,7 +401,7 @@ class SVGBuilder {
     let els = this.svgOfGeometry(feature.geometry);
     // determine the color of this feature
     let fill = 'white';
-    console.log('WHAT IS THE MJSON', this.mhjson);
+    // console.log('WHAT IS THE MJSON', this.mhjson);
     if (this.mhjson.regionsData.length === 0) {
       return '';
     }
@@ -144,15 +410,42 @@ class SVGBuilder {
     if (rColor !== undefined) {
       fill = rColor;
     }
-    let category = this.mhjson.regionsData[this.featureNumber].category;
-    if (category !== undefined && category !== DELETED_NAME) {
-      let categoryObject = this.mhjson.globalCategoryData.filter(
-        (x: ICategoryProps) => x.name === category,
-      )[0];
-      if (categoryObject !== undefined) {
-        fill = categoryObject.color;
+    // however, if it is choropleth
+    // use the written intensity
+    // but if global choropleth key is set, find the intensity in the properties
+    if (this.mhjson.mapType === 'choropleth') {
+      let intensity =
+        this.mhjson.regionsData[this.featureNumber].intensity ?? NaN;
+      let cData = this.mhjson.globalChoroplethData;
+
+      if (!cData.indexingKey.endsWith(DELETED_NAME) && feature.properties) {
+        intensity = parseFloat(feature.properties[cData.indexingKey]);
+      }
+
+      if (intensity !== undefined) {
+        let ratio =
+          (intensity - cData.minIntensity) /
+          (cData.maxIntensity - cData.minIntensity);
+        if (ratio < 0 || ratio > 1 || Number.isNaN(ratio)) {
+          fill = 'white';
+        } else {
+          fill = mixColors(cData.minColor, cData.maxColor, ratio);
+        }
       }
     }
+
+    if (this.mhjson.mapType === 'categorical') {
+      let category = this.mhjson.regionsData[this.featureNumber].category;
+      if (category !== undefined && !category.endsWith(DELETED_NAME)) {
+        let categoryObject = this.mhjson.globalCategoryData.filter(
+          (x: any) => x.name === category,
+        )[0];
+        if (categoryObject !== undefined) {
+          fill = categoryObject.color;
+        }
+      }
+    }
+
     this.featureNumber++;
     return `<g fill="${fill}">${els}</g>`;
   }
@@ -331,7 +624,6 @@ class SVGBuilder {
           .join('');
       }
     }
-    return elements;
   }
 
   /**

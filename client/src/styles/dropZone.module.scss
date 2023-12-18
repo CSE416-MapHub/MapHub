@@ -1,0 +1,60 @@
+@use 'colors';
+@use 'elevation';
+@use 'shape';
+@use 'state';
+
+.dropzone {
+  &__container {
+    @include shape.extra-large;
+    @include elevation.elevation-2;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    min-width: 280px;
+    max-width: 560px;
+    padding: 24px;
+
+    background-color: colors.$surface-container-high;
+
+    text-align: center;
+
+    transition:
+      background-color 250ms cubic-bezier(0.4, 0.0, 0.2, 1.0),
+            box-shadow 250ms cubic-bezier(0.4, 0.0, 0.2, 1.0);
+
+    &--dragover {
+      @include elevation.elevation-1;
+      background-color: colors.$primary-container;
+
+      & * {
+        pointer-events: none;
+      }
+    }
+  }
+
+  &__icon {
+    color: colors.$on-surface;
+    font-size: 24px;
+  }
+
+  &__buttons {
+    margin-top: 8px;
+  }
+
+  &__input {
+    &--hidden {
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      height: 100%;
+      overflow: hidden;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      white-space: nowrap;
+      width: 100%;
+    }
+  }
+}

@@ -25,13 +25,14 @@ export interface DeltaPayload {
   dot?: string;
   label?: string;
   capacity?: number;
-  interpolationPoints?: [
-    {
-      x: number;
-      y: number;
-    },
-  ];
+  interpolationPoints?: Array<{
+    x: number;
+    y: number;
+  }>;
   propertyValue?: string;
+
+  // ALLEN ADD THIS TO BACKEND
+  labels?: Array<string>;
 }
 
 export enum DeltaType {

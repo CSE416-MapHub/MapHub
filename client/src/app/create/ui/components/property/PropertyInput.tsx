@@ -77,15 +77,19 @@ export default function (props: IInputProps) {
     );
   } else if (props.type === 'delete') {
     inputField = (
-      <Button variant="error" onClick={getFunctionOfOption(props.value[0])}>
+      <Button
+        disabled={props.disabled}
+        variant="error"
+        onClick={getFunctionOfOption(props.value[0])}
+      >
         {getNameOfOption(props.value[0])}
       </Button>
     );
   } else if (props.type === 'gradient') {
     inputField = (
       <PropertyInputGradient
-        minValue={parseFloat(props.value[0] as string)}
-        maxValue={parseFloat(props.value[1] as string)}
+        minIntensity={parseFloat(props.value[0] as string)}
+        maxIntensity={parseFloat(props.value[1] as string)}
         minColor={props.value[2] as string}
         maxColor={props.value[3] as string}
         onChange={val => props.onChange(val)}
@@ -100,7 +104,12 @@ export default function (props: IInputProps) {
       />
     );
   } else if (props.type === 'svg') {
-    inputField = <PropertySVGInput />;
+    inputField = (
+      <PropertySVGInput
+        items={props.value as Array<string>}
+        onChange={val => props.onChange(val)}
+      />
+    );
   } else if (props.type === 'dot') {
     inputField = (
       <PropertyDotInput

@@ -8,6 +8,7 @@ import {
   EditorContext,
   ToolbarButtons,
 } from 'context/EditorProvider';
+import { MapType } from 'types/MHJSON';
 
 function Toolbar() {
   // const [selectedIconButton, setIconButton] = useState<ToolbarButtons | null>(
@@ -115,6 +116,7 @@ function Toolbar() {
         variant="standard"
         onClick={handleSelectClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.select}
+        disabled={editorContext.state.map === null}
       />
       <IconButton
         id="toolbar-pan"
@@ -123,6 +125,7 @@ function Toolbar() {
         variant="standard"
         onClick={handlePanClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.pan}
+        disabled={editorContext.state.map === null}
       />
       <IconButton
         id="toolbar-erase"
@@ -131,31 +134,35 @@ function Toolbar() {
         variant="standard"
         onClick={handleEraseClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.erase}
+        disabled={editorContext.state.map === null}
       />
-      <IconButton
+      {editorContext.state.map?.mapType === MapType.DOT && <IconButton
         id="toolbar-point"
         iconType="solid"
         iconName="circle"
         variant="standard"
         onClick={handlePointClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.dot}
-      />
-      <IconButton
+        disabled={editorContext.state.map === null}
+      />}
+      {editorContext.state.map?.mapType === MapType.SYMBOL && <IconButton
         id="toolbar-icon"
         iconType="solid"
         iconName="shapes"
         variant="standard"
         onClick={handleIconClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.symbol}
-      />
-      <IconButton
+        disabled={editorContext.state.map === null}
+      />}
+      {editorContext.state.map?.mapType === MapType.FLOW && <IconButton
         id="toolbar-path"
         iconType="solid"
         iconName="right-top-arrow-circle"
         variant="standard"
         onClick={handlePathClick}
         selected={editorContext.state.selectedTool === ToolbarButtons.arrow}
-      />
+        disabled={editorContext.state.map === null}
+      />}
     </div>
   );
 }

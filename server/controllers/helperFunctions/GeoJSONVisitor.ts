@@ -63,6 +63,9 @@ export class GeoJSONVisitor {
     this.featuresOnly = featuresOnly ?? false;
   }
 
+  public getMapData() {
+    return this.mapData;
+  }
   public visitRoot() {
     switch (this.mapData.type) {
       case 'Feature': {

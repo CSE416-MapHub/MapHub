@@ -9,11 +9,33 @@
     width: 100%;
 
     .trailing-icon {
-      align-self: flex-start;
+      align-self: center;
+      height: 24px;
+      width: 24px;
+
+      i {
+        font-size: 16px;
+      }
 
       &:hover {
         cursor: pointer;
       }
     }
   }
+}
+
+.comments-reply {
+  &__container {
+    margin: 8px 32px shape.$medium;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 16px;
+  }
+}
+
+.close__container{
+  display: flex;
 }

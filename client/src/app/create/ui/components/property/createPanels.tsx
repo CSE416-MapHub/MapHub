@@ -15,13 +15,16 @@ import { MutableRefObject } from 'react';
 import { GeoJSONVisitor } from 'context/editorHelpers/GeoJSONVisitor';
 import { IPropertyPanelSectionProps } from './PropertyPanel';
 import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
+import { GradientInputProps } from './PropertyInputGradient';
 
 let numType: PropertyPanelInputType = 'number';
 let dotType: PropertyPanelInputType = 'dot';
+let symType: PropertyPanelInputType = 'svg';
 let textType: PropertyPanelInputType = 'text';
 let colorType: PropertyPanelInputType = 'color';
 let categoricalType: PropertyPanelInputType = 'dropdown';
 let deleteType: PropertyPanelInputType = 'delete';
+let choroplethType: PropertyPanelInputType = 'gradient';
 
 export type DotPanelData = IDotDensityProps | IDotInstance;
 
@@ -39,6 +42,8 @@ function updateField(
   let p0: DeltaPayload = {};
   p0[fieldName] = v0;
   let subid = subobjid ?? '-1';
+  console.log('updating ' + fieldName);
+  console.log(`${v0} => ${vf}`);
   ctx.helpers.addDelta(
     ctx,
     {
@@ -56,6 +61,29 @@ function updateField(
   );
 }
 
+function deleteItem(
+  ctx: IEditorContext,
+  id: number,
+  typ: TargetType,
+  orig: DeltaPayload,
+) {
+  ctx.helpers.addDelta(
+    ctx,
+    {
+      type: DeltaType.DELETE,
+      targetType: typ,
+      target: [ctx.state.map_id, id, '-1'],
+      payload: {},
+    },
+    {
+      type: DeltaType.CREATE,
+      targetType: typ,
+      target: [ctx.state.map_id, id, '-1'],
+      payload: orig,
+    },
+  );
+}
+
 /**
  * Makes the dotpanel action
  * @param ctx
@@ -67,6 +95,11 @@ function updateField(
 export function makeDotPanel(
   ctx: IEditorContext,
   id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
 ): Array<IPropertyPanelSectionProps> {
   let loadedMap = ctx.state.map!;
   let dotInstance = loadedMap.dotsData[id];
@@ -129,16 +162,11 @@ export function makeDotPanel(
             type: dotType,
             short: true,
             disabled: false,
-            value: loadedMap.globalDotDensityData.map(el => el.name),
+            value: loadedMap.globalDotDensityData
+              .filter(x => !x.name.endsWith(DELETED_NAME))
+              .map(el => el.name),
             onChange(val: string) {
-              updateField(
-                ctx,
-                id,
-                TargetType.DOT,
-                'dot',
-                loadedMap.globalDotDensityData.map(el => el.name),
-                val,
-              );
+              updateField(ctx, id, TargetType.DOT, 'dot', dotInstance.dot, val);
             },
           },
         },
@@ -242,6 +270,30 @@ export function makeDotPanel(
             },
           },
         },
+        {
+          name: 'Delete Dot Class',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: false,
+            value: [
+              [
+                'Delete Dot',
+                () => {
+                  openModal('Dot', dotClass.name.toString(), () => {
+                    deleteItem(
+                      ctx,
+                      classId,
+                      TargetType.GLOBAL_DOT,
+                      structuredClone(dotClass),
+                    );
+                  });
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
+          },
+        },
       ],
     },
   ];
@@ -309,7 +361,7 @@ export function makeRegionPanel(
           input: {
             type: colorType,
             short: true,
-            disabled: m.mapType === 'categorical',
+            disabled: m.mapType === 'categorical' || m.mapType === 'choropleth',
             value: m.regionsData[id]?.color ?? '#FFFFFF',
             onChange(val: string) {
               updateField(
@@ -332,6 +384,9 @@ export function makeRegionPanel(
       makeCategoricalPanel(ctx, id, openCategoricalDeleteModal),
     );
   }
+  if (m.mapType === 'choropleth') {
+    panels = panels.concat(makeChoroplethPanel(ctx, id));
+  }
   return panels;
 }
 
@@ -349,7 +404,7 @@ export function makeCategoricalPanel(
   let ac = ctx.state.map!.regionsData[id].category;
   let activeCategoryId = -1;
   let activeCategory: ICategoryProps | null = null;
-  if (ac !== undefined && ac !== DELETED_NAME) {
+  if (ac !== undefined && !ac.endsWith(DELETED_NAME)) {
     activeCategory =
       ctx.state.map!.globalCategoryData.filter((c, i) => {
         if (c.name === ac) {
@@ -371,7 +426,7 @@ export function makeCategoricalPanel(
             short: false,
             disabled: false,
             value: allCategories
-              .filter(c => c.name !== DELETED_NAME)
+              .filter(c => !c.name.endsWith(DELETED_NAME))
               .map(c => c.name),
             auxiliaryComponent: ctx.state.map!.regionsData[id].category ?? '',
             onChange(val: string) {
@@ -434,19 +489,260 @@ export function makeCategoricalPanel(
           input: {
             type: deleteType,
             short: false,
-            disabled: activeCategory === null,
+            disabled:
+              activeCategory === null ||
+              activeCategory.name.endsWith(DELETED_NAME),
             value: [
               [
                 'Delete Category',
                 () => {
-                  openModal('Category', activeCategory!.name, () => {
-                    updateField(
+                  openModal(
+                    'Category',
+                    //TODO: DISABLE DOESNT ACTUALLY DISABLE
+                    activeCategory ? activeCategory?.name : '',
+                    () => {
+                      deleteItem(
+                        ctx,
+                        activeCategoryId,
+                        TargetType.GLOBAL_CATEGORY,
+                        structuredClone(activeCategory!),
+                      );
+                    },
+                  );
+                },
+              ] as [string, () => void],
+            ],
+            onChange(val: string) {},
+          },
+        },
+      ],
+    },
+  ];
+
+  return panels;
+}
+
+export function makeChoroplethPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let map = ctx.state.map!;
+  let cData = map.globalChoroplethData;
+  let iKey = cData.indexingKey;
+  let iValue = map.regionsData[id].intensity?.toString() ?? 'NaN';
+  if (map.globalChoroplethData.indexingKey !== DELETED_NAME) {
+    let p = ctx.state.mapDetails.regionData[id].originalFeature.properties;
+    if (p) {
+      iValue = p[iKey] ?? 'NaN';
+    } else {
+      iValue = 'NaN';
+    }
+  }
+  let panels: Array<IPropertyPanelSectionProps> = [
+    {
+      name: 'Region Choropleth',
+      items: [
+        {
+          name: 'Intensity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: iKey !== DELETED_NAME,
+            value: iValue,
+            onChange: val => {
+              updateField(
+                ctx,
+                id,
+                TargetType.REGION,
+                'intensity',
+                iValue,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'Global Choropleth',
+      items: [
+        {
+          name: 'Global Settings',
+          input: {
+            type: choroplethType,
+            short: false,
+            disabled: false,
+            value: [
+              cData.minIntensity.toString(),
+              cData.maxIntensity.toString(),
+              cData.minColor.toString(),
+              cData.maxColor.toString(),
+            ],
+            onChange: item => {
+              type t = keyof DeltaPayload & keyof GradientInputProps;
+              let key: t = item.split('||')[0] as t;
+              let val = item.split('||')[1];
+              updateField(
+                ctx,
+                id,
+                TargetType.GLOBAL_CHOROPLETH,
+                key,
+                cData[key],
+                key.includes('Color') ? val : parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+  ];
+  return panels;
+}
+
+export function makeSymbolPanel(
+  ctx: IEditorContext,
+  id: number,
+  openModal: (
+    deleteType: string,
+    instanceToBeDeleted: string,
+    onConfirm: () => void,
+  ) => void,
+): Array<IPropertyPanelSectionProps> {
+  let loadedMap = ctx.state.map!;
+  let symInstance = loadedMap.symbolsData[id];
+  let symClass = loadedMap.globalSymbolData[0];
+  // find the id of the dotclass
+  let classId = 0;
+  let gSymData = loadedMap.globalSymbolData;
+  for (let dc = 0; dc < gSymData.length; dc++) {
+    if (loadedMap.globalSymbolData[dc].name === symInstance.symbol) {
+      classId = dc;
+      symClass = loadedMap.globalSymbolData[dc];
+      break;
+    }
+  }
+  let panels = [
+    {
+      name: 'Local Symbol',
+      items: [
+        {
+          name: 'X',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.x.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'x',
+                symInstance.x,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Y',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.y.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'y',
+                symInstance.y,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Symbol',
+          input: {
+            type: symType,
+            short: true,
+            disabled: false,
+            value: loadedMap.globalSymbolData.map(
+              el => `${el.name}|${DELETED_NAME}|${el.svg}`,
+            ),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'symbol',
+                symInstance.symbol,
+                val,
+              );
+            },
+          },
+        },
+        {
+          name: 'Scale',
+          input: {
+            type: numType,
+            short: true,
+            disabled: false,
+            value: symInstance.scale.toString(),
+            onChange(val: string) {
+              updateField(
+                ctx,
+                id,
+                TargetType.SYMBOL,
+                'scale',
+                symInstance.scale,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+    {
+      name: 'Global Symbol',
+      items: [
+        {
+          name: 'Symbol Name',
+          input: {
+            type: textType,
+            short: false,
+            disabled: false,
+            value: symClass.name,
+            onChange(val: string) {
+              updateField(
+                ctx,
+                classId,
+                TargetType.GLOBAL_SYMBOL,
+                'name',
+                symClass.name,
+                val,
+              );
+            },
+          },
+        },
+        {
+          name: 'Delete Symbol Class',
+          input: {
+            type: deleteType,
+            short: false,
+            disabled: false,
+            value: [
+              [
+                'Delete Symbol',
+                () => {
+                  openModal('Symbol', symClass.name.toString(), () => {
+                    deleteItem(
                       ctx,
-                      activeCategoryId,
-                      TargetType.GLOBAL_CATEGORY,
-                      'name',
-                      activeCategory!.name,
-                      DELETED_NAME,
+                      classId,
+                      TargetType.GLOBAL_SYMBOL,
+                      structuredClone(symClass),
                     );
                   });
                 },
@@ -459,5 +755,107 @@ export function makeCategoricalPanel(
     },
   ];
 
+  return panels;
+}
+
+export function makeArrowPanel(
+  ctx: IEditorContext,
+  id: number,
+): Array<IPropertyPanelSectionProps> {
+  let arrow = ctx.state.map?.arrowsData[id];
+  if (arrow === undefined) {
+    console.log(ctx.state.map);
+    console.log(id);
+    throw new Error('Arrow is undefined at make panel');
+  }
+  let panels: Array<IPropertyPanelSectionProps> = [
+    {
+      name: 'Arrow',
+      items: [
+        {
+          name: 'Arrow Label',
+          input: {
+            type: textType,
+            short: false,
+            disabled: false,
+            value: arrow.label,
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow label',
+                );
+              }
+              updateField(ctx, id, TargetType.ARROW, 'label', arrow.label, val);
+            },
+          },
+        },
+        {
+          name: 'Arrow Color',
+          input: {
+            type: colorType,
+            short: false,
+            disabled: false,
+            value: arrow.color,
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow color',
+                );
+              }
+              updateField(ctx, id, TargetType.ARROW, 'color', arrow.color, val);
+            },
+          },
+        },
+        {
+          name: 'Arrow Opacity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: false,
+            value: arrow.opacity.toString(),
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow opacity',
+                );
+              }
+              updateField(
+                ctx,
+                id,
+                TargetType.ARROW,
+                'opacity',
+                arrow.opacity,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+        {
+          name: 'Arrow Capacity',
+          input: {
+            type: numType,
+            short: false,
+            disabled: false,
+            value: arrow.capacity.toString(),
+            onChange(val: string) {
+              if (arrow === undefined) {
+                throw new Error(
+                  'Arrow is undefined at make panel, arrow capacity',
+                );
+              }
+              updateField(
+                ctx,
+                id,
+                TargetType.ARROW,
+                'capacity',
+                arrow.capacity,
+                parseFloat(val),
+              );
+            },
+          },
+        },
+      ],
+    },
+  ];
   return panels;
 }

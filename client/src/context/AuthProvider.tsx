@@ -26,6 +26,8 @@ export enum AuthActions {
   REGISTER_FAILURE,
   EDIT_USERNAME,
   VERIFY,
+  EDIT_PROFILE_PICTURE,
+  UPDATE_USER,
 }
 
 type AuthAction =
@@ -41,6 +43,27 @@ type AuthAction =
   | { type: AuthActions.REGISTER_FAILURE; payload: { error: string } }
   | {
       type: AuthActions.EDIT_USERNAME;
+      payload: {
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        };
+      };
+    }
+  | {
+      type: AuthActions.EDIT_PROFILE_PICTURE;
+      payload: {
+        user: {
+          id: string;
+          username: string;
+          profilePic: string;
+        };
+      };
+    }
+  | {
+
+      type: AuthActions.UPDATE_USER;
       payload: {
         user: {
           id: string;
@@ -94,10 +117,20 @@ function authReducer(prev: IAuthState, action: AuthAction): IAuthState {
         ...prev,
         user: action.payload.user,
       };
+    case AuthActions.EDIT_PROFILE_PICTURE:
+      return {
+        ...prev,
+        user: action.payload.user,
+      };
     case AuthActions.VERIFY:
       return {
         ...prev,
         isLoggedIn: action.payload.isLoggedIn,
+        user: action.payload.user,
+      };
+    case AuthActions.UPDATE_USER:
+      return {
+        ...prev,
         user: action.payload.user,
       };
     default:

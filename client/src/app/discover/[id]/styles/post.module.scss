@@ -17,6 +17,13 @@
     color: colors.$on-surface;
   }
 
+  &__loading {
+    min-height: calc(100% - 180px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
   &__container {
     @include shape.extra-large();
 
@@ -42,7 +49,7 @@
     flex-direction: column;
 
     height: 100%;
-    width: 100%;
+    max-width: 100%;
 
     background-color: colors.$surface-container;
   }

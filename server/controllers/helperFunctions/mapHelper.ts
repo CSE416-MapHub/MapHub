@@ -1,8 +1,9 @@
 import mongoose from 'mongoose';
 import MapModel from '../../models/map-model';
-
+import { GeoJSONVisitor } from './GeoJSONVisitor';
 type MapDocument = typeof MapModel.prototype;
-
+const DELETED_NAME = '_#DEL';
+import fs from 'fs';
 export interface DeltaPayload {
   // this is what a diff payload could contain
   // note that at no point should all fields be active
@@ -26,17 +27,23 @@ export interface DeltaPayload {
   opacity?: number;
   size?: number;
   intensity?: number;
-  category?: number;
+  category?: string;
   dot?: string;
   label?: string;
   capacity?: number;
-  interpolationPoints?: [
-    {
-      x: number;
-      y: number;
-    },
-  ];
+  interpolationPoints?: Array<{
+    x: number;
+    y: number;
+  }>;
   propertyValue?: string;
+
+  labels?: Array<string>;
+}
+
+//FOR MAP UPDAING LIKE TITLE AND SHIT
+export interface MapPayload {
+  mapId: string;
+  title?: string;
 }
 
 export enum DeltaType {
@@ -69,18 +76,25 @@ class LabelsHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to add a label to the map
     // Example: map.labels.push({/* label details from payload */});
+    throw new Error('Cant create a new label');
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Implement the logic to update a label on the map
     // Example: find the label in map.labels and update it
+    if (d.payload.labels === undefined) {
+      throw new Error('Labels is not set in updating labels');
+    }
+    map.labels = d.payload.labels;
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Implement the logic to delete a label from the map
     // Example: remove the label from map.labels
+    throw new Error('Cant delete a new label');
+
     return map;
   }
 }
@@ -88,16 +102,29 @@ class LabelsHandler {
 class GlobalChoroplethHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a global choropleth to the map
+    throw new Error('Cant create global choropleth');
+
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a global choropleth on the map
+
+    let cData = map.globalChoroplethData;
+    cData.indexingKey = d.payload.indexingKey ?? cData.indexingKey;
+    cData.minColor = d.payload.minColor ?? cData.minColor;
+    cData.maxColor = d.payload.maxColor ?? cData.maxColor;
+    cData.minIntensity = d.payload.minIntensity ?? cData.minIntensity;
+    cData.maxIntensity = d.payload.maxIntensity ?? cData.maxIntensity;
+    map.regionsData = [...map.regionsData];
+
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global choropleth from the map
+    throw new Error('Cant delete global choropleth');
+
     return map;
   }
 }
@@ -105,55 +132,208 @@ class GlobalChoroplethHandler {
 class GlobalCategoryHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a global category to the map
+    const payload = delta.payload;
+    if (!payload.name) throw new Error('GlobalCategory Name is required');
+    if (!payload.color) throw new Error(' GlobalCategoryColor is required');
+
+    map.globalCategoryData[delta.target[1]] = {
+      name: payload.name,
+      color: payload.color,
+    };
+    for (let r of map.regionsData) {
+      if (r.category && r.category === payload.name + DELETED_NAME) {
+        r.category = payload.name;
+      }
+    }
+
     return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
     // Logic for updating a global category on the map
+    if (
+      map.globalCategoryData.length <= delta.target[1] ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Target index UPDATE global category out of bounds');
+    }
+
+    // check if the category name is taken
+    let taken = map.globalCategoryData.filter(
+      (c: any) => c.name === delta.payload.name,
+    );
+
+    if (taken.length >= 1 || delta.payload.name?.endsWith(DELETED_NAME)) {
+      throw new Error(
+        'Category name ' + delta.payload.name + ' is already used',
+      );
+    }
+
+    let targ = map.globalCategoryData[delta.target[1]];
+
+    // if the name changed, we have to change the name of each dot
+    if (delta.payload.name && delta.payload.name !== targ.name) {
+      let oldName = targ.name;
+      map.regionsData = map.regionsData.map((r: any) => {
+        if (r.category === oldName) {
+          r.category = delta.payload.name!;
+        }
+        return r;
+      });
+    }
+    targ.name = delta.payload.name ?? targ.name;
+    targ.color = delta.payload.color ?? targ.color;
+
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global category from the map
+    if (
+      map.globalCategoryData.length <= delta.target[1] ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Target DELETE Global Category index out of bounds');
+    }
+    let targName = map.globalCategoryData[delta.target[1]].name;
+
+    map.globalCategoryData[delta.target[1]].name += DELETED_NAME;
+
+    map.regionsData = map.regionsData.map((r: any) => {
+      if (r.category === targName) {
+        r.category = targName + DELETED_NAME;
+      }
+      return r;
+    });
+
     return map;
   }
 }
 class GlobalSymbolHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding a global symbol to the map
+    let p = d.payload;
+    if (p.name === undefined || p.svg === undefined) {
+      console.log(p);
+      throw new Error('Malformed global symbol in CREATE');
+    }
+
+    let taken = false;
+    for (let symMeta of map.globalSymbolData) {
+      if (symMeta.name === p.name) {
+        taken = true;
+        break;
+      }
+    }
+    if (taken) {
+      console.log(p);
+      throw new Error(
+        'Tried to create a symbol with a name that already exists',
+      );
+    }
+    map.globalSymbolData[d.target[1]] = {
+      name: p.name,
+      svg: p.svg,
+    };
+
+    // look for previously deleted symbols
+    for (let sym of map.symbolsData) {
+      if (sym.symbol === p.name + DELETED_NAME) {
+        sym.symbol = p.name;
+      }
+    }
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a global symbol on the map
+    if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Target index out of bounds');
+    }
+    let targ = map.globalSymbolData[d.target[1]];
+
+    // if the name changed, we have to change the name of each symbol
+    if (d.payload.name) {
+      let oldName = targ.name;
+      map.symbolsData = map.symbolsData.map((si: any) => {
+        if (si.symbol === oldName) {
+          console.log(
+            'CHANGING SYMBOL NAME as well',
+            si.symbol,
+            d.payload.name,
+          );
+          si.symbol = d.payload.name;
+        }
+        return si;
+      });
+    }
+    targ.name = d.payload.name ?? targ.name;
+
+    targ.svg = d.payload.svg ?? targ.svg;
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing a global symbol from the map
+    if (map.globalSymbolData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Target index out of bounds');
+    }
+
+    let targName = map.globalSymbolData[d.target[1]].name;
+    map.globalSymbolData[d.target[1]].name += DELETED_NAME;
+    map.symbolsData = map.symbolsData.map((s: any) => {
+      if (s.symbol === targName) {
+        s.symbol += DELETED_NAME;
+      }
+      return s;
+    });
     return map;
   }
 }
 class GlobalDotHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a global dot to the map
-    const payload = delta.payload;
-    if (!payload.name) throw new Error('Name is required');
-    if (!payload.opacity) throw new Error('Opacity is required');
-    if (!payload.size) throw new Error('Size is required');
-    if (!payload.color) throw new Error('Color is required');
 
-    map.globalDotDensityData.push({
+    if (
+      delta.target[1] > map.globalDotDensityData.length ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Global Dot UPDATE target index out of bounds');
+    }
+
+    const payload = delta.payload;
+
+    if (!payload.name) throw new Error('GlobalDot Name is required');
+    if (!payload.opacity) throw new Error('GlobalDot Opacity is required');
+    if (!payload.size) throw new Error('GlobalDot Size is required');
+    if (!payload.color) throw new Error('GlobalDot Color is required');
+
+    map.globalDotDensityData[delta.target[1]] = {
       name: payload.name,
       opacity: payload.opacity,
       size: payload.size,
       color: payload.color,
-    });
+    };
+
+    //also change back the anmes of all the dots that have been deleted.
+    for (let dot of map.dotsData) {
+      if (dot.dot === payload.name + DELETED_NAME) {
+        dot.dot = payload.name;
+      }
+    }
+
     return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
     const payload = delta.payload;
+
+    if (
+      delta.target[1] >= map.globalDotDensityData.length ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Global Dot UPDATE target index out of bounds');
+    }
 
     if (payload.name !== undefined) {
       const originalName = map.globalDotDensityData[delta.target[1]].name;
@@ -180,63 +360,202 @@ class GlobalDotHandler {
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a global dot from the map
+    if (
+      delta.target[1] >= map.globalDotDensityData.length ||
+      delta.target[1] < 0
+    ) {
+      throw new Error('Global Dot UPDATE target index out of bounds');
+    }
 
-    map.globalDotDensityData.splice(delta.target[1], 1);
+    // TODO: is this the smartest thing to do?
+    // map.globalDotDensityData.splice(d.target[1], 1);
+    let targName = map.globalDotDensityData[delta.target[1]].name;
+    map.globalDotDensityData[delta.target[1]].name += DELETED_NAME;
+
+    map.dotsData = map.dotsData.map((subDot: any) => {
+      if (subDot.dot === targName) {
+        subDot.dot += DELETED_NAME;
+      }
+      return subDot;
+    });
     return map;
   }
 }
 class RegionHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     // Logic for adding a region to the map
+    const payload = delta.payload;
+    if (!payload.color) throw new Error('Region Color is required');
+    if (!payload.intensity) throw new Error('INtensity coordinate is required');
+    if (!payload.category) throw new Error('Region category is required');
+
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
+      throw new Error('CREATE Region target id out of bounds');
+    }
+
+    if (
+      !map.globalCategoryData.find(
+        (globalCategory: any) => globalCategory.name === payload.category,
+      )
+    ) {
+      throw new Error(
+        `THere is no global Category for this region ${payload.category}`,
+      );
+    }
+
+    if (delta.payload.color) {
+      map.regionsData[delta.target[1]].color = delta.payload.color;
+    }
+    if (delta.payload.intensity) {
+      map.regionsData[delta.target[1]].intensity = delta.payload.intensity;
+    }
+    if (delta.payload.category) {
+      map.regionsData[delta.target[1]].category = delta.payload.category;
+    }
     return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
     // Logic for updating a region on the map
+
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
+      throw new Error('DELETE Region target id out of bounds');
+    }
+    if (delta.payload.color) {
+      map.regionsData[delta.target[1]].color = delta.payload.color;
+    }
+    if (delta.payload.intensity) {
+      map.regionsData[delta.target[1]].intensity = delta.payload.intensity;
+    }
+    if (delta.payload.category) {
+      map.regionsData[delta.target[1]].category = delta.payload.category;
+    }
     return map;
   }
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a region from the map
+    if (delta.target[1] >= map.regionsData.length || delta.target[1] < 0) {
+      throw new Error('DELETE Region target id out of bounds');
+    }
+    if (delta.payload.color) {
+      delete map.regionsData[delta.target[1]].color;
+    }
+    if (delta.payload.intensity) {
+      delete map.regionsData[delta.target[1]].intensity;
+    }
+    if (delta.payload.category) {
+      delete map.regionsData[delta.target[1]].category;
+    }
     return map;
   }
 }
 class SymbolHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding a symbol to the map
+    let p = d.payload;
+    if (
+      p.x === undefined ||
+      p.y === undefined ||
+      p.scale === undefined ||
+      p.symbol === undefined
+    ) {
+      console.log(p);
+      throw new Error('Malformed symbol in CREATE');
+    }
+
+    if (map.symbolsData.length < d.target[1] || d.target[1] < 0) {
+      throw new Error('global symbol index out of bounds');
+    }
+
+    // verify that the dot we are trying to create actually exists
+    let exists = false;
+    for (let symMeta of map.globalSymbolData) {
+      if (symMeta.name === p.symbol) {
+        exists = true;
+        break;
+      }
+    }
+
+    if (!exists) {
+      console.log(p);
+      throw new Error('Tried to create nonexistent symbol type');
+    }
+    map.symbolsData[d.target[1]] = {
+      x: p.x,
+      y: p.y,
+      scale: p.scale,
+      symbol: p.symbol,
+    };
+
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating a symbol on the map
+
+    if (map.symbolsData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('global symbol index out of bounds');
+    }
+
+    let targ = map.symbolsData[d.target[1]];
+    targ.x = d.payload.x ?? targ.x;
+    targ.y = d.payload.y ?? targ.y;
+    targ.symbol = d.payload.symbol ?? targ.symbol;
+    targ.scale = d.payload.scale ?? targ.scale;
+
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing a symbol from the map
+    if (map.symbolsData.length <= d.target[1] || d.target[1] < 0) {
+      throw new Error('Delete symbol Target index out of bounds');
+    }
+
+    map.symbolsData[d.target[1]].symbol += DELETED_NAME;
     return map;
   }
 }
 class DotHandler {
   create(map: MapDocument, delta: Delta): MapDocument {
     const payload = delta.payload;
+
+    if (delta.target[1] > map.dotsData.length || delta.target[1] < 0) {
+      throw new Error('CREATE DOT target id out of bounds');
+    }
+
     if (!payload.dot) throw new Error('Dot name is required');
-    if (!payload.x) throw new Error('X coordinate is required');
-    if (!payload.y) throw new Error('Y coordinate is required');
-    if (!payload.scale) throw new Error('Scale is required');
+    if (!payload.x) throw new Error('Dot X coordinate is required');
+    if (!payload.y) throw new Error('Dot Y coordinate is required');
+    if (!payload.scale) throw new Error('Dot Scale is required');
+
+    if (
+      !map.globalDotDensityData.find(
+        (globalDot: any) => globalDot.name === payload.dot,
+      )
+    ) {
+      throw new Error(
+        `GLOBAL Dot doesnt exist for this dot name ${payload.dot}`,
+      );
+    }
 
     // Add a new dot to the map
-    map.dotsData.push({
+    map.dotsData[delta.target[1]] = {
       x: payload.x,
       y: payload.y,
       scale: payload.scale,
       dot: payload.dot,
-    });
+    };
     return map;
   }
 
   update(map: MapDocument, delta: Delta): MapDocument {
     // Check if at least one required property is present
+
+    if (delta.target[1] >= map.dotsData.length || delta.target[1] < 0) {
+      throw new Error('UPDATE DOT Target index out of bounds');
+    }
     const payload = delta.payload;
 
     // Update map with the provided payload properties
@@ -258,47 +577,157 @@ class DotHandler {
 
   delete(map: MapDocument, delta: Delta): MapDocument {
     // Logic for removing a dot from the map
+    console.log('DELETING A DOT INSTANCE');
     const targetIndex = delta.target[1];
+    //if target index within range then we can set the name to deleted
+    if (targetIndex >= map.dotsData.length || targetIndex < 0) {
+      throw new Error('DELETE DOT Target index out of bounds');
+    }
 
-    map.dotsData.splice(targetIndex, 1);
+    map.dotsData[targetIndex].dot += DELETED_NAME;
+
     return map;
   }
 }
+interface IArrowInstance {
+  label: string;
+  color: string;
+  opacity: number;
+  capacity: number;
+  interpolationPoints: Array<{
+    x: number;
+    y: number;
+  }>;
+}
+
 class ArrowHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding an arrow to the map
+    let p = d.payload;
+    if (
+      p.color === undefined ||
+      p.label == undefined ||
+      p.opacity === undefined ||
+      p.capacity === undefined ||
+      p.interpolationPoints === undefined ||
+      (p.interpolationPoints.length as number) !== 4
+    ) {
+      console.log(p);
+      throw new Error('Found malformed arrow in create arrow');
+    }
+    let arrow: IArrowInstance = {
+      color: p.color,
+      label: p.label,
+      opacity: p.opacity,
+      capacity: p.capacity,
+      interpolationPoints: p.interpolationPoints,
+    };
+    map.arrowsData[d.target[1]] = arrow;
+
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating an arrow on the map
+    let arrow = map.arrowsData[d.target[1]];
+    arrow.color = d.payload.color ?? arrow.color;
+    arrow.label = d.payload.label ?? arrow.label;
+    arrow.opacity = d.payload.opacity ?? arrow.opacity;
+    arrow.capacity = d.payload.capacity ?? arrow.capacity;
+    arrow.interpolationPoints =
+      d.payload.interpolationPoints ?? arrow.interpolationPoints;
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing an arrow from the map
+    if (d.target[1] > map.arrowsData.length || d.target[1] < 0) {
+      throw new Error('Target out of bounds in delete arrow: ' + d.target[1]);
+    }
+    map.arrowsData[d.target[1]].label += DELETED_NAME;
+    map.arrowsData[d.target[1]].opacity = 0;
+    map.arrowsData[d.target[1]].capacity = 0;
     return map;
   }
 }
 
 class GeojsonDataHandler {
-  create(map: MapDocument, delta: Delta): MapDocument {
+  private v: GeoJSONVisitor;
+
+  constructor(map: MapDocument) {
+    const geoJSONData = fs.readFileSync(map.geoJSON, 'utf8');
+
+    this.v = new GeoJSONVisitor(JSON.parse(geoJSONData), true);
+    this.v.visitRoot();
+  }
+  create(map: MapDocument, d: Delta): MapDocument {
     // Logic for adding geoJSON data to the map
+    //TODO MAKE SURE THE FILE IS DONE
+
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to create a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      feature.properties[d.target[2]] = d.payload.propertyValue;
+    }
+    // console.log('updated MAP DATA', JSON.stringify(this.v.getMapData()));
+
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
-  update(map: MapDocument, delta: Delta): MapDocument {
+  update(map: MapDocument, d: Delta): MapDocument {
     // Logic for updating geoJSON data on the map
+
+    let targFeature = this.v.getFeatureResults().perFeature[d.target[1]];
+    if (targFeature === undefined) {
+      throw new Error('Region out of bounds');
+    }
+    let propName = d.target[2];
+    let orig = targFeature.originalFeature;
+    if (!orig.properties) {
+      orig.properties = {};
+    }
+    orig.properties[propName] = d.payload.propertyValue;
+
+    // console.log('Updated Map data', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
     return map;
   }
 
-  delete(map: MapDocument, delta: Delta): MapDocument {
+  delete(map: MapDocument, d: Delta): MapDocument {
     // Logic for removing geoJSON data from the map
+
+    if (d.target[1] !== -1) {
+      throw new Error(
+        'You are unsure if you are trying to delete a geojason property or update; got target if not equal to -1: ' +
+          d.target[1],
+      );
+    }
+    // console.log('Features in delete', this.v.getFeatureResults().perFeature);
+    for (let featureVisitResult of this.v.getFeatureResults().perFeature) {
+      let feature = featureVisitResult.originalFeature;
+
+      if (feature.properties === null) {
+        feature.properties = {};
+      }
+      delete feature.properties[d.target[2]];
+    }
+    // console.log('MAP DATA in DELETE', JSON.stringify(this.v.getMapData()));
+    fs.writeFileSync(map.geoJSON, JSON.stringify(this.v.getMapData()));
+
     return map;
   }
 }
 
-function getHandlerForTargetType(targetType: TargetType) {
+function getHandlerForTargetType(targetType: TargetType, map: MapDocument) {
   switch (targetType) {
     case TargetType.LABELS:
       return new LabelsHandler();
@@ -319,7 +748,7 @@ function getHandlerForTargetType(targetType: TargetType) {
     case TargetType.ARROW:
       return new ArrowHandler();
     case TargetType.GEOJSONDATA:
-      return new GeojsonDataHandler();
+      return new GeojsonDataHandler(map);
     default:
       throw new Error('Unsupported Target Type');
   }
@@ -327,17 +756,22 @@ function getHandlerForTargetType(targetType: TargetType) {
 
 const mapHelper = {
   handleCreate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
+    console.log('CREATED NEW ', delta.targetType);
     return handler.create(map, delta);
   },
 
   handleUpdate: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
+    console.log('UPDATED ', delta.targetType);
+
     return handler.update(map, delta);
   },
 
   handleDelete: (delta: any, map: MapDocument): MapDocument => {
-    const handler = getHandlerForTargetType(delta.targetType);
+    const handler = getHandlerForTargetType(delta.targetType, map);
+    console.log('DELETED', delta.targetType);
+
     return handler.delete(map, delta);
   },
 };

@@ -8,21 +8,59 @@ import {
   ToolbarButtons,
 } from 'context/EditorProvider';
 import { DeltaType, TargetType } from 'types/delta';
+import NewSymbolModal from './modals/newSymbolModal';
+import { DELETED_NAME } from 'context/editorHelpers/DeltaUtil';
 
 export default function () {
   const editorContext = useContext(EditorContext);
   const [openDeleteModal, setOpenDeleteModal] = useState(false);
   const [openDotModal, setOpenDotModal] = useState(false);
+  const [openSymbolModal, setOpenSymbolModal] = useState(false);
 
   let createdDot = false;
   useEffect(() => {
+    // find nearest dot and symbol name
+    let aDotName =
+      editorContext.state.map?.globalDotDensityData.filter(
+        x => !x.name.endsWith(DELETED_NAME),
+      )[0]?.name ?? DELETED_NAME;
+    let aSymbolName =
+      editorContext.state.map?.globalSymbolData.filter(
+        x => !x.name.endsWith(DELETED_NAME),
+      )[0]?.name ?? DELETED_NAME;
     if (
       editorContext.state.selectedTool === ToolbarButtons.dot &&
       editorContext.state.map &&
-      editorContext.state.map.globalDotDensityData.length === 0 &&
+      editorContext.state.lastInstantiated.endsWith(DELETED_NAME) &&
       !openDotModal
     ) {
-      setOpenDotModal(true);
+      if (!aDotName.endsWith(DELETED_NAME)) {
+        editorContext.dispatch({
+          type: EditorActions.SET_LAST_INSTANTIATED,
+          payload: {
+            lastInstantiated: aDotName,
+          },
+        });
+      } else {
+        setOpenDotModal(true);
+      }
+    }
+    if (
+      editorContext.state.selectedTool === ToolbarButtons.symbol &&
+      editorContext.state.map &&
+      editorContext.state.lastInstantiated.endsWith(DELETED_NAME) &&
+      !openSymbolModal
+    ) {
+      if (!aSymbolName.endsWith(DELETED_NAME)) {
+        editorContext.dispatch({
+          type: EditorActions.SET_LAST_INSTANTIATED,
+          payload: {
+            lastInstantiated: aSymbolName,
+          },
+        });
+      } else {
+        setOpenSymbolModal(true);
+      }
     }
   });
   return (
@@ -84,6 +122,22 @@ export default function () {
           createdDot = true;
         }}
       />
+
+      <NewSymbolModal
+        open={openSymbolModal}
+        onClose={function (created): void {
+          console.log('CLOSING WITH CREATED ' + created);
+          if (!created) {
+            editorContext.dispatch({
+              type: EditorActions.SET_TOOL,
+              payload: {
+                selectedTool: null,
+              },
+            });
+          }
+          setOpenSymbolModal(false);
+        }}
+      ></NewSymbolModal>
     </>
   );
 }

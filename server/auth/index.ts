@@ -6,7 +6,6 @@ const jwtSecret = process.env.JWT_SECRET ?? 'AOIHFAOUHFSHUSDFWEIUFHEIOWJ';
 
 function authManager() {
   const verify = async (req: Request, res: Response, next: NextFunction) => {
-    console.log('req: ' + req.cookies);
     try {
       const token = req.cookies.token;
       if (!token) {

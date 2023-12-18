@@ -19,6 +19,7 @@ export interface IFeatureVisitResults extends IGeometryVisitResults {
 
 export interface IFeatureAggregateResults {
   globallyAvailableKeys: Set<string>;
+  numericKeys: Set<string>;
 }
 
 export function addPointToLocalBBox(x: number, y: number, b: BBox) {
@@ -60,12 +61,19 @@ export class GeoJSONVisitor {
     this.featureResults = [];
     this.featureAgg = {
       globallyAvailableKeys: new Set<string>(),
+      numericKeys: new Set<string>(),
     };
     this.featuresOnly = featuresOnly ?? false;
   }
 
+  public addKey(key: string, isNumeric: boolean) {
+    this.featureAgg.globallyAvailableKeys.add(key);
+    if (isNumeric) {
+      this.featureAgg.numericKeys.add(key);
+    }
+  }
+
   public visitRoot() {
-    console.log(this.mapData);
     switch (this.mapData.type) {
       case 'Feature': {
         this.visitFeature(this.mapData);
@@ -81,7 +89,8 @@ export class GeoJSONVisitor {
           this.visitGeometry(this.mapData);
           break;
         } else {
-          throw new Error(`Unsupported GeoJSON type: ${this.mapData}. Programmer did not catch a type.`,
+          throw new Error(
+            `Unsupported GeoJSON type: ${this.mapData}. Programmer did not catch a type.`,
           );
         }
       }
@@ -103,6 +112,9 @@ export class GeoJSONVisitor {
     if (props) {
       for (let p of Object.keys(props)) {
         this.featureAgg.globallyAvailableKeys.add(p);
+        if (!Number.isNaN(parseFloat(props[p]))) {
+          this.featureAgg.numericKeys.add(p);
+        }
       }
     }
     if (this.featuresOnly) {

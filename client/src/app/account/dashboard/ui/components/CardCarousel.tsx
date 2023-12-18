@@ -15,7 +15,8 @@ export interface CardCarouselProps {
     _id: string;
     title: string;
     userId: string;
-    png: Buffer;
+    numLikes: number;
+    svg: string;
   }>;
   published: boolean;
 }
@@ -25,22 +26,15 @@ export default function (props: CardCarouselProps) {
   const [authors, setAuthors] = useState<string[]>([]);
 
   let leftArrow = (
-    <IconButton onClick={() => setPage(page - 1)}>
+    <IconButton onClick={() => setPage(page - 1)} disabled={page === 0}>
       <KeyboardArrowLeftIcon sx={{ fontSize: '96px' }} />
     </IconButton>
   );
   let rightArrow = (
-    <IconButton onClick={() => setPage(page + 1)}>
+    <IconButton onClick={() => setPage(page + 1)} disabled={(page + 1) * 5 >= props.maps.length}>
       <KeyboardArrowRightIcon sx={{ fontSize: '96px' }} />
     </IconButton>
   );
-
-  if (page === 0) {
-    leftArrow = <></>;
-  }
-  if ((page + 1) * 5 >= props.maps.length) {
-    rightArrow = <></>;
-  }
 
   const getAuthorById = async (id: string) => {
     try {
@@ -93,11 +87,12 @@ export default function (props: CardCarouselProps) {
                 key={i}
                 published={props.published}
                 id={map._id}
-                userId={map.userId} //get userId
-                numLikes={123} //get numlikes
+                userId={map.userId} 
+                numLikes={props.published ? map.numLikes : 0}
                 userLiked={false}
                 title={map.title}
                 author={authors[i]} //get author
+                preview={map.svg}
               />
             )
           }

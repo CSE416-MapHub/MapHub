@@ -1,11 +1,10 @@
-'use client'
+'use client';
 import { useEffect, useState } from 'react';
 import style from './page.module.scss';
 import MapCard, { MapCardProps } from './ui/components/MapCard';
 import SearchBar from './ui/components/SearchBar';
 import PostAPI from 'api/PostAPI';
 import AccountAPI from 'api/AccountAPI';
-
 
 export default function () {
   const [mapCardData, setMapCardData] = useState<MapCardProps[]>([]);
@@ -27,7 +26,7 @@ export default function () {
       setAuthors(authorsArray);
     };
     fetchAuthors();
-  }, [mapCardData])
+  }, [mapCardData]);
 
   const getAuthorById = async (id: string) => {
     try {
@@ -39,18 +38,49 @@ export default function () {
     } catch (error) {
       console.error(`Error fetching author for map ${id}:`, error);
     }
-  }
+  };
 
   const fetchMapCardData = (searchValue: string) => {
     // Fetch map card data based on search value
     PostAPI.queryPosts(searchValue)
-      .then((response) => {
+      .then(response => {
         if (response.data.success) {
-          setMapCardData(response.data.posts);
+          let posts = response.data.posts;
+          if (searchValue === '') {
+            posts.sort(
+              (a: MapCardProps, b: MapCardProps) => b.numLikes - a.numLikes,
+            );
+          } else {
+            posts = posts.filter((a: MapCardProps) =>
+              a.title.toLowerCase().includes(searchValue.toLowerCase()),
+            );
+          }
+          posts = posts.slice(0, Math.min(6, posts.length));
+          setMapCardData(
+            posts.map(
+              (i: {
+                postId: string;
+                userId: string;
+                numLikes: number;
+                title: string;
+                author: string;
+                svg: string;
+              }) => {
+                return {
+                  id: i.postId,
+                  userId: i.userId,
+                  numLikes: i.numLikes,
+                  title: i.title,
+                  author: i.author,
+                  preview: i.svg,
+                };
+              },
+            ),
+          );
           setSearchResponse(response); // Set the response data to pass to SearchBar
         }
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error while querying or searching posts:', error);
       });
   };
@@ -66,13 +96,14 @@ export default function () {
       <div className={style['card-grid']}>
         {mapCardData.map((map, i) => (
           <MapCard
-            key={map.id}
+            key={i}
             id={map.id}
             userId={map.userId}
             numLikes={map.numLikes}
             userLiked={map.userLiked}
             title={map.title}
             author={authors[i]}
+            preview={map.preview}
           />
         ))}
       </div>

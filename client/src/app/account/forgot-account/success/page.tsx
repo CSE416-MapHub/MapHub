@@ -18,12 +18,7 @@ function Page() {
       : 'Instructions to reset your password have been sent to your email.';
 
   const handleReturnToLogin = () => {
-    if (searchParams.get('query') == 'username') {
-      router.back();
-      router.back();
-    } else {
-      router.replace('/account/reset-password');
-    }
+    router.push('/account/sign-in');
   };
 
   return (

@@ -1,25 +1,60 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { TextField, Box, Grid, Typography, Button } from '@mui/material';
 import GeneralizedDialog from 'components/modals/GeneralizedDialog';
 import style from './LabelSelector.module.scss';
+import { EditorContext } from 'context/EditorProvider';
+import { DeltaType, TargetType } from 'types/delta';
 interface NewSymbolModalProps {
   open: boolean;
-  onClose: () => void;
-  onConfirm: (svgFile: File | null, preview: string | null) => void;
+  onClose: (created: boolean) => void;
+  // onConfirm: (svgFile: File, name: string, preview: string) => void;
 }
 
 const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   open,
   onClose,
-  onConfirm,
+  // onConfirm,
 }) => {
+  const editorContext = useContext(EditorContext);
   const [name, setName] = useState('');
   const [svgFile, setSvgFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<string | null>(null);
 
   const handleConfirm = () => {
-    onConfirm(svgFile, preview);
-    onClose();
+    if (svgFile && preview) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        let res = reader.result as string;
+
+        let map = editorContext.state.map;
+        if (!map) {
+          throw new Error('Cannot make dot type without map');
+        }
+        let mapId = editorContext.state.map_id;
+        let targetId = map.globalSymbolData.length;
+        editorContext.helpers.addDelta(
+          editorContext,
+          {
+            type: DeltaType.CREATE,
+            targetType: TargetType.GLOBAL_SYMBOL,
+            target: [mapId, targetId, '-1'],
+            payload: {
+              svg: res,
+              name: name,
+            },
+          },
+          {
+            type: DeltaType.DELETE,
+            targetType: TargetType.GLOBAL_SYMBOL,
+            target: [mapId, targetId, '-1'],
+            payload: {},
+          },
+        );
+        console.log('calling onclose');
+        onClose(true);
+      };
+      reader.readAsText(svgFile);
+    }
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +74,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
   return (
     <GeneralizedDialog
       open={open}
-      onClose={onClose}
+      onClose={() => onClose(false)}
       onConfirm={handleConfirm}
       title="Create New Symbol"
     >
@@ -65,6 +100,7 @@ const NewSymbolModal: React.FC<NewSymbolModalProps> = ({
             onChange={e => setName(e.target.value)}
             className={style.textField}
             margin="normal"
+            id="symbol-modal-symbol-name-field"
           />
         </Box>
         <Box

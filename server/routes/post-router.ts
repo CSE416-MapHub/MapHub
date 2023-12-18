@@ -11,20 +11,23 @@ router.put('/post/:postId', auth.verify, PostController.updatePostById);
 // Handles a delete a post request
 router.delete('/post/:postId', auth.verify, PostController.deletePostById);
 
-// Handles a get a post request
+// Get a single post this cannot be verified because we need all users to enter into discover
 router.get('/post/:postId', PostController.getPostById);
 
-//Handles a get posts request
-router.get('/all', auth.verify, PostController.queryPosts);
+//Handles a get posts from a search query, but usually used with empty string for all posts
+router.get('/all', PostController.queryPosts);
 
 //Add a like
 router.patch('/post/likeChange', auth.verify, PostController.changeLikeToPost);
 
-//Handles a get posts request
-router.get('/user/:id', PostController.getUserPosts);
+//gets a post by the author id so this is important to be not verified
+router.get('/user/:userId', PostController.getUserPosts);
 
 //Handles a create a comment request
 router.post('/comments/:postId', auth.verify, PostController.createComment);
+
+//forking a map
+router.post('/fork/:postId', auth.verify, PostController.forkMap);
 
 // //Handles a get a comment request
 // router.get('/comments/:commentId/', auth.verify, PostController.getCommentById);
@@ -70,7 +73,6 @@ router.patch(
   auth.verify,
   PostController.likeChangeComment,
 );
-
 
 //Handles an add reply request
 router.post(

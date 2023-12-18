@@ -1,38 +1,62 @@
+'use client';
+
 import Image from 'next/image';
 import { notFound } from 'next/navigation';
+import { useEffect, useState } from 'react';
+import { CircularProgress } from '@mui/material';
 
 import CommentsHead from './components/commentsHead';
 import CommentsDivider from './components/commentsDivider';
 import CommentsCoordinator from './components/commentsCoordinator';
+import PostAPI from 'api/PostAPI';
 
 import styles from './styles/post.module.scss';
 
-import 'dotenv/config';
-const baseURL = process.env.API_URL
-  ? process.env.API_URL
-  : 'https://api.maphub.pro';
+interface PostType {
+  title: string;
+  description: string;
+  owner: {
+    username: string;
+    profilePic: string;
+  };
+  svg: string;
+  createdAt: string;
+}
+const Post = ({ params }: { params: { id: string } }) => {
+  const [post, setPost] = useState<PostType | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-async function fetchData(id: string) {
-  try {
-    const post = await fetch(`${baseURL}/posts/post/${id}`, {
-      method: 'GET',
-      cache: 'no-store',
-    });
+  useEffect(() => {
+    async function loadPost() {
+      try {
+        const post = await PostAPI.getPostById(params.id);
 
-    if (!post.ok) {
-      return undefined;
+        const body: { success: boolean; post: any } = post.data;
+
+        if (!body.success) {
+          return undefined;
+        }
+
+        setPost(body.post);
+      } catch (error) {
+        setPost(null); // or handle the error as needed
+      } finally {
+        setIsLoading(false);
+      }
     }
 
-    const body: { success: boolean; post: any } = await post.json();
-    return body.post;
-  } catch (error) {
-    return undefined;
+    if (params.id && !post) {
+      loadPost();
+    }
+  }, [params.id, post]);
+
+  if (isLoading) {
+    return (
+      <main className={styles['post__loading']}>
+        <CircularProgress />
+      </main>
+    );
   }
-}
-
-async function Post({ params }: { params: { id: string } }) {
-  const post = await fetchData(params.id);
-
   if (!post) {
     notFound();
   }
@@ -56,12 +80,13 @@ async function Post({ params }: { params: { id: string } }) {
           }}
           title={post.title}
           description={post.description}
+          time={post.createdAt}
         />
         <CommentsDivider />
         <CommentsCoordinator post={post} />
       </div>
     </main>
   );
-}
+};
 
 export default Post;

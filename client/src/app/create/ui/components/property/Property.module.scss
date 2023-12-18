@@ -1,13 +1,13 @@
 @use 'colors';
 
 .properties-container {
-  height: calc(100vh - 80px - 56px);
+  height: calc(100vh - 80px - 72px);
   min-width: 25%;
   position: fixed;
   bottom: 0;
   right: 0;
   background-color: colors.$surface-container;
-  padding: 4px;
+  padding: 10px 10px 0px 10px;
   z-index: 999;
 }
 
@@ -17,13 +17,17 @@
   margin-bottom: 8px;
 }
 
+.properties-title {
+  padding-bottom: 15px;
+}
+
 .prop-input {
   padding: 4px;
   border-radius: 4px;
 }
 
 .prop-input-tiny {
-  width: 32px;
+  width: 100%;
 }
 
 // TODO: unhardcode
@@ -73,4 +77,8 @@
   max-height: 32px;
   margin-top: auto;
   margin-bottom: auto;
+}
+
+.gradient-endpoint {
+  flex-direction: column;
 }

@@ -1,18 +1,21 @@
 import { IPropertyPanelSectionProps } from 'app/create/ui/components/property/PropertyPanel';
-import { Dispatch, createContext, useReducer } from 'react';
-import { IDotDensityProps, MHJSON } from 'types/MHJSON';
+import { Dispatch, createContext, useReducer, useContext } from 'react';
+import { IDotDensityProps, ISymbolProps, MHJSON } from 'types/MHJSON';
 import {
   GeoJSONVisitor,
   IFeatureVisitResults,
   mergeBBox,
 } from './editorHelpers/GeoJSONVisitor';
 import * as G from 'geojson';
+import {
+  NotificationsActionType,
+  NotificationsContext,
+  NotificationsContextValue,
+} from 'context/notificationsProvider';
+
 import { ActionStack } from './editorHelpers/Actions';
 import { Delta, DeltaType, TargetType } from 'types/delta';
-import {
-  DELETED_NAME,
-  applyDelta,
-} from './editorHelpers/DeltaUtil';
+import { DELETED_NAME, applyDelta } from './editorHelpers/DeltaUtil';
 import MapAPI from 'api/MapAPI';
 
 export enum ToolbarButtons {
@@ -70,97 +73,189 @@ export enum EditorActions {
   SET_TITLE,
   SET_ACTION,
   SET_DELETING,
+  SET_LAST_INSTANTIATED,
 }
 
 // the reducer
-function reducer(
-  prev: IEditorState,
-  action: {
-    type: EditorActions;
-    payload: Partial<IEditorState>;
-  },
-): IEditorState {
-  let newState: IEditorState = { ...prev };
-  switch (action.type) {
-    case EditorActions.SET_SELECTED: {
-      if (action.payload.selectedItem || action.payload.selectedItem === null) {
-        newState.selectedItem = action.payload.selectedItem;
-      } else {
-        throw new Error('SET_SELECTED must have a selectedItem in its payload');
+function getReducer(notifications: NotificationsContextValue) {
+  function reducer(
+    prev: IEditorState,
+    action: {
+      type: EditorActions;
+      payload: Partial<IEditorState>;
+    },
+  ): IEditorState {
+    let newState: IEditorState = { ...prev };
+    console.log(action);
+    switch (action.type) {
+      case EditorActions.SET_SELECTED: {
+        if (
+          action.payload.selectedItem ||
+          action.payload.selectedItem === null
+        ) {
+          newState.selectedItem = action.payload.selectedItem;
+        } else {
+          throw new Error(
+            'SET_SELECTED must have a selectedItem in its payload',
+          );
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_MAP: {
-      if (action.payload.map && action.payload.map_id) {
-        newState.map = action.payload.map;
-        newState.map_id = action.payload.map_id;
-        let geoJSON = action.payload.map.geoJSON;
-        let v = new GeoJSONVisitor(geoJSON);
-        v.visitRoot();
-        newState.mapDetails = {
-          availableProps: Array.from(
-            v.getFeatureResults().aggregate.globallyAvailableKeys,
-          ),
-          bbox: v
-            .getFeatureResults()
-            .perFeature.reduce(
-              (prev, curr) => mergeBBox(prev, curr.box),
-              v.getFeatureResults().perFeature[0].box,
+      case EditorActions.SET_MAP: {
+        if (action.payload.map && action.payload.map_id) {
+          newState.map = action.payload.map;
+          newState.map_id = action.payload.map_id;
+          let geoJSON = action.payload.map.geoJSON;
+          let v = new GeoJSONVisitor(geoJSON);
+          v.visitRoot();
+          console.log('AHHH HELOOO', v);
+          if (v.getFeatureResults().perFeature.length === 0) {
+            notifications.dispatch({
+              type: NotificationsActionType.enqueue,
+              value: {
+                message: 'FEATURES LIST IS EMPTY. PLEASE PICK A DIFFERENT FILE',
+                actions: {
+                  close: true,
+                },
+              },
+            });
+            break;
+          }
+          newState.mapDetails = {
+            availableProps: Array.from(
+              v.getFeatureResults().aggregate.globallyAvailableKeys,
             ),
-          regionData: v.getFeatureResults().perFeature,
-        };
-      } else {
-        throw new Error('SET_MAP must have a map and a map_id in its payload');
+            bbox: v
+              .getFeatureResults()
+              .perFeature.reduce(
+                (prev, curr) => mergeBBox(prev, curr.box),
+                v.getFeatureResults().perFeature[0].box,
+              ),
+            regionData: v.getFeatureResults().perFeature,
+          };
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_MAP must have a map and a map_id in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_TOOL: {
-      if (action.payload.selectedTool !== undefined) {
-        newState.selectedTool = action.payload.selectedTool;
-      } else {
-        throw new Error('SET_TOOL must have a tool in its payload');
+      case EditorActions.SET_TOOL: {
+        if (action.payload.selectedTool !== undefined) {
+          newState.selectedTool = action.payload.selectedTool;
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_TOOL must have a tool in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_TITLE: {
-      if (action.payload.map !== undefined) {
-        newState.map = action.payload.map;
-      } else {
-        throw new Error('SET_NAME must have a map in its payload');
+      case EditorActions.SET_TITLE: {
+        if (action.payload.map !== undefined) {
+          newState.map = action.payload.map;
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_NAME must have a map in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_ACTION: {
-      if (
-        action.payload.map !== undefined &&
-        action.payload.actionStack !== undefined &&
-        action.payload.lastInstantiated !== undefined
-      ) {
-        newState.map = action.payload.map;
-        newState.actionStack = action.payload.actionStack;
-        newState.lastInstantiated = action.payload.lastInstantiated;
-      } else {
-        throw new Error(
-          'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
-        );
+      case EditorActions.SET_ACTION: {
+        if (
+          action.payload.map !== undefined &&
+          action.payload.actionStack !== undefined &&
+          action.payload.lastInstantiated !== undefined
+        ) {
+          newState.map = action.payload.map;
+          newState.actionStack = action.payload.actionStack;
+          newState.lastInstantiated = action.payload.lastInstantiated;
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message:
+                'SET_ACTION must have a map, an actionstack, and lastInstantiated in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
       }
-      break;
-    }
-    case EditorActions.SET_DELETING: {
-      if (action.payload.isDeleting !== undefined) {
-        newState.isDeleting = action.payload.isDeleting;
-      } else {
-        throw new Error('SET_DELETING must have a isDeleting');
+      case EditorActions.SET_DELETING: {
+        if (action.payload.isDeleting !== undefined) {
+          newState.isDeleting = action.payload.isDeleting;
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message: 'SET_DELETING must have a isDeleting',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
       }
-      break;
+      case EditorActions.SET_LAST_INSTANTIATED: {
+        if (action.payload.lastInstantiated !== undefined) {
+          newState.lastInstantiated = action.payload.lastInstantiated;
+        } else {
+          notifications.dispatch({
+            type: NotificationsActionType.enqueue,
+            value: {
+              message:
+                'SET_LAST_INSTANTIATED must have a lastInstantiated in its payload',
+              actions: {
+                close: true,
+              },
+            },
+          });
+        }
+        break;
+      }
+      default:
+        notifications.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: 'UNHANDLED ACTION',
+            actions: {
+              close: true,
+            },
+          },
+        });
     }
-    default:
-      throw new Error('UNHANDLED ACTION');
+    return newState;
   }
-  return newState;
+  return reducer;
 }
 
 class helpers {
+  private notificationContext: NotificationsContextValue;
+  constructor(notificationContext?: NotificationsContextValue) {
+    this.notificationContext = notificationContext!;
+  }
+
   public changeTitle(ctx: IEditorContext, newTitle: string) {
     let newMap = structuredClone(ctx.state.map);
     if (newMap === null) {
@@ -185,11 +280,53 @@ class helpers {
     });
   }
 
+  private getLastInitialized(map: MHJSON, d: Delta, li: string): string {
+    // if we transformed into a new type, make it the li
+    if (d.targetType === TargetType.DOT) {
+      if (d.type === DeltaType.UPDATE && d.payload.dot) {
+        li = d.payload.dot;
+      }
+    }
+    if (d.targetType === TargetType.SYMBOL) {
+      if (d.type === DeltaType.UPDATE && d.payload.symbol) {
+        li = d.payload.symbol;
+      }
+    }
+    if (d.targetType === TargetType.GLOBAL_DOT) {
+      if (d.type === DeltaType.CREATE && d.payload.name) {
+        li = d.payload.name;
+      }
+      if (
+        d.type === DeltaType.DELETE &&
+        map.globalDotDensityData[d.target[1]].name.endsWith(DELETED_NAME)
+      ) {
+        li =
+          map.globalDotDensityData.filter(
+            x => !x.name.endsWith(DELETED_NAME),
+          )[0]?.name ?? DELETED_NAME;
+      }
+    }
+    if (d.targetType === TargetType.GLOBAL_SYMBOL) {
+      if (d.type === DeltaType.CREATE && d.payload.name) {
+        li = d.payload.name;
+      }
+      if (
+        d.type === DeltaType.DELETE &&
+        map.globalSymbolData[d.target[1]].name.endsWith(DELETED_NAME)
+      ) {
+        li =
+          map.globalDotDensityData.filter(
+            x => !x.name.endsWith(DELETED_NAME),
+          )[0]?.name ?? DELETED_NAME;
+      }
+    }
+    return li;
+  }
+
   public addDelta(ctx: IEditorContext, d: Delta, dInv: Delta) {
     let x = ctx.state.map;
     if (x !== null) {
       let map = x;
-
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack = [];
       nStack.stack.push({
@@ -197,14 +334,29 @@ class helpers {
         undo: dInv,
       });
       let nMap = { ...map };
-      applyDelta(nMap, d);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(d);
+
+      try {
+        applyDelta(nMap, d);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(d);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
-      let li = ctx.state.lastInstantiated;
-      if (d.type === DeltaType.CREATE && d.payload.name !== undefined) {
-        li = d.payload.name;
-      }
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        d,
+        ctx.state.lastInstantiated,
+      );
 
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
@@ -225,22 +377,43 @@ class helpers {
     if (ctx.state.actionStack.canUndo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekStack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
-      applyDelta(nMap, a.undo);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(a.do);
+      try {
+        applyDelta(nMap, a.undo);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(a.undo);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.counterStack.push(nStack.stack.pop()!);
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        a.do,
+        ctx.state.lastInstantiated,
+      );
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           map: nMap,
           actionStack: nStack,
-          lastInstantiated: ctx.state.lastInstantiated,
+          lastInstantiated: li,
         },
       });
     } else {
@@ -253,22 +426,44 @@ class helpers {
     if (ctx.state.actionStack.canRedo() && map !== null) {
       // get most recent action
       let a = ctx.state.actionStack.peekCounterstack();
+      // if it doesnt exist, return silently
+      if (a === null) return;
       // apply it to a copy of the map
       let nMap = { ...map };
-      applyDelta(nMap, a.do);
-      if (ctx.state.map_id !== GUEST_MAP_ID) {
-        MapAPI.updateMapPayload(a.do);
+
+      try {
+        applyDelta(nMap, a.do);
+        if (ctx.state.map_id !== GUEST_MAP_ID) {
+          MapAPI.updateMapPayload(a.do);
+        }
+      } catch (error: any) {
+        this.notificationContext.dispatch({
+          type: NotificationsActionType.enqueue,
+          value: {
+            message: error.message,
+            actions: {
+              close: true,
+            },
+          },
+        });
       }
+
       // create a copy of the stack with the change
       let nStack = ctx.state.actionStack.clone();
       nStack.stack.push(nStack.counterStack.pop()!);
+
+      let li: string = this.getLastInitialized(
+        nMap,
+        a.undo,
+        ctx.state.lastInstantiated,
+      );
       //dispatch it
       ctx.dispatch({
         type: EditorActions.SET_ACTION,
         payload: {
           map: nMap,
           actionStack: nStack,
-          lastInstantiated: ctx.state.lastInstantiated,
+          lastInstantiated: li,
         },
       });
     } else {
@@ -278,8 +473,19 @@ class helpers {
 
   public getLastInstantiatedDot(ctx: IEditorContext): IDotDensityProps | null {
     let name = ctx.state.lastInstantiated;
-    if (name === DELETED_NAME || !ctx.state.map) return null;
+    if (name.endsWith(DELETED_NAME) || !ctx.state.map) return null;
     for (let d of ctx.state.map.globalDotDensityData) {
+      if (d.name === name) {
+        return d;
+      }
+    }
+    return null;
+  }
+
+  public getLastInstantiatedSymbol(ctx: IEditorContext): ISymbolProps | null {
+    let name = ctx.state.lastInstantiated;
+    if (name.endsWith(DELETED_NAME) || !ctx.state.map) return null;
+    for (let d of ctx.state.map.globalSymbolData) {
       if (d.name === name) {
         return d;
       }
@@ -304,9 +510,16 @@ export const EditorContext = createContext<IEditorContext>({
 });
 
 export const EditorProvider = ({ children }: React.PropsWithChildren) => {
+  const reducer = getReducer(useContext(NotificationsContext));
   const [state, dispatch] = useReducer(reducer, initialState);
   return (
-    <EditorContext.Provider value={{ state, dispatch, helpers: new helpers() }}>
+    <EditorContext.Provider
+      value={{
+        state,
+        dispatch,
+        helpers: new helpers(useContext(NotificationsContext)),
+      }}
+    >
       {children}
     </EditorContext.Provider>
   );

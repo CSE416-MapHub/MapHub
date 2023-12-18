@@ -2,6 +2,8 @@
 
 import { MouseEventHandler, useContext, useState } from 'react';
 import { useRouter } from 'next/navigation';
+
+import { AuthContext } from 'context/AuthProvider';
 import AccountAPI from 'api/AccountAPI';
 import Avatar from '../../components/avatar';
 import Button from '../../components/button';
@@ -10,13 +12,12 @@ import Menu from '../../components/menu';
 import MenuItem from '../../components/menuItem';
 
 import styles from '../styles/navAvatar.module.scss';
-import { AuthContext } from 'context/AuthProvider';
 
 function NavAvatar() {
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
   const router = useRouter();
-  const authContext = useContext(AuthContext);
+  const auth = useContext(AuthContext);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -37,12 +38,10 @@ function NavAvatar() {
   const handleSignOutClick: MouseEventHandler = async () => {
     setAnchorEl(null);
     try {
-      const response = await AccountAPI.logoutUser();
-      console.log('Logout Successful: ', response);
+      await AccountAPI.logoutUser();
     } catch (error) {
-      console.log('Logout Failed: ', error);
     } finally {
-      authContext.helpers.logout(authContext);
+      auth.helpers.logout(auth);
       router.replace('/');
     }
   };
@@ -57,7 +56,14 @@ function NavAvatar() {
         aria-expanded={open ? 'true' : undefined}
         onClick={handleClick}
       >
-        <Avatar className={styles['nav-avatar']} />
+        <Avatar
+          className={styles['nav-avatar']}
+          src={
+            auth.state.user?.profilePic
+              ? `data:image/webp;base64,${auth.state.user.profilePic}`
+              : undefined
+          }
+        />
       </Button>
       <Menu
         id="account-menu"

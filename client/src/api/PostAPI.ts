@@ -43,6 +43,7 @@ class PostAPI {
     return this.api.post('/posts/publish', { mapID, title, description });
   }
   static async getPostById(postId: string) {
+    console.log('Im sening a get post to ', postId);
     return this.api.get(`/posts/post/${postId}`);
   }
   static async queryPosts(searchQuery: string) {
@@ -54,6 +55,10 @@ class PostAPI {
 
   static async createComment(postID: string, content: string) {
     return this.api.post(`/posts/comments/${postID} `, { content });
+  }
+
+  static async deleteCommentById(commentId: string) {
+    return this.api.delete(`/posts/comments/${commentId}`);
   }
   // static async updatePostInfo(postPayload: PostPayload) {
   //   return this.api.put(`/posts/post/${postPayload.postId}`, { postPayload });
@@ -69,6 +74,10 @@ class PostAPI {
 
   static async addReplyToComment(commentId: string, content: string) {
     return this.api.post(`/posts/comments/${commentId}/replies`, { content });
+  }
+
+  static async forkMap(postId: string) {
+    return this.api.post(`/posts/fork/${postId}`);
   }
 }
 

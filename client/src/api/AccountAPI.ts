@@ -108,8 +108,38 @@ class AccountAPI {
     return this.api.post('/auth/username', { username });
   }
 
+  /**
+   * Makes an API call to modify the user's profile picture.
+   * @param profilePic - a base-64 string in PNG, JPG, or GIF format.
+   */
+  static async putProfilePic(profilePic: string) {
+    return this.api.put('/auth/profile-pic', { profilePic });
+  }
+
+
+  static async putPassword(
+    currentPassword: string,
+    newPassword: string,
+    newPasswordConfirm: string,
+  ) {
+    return this.api.put('/auth/password', {
+      currentPassword,
+      newPassword,
+      newPasswordConfirm,
+    });
+  }
+
   static async getVerify() {
     return this.api.get('/auth/verify');
+  }
+
+  static async getPasswordResetLink(email: string) {
+    return this.api.post('/auth/request-reset-password', { email: email });
+  }
+  static async resetUserPassword(token: string, newPassword: string) {
+    return this.api.post(`/auth/reset-password/${token}`, {
+      password: newPassword,
+    });
   }
 }
 

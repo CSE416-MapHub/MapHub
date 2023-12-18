@@ -7,7 +7,11 @@ import { BBox } from 'context/editorHelpers/GeoJSONVisitor';
 export type ExportType = 'png' | 'svg' | 'json';
 
 export default async function exportMap(map: MHJSON | null, type: ExportType) {
-  let fileName = `${'map'}.${type}`;
+  let fileExt: string = type;
+  if (fileExt === 'json') {
+    fileExt = 'mh.json';
+  }
+  let fileName = `${'map'}.${fileExt}`;
 
   if (map === null) {
     alert('TODO: what if map is null');

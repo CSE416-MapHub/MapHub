@@ -1,6 +1,6 @@
 'use client';
+
 import { useEffect, useState, useContext } from 'react';
-// TODO: make this not use client?
 import CardCarousel from './ui/components/CardCarousel';
 import Greeting from './ui/components/Greeting';
 import {
@@ -17,7 +17,8 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
-      png: Buffer;
+      numLikes: number;
+      svg: string;
     }>
   >([]);
   const [ums, setUMS] = useState<
@@ -25,7 +26,8 @@ export default function () {
       _id: string;
       title: string;
       userId: string;
-      png: Buffer;
+      numLikes: number;
+      svg: string;
     }>
   >([]);
 
@@ -41,8 +43,11 @@ export default function () {
             return {
               _id: i.postID,
               title: i.title,
-              userId: authContext.state.user?.id ? authContext.state.user?.id : '',
-              png: i.png,
+              userId: authContext.state.user?.id
+                ? authContext.state.user?.id
+                : '',
+              numLikes: i.numLikes,
+              svg: i.svg,
             };
           }),
         );
@@ -52,16 +57,18 @@ export default function () {
           _id: string;
           title: string;
           userId: string;
-          png: Buffer;
+          numLikes: number;
+          svg: string;
         }[] = [];
         p.forEach(map => {
           console.log(map);
-          if(!map.published) {
+          if (!map.published) {
             unpublishedMaps.push({
               _id: map._id,
               title: map.title,
               userId: map.owner,
-              png: map.png,
+              numLikes: 0,
+              svg: map.svg,
             });
           }
         });
@@ -75,16 +82,8 @@ export default function () {
   return (
     <main>
       <Greeting />
-      <CardCarousel
-        title="My Published Maps"
-        maps={pms}
-        published={true}
-      />
-      <CardCarousel
-        title="My Unpublished Maps"
-        maps={ums}
-        published={false}
-      />
+      <CardCarousel title="My Published Maps" maps={pms} published={true} />
+      <CardCarousel title="My Unpublished Maps" maps={ums} published={false} />
     </main>
   );
 }

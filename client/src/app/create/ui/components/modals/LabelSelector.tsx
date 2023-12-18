@@ -90,11 +90,11 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
     );
   };
 
-  const handleRadioChange = (
-    event: React.ChangeEvent<HTMLInputElement>,
-    property: string,
-  ) => {
-    const newSelection = [property];
+  const handleRadioChange = (property: string) => {
+    let newSelection: Array<string> = [];
+    if (!selectedOptions.includes(property)) {
+      newSelection = [property];
+    }
     setSelectedOptions(newSelection);
     onSelect(newSelection);
   };
@@ -128,30 +128,32 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
             setSearchInput(newInputValue)
           }
           options={properties}
-          renderInput={params => (
-            <TextField
-              {...params}
-              label="Search"
-              className={style.textField}
-              InputProps={{
-                ...params.InputProps,
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <IconButton>
-                      <SearchIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={handleSortIconClick}>
-                      <SortIcon />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-          )}
+          renderInput={params => {
+            return (
+              <TextField
+                {...params}
+                label="Search"
+                className={style.textField}
+                InputProps={{
+                  ...params.InputProps,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <IconButton>
+                        <SearchIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                  endAdornment: (
+                    <InputAdornment position="end">
+                      <IconButton onClick={handleSortIconClick}>
+                        <SortIcon />
+                      </IconButton>
+                    </InputAdornment>
+                  ),
+                }}
+              />
+            );
+          }}
           style={{ minWidth: '40%' }}
           freeSolo
         />
@@ -217,7 +219,7 @@ const LabelSelector: React.FC<LabelSelectorProps> = ({
                         selectedOptions.includes(property) &&
                         selectedOptions.length === 1
                       }
-                      onChange={e => handleRadioChange(e, property)}
+                      onClick={e => handleRadioChange(property)}
                     />
                   )
                 }

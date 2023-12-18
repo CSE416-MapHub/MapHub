@@ -1,0 +1,39 @@
+@use 'colors';
+@use 'shape';
+
+.reply {
+  &__container {
+    padding: 12px 16px;
+  }
+  &__divider {
+    background-color: colors.$on-surface-variant;
+    border: none;
+    width: 24px;
+    height: 1px;
+    transition: background-color 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
+  }
+  &__show-button {
+    display: flex;
+    align-items: center;
+    gap: shape.$large;
+
+    margin-left: 56px;
+    border: 0;
+    padding: 0;
+    background-color: transparent;
+    color: colors.$on-surface-variant;
+
+    transition: color 250ms cubic-bezier(0.075, 0.82, 0.165, 1);
+
+    &:hover {
+      cursor: pointer;
+      color: colors.$on-surface;
+      & div {
+        background-color: colors.$on-surface;
+      }
+    }
+  }
+  &__item {
+    padding-left: 72px;
+  }
+}

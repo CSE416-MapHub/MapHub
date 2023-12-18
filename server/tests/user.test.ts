@@ -5,10 +5,11 @@ import bcrypt from 'bcrypt';
 import userModel from '../models/user-model';
 import mongoose from 'mongoose';
 import fs from 'fs';
+import nodemailer from 'nodemailer';
 
 jest.mock('bcrypt');
 jest.mock('../models/user-model');
-jest.mock('../auth/index')
+jest.mock('../auth/index');
 beforeAll(() => {
   jest.setTimeout(6000);
   jest.clearAllMocks();
@@ -354,6 +355,182 @@ describe('POST /auth/username', () => {
   });
 });
 
+describe('PUT /auth/password', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from('', 'base64'),
+    password: '********',
+    maps: [],
+    save: jest.fn().mockResolvedValue(this),
+  };
+
+  beforeEach(() => {
+    jest.mock('bcrypt');
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+    (auth.verify as jest.Mock).mockImplementation((request, response, next) => {
+      request.userId = '65677439126531bcfbbe2c10';
+      return next();
+    });
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+    (bcrypt.compare as jest.Mock).mockResolvedValue(true);
+    (bcrypt.hash as jest.Mock).mockResolvedValue('*********');
+  });
+
+  it('returns the user when successfully edited password.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Passw0rd',
+    });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: '65677439126531bcfbbe2c10',
+        username: 'someUser',
+        profilePic: '',
+      },
+    });
+  });
+
+  it('returns a bad request when some fields are missing.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(1);
+    expect(response.body.missingFields).toBe(0b011);
+  });
+
+  it('returns a bad request when the new password does not meet requirements.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: '********',
+      newPasswordConfirm: '********',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(2);
+  });
+
+  it('returns a bad request when the new password does not match its confirmation.', async () => {
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Password',
+    });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(3);
+  });
+
+  it('returns an unauthorized request if the current password is incorrect.', async () => {
+    (bcrypt.compare as jest.Mock).mockResolvedValue(false);
+
+    const response = await supertest(app).put('/auth/password').send({
+      currentPassword: '********',
+      newPassword: 'Passw0rd',
+      newPasswordConfirm: 'Passw0rd',
+    });
+
+    expect(response.statusCode).toBe(401);
+    expect(response.body.success).toBe(false);
+    expect(response.body.errorCode).toBe(5);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+});
+
+describe('PUT /auth/profile-picture', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from('', 'base64'),
+    password: '********',
+    maps: [],
+    save: jest.fn().mockResolvedValue(this),
+  };
+
+  beforeEach(() => {
+    jest.mock('../models/user-model');
+    jest.mock('../auth/index');
+    (auth.verify as jest.Mock).mockImplementation((request, response, next) => {
+      request.userId = '65677439126531bcfbbe2c10';
+      return next();
+    });
+  });
+
+  it('returns the user when a profile picture is successfully edited.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(mockUser);
+
+    const response = await supertest(app)
+      .put('/auth/profile-pic')
+      .send({
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.jpg'),
+        ).toString('base64'),
+      });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toStrictEqual({
+      success: true,
+      user: {
+        id: '65677439126531bcfbbe2c10',
+        username: 'someUser',
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.webp'),
+        ).toString('base64'),
+      },
+    });
+  });
+
+  it('returns a bad request response if there is an empty body.', async () => {
+    const response = await supertest(app).put('/auth/profile-pic').send({});
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(false);
+    expect(response.body).toHaveProperty('errorCode');
+    expect(response.body.errorCode).toBe(1);
+    expect(response.body).toHaveProperty('errorMessage');
+  });
+
+  it('returns a bad request response if there is no user.', async () => {
+    (userModel.findById as jest.Mock).mockResolvedValue(null);
+
+    const response = await supertest(app)
+      .put('/auth/profile-pic')
+      .send({
+        profilePic: Buffer.from(
+          fs.readFileSync('./tests/fixtures/avatar.jpg'),
+        ).toString('base64'),
+      });
+
+    expect(response.statusCode).toBe(400);
+    expect(response.body).toHaveProperty('success');
+    expect(response.body.success).toBe(false);
+    expect(response.body).toHaveProperty('errorCode');
+    expect(response.body.errorCode).toBe(2);
+    expect(response.body).toHaveProperty('errorMessage');
+  });
+
+
+  afterEach(() => {
+    jest.clearAllMocks();
+  });
+});
+
 describe('GET /auth/verify ', () => {
   const mockUser = {
     _id: '65677439126531bcfbbe2c10',
@@ -424,6 +601,79 @@ describe('GET /auth/verify ', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+});
+
+describe('POST /auth/request-reset-password ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    maps: [],
+    resetPasswordToken: undefined,
+    resetPasswordExpires: undefined,
+    save: jest.fn().mockReturnThis(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (userModel.findOne as jest.Mock).mockResolvedValue(mockUser);
+    const mockedSendMail = jest.fn();
+
+    jest.spyOn(nodemailer, 'createTransport').mockReturnValue({
+      sendMail: mockedSendMail,
+    } as unknown as nodemailer.Transporter);
+
+    const response = await supertest(app)
+      .post('/auth/request-reset-password')
+      .send({
+        email: 'someUser@gmail.com',
+      });
+
+    const urlRegex = /\/account\/reset-password\/[a-zA-Z0-9]+/;
+
+    expect(response.statusCode).toBe(200);
+    const resetURL = response.body.resetURL;
+    console.log('Tis is the reset url', resetURL);
+    expect(resetURL).toMatch(urlRegex);
+  });
+});
+
+describe('GET /auth/reset-password/:token ', () => {
+  const mockUser = {
+    _id: '65677439126531bcfbbe2c10',
+    username: 'someUser',
+    email: 'someUser@gmail.com',
+    profilePic: Buffer.from(fs.readFileSync('./tests/fixtures/avatar.jpg')),
+    password: '********',
+    resetPasswordToken: 'd1124155c4555cbd5a2486cee58b089ac64b7651',
+    resetPasswordExpires: Date.now(),
+    maps: [],
+    save: jest.fn().mockReturnThis(),
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('should send a login response if cookies are correct.', async () => {
+    (userModel.findOne as jest.Mock).mockResolvedValue(mockUser);
+    const response = await supertest(app)
+      .post(`/auth/reset-password/${mockUser.resetPasswordToken}`)
+      .send({ password: 'iofoiad21314jiof' });
+
+    expect(response.statusCode).toBe(200);
+    expect(response.body).toHaveProperty('user');
+    console.log('Password resetted user', response.body.user);
+    expect(response.body.user.resetPasswordToken).toEqual(undefined);
+    expect(response.body.user.resetPasswordExpires).toEqual(undefined);
+    console.log(response.body.user);
+    expect(response.body.user.password).not.toEqual('********');
   });
 });
 
