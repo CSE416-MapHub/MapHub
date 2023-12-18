@@ -569,8 +569,10 @@ describe('POST /posts/comments/:commentId/replies', () => {
 describe('POST /posts/fork/:postId', () => {
   it('forks off a post', async () => {
     const mockPostId = new mongoose.Types.ObjectId();
+    
     const mockMap = {
       ...mapData,
+      toObject: jest.fn().mockReturnThis(),
     };
 
     jest.spyOn(postModel, 'findById').mockResolvedValue({
@@ -578,7 +580,7 @@ describe('POST /posts/fork/:postId', () => {
       map: mockMap._id,
     } as any);
 
-    jest.spyOn(mapModel, 'findById').mockResolvedValue(mapData as any);
+    jest.spyOn(mapModel, 'findById').mockResolvedValue(mockMap);
 
     jest
       .spyOn(fs.promises, 'readFile')
